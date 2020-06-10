@@ -27,10 +27,10 @@ function windowCryptoSubtleDigest(
     });
   }
   return new Promise((resolve, reject) => {
-    (promiseOrEvent as any).oncomplete = function(output: ArrayBuffer) {
+    (promiseOrEvent as any).oncomplete = function (output: ArrayBuffer) {
       resolve(new Uint8Array(output));
     };
-    (promiseOrEvent as any).onerror = function(err: any) {
+    (promiseOrEvent as any).onerror = function (err: any) {
       reject(err);
     };
   });

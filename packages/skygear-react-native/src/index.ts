@@ -263,8 +263,6 @@ export class ReactNativeContainer<
  *
  * @public
  */
-const defaultContainer: ReactNativeContainer<
-  ReactNativeAPIClient
-> = new ReactNativeContainer();
+const defaultContainer: ReactNativeContainer<ReactNativeAPIClient> = new ReactNativeContainer();
 
 export default defaultContainer;

@@ -16,7 +16,7 @@ export const SkygearErrorNames = {
 /**
  * @public
  */
-export type SkygearErrorName = (typeof SkygearErrorNames)[keyof (typeof SkygearErrorNames)];
+export type SkygearErrorName = typeof SkygearErrorNames[keyof typeof SkygearErrorNames];
 
 /**
  * CancelError is an error to represent cancel.
