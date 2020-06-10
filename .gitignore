@@ -6,3 +6,7 @@ dist/
 /packages/skygear-node-client/index.d.ts
 /packages/skygear-web/index.d.ts
 /packages/skygear-react-native/index.d.ts
+/packages/skygear-react-native/android/build/
+
+xcuserdata/
+xcshareddata/
