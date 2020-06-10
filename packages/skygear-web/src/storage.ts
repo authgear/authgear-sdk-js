@@ -1,3 +1,5 @@
+/* global localStorage */
+
 import { StorageDriver } from "@skygear/core";
 
 const globalLocalStorage = localStorage;

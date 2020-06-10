@@ -1,3 +1,4 @@
+/* global window */
 import {
   Container,
   User,
@@ -25,7 +26,8 @@ export class WebOIDCContainer<T extends WebAPIClient> extends OIDCContainer<T> {
     this.isThirdParty = false;
   }
 
-  async _setupCodeVerifier() {
+  // eslint-disable-next-line class-methods-use-this
+  async _setupCodeVerifier(): Promise<{ verifier: string; challenge: string }> {
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = await computeCodeChallenge(codeVerifier);
     return {
@@ -107,9 +109,9 @@ export class WebContainer<T extends WebAPIClient> extends Container<T> {
   constructor(options?: ContainerOptions<T>) {
     const o = {
       ...options,
-      apiClient: (options && options.apiClient) || new WebAPIClient(),
+      apiClient: options?.apiClient ?? new WebAPIClient(),
       storage:
-        (options && options.storage) ||
+        options?.storage ??
         new GlobalJSONContainerStorage(localStorageStorageDriver),
     } as ContainerOptions<T>;
 
@@ -122,7 +124,7 @@ export class WebContainer<T extends WebAPIClient> extends Container<T> {
    *
    * @param options - Skygear connection information
    */
-  async configure(options: ConfigureOptions) {
+  async configure(options: ConfigureOptions): Promise<void> {
     this.apiClient.setEndpoint(options.authEndpoint);
 
     const accessToken = await this.storage.getAccessToken(this.name);

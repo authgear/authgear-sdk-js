@@ -22,8 +22,8 @@ export async function getAnonymousJWK(
 
 export async function signAnonymousJWT(
   kid: string,
-  header: object,
-  payload: object
+  header: Record<string, unknown>,
+  payload: Record<string, unknown>
 ): Promise<string> {
   const dataToSign = [header, payload]
     .map((part) => encodeRawBase64URL(JSON.stringify(part)))

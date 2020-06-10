@@ -79,6 +79,7 @@ export class SkygearError extends Error {
 /**
  * @public
  */
+// eslint-disable-next-line complexity
 export function decodeError(err?: any): Error {
   // Construct SkygearError if it looks like one.
   if (

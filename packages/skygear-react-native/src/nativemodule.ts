@@ -3,15 +3,15 @@ import { CANCEL } from "@skygear/core";
 
 const { SGSkygearReactNative } = NativeModules;
 
-export function randomBytes(length: number): Promise<number[]> {
+export async function randomBytes(length: number): Promise<number[]> {
   return SGSkygearReactNative.randomBytes(length);
 }
 
-export function sha256String(input: string): Promise<number[]> {
+export async function sha256String(input: string): Promise<number[]> {
   return SGSkygearReactNative.sha256String(input);
 }
 
-export function openURL(url: string): Promise<void> {
+export async function openURL(url: string): Promise<void> {
   return SGSkygearReactNative.openURL(url);
 }
 
@@ -34,17 +34,17 @@ export async function openAuthorizeURL(
   }
 }
 
-export function dismiss(): Promise<void> {
+export async function dismiss(): Promise<void> {
   return SGSkygearReactNative.dismiss();
 }
 
-export function getAnonymousKey(
+export async function getAnonymousKey(
   kid: string | null
 ): Promise<{ kid: string; alg: string; jwk?: any }> {
   return SGSkygearReactNative.getAnonymousKey(kid);
 }
 
-export function signAnonymousToken(
+export async function signAnonymousToken(
   kid: string,
   tokenData: string
 ): Promise<string> {

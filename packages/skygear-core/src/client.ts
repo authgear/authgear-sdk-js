@@ -36,7 +36,9 @@ export abstract class BaseAPIClient {
    * 0 means doesn't need to refresh
    */
   _shouldRefreshTokenAt: number;
+  // eslint-disable-next-line no-undef
   fetchFunction?: typeof fetch;
+  // eslint-disable-next-line no-undef
   requestClass?: typeof Request;
   refreshTokenFunction?: () => Promise<boolean>;
   userAgent?: string;
@@ -49,15 +51,15 @@ export abstract class BaseAPIClient {
     this._shouldRefreshTokenAt = 0;
   }
 
-  setShouldNotRefreshToken() {
+  setShouldNotRefreshToken(): void {
     this._shouldRefreshTokenAt = 0;
   }
 
-  setShouldRefreshTokenNow() {
+  setShouldRefreshTokenNow(): void {
     this._shouldRefreshTokenAt = new Date().getTime();
   }
 
-  setAccessTokenAndExpiresIn(accessToken: string, expires_in?: number) {
+  setAccessTokenAndExpiresIn(accessToken: string, expires_in?: number): void {
     this._accessToken = accessToken;
     if (expires_in) {
       this._shouldRefreshTokenAt =
@@ -67,7 +69,7 @@ export abstract class BaseAPIClient {
     }
   }
 
-  setEndpoint(authEndpoint: string) {
+  setEndpoint(authEndpoint: string): void {
     this.authEndpoint = _removeTrailingSlash(authEndpoint);
   }
 
@@ -76,7 +78,7 @@ export abstract class BaseAPIClient {
     if (this._accessToken) {
       headers["authorization"] = `bearer ${this._accessToken}`;
     }
-    if (this.userAgent !== undefined) {
+    if (this.userAgent != null) {
       headers["user-agent"] = this.userAgent;
     }
     return headers;
@@ -140,6 +142,7 @@ export abstract class BaseAPIClient {
     return this.fetchFunction(request);
   }
 
+  // eslint-disable-next-line complexity
   protected async request(
     method: "GET" | "POST" | "DELETE",
     endpoint: string,
@@ -181,7 +184,7 @@ export abstract class BaseAPIClient {
     let jsonBody;
     try {
       jsonBody = await response.json();
-    } catch (err) {
+    } catch {
       if (response.status < 200 || response.status >= 300) {
         throw new SkygearError(
           "unexpected status code",
@@ -245,6 +248,7 @@ export abstract class BaseAPIClient {
       error: errJSON["error"],
       error_description: errJSON["error_description"],
     };
+    // eslint-disable-next-line @typescript-eslint/no-throw-literal
     throw oauthError;
   }
 

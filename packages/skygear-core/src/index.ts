@@ -1,3 +1,4 @@
+/* global process */
 export * from "./types";
 export * from "./error";
 export * from "./client";
@@ -10,4 +11,4 @@ export * from "./base64";
 /**
  * @public
  */
-export const VERSION: string = process.env.SKYGEAR_VERSION || "VERSION";
+export const VERSION: string = process.env.SKYGEAR_VERSION ?? "VERSION";

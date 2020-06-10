@@ -120,7 +120,7 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
   /**
    * @internal
    */
-  async _clearSession() {
+  async _clearSession(): Promise<void> {
     await this.parent.storage.delUser(this.parent.name);
     await this.parent.storage.delAccessToken(this.parent.name);
     await this.parent.storage.delRefreshToken(this.parent.name);
@@ -249,6 +249,7 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
         error: params.get("error"),
         error_description: params.get("error_description"),
       } as OAuthError;
+      // eslint-disable-next-line @typescript-eslint/no-throw-literal
       throw err;
     }
 
@@ -265,6 +266,7 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
           error: "invalid_request",
           error_description: "Missing parameter: code",
         } as OAuthError;
+        // eslint-disable-next-line @typescript-eslint/no-throw-literal
         throw missingCodeError;
       }
       const codeVerifier = await this.parent.storage.getOIDCCodeVerifier(
@@ -275,7 +277,7 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
         code: code,
         redirect_uri: redirectURI,
         client_id: this.clientID,
-        code_verifier: codeVerifier || "",
+        code_verifier: codeVerifier ?? "",
       });
       authResponse = await this.parent.apiClient._oidcUserInfoRequest(
         tokenResponse.access_token
@@ -292,7 +294,7 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
     await this._persistAuthResponse(ar);
     return {
       user: authResponse.user,
-      state: params.get("state") || undefined,
+      state: params.get("state") ?? undefined,
     };
   }
 
@@ -313,7 +315,7 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
     if (this.isThirdParty) {
       try {
         const refreshToken =
-          (await this.parent.storage.getRefreshToken(this.parent.name)) || "";
+          (await this.parent.storage.getRefreshToken(this.parent.name)) ?? "";
         await this.parent.apiClient._oidcRevocationRequest(refreshToken);
       } catch (error) {
         if (!options.force) {
@@ -331,7 +333,10 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
         config.end_session_endpoint
       }?${query.toString()}`;
       await this._clearSession();
-      window.location.href = endSessionEndpoint;
+      if (typeof window !== "undefined") {
+        // eslint-disable-next-line no-undef
+        window.location.href = endSessionEndpoint;
+      }
     }
   }
 }
@@ -363,7 +368,7 @@ export class Container<T extends BaseAPIClient> {
       throw Error("missing storage");
     }
 
-    this.name = options.name || "default";
+    this.name = options.name ?? "default";
     this.apiClient = options.apiClient;
     this.storage = options.storage;
   }

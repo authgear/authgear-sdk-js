@@ -1,3 +1,4 @@
+/* global fetch, Request */
 import AsyncStorage from "@react-native-community/async-storage";
 import {
   BaseAPIClient,
@@ -30,13 +31,16 @@ export class ReactNativeAPIClient extends BaseAPIClient {
  * @public
  */
 export class ReactNativeAsyncStorageStorageDriver implements StorageDriver {
-  get(key: string): Promise<string | null> {
+  // eslint-disable-next-line class-methods-use-this
+  async get(key: string): Promise<string | null> {
     return AsyncStorage.getItem(key);
   }
-  set(key: string, value: string): Promise<void> {
+  // eslint-disable-next-line class-methods-use-this
+  async set(key: string, value: string): Promise<void> {
     return AsyncStorage.setItem(key, value);
   }
-  del(key: string): Promise<void> {
+  // eslint-disable-next-line class-methods-use-this
+  async del(key: string): Promise<void> {
     return AsyncStorage.removeItem(key);
   }
 }
@@ -58,7 +62,8 @@ export class ReactNativeOIDCContainer<
     this.isThirdParty = true;
   }
 
-  async _setupCodeVerifier() {
+  // eslint-disable-next-line class-methods-use-this
+  async _setupCodeVerifier(): Promise<{ verifier: string; challenge: string }> {
     const codeVerifier = await generateCodeVerifier();
     const codeChallenge = await computeCodeChallenge(codeVerifier);
     return {
@@ -84,6 +89,8 @@ export class ReactNativeOIDCContainer<
   /**
    * Open the URL with the user agent that is used to perform authentication.
    */
+
+  // eslint-disable-next-line class-methods-use-this
   async openURL(url: string): Promise<void> {
     await openURL(url);
   }
@@ -217,9 +224,9 @@ export class ReactNativeContainer<
   constructor(options?: ContainerOptions<T>) {
     const o = {
       ...options,
-      apiClient: (options && options.apiClient) || new ReactNativeAPIClient(),
+      apiClient: options?.apiClient ?? new ReactNativeAPIClient(),
       storage:
-        (options && options.storage) ||
+        options?.storage ??
         new GlobalJSONContainerStorage(
           new ReactNativeAsyncStorageStorageDriver()
         ),
@@ -234,7 +241,7 @@ export class ReactNativeContainer<
    *
    * @param options - Skygear connection information
    */
-  async configure(options: ConfigureOptions) {
+  async configure(options: ConfigureOptions): Promise<void> {
     this.apiClient.setEndpoint(options.authEndpoint);
 
     const accessToken = await this.storage.getAccessToken(this.name);

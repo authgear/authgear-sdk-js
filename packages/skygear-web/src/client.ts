@@ -1,3 +1,5 @@
+/* global window, Request */
+
 import { BaseAPIClient } from "@skygear/core";
 
 /**

@@ -2,7 +2,7 @@ import { GlobalJSONContainerStorage, _GlobalJSONStorage } from "./storage";
 import { StorageDriver, User } from "./types";
 
 class MemoryStorageDriver implements StorageDriver {
-  backingStore: { [key: string]: string };
+  backingStore: { [key: string]: string | undefined };
 
   constructor() {
     this.backingStore = {};
