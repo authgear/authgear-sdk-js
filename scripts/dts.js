@@ -22,10 +22,6 @@ for (const p of packages) {
     projectRoot,
     `packages/${p}/index.d.ts`
   );
-  configObject.docModel.apiJsonFilePath = path.join(
-    projectRoot,
-    `temp/${p}.api.json`
-  );
 
   const extractorConfig = ExtractorConfig.prepare({
     configObject,
@@ -64,40 +60,3 @@ for (const p of publishedPackages) {
   fs.writeFileSync(dtsPath, content);
 }
 fs.unlinkSync(coreDtsPath);
-
-// Generate api.json
-for (const p of publishedPackages) {
-  const entrypoint = path.join(projectRoot, `packages/${p}/index.d.ts`);
-  const configObject = ExtractorConfig.loadFile(
-    path.join(projectRoot, "api-extractor.json")
-  );
-  configObject.mainEntryPointFilePath = entrypoint;
-  configObject.projectFolder = path.join(projectRoot, `packages/${p}`);
-  configObject.docModel.enabled = true;
-  configObject.docModel.apiJsonFilePath = path.join(
-    projectRoot,
-    `temp/${p}.api.json`
-  );
-
-  const extractorConfig = ExtractorConfig.prepare({
-    configObject,
-    packageJsonFullPath: path.join(projectRoot, `packages/${p}/package.json`),
-  });
-
-  const extractorResult = Extractor.invoke(extractorConfig, {
-    localBuild: true,
-    showVerboseMessages: true,
-  });
-
-  if (
-    !extractorResult.succeeded ||
-    extractorResult.errorCount > 0 ||
-    extractorResult.warningCount > 0
-  ) {
-    console.error(
-      `API Extractor completed with ${extractorResult.errorCount} errors` +
-        ` and ${extractorResult.warningCount} warnings`
-    );
-    process.exit(1);
-  }
-}
