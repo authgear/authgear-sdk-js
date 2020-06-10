@@ -77,6 +77,10 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
 
   abstract clientID: string;
   abstract isThirdParty: boolean;
+
+  /**
+   * @internal
+   */
   abstract async _setupCodeVerifier(): Promise<{
     verifier: string;
     challenge: string;
@@ -190,6 +194,9 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
     return true;
   }
 
+  /**
+   * @internal
+   */
   async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
     const config = await this.parent.apiClient._fetchOIDCConfiguration();
     const query = new URLSearchParams();
@@ -235,6 +242,9 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
     return `${config.authorization_endpoint}?${query.toString()}`;
   }
 
+  /**
+   * @internal
+   */
   async _finishAuthorization(
     url: string
   ): Promise<{ user: User; state?: string }> {
@@ -300,6 +310,8 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
 
   /**
    * Logout current session.
+   *
+   * @internal
    *
    * @remarks
    * If `force` parameter is set to `true`, all potential errors (e.g. network

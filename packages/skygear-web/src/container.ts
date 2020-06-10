@@ -26,6 +26,9 @@ export class WebOIDCContainer<T extends WebAPIClient> extends OIDCContainer<T> {
     this.isThirdParty = false;
   }
 
+  /**
+   * @internal
+   */
   // eslint-disable-next-line class-methods-use-this
   async _setupCodeVerifier(): Promise<{ verifier: string; challenge: string }> {
     const codeVerifier = generateCodeVerifier();

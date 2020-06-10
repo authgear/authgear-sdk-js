@@ -1,4 +1,4 @@
-import { ByteArray } from "./types";
+import { _ByteArray } from "./types";
 
 function uint6ToB64URL(nUint6: number) {
   return nUint6 < 26
@@ -14,7 +14,7 @@ function uint6ToB64URL(nUint6: number) {
     : 65;
 }
 
-function base64URLEncArr(aBytes: ByteArray) {
+function base64URLEncArr(aBytes: _ByteArray) {
   const eqLen = (3 - (aBytes.length % 3)) % 3;
   let sB64Enc = "";
   let nUint24 = 0;
@@ -38,6 +38,6 @@ function base64URLEncArr(aBytes: ByteArray) {
 /**
  * @internal
  */
-export function _encodeBase64URLFromByteArray(bytes: ByteArray): string {
+export function _encodeBase64URLFromByteArray(bytes: _ByteArray): string {
   return base64URLEncArr(bytes);
 }

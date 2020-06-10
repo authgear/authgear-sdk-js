@@ -1,6 +1,6 @@
 import { ContainerStorage, StorageDriver, User } from "./types";
 
-import { encodeUser, decodeUser } from "./encoding";
+import { _encodeUser, _decodeUser } from "./encoding";
 
 function scopedKey(key: string): string {
   return `skygear2_${key}`;
@@ -96,7 +96,7 @@ export class GlobalJSONContainerStorage implements ContainerStorage {
   }
 
   async setUser(namespace: string, user: User): Promise<void> {
-    const userJSON = encodeUser(user);
+    const userJSON = _encodeUser(user);
     await this.storage.safeSetJSON(keyUser(namespace), userJSON);
   }
 
@@ -126,7 +126,7 @@ export class GlobalJSONContainerStorage implements ContainerStorage {
   async getUser(namespace: string): Promise<User | null> {
     const userJSON = await this.storage.safeGetJSON(keyUser(namespace));
     if (userJSON) {
-      return decodeUser(userJSON);
+      return _decodeUser(userJSON);
     }
     return null;
   }

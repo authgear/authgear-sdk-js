@@ -62,6 +62,9 @@ export class ReactNativeOIDCContainer<
     this.isThirdParty = true;
   }
 
+  /**
+   * @internal
+   */
   // eslint-disable-next-line class-methods-use-this
   async _setupCodeVerifier(): Promise<{ verifier: string; challenge: string }> {
     const codeVerifier = await generateCodeVerifier();

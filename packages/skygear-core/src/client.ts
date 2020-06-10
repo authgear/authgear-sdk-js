@@ -36,14 +36,26 @@ export abstract class BaseAPIClient {
    * 0 means doesn't need to refresh
    */
   _shouldRefreshTokenAt: number;
+  /**
+   * @internal
+   */
   // eslint-disable-next-line no-undef
   fetchFunction?: typeof fetch;
+  /**
+   * @internal
+   */
   // eslint-disable-next-line no-undef
   requestClass?: typeof Request;
+  /**
+   * @internal
+   */
   refreshTokenFunction?: () => Promise<boolean>;
   userAgent?: string;
 
-  private config?: _OIDCConfiguration;
+  /**
+   * @internal
+   */
+  config?: _OIDCConfiguration;
 
   constructor() {
     this.authEndpoint = "";
@@ -51,14 +63,23 @@ export abstract class BaseAPIClient {
     this._shouldRefreshTokenAt = 0;
   }
 
+  /**
+   * @internal
+   */
   setShouldNotRefreshToken(): void {
     this._shouldRefreshTokenAt = 0;
   }
 
+  /**
+   * @internal
+   */
   setShouldRefreshTokenNow(): void {
     this._shouldRefreshTokenAt = new Date().getTime();
   }
 
+  /**
+   * @internal
+   */
   setAccessTokenAndExpiresIn(accessToken: string, expires_in?: number): void {
     this._accessToken = accessToken;
     if (expires_in) {
@@ -69,10 +90,16 @@ export abstract class BaseAPIClient {
     }
   }
 
+  /**
+   * @internal
+   */
   setEndpoint(authEndpoint: string): void {
     this.authEndpoint = _removeTrailingSlash(authEndpoint);
   }
 
+  /**
+   * @internal
+   */
   protected async prepareHeaders(): Promise<{ [name: string]: string }> {
     const headers: { [name: string]: string } = {};
     if (this._accessToken) {
@@ -142,6 +169,9 @@ export abstract class BaseAPIClient {
     return this.fetchFunction(request);
   }
 
+  /**
+   * @internal
+   */
   // eslint-disable-next-line complexity
   protected async request(
     method: "GET" | "POST" | "DELETE",
@@ -212,6 +242,9 @@ export abstract class BaseAPIClient {
     throw decodeError();
   }
 
+  /**
+   * @internal
+   */
   protected async postAuth(
     path: string,
     options?: {
