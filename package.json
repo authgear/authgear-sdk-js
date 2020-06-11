@@ -13,7 +13,6 @@
     "dts": "tsc --emitDeclarationOnly && node scripts/dts.js && npm run clean-decl",
     "clean-decl": "rimraf 'packages/*/src/*.d.ts' 'packages/*/src/!(@types)/**/*.d.ts' 'packages/*/src/*.d.ts.map' 'packages/*/src/!(@types)/**/*.d.ts.map'",
     "clean": "npm run clean-decl && rimraf temp 'packages/*/dist' 'packages/*/index.d.ts'",
-    "build": "npm run clean && npm run bundle && npm run docs",
     "set-version": "npm run lerna -- version --no-changelog --no-commit-hooks --no-git-tag-version --no-push --exact --yes",
     "prepare-new-release": "git log --first-parent `git describe --abbrev=0`.. > new-release"
   },
@@ -42,6 +41,8 @@
     "rollup-plugin-json": "4.0.0",
     "rollup-plugin-node-resolve": "5.2.0",
     "rollup-plugin-replace": "2.2.0",
+    "typedoc": "0.17.7",
+    "typedoc-plugin-markdown": "2.3.1",
     "typescript": "3.9.5"
   }
 }

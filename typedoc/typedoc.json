@@ -1,0 +1,11 @@
+{
+  "mode": "file",
+  "includeDeclarations": true,
+  "excludeExternals": true,
+  "excludeNotExported": true,
+  "excludePrivate": true,
+  "stripInternal": true,
+  "theme": "minimal",
+  "readme": "none",
+  "hideGenerator": true
+}
