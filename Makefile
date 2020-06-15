@@ -32,8 +32,8 @@ docs:
 		--namedAnchors \
 		--hideSources
 	cp ./typedoc/index.md ./temp/docs/index.md
-	./scripts/rewrite_document_id.py ./temp/docs
-	./scripts/generate_sidebars_js.py ./temp/docs >./temp/sidebars.js
+	node ./scripts/rewrite_document_id.js ./temp/docs
+	node ./scripts/generate_sidebars_js.js ./temp/docs >./temp/sidebars.js
 	rm -rf ./website/docs
 	cp -R ./temp/docs/. ./website/docs
 	cp ./temp/sidebars.js ./website
