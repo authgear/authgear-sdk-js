@@ -135,8 +135,7 @@ export abstract class BaseAPIClient {
   async fetch(
     endpoint: string,
     input: string,
-    init?: RequestInit,
-    options: { autoRefreshToken?: boolean } = {}
+    init?: RequestInit
   ): Promise<Response> {
     if (this._fetchFunction == null) {
       throw new Error("missing fetchFunction in api client");
@@ -145,8 +144,6 @@ export abstract class BaseAPIClient {
     if (this._requestClass == null) {
       throw new Error("missing requestClass in api client");
     }
-
-    const { autoRefreshToken = !!this._refreshTokenFunction } = options;
 
     if (typeof input !== "string") {
       throw new Error("only string path is allowed for fetch input");
@@ -157,7 +154,7 @@ export abstract class BaseAPIClient {
       this._accessToken &&
       this._shouldRefreshTokenAt &&
       this._shouldRefreshTokenAt < new Date().getTime();
-    if (shouldRefreshToken && autoRefreshToken) {
+    if (shouldRefreshToken) {
       if (!this._refreshTokenFunction) {
         throw new Error("missing refreshTokenFunction in api client");
       }
@@ -185,7 +182,6 @@ export abstract class BaseAPIClient {
     options: {
       json?: unknown;
       query?: [string, string][];
-      autoRefreshToken?: boolean;
     } = {}
   ): Promise<any> {
     if (this.endpoint == null) {
@@ -193,7 +189,7 @@ export abstract class BaseAPIClient {
     }
     const endpoint: string = this.endpoint;
 
-    const { json, query, autoRefreshToken } = options;
+    const { json, query } = options;
     let p = path;
     if (query != null && query.length > 0) {
       const params = new URLSearchParams();
@@ -208,18 +204,13 @@ export abstract class BaseAPIClient {
       headers["content-type"] = "application/json";
     }
 
-    const response = await this.fetch(
-      endpoint,
-      p,
-      {
-        method,
-        headers,
-        mode: "cors",
-        credentials: "include",
-        body: json && JSON.stringify(json),
-      },
-      { autoRefreshToken }
-    );
+    const response = await this.fetch(endpoint, p, {
+      method,
+      headers,
+      mode: "cors",
+      credentials: "include",
+      body: json && JSON.stringify(json),
+    });
 
     let jsonBody;
     try {
@@ -260,7 +251,6 @@ export abstract class BaseAPIClient {
     options?: {
       json?: unknown;
       query?: [string, string][];
-      autoRefreshToken?: boolean;
     }
   ): Promise<any> {
     return this._request("POST", path, options);
