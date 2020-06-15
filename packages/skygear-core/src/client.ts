@@ -7,11 +7,10 @@ import {
   _OIDCTokenRequest,
   OAuthError,
   ChallengeResponse,
+  APIClientDelegate,
 } from "./types";
 import { decodeError, ServerError } from "./error";
 import { _decodeAuthResponseFromOIDCUserinfo } from "./encoding";
-
-const refreshTokenWindow = 0.7;
 
 /**
  * @internal
@@ -25,6 +24,8 @@ export function _removeTrailingSlash(s: string): string {
  */
 export abstract class BaseAPIClient {
   userAgent?: string;
+
+  delegate?: APIClientDelegate;
 
   /**
    * @internal
@@ -59,17 +60,11 @@ export abstract class BaseAPIClient {
   _accessToken?: string;
 
   /**
-   * @internal
+   * The timestamp that the access token is considered as expired.
    *
-   * _shouldRefreshTokenAt is the timestamp that the sdk should refresh token.
-   * falsy value means does not need to refresh.
-   */
-  _shouldRefreshTokenAt?: number;
-
-  /**
    * @internal
    */
-  _refreshTokenFunction?: () => Promise<boolean>;
+  _accessTokenExpireAt?: Date;
 
   /**
    * @internal
@@ -79,28 +74,11 @@ export abstract class BaseAPIClient {
   /**
    * @internal
    */
-  _setShouldNotRefreshToken(): void {
-    this._shouldRefreshTokenAt = 0;
-  }
-
-  /**
-   * @internal
-   */
-  _setShouldRefreshTokenNow(): void {
-    this._shouldRefreshTokenAt = new Date().getTime();
-  }
-
-  /**
-   * @internal
-   */
-  _setAccessTokenAndExpiresIn(accessToken: string, expires_in?: number): void {
+  _setAccessTokenAndExpiresIn(accessToken: string, expires_in: number): void {
     this._accessToken = accessToken;
-    if (expires_in) {
-      this._shouldRefreshTokenAt =
-        new Date().getTime() + expires_in * 1000 * refreshTokenWindow;
-    } else {
-      this._shouldRefreshTokenAt = 0;
-    }
+    this._accessTokenExpireAt = new Date(
+      new Date(Date.now()).getTime() + expires_in * 1000
+    );
   }
 
   /**
@@ -120,7 +98,10 @@ export abstract class BaseAPIClient {
   /**
    * @internal
    */
-  async _fetch(url: string, init?: RequestInit): Promise<Response> {
+  async _fetchWithoutRefresh(
+    url: string,
+    init?: RequestInit
+  ): Promise<Response> {
     if (!this._fetchFunction) {
       throw new Error("missing fetchFunction in api client");
     }
@@ -149,16 +130,17 @@ export abstract class BaseAPIClient {
       throw new Error("only string path is allowed for fetch input");
     }
 
-    // check if need to refresh token
-    const shouldRefreshToken =
-      this._accessToken &&
-      this._shouldRefreshTokenAt &&
-      this._shouldRefreshTokenAt < new Date().getTime();
-    if (shouldRefreshToken) {
-      if (!this._refreshTokenFunction) {
-        throw new Error("missing refreshTokenFunction in api client");
+    // check if access token is considered expired.
+    const now = new Date(Date.now());
+    const accessTokenIsExpired =
+      this._accessToken != null &&
+      (this._accessTokenExpireAt == null ||
+        this._accessTokenExpireAt.getTime() < now.getTime());
+    if (accessTokenIsExpired) {
+      if (this.delegate == null) {
+        throw new Error("missing delegate in api client");
       }
-      await this._refreshTokenFunction();
+      await this.delegate.onAccessTokenExpired();
     }
 
     const url = endpoint + "/" + input.replace(/^\//, "");
@@ -260,7 +242,7 @@ export abstract class BaseAPIClient {
    * @internal
    */
   async _fetchOIDCRequest(url: string, init?: RequestInit): Promise<Response> {
-    const resp = await this._fetch(url, init);
+    const resp = await this._fetchWithoutRefresh(url, init);
     if (resp.status === 200) {
       return resp;
     }

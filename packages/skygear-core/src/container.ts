@@ -6,6 +6,7 @@ import {
   ContainerStorage,
   OAuthError,
   User,
+  APIClientDelegate,
   _AuthResponse,
 } from "./types";
 import { BaseAPIClient } from "./client";
@@ -15,7 +16,8 @@ import { BaseAPIClient } from "./client";
  *
  * @public
  */
-export abstract class BaseContainer<T extends BaseAPIClient> {
+export abstract class BaseContainer<T extends BaseAPIClient>
+  implements APIClientDelegate {
   /**
    *
    * Unique ID for this container.
@@ -109,7 +111,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     }
 
     this.currentUser = user;
-    if (accessToken) {
+    if (accessToken && expiresIn) {
       this.apiClient._setAccessTokenAndExpiresIn(accessToken, expiresIn);
     }
     if (sessionID) {
@@ -127,21 +129,15 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     await this.storage.delSessionID(this.name);
     this.currentUser = undefined;
     this.apiClient._accessToken = undefined;
+    this.apiClient._accessTokenExpireAt = undefined;
     this.currentSessionID = undefined;
   }
 
   /**
-   * @internal
+   * @public
    */
-  async _refreshAccessToken(): Promise<boolean> {
-    // api client determine whether the token need to be refresh or not by
-    // shouldRefreshTokenAt timeout
-    //
-    // The value of shouldRefreshTokenAt will be updated based on expires_in in
-    // the token response
-    //
-    // The session will be cleared only if token request return invalid_grant
-    // which indicate the refresh token is no longer valid
+  async onAccessTokenExpired(): Promise<void> {
+    // APIClient determines whether the access token is considered expired.
     //
     // If token request fails due to other reasons, session will be kept and
     // the whole process can be retried.
@@ -151,10 +147,10 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     }
 
     const refreshToken = await this.storage.getRefreshToken(this.name);
-    if (!refreshToken) {
-      // no refresh token -> cannot refresh
-      this.apiClient._setShouldNotRefreshToken();
-      return false;
+    if (refreshToken == null) {
+      // The API client has access token but we do not have the refresh token.
+      await this._clearSession();
+      return;
     }
 
     let tokenResponse;
@@ -165,28 +161,25 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
         refresh_token: refreshToken,
       });
     } catch (error) {
-      // When the error is `invalid_grant`, that means the refresh is
-      // no longer invalid, clear the session in this case.
+      // TODO(refresh): Add delegate
+      // When the error is `invalid_grant`, the refresh token is no longer valid.
+      // Clear the session in this case.
       // https://tools.ietf.org/html/rfc6749#section-5.2
       if (error.error === "invalid_grant") {
         await this._clearSession();
-        return false;
+        return;
       }
+
       throw error;
     }
 
-    await this.storage.setAccessToken(this.name, tokenResponse.access_token);
-    if (tokenResponse.refresh_token) {
-      await this.storage.setRefreshToken(
-        this.name,
-        tokenResponse.refresh_token
-      );
+    const { access_token, refresh_token, expires_in } = tokenResponse;
+
+    await this.storage.setAccessToken(this.name, access_token);
+    if (refresh_token != null) {
+      await this.storage.setRefreshToken(this.name, refresh_token);
     }
-    this.apiClient._setAccessTokenAndExpiresIn(
-      tokenResponse.access_token,
-      tokenResponse.expires_in
-    );
-    return true;
+    this.apiClient._setAccessTokenAndExpiresIn(access_token, expires_in);
   }
 
   /**

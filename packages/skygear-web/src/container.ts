@@ -44,8 +44,11 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
         options?.storage ??
         new GlobalJSONContainerStorage(localStorageStorageDriver),
     } as ContainerOptions<T>;
+
     super(o);
+
     this.isThirdParty = false;
+    this.apiClient.delegate = this;
   }
 
   /**
@@ -59,7 +62,6 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
     const sessionID = await this.storage.getSessionID(this.name);
 
     this.apiClient.endpoint = options.endpoint;
-    this.apiClient._refreshTokenFunction = this._refreshAccessToken.bind(this);
     this.apiClient._accessToken = accessToken ?? undefined;
 
     this.currentUser = user ?? undefined;
@@ -67,8 +69,8 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
     this.clientID = options.clientID;
     this.isThirdParty = !!options.isThirdPartyApp;
 
-    // should refresh token when app start
-    this.apiClient._setShouldRefreshTokenNow();
+    // Refresh access token when app launches.
+    this.apiClient._accessTokenExpireAt = undefined;
   }
 
   /**
