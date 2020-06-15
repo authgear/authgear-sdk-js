@@ -33,6 +33,54 @@ export interface User {
 }
 
 /**
+ * Auth UI anonymous user promotion options
+ *
+ * @public
+ */
+export interface PromoteOptions {
+  /**
+   * Redirect uri. Redirection URI to which the response will be sent after authorization.
+   */
+  redirectURI: string;
+  /**
+   * OAuth 2.0 state value.
+   */
+  state?: string;
+  /**
+   * UI locale tags
+   */
+  uiLocales?: string[];
+}
+
+/**
+ * Auth UI authorization options
+ *
+ * @public
+ */
+export interface AuthorizeOptions {
+  /**
+   * Redirect uri. Redirection URI to which the response will be sent after authorization.
+   */
+  redirectURI: string;
+  /**
+   * OAuth 2.0 state value.
+   */
+  state?: string;
+  /**
+   * OIDC prompt parameter.
+   */
+  prompt?: string;
+  /**
+   * OIDC login hint parameter
+   */
+  loginHint?: string;
+  /**
+   * UI locale tags
+   */
+  uiLocales?: string[];
+}
+
+/**
  * @internal
  */
 export interface _AuthResponse {

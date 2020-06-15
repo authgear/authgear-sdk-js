@@ -1,82 +1,70 @@
 import URL from "core-js-pure/features/url";
 import URLSearchParams from "core-js-pure/features/url-search-params";
 import {
+  AuthorizeOptions,
+  ContainerOptions,
   ContainerStorage,
+  OAuthError,
   User,
   _AuthResponse,
-  ContainerOptions,
-  OAuthError,
 } from "./types";
 import { BaseAPIClient } from "./client";
 
 /**
- * Auth UI authorization options
+ * Base Container
  *
  * @public
  */
-export interface AuthorizeOptions {
+export abstract class BaseContainer<T extends BaseAPIClient> {
   /**
-   * Redirect uri. Redirection URI to which the response will be sent after authorization.
+   *
+   * Unique ID for this container.
+   * @defaultValue "default"
+   *
+   * @public
    */
-  redirectURI: string;
-  /**
-   * OAuth 2.0 state value.
-   */
-  state?: string;
-  /**
-   * OIDC prompt parameter.
-   */
-  prompt?: string;
-  /**
-   * OIDC login hint parameter
-   */
-  loginHint?: string;
-  /**
-   * UI locale tags
-   */
-  uiLocales?: string[];
-}
+  name: string;
 
-/**
- * Auth UI anonymous user promotion options
- *
- * @public
- */
-export interface PromoteOptions {
   /**
-   * Redirect uri. Redirection URI to which the response will be sent after authorization.
+   * @internal
    */
-  redirectURI: string;
-  /**
-   * OAuth 2.0 state value.
-   */
-  state?: string;
-  /**
-   * UI locale tags
-   */
-  uiLocales?: string[];
-}
+  apiClient: T;
 
-/**
- * Skygear Auth OIDC client APIs.
- *
- * @public
- */
-export abstract class OIDCContainer<T extends BaseAPIClient> {
-  parent: Container<T>;
+  /**
+   * @internal
+   */
+  storage: ContainerStorage;
 
   /**
    * Current logged in user.
+   *
+   * @public
    */
   currentUser?: User;
 
   /**
    * Session ID of current logged in user.
+   *
+   * @public
    */
   currentSessionID?: string;
 
-  abstract clientID?: string;
-  abstract isThirdParty?: boolean;
+  /**
+   * OIDC client ID
+   *
+   * @public
+   */
+  clientID?: string;
+
+  /**
+   * Whether the application shares cookies with Authgear.
+   *
+   * Only web application can shares cookies so all native applications
+   * are considered third party.
+   *
+   * @public
+   */
+  isThirdParty?: boolean;
 
   /**
    * @internal
@@ -86,8 +74,18 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
     challenge: string;
   }>;
 
-  constructor(parent: Container<T>) {
-    this.parent = parent;
+  constructor(options: ContainerOptions<T>) {
+    if (!options.apiClient) {
+      throw Error("missing apiClient");
+    }
+
+    if (!options.storage) {
+      throw Error("missing storage");
+    }
+
+    this.name = options.name ?? "default";
+    this.apiClient = options.apiClient;
+    this.storage = options.storage;
   }
 
   /**
@@ -96,23 +94,23 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
   async _persistAuthResponse(response: _AuthResponse): Promise<void> {
     const { user, accessToken, refreshToken, sessionID, expiresIn } = response;
 
-    await this.parent.storage.setUser(this.parent.name, user);
+    await this.storage.setUser(this.name, user);
 
     if (accessToken) {
-      await this.parent.storage.setAccessToken(this.parent.name, accessToken);
+      await this.storage.setAccessToken(this.name, accessToken);
     }
 
     if (refreshToken) {
-      await this.parent.storage.setRefreshToken(this.parent.name, refreshToken);
+      await this.storage.setRefreshToken(this.name, refreshToken);
     }
 
     if (sessionID) {
-      await this.parent.storage.setSessionID(this.parent.name, sessionID);
+      await this.storage.setSessionID(this.name, sessionID);
     }
 
     this.currentUser = user;
     if (accessToken) {
-      this.parent.apiClient._setAccessTokenAndExpiresIn(accessToken, expiresIn);
+      this.apiClient._setAccessTokenAndExpiresIn(accessToken, expiresIn);
     }
     if (sessionID) {
       this.currentSessionID = sessionID;
@@ -123,12 +121,12 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
    * @internal
    */
   async _clearSession(): Promise<void> {
-    await this.parent.storage.delUser(this.parent.name);
-    await this.parent.storage.delAccessToken(this.parent.name);
-    await this.parent.storage.delRefreshToken(this.parent.name);
-    await this.parent.storage.delSessionID(this.parent.name);
+    await this.storage.delUser(this.name);
+    await this.storage.delAccessToken(this.name);
+    await this.storage.delRefreshToken(this.name);
+    await this.storage.delSessionID(this.name);
     this.currentUser = undefined;
-    this.parent.apiClient._accessToken = undefined;
+    this.apiClient._accessToken = undefined;
     this.currentSessionID = undefined;
   }
 
@@ -152,18 +150,16 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
       throw new Error("missing client ID");
     }
 
-    const refreshToken = await this.parent.storage.getRefreshToken(
-      this.parent.name
-    );
+    const refreshToken = await this.storage.getRefreshToken(this.name);
     if (!refreshToken) {
       // no refresh token -> cannot refresh
-      this.parent.apiClient._setShouldNotRefreshToken();
+      this.apiClient._setShouldNotRefreshToken();
       return false;
     }
 
     let tokenResponse;
     try {
-      tokenResponse = await this.parent.apiClient._oidcTokenRequest({
+      tokenResponse = await this.apiClient._oidcTokenRequest({
         grant_type: "refresh_token",
         client_id: clientID,
         refresh_token: refreshToken,
@@ -179,17 +175,14 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
       throw error;
     }
 
-    await this.parent.storage.setAccessToken(
-      this.parent.name,
-      tokenResponse.access_token
-    );
+    await this.storage.setAccessToken(this.name, tokenResponse.access_token);
     if (tokenResponse.refresh_token) {
-      await this.parent.storage.setRefreshToken(
-        this.parent.name,
+      await this.storage.setRefreshToken(
+        this.name,
         tokenResponse.refresh_token
       );
     }
-    this.parent.apiClient._setAccessTokenAndExpiresIn(
+    this.apiClient._setAccessTokenAndExpiresIn(
       tokenResponse.access_token,
       tokenResponse.expires_in
     );
@@ -205,15 +198,12 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
       throw new Error("missing client ID");
     }
 
-    const config = await this.parent.apiClient._fetchOIDCConfiguration();
+    const config = await this.apiClient._fetchOIDCConfiguration();
     const query = new URLSearchParams();
 
     if (this.isThirdParty) {
       const codeVerifier = await this._setupCodeVerifier();
-      await this.parent.storage.setOIDCCodeVerifier(
-        this.parent.name,
-        codeVerifier.verifier
-      );
+      await this.storage.setOIDCCodeVerifier(this.name, codeVerifier.verifier);
 
       query.append("response_type", "code");
       query.append(
@@ -280,7 +270,7 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
     if (!this.isThirdParty) {
       // if the app is first party app, use session cookie for authorization
       // no code exchange is needed.
-      authResponse = await this.parent.apiClient._oidcUserInfoRequest();
+      authResponse = await this.apiClient._oidcUserInfoRequest();
     } else {
       const code = params.get("code");
       if (!code) {
@@ -291,17 +281,15 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
         // eslint-disable-next-line @typescript-eslint/no-throw-literal
         throw missingCodeError;
       }
-      const codeVerifier = await this.parent.storage.getOIDCCodeVerifier(
-        this.parent.name
-      );
-      tokenResponse = await this.parent.apiClient._oidcTokenRequest({
+      const codeVerifier = await this.storage.getOIDCCodeVerifier(this.name);
+      tokenResponse = await this.apiClient._oidcTokenRequest({
         grant_type: "authorization_code",
         code: code,
         redirect_uri: redirectURI,
         client_id: clientID,
         code_verifier: codeVerifier ?? "",
       });
-      authResponse = await this.parent.apiClient._oidcUserInfoRequest(
+      authResponse = await this.apiClient._oidcUserInfoRequest(
         tokenResponse.access_token
       );
     }
@@ -339,8 +327,8 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
     if (this.isThirdParty) {
       try {
         const refreshToken =
-          (await this.parent.storage.getRefreshToken(this.parent.name)) ?? "";
-        await this.parent.apiClient._oidcRevocationRequest(refreshToken);
+          (await this.storage.getRefreshToken(this.name)) ?? "";
+        await this.apiClient._oidcRevocationRequest(refreshToken);
       } catch (error) {
         if (!options.force) {
           throw error;
@@ -348,7 +336,7 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
       }
       await this._clearSession();
     } else {
-      const config = await this.parent.apiClient._fetchOIDCConfiguration();
+      const config = await this.apiClient._fetchOIDCConfiguration();
       const query = new URLSearchParams();
       if (options.redirectURI) {
         query.append("post_logout_redirect_uri", options.redirectURI);
@@ -362,38 +350,5 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
         window.location.href = endSessionEndpoint;
       }
     }
-  }
-}
-
-/**
- * Skygear APIs container.
- *
- * @remarks
- * This is the base class to Skygear APIs.
- * Consumers should use platform-specific containers instead.
- *
- * @public
- */
-export class Container<T extends BaseAPIClient> {
-  /**
-   * Unique ID for this container.
-   * @defaultValue "default"
-   */
-  name: string;
-  apiClient: T;
-  storage: ContainerStorage;
-
-  constructor(options: ContainerOptions<T>) {
-    if (!options.apiClient) {
-      throw Error("missing apiClient");
-    }
-
-    if (!options.storage) {
-      throw Error("missing storage");
-    }
-
-    this.name = options.name ?? "default";
-    this.apiClient = options.apiClient;
-    this.storage = options.storage;
   }
 }
