@@ -1,4 +1,4 @@
-import { User, AuthResponse } from "./types";
+import { User, _AuthResponse } from "./types";
 
 /**
  * @internal
@@ -7,18 +7,12 @@ export function _decodeUser(u: any): User {
   const id = u.id;
   const createdAt = new Date(u.created_at);
   const lastLoginAt = new Date(u.last_login_at);
-  const isVerified = u.is_verified;
-  const isManuallyVerified = u.is_manually_verified;
-  const isDisabled = u.is_disabled;
   const isAnonymous = u.is_anonymous;
   const metadata = u.metadata;
   return {
     id,
     createdAt,
     lastLoginAt,
-    isManuallyVerified,
-    isVerified,
-    isDisabled,
     isAnonymous,
     metadata,
   };
@@ -34,9 +28,6 @@ export function _encodeUser(u: User): unknown {
     id: u.id,
     created_at,
     last_login_at,
-    is_manually_verified: u.isManuallyVerified,
-    is_verified: u.isVerified,
-    is_disabled: u.isDisabled,
     is_anonymous: u.isAnonymous,
     metadata: u.metadata,
   };
@@ -45,7 +36,7 @@ export function _encodeUser(u: User): unknown {
 /**
  * @internal
  */
-export function _decodeAuthResponseFromOIDCUserinfo(u: any): AuthResponse {
+export function _decodeAuthResponseFromOIDCUserinfo(u: any): _AuthResponse {
   const { sub, skygear_user, skygear_session_id } = u;
 
   if (!skygear_user) {
@@ -55,7 +46,7 @@ export function _decodeAuthResponseFromOIDCUserinfo(u: any): AuthResponse {
   const user = _decodeUser(skygear_user);
   user.id = sub;
 
-  const response: AuthResponse = {
+  const response: _AuthResponse = {
     user: user,
   };
 

@@ -23,18 +23,6 @@ export interface User {
    */
   lastLoginAt: Date;
   /**
-   * Indicates whether the user is verified manually.
-   */
-  isManuallyVerified: boolean;
-  /**
-   * Indicates whether the user is verified.
-   */
-  isVerified: boolean;
-  /**
-   * Indicates whether the user is disabled.
-   */
-  isDisabled: boolean;
-  /**
    * Indicates whether the user is anonymous user.
    */
   isAnonymous: boolean;
@@ -45,9 +33,9 @@ export interface User {
 }
 
 /**
- * @public
+ * @internal
  */
-export interface AuthResponse {
+export interface _AuthResponse {
   user: User;
   accessToken?: string;
   refreshToken?: string;

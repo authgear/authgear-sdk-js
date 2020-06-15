@@ -1,7 +1,7 @@
 import URLSearchParams from "core-js-pure/features/url-search-params";
 
 import {
-  AuthResponse,
+  _AuthResponse,
   _OIDCConfiguration,
   _OIDCTokenResponse,
   _OIDCTokenRequest,
@@ -350,7 +350,7 @@ export abstract class BaseAPIClient {
   /**
    * @internal
    */
-  async _oidcUserInfoRequest(accessToken?: string): Promise<AuthResponse> {
+  async _oidcUserInfoRequest(accessToken?: string): Promise<_AuthResponse> {
     const headers: { [name: string]: string } = {};
     if (accessToken) {
       headers["authorization"] = `bearer ${accessToken}`;

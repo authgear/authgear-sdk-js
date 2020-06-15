@@ -3,7 +3,7 @@ import URLSearchParams from "core-js-pure/features/url-search-params";
 import {
   ContainerStorage,
   User,
-  AuthResponse,
+  _AuthResponse,
   ContainerOptions,
   OAuthError,
 } from "./types";
@@ -95,7 +95,7 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
   /**
    * @internal
    */
-  async _persistAuthResponse(response: AuthResponse): Promise<void> {
+  async _persistAuthResponse(response: _AuthResponse): Promise<void> {
     const { user, accessToken, refreshToken, sessionID, expiresIn } = response;
 
     await this.parent.storage.setUser(this.parent.name, user);
