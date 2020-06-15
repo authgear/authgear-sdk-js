@@ -8,6 +8,7 @@ import {
   User,
   APIClientDelegate,
   _AuthResponse,
+  ContainerDelegate,
 } from "./types";
 import { BaseAPIClient } from "./client";
 
@@ -28,14 +29,11 @@ export abstract class BaseContainer<T extends BaseAPIClient>
   name: string;
 
   /**
-   * @internal
+   * OIDC client ID
+   *
+   * @public
    */
-  apiClient: T;
-
-  /**
-   * @internal
-   */
-  storage: ContainerStorage;
+  clientID?: string;
 
   /**
    * Current logged in user.
@@ -52,13 +50,6 @@ export abstract class BaseContainer<T extends BaseAPIClient>
   currentSessionID?: string;
 
   /**
-   * OIDC client ID
-   *
-   * @public
-   */
-  clientID?: string;
-
-  /**
    * Whether the application shares cookies with Authgear.
    *
    * Only web application can shares cookies so all native applications
@@ -67,6 +58,21 @@ export abstract class BaseContainer<T extends BaseAPIClient>
    * @public
    */
   isThirdParty?: boolean;
+
+  /**
+   * @public
+   */
+  apiClient: T;
+
+  /**
+   * @public
+   */
+  delegate?: ContainerDelegate;
+
+  /**
+   * @internal
+   */
+  storage: ContainerStorage;
 
   /**
    * @internal
@@ -161,11 +167,14 @@ export abstract class BaseContainer<T extends BaseAPIClient>
         refresh_token: refreshToken,
       });
     } catch (error) {
-      // TODO(refresh): Add delegate
       // When the error is `invalid_grant`, the refresh token is no longer valid.
       // Clear the session in this case.
       // https://tools.ietf.org/html/rfc6749#section-5.2
       if (error.error === "invalid_grant") {
+        if (this.delegate != null) {
+          await this.delegate.onRefreshTokenExpired();
+        }
+
         await this._clearSession();
         return;
       }

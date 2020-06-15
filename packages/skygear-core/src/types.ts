@@ -84,9 +84,26 @@ export interface AuthorizeOptions {
  * @public
  */
 export interface APIClientDelegate {
-  // Called when API client considers the access token as expired.
-  // By default, the access token is refreshed automatically.
+  /**
+   * Called when API client considers the access token as expired.
+   * By default, the access token is refreshed automatically.
+   *
+   * @public
+   */
   onAccessTokenExpired(): Promise<void>;
+}
+
+/**
+ * @public
+ */
+export interface ContainerDelegate {
+  /**
+   * Called when the server rejects the refresh token.
+   * When this function is called, the session is not cleared yet.
+   *
+   * @public
+   */
+  onRefreshTokenExpired(): Promise<void>;
 }
 
 /**
