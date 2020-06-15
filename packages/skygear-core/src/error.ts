@@ -1,7 +1,7 @@
 /**
  * @public
  */
-export const SkygearErrorNames = {
+export const ErrorNames = {
   BadRequest: "BadRequest",
   Invalid: "Invalid",
   Unauthorized: "Unauthorized",
@@ -16,7 +16,7 @@ export const SkygearErrorNames = {
 /**
  * @public
  */
-export type SkygearErrorName = typeof SkygearErrorNames[keyof typeof SkygearErrorNames];
+export type ErrorName = typeof ErrorNames[keyof typeof ErrorNames];
 
 /**
  * CancelError is an error to represent cancel.
@@ -33,20 +33,16 @@ export class CancelError extends Error {}
 export const CANCEL = new CancelError();
 
 /**
- * Skygear API error.
- *
- * @remarks
- * All Skygear APIs (e.g. Auth, Asset) functions would throw errors of this
- * type if server returns failure.
+ * ServerError
  *
  * @public
  */
-export class SkygearError extends Error {
+export class ServerError extends Error {
   /**
    * Error name.
    *
    * @remarks
-   * See {@link SkygearErrorNames} for possible values.
+   * See {@link ErrorNames} for possible values.
    * New error names may be added in future.
    */
   name: string;
@@ -55,8 +51,8 @@ export class SkygearError extends Error {
    *
    * @remarks
    * Error messages are provided for convenience, and not stable APIs;
-   * Consumers should use {@link SkygearError.name} or
-   * {@link SkygearError.reason} to distinguish between different errors.
+   * Consumers should use {@link ServerError.name} or
+   * {@link ServerError.reason} to distinguish between different errors.
    */
   message!: string;
   /**
@@ -81,7 +77,7 @@ export class SkygearError extends Error {
  */
 // eslint-disable-next-line complexity
 export function decodeError(err?: any): Error {
-  // Construct SkygearError if it looks like one.
+  // Construct ServerError if it looks like one.
   if (
     err != null &&
     !(err instanceof Error) &&
@@ -89,7 +85,7 @@ export function decodeError(err?: any): Error {
     typeof err.reason === "string" &&
     typeof err.message === "string"
   ) {
-    return new SkygearError(err.message, err.name, err.reason, err.info);
+    return new ServerError(err.message, err.name, err.reason, err.info);
   }
   // If it is an Error, just return it.
   if (err instanceof Error) {

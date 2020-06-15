@@ -8,7 +8,7 @@ import {
   OAuthError,
   ChallengeResponse,
 } from "./types";
-import { decodeError, SkygearError } from "./error";
+import { decodeError, ServerError } from "./error";
 import { _decodeAuthResponseFromOIDCUserinfo } from "./encoding";
 
 const refreshTokenWindow = 0.7;
@@ -226,7 +226,7 @@ export abstract class BaseAPIClient {
       jsonBody = await response.json();
     } catch {
       if (response.status < 200 || response.status >= 300) {
-        throw new SkygearError(
+        throw new ServerError(
           "unexpected status code",
           "InternalError",
           "UnexpectedError",
@@ -235,7 +235,7 @@ export abstract class BaseAPIClient {
           }
         );
       } else {
-        throw new SkygearError(
+        throw new ServerError(
           "failed to decode response JSON",
           "InternalError",
           "UnexpectedError"
@@ -278,7 +278,7 @@ export abstract class BaseAPIClient {
     try {
       errJSON = await resp.json();
     } catch {
-      throw new SkygearError(
+      throw new ServerError(
         "failed to decode response JSON",
         "InternalError",
         "UnexpectedError",
@@ -304,7 +304,7 @@ export abstract class BaseAPIClient {
     try {
       jsonBody = await resp.json();
     } catch {
-      throw new SkygearError(
+      throw new ServerError(
         "failed to decode response JSON",
         "InternalError",
         "UnexpectedError"

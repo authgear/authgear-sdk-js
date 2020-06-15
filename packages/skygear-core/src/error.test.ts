@@ -1,7 +1,7 @@
-import { SkygearError, decodeError } from "./error";
+import { ServerError, decodeError } from "./error";
 
 describe("decodeError", () => {
-  it("decodes skygear error", () => {
+  it("decodes server error", () => {
     const actual = decodeError({
       name: "name",
       reason: "reason",
@@ -11,10 +11,10 @@ describe("decodeError", () => {
         a: "b",
       },
     });
-    const expected = new SkygearError("message", "name", "reason", {
+    const expected = new ServerError("message", "name", "reason", {
       a: "b",
     });
-    expect(actual).toBeInstanceOf(SkygearError);
+    expect(actual).toBeInstanceOf(ServerError);
     expect(actual.name).toEqual(expected.name);
     expect(actual.message).toEqual(expected.message);
     expect((actual as any).reason).toEqual(expected.reason);
