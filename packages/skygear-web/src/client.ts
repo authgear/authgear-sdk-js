@@ -10,6 +10,6 @@ export class WebAPIClient extends BaseAPIClient {
   // following error
   // TypeError: Failed to execute 'fetch' on 'Window': Illegal invocation
   // To prevent this, we bind window to the fetch function
-  fetchFunction = window.fetch.bind(window);
-  requestClass = Request;
+  _fetchFunction = window.fetch.bind(window);
+  _requestClass = Request;
 }

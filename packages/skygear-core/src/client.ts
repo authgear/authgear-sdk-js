@@ -24,63 +24,76 @@ export function _removeTrailingSlash(s: string): string {
  * @public
  */
 export abstract class BaseAPIClient {
-  authEndpoint: string;
-  /**
-   * @internal
-   */
-  _accessToken: string | null;
-  /**
-   * @internal
-   *
-   * _shouldRefreshTokenAt is the timestamp that the sdk should refresh token
-   * 0 means doesn't need to refresh
-   */
-  _shouldRefreshTokenAt: number;
-  /**
-   * @internal
-   */
-  // eslint-disable-next-line no-undef
-  fetchFunction?: typeof fetch;
-  /**
-   * @internal
-   */
-  // eslint-disable-next-line no-undef
-  requestClass?: typeof Request;
-  /**
-   * @internal
-   */
-  refreshTokenFunction?: () => Promise<boolean>;
   userAgent?: string;
 
   /**
    * @internal
    */
-  config?: _OIDCConfiguration;
+  _endpoint?: string;
+  get endpoint(): string | undefined {
+    return this._endpoint;
+  }
+  set endpoint(newEndpoint: string | undefined) {
+    if (newEndpoint != null) {
+      this._endpoint = _removeTrailingSlash(newEndpoint);
+    } else {
+      this._endpoint = undefined;
+    }
+  }
 
-  constructor() {
-    this.authEndpoint = "";
-    this._accessToken = null;
+  /**
+   * @internal
+   */
+  // eslint-disable-next-line no-undef
+  abstract _fetchFunction?: typeof fetch;
+
+  /**
+   * @internal
+   */
+  // eslint-disable-next-line no-undef
+  abstract _requestClass?: typeof Request;
+
+  /**
+   * @internal
+   */
+  _accessToken?: string;
+
+  /**
+   * @internal
+   *
+   * _shouldRefreshTokenAt is the timestamp that the sdk should refresh token.
+   * falsy value means does not need to refresh.
+   */
+  _shouldRefreshTokenAt?: number;
+
+  /**
+   * @internal
+   */
+  _refreshTokenFunction?: () => Promise<boolean>;
+
+  /**
+   * @internal
+   */
+  _config?: _OIDCConfiguration;
+
+  /**
+   * @internal
+   */
+  _setShouldNotRefreshToken(): void {
     this._shouldRefreshTokenAt = 0;
   }
 
   /**
    * @internal
    */
-  setShouldNotRefreshToken(): void {
-    this._shouldRefreshTokenAt = 0;
-  }
-
-  /**
-   * @internal
-   */
-  setShouldRefreshTokenNow(): void {
+  _setShouldRefreshTokenNow(): void {
     this._shouldRefreshTokenAt = new Date().getTime();
   }
 
   /**
    * @internal
    */
-  setAccessTokenAndExpiresIn(accessToken: string, expires_in?: number): void {
+  _setAccessTokenAndExpiresIn(accessToken: string, expires_in?: number): void {
     this._accessToken = accessToken;
     if (expires_in) {
       this._shouldRefreshTokenAt =
@@ -93,14 +106,7 @@ export abstract class BaseAPIClient {
   /**
    * @internal
    */
-  setEndpoint(authEndpoint: string): void {
-    this.authEndpoint = _removeTrailingSlash(authEndpoint);
-  }
-
-  /**
-   * @internal
-   */
-  protected async prepareHeaders(): Promise<{ [name: string]: string }> {
+  protected async _prepareHeaders(): Promise<{ [name: string]: string }> {
     const headers: { [name: string]: string } = {};
     if (this._accessToken) {
       headers["authorization"] = `bearer ${this._accessToken}`;
@@ -115,15 +121,15 @@ export abstract class BaseAPIClient {
    * @internal
    */
   async _fetch(url: string, init?: RequestInit): Promise<Response> {
-    if (!this.fetchFunction) {
+    if (!this._fetchFunction) {
       throw new Error("missing fetchFunction in api client");
     }
 
-    if (!this.requestClass) {
+    if (!this._requestClass) {
       throw new Error("missing requestClass in api client");
     }
-    const request = new this.requestClass(url, init);
-    return this.fetchFunction(request);
+    const request = new this._requestClass(url, init);
+    return this._fetchFunction(request);
   }
 
   async fetch(
@@ -132,15 +138,15 @@ export abstract class BaseAPIClient {
     init?: RequestInit,
     options: { autoRefreshToken?: boolean } = {}
   ): Promise<Response> {
-    if (this.fetchFunction == null) {
+    if (this._fetchFunction == null) {
       throw new Error("missing fetchFunction in api client");
     }
 
-    if (this.requestClass == null) {
+    if (this._requestClass == null) {
       throw new Error("missing requestClass in api client");
     }
 
-    const { autoRefreshToken = !!this.refreshTokenFunction } = options;
+    const { autoRefreshToken = !!this._refreshTokenFunction } = options;
 
     if (typeof input !== "string") {
       throw new Error("only string path is allowed for fetch input");
@@ -152,30 +158,29 @@ export abstract class BaseAPIClient {
       this._shouldRefreshTokenAt &&
       this._shouldRefreshTokenAt < new Date().getTime();
     if (shouldRefreshToken && autoRefreshToken) {
-      if (!this.refreshTokenFunction) {
+      if (!this._refreshTokenFunction) {
         throw new Error("missing refreshTokenFunction in api client");
       }
-      await this.refreshTokenFunction();
+      await this._refreshTokenFunction();
     }
 
     const url = endpoint + "/" + input.replace(/^\//, "");
-    const request = new this.requestClass(url, init);
+    const request = new this._requestClass(url, init);
 
-    const headers = await this.prepareHeaders();
+    const headers = await this._prepareHeaders();
     for (const key of Object.keys(headers)) {
       request.headers.set(key, headers[key]);
     }
 
-    return this.fetchFunction(request);
+    return this._fetchFunction(request);
   }
 
   /**
    * @internal
    */
   // eslint-disable-next-line complexity
-  protected async request(
+  protected async _request(
     method: "GET" | "POST" | "DELETE",
-    endpoint: string,
     path: string,
     options: {
       json?: unknown;
@@ -183,6 +188,11 @@ export abstract class BaseAPIClient {
       autoRefreshToken?: boolean;
     } = {}
   ): Promise<any> {
+    if (this.endpoint == null) {
+      throw new Error("missing endpoint in api client");
+    }
+    const endpoint: string = this.endpoint;
+
     const { json, query, autoRefreshToken } = options;
     let p = path;
     if (query != null && query.length > 0) {
@@ -245,7 +255,7 @@ export abstract class BaseAPIClient {
   /**
    * @internal
    */
-  protected async postAuth(
+  protected async _post(
     path: string,
     options?: {
       json?: unknown;
@@ -253,7 +263,7 @@ export abstract class BaseAPIClient {
       autoRefreshToken?: boolean;
     }
   ): Promise<any> {
-    return this.request("POST", this.authEndpoint, path, options);
+    return this._request("POST", path, options);
   }
 
   /**
@@ -307,12 +317,18 @@ export abstract class BaseAPIClient {
    * @internal
    */
   async _fetchOIDCConfiguration(): Promise<_OIDCConfiguration> {
-    if (!this.config) {
-      this.config = (await this._fetchOIDCJSON(
-        `${this.authEndpoint}/.well-known/openid-configuration`
+    if (this.endpoint == null) {
+      throw new Error("missing endpoint in api client");
+    }
+    const endpoint: string = this.endpoint;
+
+    if (!this._config) {
+      this._config = (await this._fetchOIDCJSON(
+        `${endpoint}/.well-known/openid-configuration`
       )) as _OIDCConfiguration;
     }
-    return this.config;
+
+    return this._config;
   }
 
   /**
@@ -384,6 +400,6 @@ export abstract class BaseAPIClient {
   }
 
   async oauthChallenge(purpose: string): Promise<ChallengeResponse> {
-    return this.postAuth("/oauth2/challenge", { json: { purpose } });
+    return this._post("/oauth2/challenge", { json: { purpose } });
   }
 }

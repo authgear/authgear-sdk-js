@@ -17,12 +17,11 @@ import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
  * @public
  */
 export class WebOIDCContainer<T extends WebAPIClient> extends OIDCContainer<T> {
-  clientID: string;
+  clientID?: string;
   isThirdParty: boolean;
 
   constructor(parent: WebContainer<T>) {
     super(parent);
-    this.clientID = "";
     this.isThirdParty = false;
   }
 
@@ -90,9 +89,9 @@ export interface ConfigureOptions {
    */
   clientID: string;
   /**
-   * The Skygear Auth endpoint.
+   * The endpoint.
    */
-  authEndpoint: string;
+  endpoint: string;
   /**
    * isThirdPartyApp indicate if the application a third party app.
    * A third party app means the app doesn't share common-domain with Skygear Auth thus the session cookie cannot be shared.
@@ -128,24 +127,22 @@ export class WebContainer<T extends WebAPIClient> extends Container<T> {
    * @param options - Skygear connection information
    */
   async configure(options: ConfigureOptions): Promise<void> {
-    this.apiClient.setEndpoint(options.authEndpoint);
-
     const accessToken = await this.storage.getAccessToken(this.name);
-    this.apiClient._accessToken = accessToken;
-    // should refresh token when app start
-    this.apiClient.setShouldRefreshTokenNow();
-
     const user = await this.storage.getUser(this.name);
-    this.auth.currentUser = user;
-
     const sessionID = await this.storage.getSessionID(this.name);
-    this.auth.currentSessionID = sessionID;
 
-    this.apiClient.refreshTokenFunction = this.auth._refreshAccessToken.bind(
+    this.apiClient.endpoint = options.endpoint;
+    this.apiClient._refreshTokenFunction = this.auth._refreshAccessToken.bind(
       this.auth
     );
+    this.apiClient._accessToken = accessToken ?? undefined;
 
+    this.auth.currentUser = user ?? undefined;
+    this.auth.currentSessionID = sessionID ?? undefined;
     this.auth.clientID = options.clientID;
     this.auth.isThirdParty = !!options.isThirdPartyApp;
+
+    // should refresh token when app start
+    this.apiClient._setShouldRefreshTokenNow();
   }
 }

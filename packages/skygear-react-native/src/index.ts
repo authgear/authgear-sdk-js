@@ -17,14 +17,12 @@ import { getCallbackURLScheme } from "./url";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 export * from "@skygear/core";
 
-const globalFetch = fetch;
-
 /**
  * @public
  */
 export class ReactNativeAPIClient extends BaseAPIClient {
-  fetchFunction = globalFetch;
-  requestClass = Request;
+  _fetchFunction = fetch;
+  _requestClass = Request;
 }
 
 /**
@@ -53,12 +51,11 @@ export class ReactNativeAsyncStorageStorageDriver implements StorageDriver {
 export class ReactNativeOIDCContainer<
   T extends ReactNativeAPIClient
 > extends OIDCContainer<T> {
-  clientID: string;
+  clientID?: string;
   isThirdParty: boolean;
 
   constructor(parent: ReactNativeContainer<T>) {
     super(parent);
-    this.clientID = "";
     this.isThirdParty = true;
   }
 
@@ -119,6 +116,11 @@ export class ReactNativeOIDCContainer<
    * Authenticate as an anonymous user.
    */
   async authenticateAnonymously(): Promise<{ user: User }> {
+    const clientID = this.clientID;
+    if (clientID == null) {
+      throw new Error("missing client ID");
+    }
+
     const { token } = await this.parent.apiClient.oauthChallenge(
       "anonymous_request"
     );
@@ -138,7 +140,7 @@ export class ReactNativeOIDCContainer<
 
     const tokenResponse = await this.parent.apiClient._oidcTokenRequest({
       grant_type: "urn:skygear-auth:params:oauth:grant-type:anonymous-request",
-      client_id: this.clientID,
+      client_id: clientID,
       jwt,
     });
 
@@ -209,9 +211,9 @@ export interface ConfigureOptions {
    */
   clientID: string;
   /**
-   * The Skygear Auth endpoint.
+   * The endpoint.
    */
-  authEndpoint: string;
+  endpoint: string;
 }
 
 /**
@@ -245,23 +247,22 @@ export class ReactNativeContainer<
    * @param options - Skygear connection information
    */
   async configure(options: ConfigureOptions): Promise<void> {
-    this.apiClient.setEndpoint(options.authEndpoint);
-
     const accessToken = await this.storage.getAccessToken(this.name);
-    this.apiClient._accessToken = accessToken;
-    // should refresh token when app start
-    this.apiClient.setShouldRefreshTokenNow();
-
     const user = await this.storage.getUser(this.name);
-    this.auth.currentUser = user;
-
     const sessionID = await this.storage.getSessionID(this.name);
-    this.auth.currentSessionID = sessionID;
 
-    this.apiClient.refreshTokenFunction = this.auth._refreshAccessToken.bind(
+    this.apiClient.endpoint = options.endpoint;
+    this.apiClient._refreshTokenFunction = this.auth._refreshAccessToken.bind(
       this.auth
     );
+    this.apiClient._accessToken = accessToken ?? undefined;
+
+    this.auth.currentUser = user ?? undefined;
+    this.auth.currentSessionID = sessionID ?? undefined;
     this.auth.clientID = options.clientID;
+
+    // should refresh token when app start
+    this.apiClient._setShouldRefreshTokenNow();
   }
 }
 

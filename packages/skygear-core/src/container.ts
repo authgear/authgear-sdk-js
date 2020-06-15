@@ -68,15 +68,15 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
   /**
    * Current logged in user.
    */
-  currentUser: User | null;
+  currentUser?: User;
 
   /**
    * Session ID of current logged in user.
    */
-  currentSessionID: string | null;
+  currentSessionID?: string;
 
-  abstract clientID: string;
-  abstract isThirdParty: boolean;
+  abstract clientID?: string;
+  abstract isThirdParty?: boolean;
 
   /**
    * @internal
@@ -88,8 +88,6 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
 
   constructor(parent: Container<T>) {
     this.parent = parent;
-    this.currentUser = null;
-    this.currentSessionID = null;
   }
 
   /**
@@ -114,7 +112,7 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
 
     this.currentUser = user;
     if (accessToken) {
-      this.parent.apiClient.setAccessTokenAndExpiresIn(accessToken, expiresIn);
+      this.parent.apiClient._setAccessTokenAndExpiresIn(accessToken, expiresIn);
     }
     if (sessionID) {
       this.currentSessionID = sessionID;
@@ -129,9 +127,9 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
     await this.parent.storage.delAccessToken(this.parent.name);
     await this.parent.storage.delRefreshToken(this.parent.name);
     await this.parent.storage.delSessionID(this.parent.name);
-    this.currentUser = null;
-    this.parent.apiClient._accessToken = null;
-    this.currentSessionID = null;
+    this.currentUser = undefined;
+    this.parent.apiClient._accessToken = undefined;
+    this.currentSessionID = undefined;
   }
 
   /**
@@ -149,13 +147,17 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
     //
     // If token request fails due to other reasons, session will be kept and
     // the whole process can be retried.
+    const clientID = this.clientID;
+    if (clientID == null) {
+      throw new Error("missing client ID");
+    }
 
     const refreshToken = await this.parent.storage.getRefreshToken(
       this.parent.name
     );
     if (!refreshToken) {
       // no refresh token -> cannot refresh
-      this.parent.apiClient.setShouldNotRefreshToken();
+      this.parent.apiClient._setShouldNotRefreshToken();
       return false;
     }
 
@@ -163,7 +165,7 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
     try {
       tokenResponse = await this.parent.apiClient._oidcTokenRequest({
         grant_type: "refresh_token",
-        client_id: this.clientID,
+        client_id: clientID,
         refresh_token: refreshToken,
       });
     } catch (error) {
@@ -187,7 +189,7 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
         tokenResponse.refresh_token
       );
     }
-    this.parent.apiClient.setAccessTokenAndExpiresIn(
+    this.parent.apiClient._setAccessTokenAndExpiresIn(
       tokenResponse.access_token,
       tokenResponse.expires_in
     );
@@ -198,6 +200,11 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
    * @internal
    */
   async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
+    const clientID = this.clientID;
+    if (clientID == null) {
+      throw new Error("missing client ID");
+    }
+
     const config = await this.parent.apiClient._fetchOIDCConfiguration();
     const query = new URLSearchParams();
 
@@ -224,7 +231,7 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
       );
     }
 
-    query.append("client_id", this.clientID);
+    query.append("client_id", clientID);
     query.append("redirect_uri", options.redirectURI);
     if (options.state) {
       query.append("state", options.state);
@@ -248,6 +255,11 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
   async _finishAuthorization(
     url: string
   ): Promise<{ user: User; state?: string }> {
+    const clientID = this.clientID;
+    if (clientID == null) {
+      throw new Error("missing client ID");
+    }
+
     const u = new URL(url);
     const params = u.searchParams;
     const uu = new URL(url);
@@ -286,7 +298,7 @@ export abstract class OIDCContainer<T extends BaseAPIClient> {
         grant_type: "authorization_code",
         code: code,
         redirect_uri: redirectURI,
-        client_id: this.clientID,
+        client_id: clientID,
         code_verifier: codeVerifier ?? "",
       });
       authResponse = await this.parent.apiClient._oidcUserInfoRequest(
