@@ -1,7 +1,7 @@
 /**
- * @public
+ * @internal
  */
-export interface ByteArray {
+export interface _ByteArray {
   [index: number]: number;
   length: number;
 }

@@ -1,3 +1,5 @@
+/* global Uint8Array, window */
+
 import { _encodeUTF8, _encodeBase64URLFromByteArray } from "@skygear/core";
 
 function byteToHex(byte: number): string {
@@ -14,29 +16,28 @@ function uint8ArrayFrom(arr: number[]): Uint8Array {
 }
 
 // windowCryptoSubtleDigest is window.crypto.subtle.digest with IE 11 support.
-function windowCryptoSubtleDigest(
+async function windowCryptoSubtleDigest(
   algorithm: string,
   data: Uint8Array
 ): Promise<Uint8Array> {
   const promiseOrEvent = window.crypto.subtle.digest(algorithm, data.buffer);
-  // eslint-disable-next-line
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (promiseOrEvent.then) {
-    // @ts-ignore
     return promiseOrEvent.then((output: ArrayBuffer) => {
       return new Uint8Array(output);
     });
   }
   return new Promise((resolve, reject) => {
-    (promiseOrEvent as any).oncomplete = function(output: ArrayBuffer) {
+    (promiseOrEvent as any).oncomplete = function (output: ArrayBuffer) {
       resolve(new Uint8Array(output));
     };
-    (promiseOrEvent as any).onerror = function(err: any) {
+    (promiseOrEvent as any).onerror = function (err: any) {
       reject(err);
     };
   });
 }
 
-function sha256(s: string): Promise<Uint8Array> {
+async function sha256(s: string): Promise<Uint8Array> {
   const bytes = uint8ArrayFrom(_encodeUTF8(s));
   return windowCryptoSubtleDigest("SHA-256", bytes);
 }

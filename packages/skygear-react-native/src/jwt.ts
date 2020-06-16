@@ -6,10 +6,7 @@ function encodeRawBase64URL(input: string): string {
 }
 
 function toRawBase64URL(base64: string): string {
-  return base64
-    .replace(/=+$/, "")
-    .replace(/\//g, "_")
-    .replace(/\+/g, "-");
+  return base64.replace(/=+$/, "").replace(/\//g, "_").replace(/\+/g, "-");
 }
 
 export async function getAnonymousJWK(
@@ -25,11 +22,11 @@ export async function getAnonymousJWK(
 
 export async function signAnonymousJWT(
   kid: string,
-  header: object,
-  payload: object
+  header: Record<string, unknown>,
+  payload: Record<string, unknown>
 ): Promise<string> {
   const dataToSign = [header, payload]
-    .map(part => encodeRawBase64URL(JSON.stringify(part)))
+    .map((part) => encodeRawBase64URL(JSON.stringify(part)))
     .join(".");
   const sig = toRawBase64URL(await signAnonymousToken(kid, dataToSign));
   const token = `${dataToSign}.${sig}`;

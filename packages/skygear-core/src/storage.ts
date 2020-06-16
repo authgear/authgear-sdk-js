@@ -1,6 +1,6 @@
 import { ContainerStorage, StorageDriver, User } from "./types";
 
-import { encodeUser, decodeUser } from "./encoding";
+import { _encodeUser, _decodeUser } from "./encoding";
 
 function scopedKey(key: string): string {
   return `skygear2_${key}`;
@@ -50,7 +50,7 @@ export class _GlobalJSONStorage {
   async safeGet(key: string): Promise<string | null> {
     key = scopedKey(key);
     try {
-      return this.driver.get(key);
+      return await this.driver.get(key);
     } catch {
       return null;
     }
@@ -95,35 +95,38 @@ export class GlobalJSONContainerStorage implements ContainerStorage {
     this.storage = new _GlobalJSONStorage(driver);
   }
 
-  async setUser(namespace: string, user: User) {
-    const userJSON = encodeUser(user);
+  async setUser(namespace: string, user: User): Promise<void> {
+    const userJSON = _encodeUser(user);
     await this.storage.safeSetJSON(keyUser(namespace), userJSON);
   }
 
-  async setAccessToken(namespace: string, accessToken: string) {
+  async setAccessToken(namespace: string, accessToken: string): Promise<void> {
     await this.storage.safeSet(keyAccessToken(namespace), accessToken);
   }
 
-  async setRefreshToken(namespace: string, refreshToken: string) {
+  async setRefreshToken(
+    namespace: string,
+    refreshToken: string
+  ): Promise<void> {
     await this.storage.safeSet(keyRefreshToken(namespace), refreshToken);
   }
 
-  async setSessionID(namespace: string, sessionID: string) {
+  async setSessionID(namespace: string, sessionID: string): Promise<void> {
     await this.storage.safeSet(keySessionID(namespace), sessionID);
   }
 
-  async setOIDCCodeVerifier(namespace: string, code: string) {
+  async setOIDCCodeVerifier(namespace: string, code: string): Promise<void> {
     await this.storage.safeSet(keyOIDCCodeVerifier(namespace), code);
   }
 
-  async setAnonymousKeyID(namespace: string, kid: string) {
+  async setAnonymousKeyID(namespace: string, kid: string): Promise<void> {
     await this.storage.safeSet(keyAnonymousKeyID(namespace), kid);
   }
 
   async getUser(namespace: string): Promise<User | null> {
     const userJSON = await this.storage.safeGetJSON(keyUser(namespace));
     if (userJSON) {
-      return decodeUser(userJSON);
+      return _decodeUser(userJSON);
     }
     return null;
   }
@@ -148,27 +151,27 @@ export class GlobalJSONContainerStorage implements ContainerStorage {
     return this.storage.safeGet(keyAnonymousKeyID(namespace));
   }
 
-  async delUser(namespace: string) {
+  async delUser(namespace: string): Promise<void> {
     await this.storage.safeDel(keyUser(namespace));
   }
 
-  async delAccessToken(namespace: string) {
+  async delAccessToken(namespace: string): Promise<void> {
     await this.storage.safeDel(keyAccessToken(namespace));
   }
 
-  async delRefreshToken(namespace: string) {
+  async delRefreshToken(namespace: string): Promise<void> {
     await this.storage.safeDel(keyRefreshToken(namespace));
   }
 
-  async delSessionID(namespace: string) {
+  async delSessionID(namespace: string): Promise<void> {
     await this.storage.safeDel(keySessionID(namespace));
   }
 
-  async delOIDCCodeVerifier(namespace: string) {
+  async delOIDCCodeVerifier(namespace: string): Promise<void> {
     await this.storage.safeDel(keyOIDCCodeVerifier(namespace));
   }
 
-  async delAnonymousKeyID(namespace: string) {
+  async delAnonymousKeyID(namespace: string): Promise<void> {
     await this.storage.safeDel(keyAnonymousKeyID(namespace));
   }
 }

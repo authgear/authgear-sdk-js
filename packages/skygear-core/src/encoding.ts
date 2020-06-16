@@ -1,9 +1,9 @@
 import { User, AuthResponse } from "./types";
 
 /**
- * @public
+ * @internal
  */
-export function decodeUser(u: any): User {
+export function _decodeUser(u: any): User {
   const id = u.id;
   const createdAt = new Date(u.created_at);
   const lastLoginAt = new Date(u.last_login_at);
@@ -25,9 +25,9 @@ export function decodeUser(u: any): User {
 }
 
 /**
- * @public
+ * @internal
  */
-export function encodeUser(u: User): unknown {
+export function _encodeUser(u: User): unknown {
   const created_at = u.createdAt.toISOString();
   const last_login_at = u.lastLoginAt.toISOString();
   return {
@@ -52,7 +52,7 @@ export function _decodeAuthResponseFromOIDCUserinfo(u: any): AuthResponse {
     throw new Error("missing skygear_user in userinfo");
   }
 
-  const user = decodeUser(skygear_user);
+  const user = _decodeUser(skygear_user);
   user.id = sub;
 
   const response: AuthResponse = {

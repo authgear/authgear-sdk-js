@@ -16,7 +16,7 @@ export const SkygearErrorNames = {
 /**
  * @public
  */
-export type SkygearErrorName = (typeof SkygearErrorNames)[keyof (typeof SkygearErrorNames)];
+export type SkygearErrorName = typeof SkygearErrorNames[keyof typeof SkygearErrorNames];
 
 /**
  * CancelError is an error to represent cancel.
@@ -79,6 +79,7 @@ export class SkygearError extends Error {
 /**
  * @public
  */
+// eslint-disable-next-line complexity
 export function decodeError(err?: any): Error {
   // Construct SkygearError if it looks like one.
   if (

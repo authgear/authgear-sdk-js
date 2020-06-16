@@ -1,3 +1,4 @@
+/* global URL, URLSearchParams */
 declare module "core-js-pure/features/url" {
   export default URL;
 }
