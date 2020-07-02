@@ -57,13 +57,17 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
    * @public
    */
   async configure(options: ConfigureOptions): Promise<void> {
+    const refreshToken = await this.storage.getRefreshToken(this.name);
+
     this.clientID = options.clientID;
     this.isThirdParty = !!options.isThirdPartyApp;
     this.apiClient.endpoint = options.endpoint;
 
-    // TODO: load refresh token
-    // Refresh access token when app launches.
-    this.apiClient._accessTokenExpireAt = undefined;
+    this.refreshToken = refreshToken ?? undefined;
+
+    if (this.shouldRefreshAccessToken()) {
+      await this.refreshAccessToken();
+    }
   }
 
   /**

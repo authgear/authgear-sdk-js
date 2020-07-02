@@ -56,37 +56,16 @@ export abstract class BaseAPIClient {
   /**
    * @internal
    */
-  _accessToken?: string;
-
-  /**
-   * The timestamp that the access token is considered as expired.
-   *
-   * @internal
-   */
-  _accessTokenExpireAt?: Date;
-
-  /**
-   * @internal
-   */
   _config?: _OIDCConfiguration;
-
-  /**
-   * @internal
-   */
-  _setAccessTokenAndExpiresIn(accessToken: string, expires_in: number): void {
-    this._accessToken = accessToken;
-    this._accessTokenExpireAt = new Date(
-      new Date(Date.now()).getTime() + expires_in * 1000
-    );
-  }
 
   /**
    * @internal
    */
   protected async _prepareHeaders(): Promise<{ [name: string]: string }> {
     const headers: { [name: string]: string } = {};
-    if (this._accessToken) {
-      headers["authorization"] = `bearer ${this._accessToken}`;
+    const accessToken = this.delegate?.getAccessToken();
+    if (accessToken != null) {
+      headers["authorization"] = `bearer ${accessToken}`;
     }
     if (this.userAgent != null) {
       headers["user-agent"] = this.userAgent;
@@ -129,18 +108,13 @@ export abstract class BaseAPIClient {
       throw new Error("only string path is allowed for fetch input");
     }
 
-    // check if access token is considered expired.
-    const now = new Date(Date.now());
-    const accessTokenIsExpired =
-      this._accessToken != null &&
-      (this._accessTokenExpireAt == null ||
-        this._accessTokenExpireAt.getTime() < now.getTime());
+    if (this.delegate == null) {
+      throw new Error("missing delegate in api client");
+    }
 
-    if (accessTokenIsExpired) {
-      if (this.delegate == null) {
-        throw new Error("missing delegate in api client");
-      }
-      await this.delegate.onAccessTokenExpired();
+    const shouldRefresh = this.delegate.shouldRefreshAccessToken();
+    if (shouldRefresh) {
+      await this.delegate.refreshAccessToken();
     }
 
     const url = endpoint + "/" + input.replace(/^\//, "");

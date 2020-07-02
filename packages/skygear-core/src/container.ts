@@ -63,6 +63,21 @@ export abstract class BaseContainer<T extends BaseAPIClient>
   /**
    * @internal
    */
+  accessToken?: string;
+
+  /**
+   * @internal
+   */
+  refreshToken?: string;
+
+  /**
+   * @internal
+   */
+  expireAt?: Date;
+
+  /**
+   * @internal
+   */
   abstract async _setupCodeVerifier(): Promise<{
     verifier: string;
     challenge: string;
@@ -88,12 +103,14 @@ export abstract class BaseContainer<T extends BaseAPIClient>
   async _persistTokenResponse(response: _OIDCTokenResponse): Promise<void> {
     const { access_token, refresh_token, expires_in } = response;
 
+    this.accessToken = access_token;
+    this.refreshToken = refresh_token;
+    this.expireAt = new Date(
+      new Date(Date.now()).getTime() + expires_in * 1000
+    );
+
     if (refresh_token) {
       await this.storage.setRefreshToken(this.name, refresh_token);
-    }
-
-    if (access_token && expires_in) {
-      this.apiClient._setAccessTokenAndExpiresIn(access_token, expires_in);
     }
   }
 
@@ -102,16 +119,51 @@ export abstract class BaseContainer<T extends BaseAPIClient>
    */
   async _clearSession(): Promise<void> {
     await this.storage.delRefreshToken(this.name);
-    this.apiClient._accessToken = undefined;
-    this.apiClient._accessTokenExpireAt = undefined;
+    this.accessToken = undefined;
+    this.refreshToken = undefined;
+    this.expireAt = undefined;
   }
 
   /**
    * @public
    */
-  async onAccessTokenExpired(): Promise<void> {
-    // APIClient determines whether the access token is considered expired.
-    //
+  getAccessToken(): string | undefined {
+    return this.accessToken;
+  }
+
+  /**
+   * @public
+   */
+  shouldRefreshAccessToken(): boolean {
+    // No need to refresh if we do not even have a refresh token.
+    if (this.refreshToken == null) {
+      return false;
+    }
+
+    // When we have a refresh token but not an access token
+    if (this.accessToken == null) {
+      return true;
+    }
+
+    // When we have a refresh token and an access token but its expiration is unknown.
+    if (this.expireAt == null) {
+      return true;
+    }
+
+    // When we have a refresh token and an access token but it is indeed expired.
+    const now = new Date(Date.now());
+    if (this.expireAt.getTime() < now.getTime()) {
+      return true;
+    }
+
+    // Otherwise no need to refresh.
+    return false;
+  }
+
+  /**
+   * @public
+   */
+  async refreshAccessToken(): Promise<void> {
     // If token request fails due to other reasons, session will be kept and
     // the whole process can be retried.
     const clientID = this.clientID;
@@ -149,12 +201,7 @@ export abstract class BaseContainer<T extends BaseAPIClient>
       throw error;
     }
 
-    const { access_token, refresh_token, expires_in } = tokenResponse;
-
-    if (refresh_token != null) {
-      await this.storage.setRefreshToken(this.name, refresh_token);
-    }
-    this.apiClient._setAccessTokenAndExpiresIn(access_token, expires_in);
+    await this._persistTokenResponse(tokenResponse);
   }
 
   /**

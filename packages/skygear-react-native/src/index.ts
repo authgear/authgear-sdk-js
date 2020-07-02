@@ -87,12 +87,16 @@ export class ReactNativeContainer<
    * @public
    */
   async configure(options: ConfigureOptions): Promise<void> {
+    const refreshToken = await this.storage.getRefreshToken(this.name);
+
     this.clientID = options.clientID;
     this.apiClient.endpoint = options.endpoint;
 
-    // TODO: load refresh token
-    // Refresh access token when app launches.
-    this.apiClient._accessTokenExpireAt = undefined;
+    this.refreshToken = refreshToken ?? undefined;
+
+    if (this.shouldRefreshAccessToken()) {
+      await this.refreshAccessToken();
+    }
   }
 
   /**
