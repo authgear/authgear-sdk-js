@@ -1,6 +1,6 @@
 /* global window */
 import {
-  User,
+  UserInfo,
   ContainerOptions,
   GlobalJSONContainerStorage,
   BaseContainer,
@@ -57,18 +57,11 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
    * @public
    */
   async configure(options: ConfigureOptions): Promise<void> {
-    const accessToken = await this.storage.getAccessToken(this.name);
-    const user = await this.storage.getUser(this.name);
-    const sessionID = await this.storage.getSessionID(this.name);
-
-    this.apiClient.endpoint = options.endpoint;
-    this.apiClient._accessToken = accessToken ?? undefined;
-
-    this.currentUser = user ?? undefined;
-    this.currentSessionID = sessionID ?? undefined;
     this.clientID = options.clientID;
     this.isThirdParty = !!options.isThirdPartyApp;
+    this.apiClient.endpoint = options.endpoint;
 
+    // TODO: load refresh token
     // Refresh access token when app launches.
     this.apiClient._accessTokenExpireAt = undefined;
   }
@@ -103,7 +96,7 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
    * It checks if error is present and rejects with OAuthError.
    * Otherwise assume code is present, make a token request.
    */
-  async finishAuthorization(): Promise<{ user: User; state?: string }> {
+  async finishAuthorization(): Promise<{ userInfo: UserInfo; state?: string }> {
     return this._finishAuthorization(window.location.href);
   }
 

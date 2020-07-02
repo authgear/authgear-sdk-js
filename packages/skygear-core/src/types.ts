@@ -7,32 +7,6 @@ export interface _ByteArray {
 }
 
 /**
- * @public
- */
-export interface User {
-  /**
-   * User ID.
-   */
-  id: string;
-  /**
-   * User creation time.
-   */
-  createdAt: Date;
-  /**
-   * User last login time.
-   */
-  lastLoginAt: Date;
-  /**
-   * Indicates whether the user is anonymous user.
-   */
-  isAnonymous: boolean;
-  /**
-   * User custom metadata.
-   */
-  metadata: unknown;
-}
-
-/**
  * Auth UI anonymous user promotion options
  *
  * @public
@@ -107,14 +81,10 @@ export interface ContainerDelegate {
 }
 
 /**
- * @internal
+ * @public
  */
-export interface _AuthResponse {
-  user: User;
-  accessToken?: string;
-  refreshToken?: string;
-  sessionID?: string;
-  expiresIn?: number;
+export interface UserInfo {
+  sub: string;
 }
 
 /**
@@ -129,24 +99,15 @@ export interface ChallengeResponse {
  * @public
  */
 export interface ContainerStorage {
-  setUser(namespace: string, user: User): Promise<void>;
-  setAccessToken(namespace: string, accessToken: string): Promise<void>;
   setRefreshToken(namespace: string, refreshToken: string): Promise<void>;
-  setSessionID(namespace: string, sessionID: string): Promise<void>;
   setOIDCCodeVerifier(namespace: string, code: string): Promise<void>;
   setAnonymousKeyID(namespace: string, kid: string): Promise<void>;
 
-  getUser(namespace: string): Promise<User | null>;
-  getAccessToken(namespace: string): Promise<string | null>;
   getRefreshToken(namespace: string): Promise<string | null>;
-  getSessionID(namespace: string): Promise<string | null>;
   getOIDCCodeVerifier(namespace: string): Promise<string | null>;
   getAnonymousKeyID(namespace: string): Promise<string | null>;
 
-  delUser(namespace: string): Promise<void>;
-  delAccessToken(namespace: string): Promise<void>;
   delRefreshToken(namespace: string): Promise<void>;
-  delSessionID(namespace: string): Promise<void>;
   delOIDCCodeVerifier(namespace: string): Promise<void>;
   delAnonymousKeyID(namespace: string): Promise<void>;
 }

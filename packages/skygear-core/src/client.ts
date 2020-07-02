@@ -1,7 +1,7 @@
 import URLSearchParams from "core-js-pure/features/url-search-params";
 
 import {
-  _AuthResponse,
+  UserInfo,
   _OIDCConfiguration,
   _OIDCTokenResponse,
   _OIDCTokenRequest,
@@ -10,7 +10,6 @@ import {
   APIClientDelegate,
 } from "./types";
 import { decodeError, ServerError } from "./error";
-import { _decodeAuthResponseFromOIDCUserinfo } from "./encoding";
 
 /**
  * @internal
@@ -136,6 +135,7 @@ export abstract class BaseAPIClient {
       this._accessToken != null &&
       (this._accessTokenExpireAt == null ||
         this._accessTokenExpireAt.getTime() < now.getTime());
+
     if (accessTokenIsExpired) {
       if (this.delegate == null) {
         throw new Error("missing delegate in api client");
@@ -338,7 +338,7 @@ export abstract class BaseAPIClient {
   /**
    * @internal
    */
-  async _oidcUserInfoRequest(accessToken?: string): Promise<_AuthResponse> {
+  async _oidcUserInfoRequest(accessToken?: string): Promise<UserInfo> {
     const headers: { [name: string]: string } = {};
     if (accessToken) {
       headers["authorization"] = `bearer ${accessToken}`;
@@ -350,8 +350,7 @@ export abstract class BaseAPIClient {
       mode: "cors",
       credentials: "include",
     });
-    const result = _decodeAuthResponseFromOIDCUserinfo(userinfo);
-    return result;
+    return userinfo;
   }
 
   /**

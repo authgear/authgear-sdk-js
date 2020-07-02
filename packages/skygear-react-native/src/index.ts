@@ -5,10 +5,10 @@ import {
   ContainerOptions,
   GlobalJSONContainerStorage,
   StorageDriver,
-  User,
   BaseContainer,
   AuthorizeOptions,
   PromoteOptions,
+  UserInfo,
 } from "@skygear/core";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import { openURL, openAuthorizeURL } from "./nativemodule";
@@ -87,17 +87,10 @@ export class ReactNativeContainer<
    * @public
    */
   async configure(options: ConfigureOptions): Promise<void> {
-    const accessToken = await this.storage.getAccessToken(this.name);
-    const user = await this.storage.getUser(this.name);
-    const sessionID = await this.storage.getSessionID(this.name);
-
-    this.apiClient.endpoint = options.endpoint;
-    this.apiClient._accessToken = accessToken ?? undefined;
-
-    this.currentUser = user ?? undefined;
-    this.currentSessionID = sessionID ?? undefined;
     this.clientID = options.clientID;
+    this.apiClient.endpoint = options.endpoint;
 
+    // TODO: load refresh token
     // Refresh access token when app launches.
     this.apiClient._accessTokenExpireAt = undefined;
   }
@@ -120,9 +113,7 @@ export class ReactNativeContainer<
    *
    * @param options - authorize options
    */
-  async authorize(
-    options: AuthorizeOptions
-  ): Promise<{ user: User; state?: string }> {
+  async authorize(options: AuthorizeOptions): Promise<{ state?: string }> {
     const redirectURIScheme = getCallbackURLScheme(options.redirectURI);
     const authorizeURL = await this.authorizeEndpoint(options);
     const redirectURL = await openAuthorizeURL(authorizeURL, redirectURIScheme);
@@ -158,7 +149,7 @@ export class ReactNativeContainer<
   /**
    * Authenticate as an anonymous user.
    */
-  async authenticateAnonymously(): Promise<{ user: User }> {
+  async authenticateAnonymously(): Promise<{ userInfo: UserInfo }> {
     const clientID = this.clientID;
     if (clientID == null) {
       throw new Error("missing client ID");
@@ -185,17 +176,13 @@ export class ReactNativeContainer<
       jwt,
     });
 
-    const authResponse = await this.apiClient._oidcUserInfoRequest(
+    const userInfo = await this.apiClient._oidcUserInfoRequest(
       tokenResponse.access_token
     );
-    const ar = { ...authResponse };
-    ar.accessToken = tokenResponse.access_token;
-    ar.refreshToken = tokenResponse.refresh_token;
-    ar.expiresIn = tokenResponse.expires_in;
-    await this._persistAuthResponse(ar);
 
+    await this._persistTokenResponse(tokenResponse);
     await this.storage.setAnonymousKeyID(this.name, key.kid);
-    return { user: authResponse.user };
+    return { userInfo };
   }
 
   /**
@@ -205,7 +192,7 @@ export class ReactNativeContainer<
    */
   async promoteAnonymousUser(
     options: PromoteOptions
-  ): Promise<{ user: User; state?: string }> {
+  ): Promise<{ userInfo: UserInfo; state?: string }> {
     const keyID = await this.storage.getAnonymousKeyID(this.name);
     if (!keyID) {
       throw new Error("anonymous user credentials not found");

@@ -5,10 +5,10 @@ import {
   ContainerOptions,
   ContainerStorage,
   OAuthError,
-  User,
   APIClientDelegate,
-  _AuthResponse,
   ContainerDelegate,
+  _OIDCTokenResponse,
+  UserInfo,
 } from "./types";
 import { BaseAPIClient } from "./client";
 
@@ -34,20 +34,6 @@ export abstract class BaseContainer<T extends BaseAPIClient>
    * @public
    */
   clientID?: string;
-
-  /**
-   * Current logged in user.
-   *
-   * @public
-   */
-  currentUser?: User;
-
-  /**
-   * Session ID of current logged in user.
-   *
-   * @public
-   */
-  currentSessionID?: string;
 
   /**
    * Whether the application shares cookies with Authgear.
@@ -99,29 +85,15 @@ export abstract class BaseContainer<T extends BaseAPIClient>
   /**
    * @internal
    */
-  async _persistAuthResponse(response: _AuthResponse): Promise<void> {
-    const { user, accessToken, refreshToken, sessionID, expiresIn } = response;
+  async _persistTokenResponse(response: _OIDCTokenResponse): Promise<void> {
+    const { access_token, refresh_token, expires_in } = response;
 
-    await this.storage.setUser(this.name, user);
-
-    if (accessToken) {
-      await this.storage.setAccessToken(this.name, accessToken);
+    if (refresh_token) {
+      await this.storage.setRefreshToken(this.name, refresh_token);
     }
 
-    if (refreshToken) {
-      await this.storage.setRefreshToken(this.name, refreshToken);
-    }
-
-    if (sessionID) {
-      await this.storage.setSessionID(this.name, sessionID);
-    }
-
-    this.currentUser = user;
-    if (accessToken && expiresIn) {
-      this.apiClient._setAccessTokenAndExpiresIn(accessToken, expiresIn);
-    }
-    if (sessionID) {
-      this.currentSessionID = sessionID;
+    if (access_token && expires_in) {
+      this.apiClient._setAccessTokenAndExpiresIn(access_token, expires_in);
     }
   }
 
@@ -129,14 +101,9 @@ export abstract class BaseContainer<T extends BaseAPIClient>
    * @internal
    */
   async _clearSession(): Promise<void> {
-    await this.storage.delUser(this.name);
-    await this.storage.delAccessToken(this.name);
     await this.storage.delRefreshToken(this.name);
-    await this.storage.delSessionID(this.name);
-    this.currentUser = undefined;
     this.apiClient._accessToken = undefined;
     this.apiClient._accessTokenExpireAt = undefined;
-    this.currentSessionID = undefined;
   }
 
   /**
@@ -184,7 +151,6 @@ export abstract class BaseContainer<T extends BaseAPIClient>
 
     const { access_token, refresh_token, expires_in } = tokenResponse;
 
-    await this.storage.setAccessToken(this.name, access_token);
     if (refresh_token != null) {
       await this.storage.setRefreshToken(this.name, refresh_token);
     }
@@ -246,7 +212,7 @@ export abstract class BaseContainer<T extends BaseAPIClient>
    */
   async _finishAuthorization(
     url: string
-  ): Promise<{ user: User; state?: string }> {
+  ): Promise<{ userInfo: UserInfo; state?: string }> {
     const clientID = this.clientID;
     if (clientID == null) {
       throw new Error("missing client ID");
@@ -267,12 +233,12 @@ export abstract class BaseContainer<T extends BaseAPIClient>
       throw err;
     }
 
-    let authResponse;
+    let userInfo;
     let tokenResponse;
     if (!this.isThirdParty) {
       // if the app is first party app, use session cookie for authorization
       // no code exchange is needed.
-      authResponse = await this.apiClient._oidcUserInfoRequest();
+      userInfo = await this.apiClient._oidcUserInfoRequest();
     } else {
       const code = params.get("code");
       if (!code) {
@@ -291,21 +257,17 @@ export abstract class BaseContainer<T extends BaseAPIClient>
         client_id: clientID,
         code_verifier: codeVerifier ?? "",
       });
-      authResponse = await this.apiClient._oidcUserInfoRequest(
+      userInfo = await this.apiClient._oidcUserInfoRequest(
         tokenResponse.access_token
       );
     }
 
-    const ar = { ...authResponse };
-    // only third party app has token reponse
     if (tokenResponse) {
-      ar.accessToken = tokenResponse.access_token;
-      ar.refreshToken = tokenResponse.refresh_token;
-      ar.expiresIn = tokenResponse.expires_in;
+      await this._persistTokenResponse(tokenResponse);
     }
-    await this._persistAuthResponse(ar);
+
     return {
-      user: authResponse.user,
+      userInfo,
       state: params.get("state") ?? undefined,
     };
   }
