@@ -1,17 +1,15 @@
 import URLSearchParams from "core-js-pure/features/url-search-params";
 
 import {
-  AuthResponse,
+  UserInfo,
   _OIDCConfiguration,
   _OIDCTokenResponse,
   _OIDCTokenRequest,
   OAuthError,
   ChallengeResponse,
+  _APIClientDelegate,
 } from "./types";
-import { decodeError, SkygearError } from "./error";
-import { _decodeAuthResponseFromOIDCUserinfo } from "./encoding";
-
-const refreshTokenWindow = 0.7;
+import { decodeError, ServerError } from "./error";
 
 /**
  * @internal
@@ -24,86 +22,53 @@ export function _removeTrailingSlash(s: string): string {
  * @public
  */
 export abstract class BaseAPIClient {
-  authEndpoint: string;
-  /**
-   * @internal
-   */
-  _accessToken: string | null;
-  /**
-   * @internal
-   *
-   * _shouldRefreshTokenAt is the timestamp that the sdk should refresh token
-   * 0 means doesn't need to refresh
-   */
-  _shouldRefreshTokenAt: number;
-  /**
-   * @internal
-   */
-  // eslint-disable-next-line no-undef
-  fetchFunction?: typeof fetch;
-  /**
-   * @internal
-   */
-  // eslint-disable-next-line no-undef
-  requestClass?: typeof Request;
-  /**
-   * @internal
-   */
-  refreshTokenFunction?: () => Promise<boolean>;
   userAgent?: string;
 
   /**
    * @internal
    */
-  config?: _OIDCConfiguration;
-
-  constructor() {
-    this.authEndpoint = "";
-    this._accessToken = null;
-    this._shouldRefreshTokenAt = 0;
-  }
+  _delegate?: _APIClientDelegate;
 
   /**
    * @internal
    */
-  setShouldNotRefreshToken(): void {
-    this._shouldRefreshTokenAt = 0;
+  _endpoint?: string;
+  get endpoint(): string | undefined {
+    return this._endpoint;
   }
-
-  /**
-   * @internal
-   */
-  setShouldRefreshTokenNow(): void {
-    this._shouldRefreshTokenAt = new Date().getTime();
-  }
-
-  /**
-   * @internal
-   */
-  setAccessTokenAndExpiresIn(accessToken: string, expires_in?: number): void {
-    this._accessToken = accessToken;
-    if (expires_in) {
-      this._shouldRefreshTokenAt =
-        new Date().getTime() + expires_in * 1000 * refreshTokenWindow;
+  set endpoint(newEndpoint: string | undefined) {
+    if (newEndpoint != null) {
+      this._endpoint = _removeTrailingSlash(newEndpoint);
     } else {
-      this._shouldRefreshTokenAt = 0;
+      this._endpoint = undefined;
     }
   }
 
   /**
    * @internal
    */
-  setEndpoint(authEndpoint: string): void {
-    this.authEndpoint = _removeTrailingSlash(authEndpoint);
-  }
+  // eslint-disable-next-line no-undef
+  abstract _fetchFunction?: typeof fetch;
 
   /**
    * @internal
    */
-  protected async prepareHeaders(): Promise<{ [name: string]: string }> {
+  // eslint-disable-next-line no-undef
+  abstract _requestClass?: typeof Request;
+
+  /**
+   * @internal
+   */
+  _config?: _OIDCConfiguration;
+
+  /**
+   * @internal
+   */
+  protected async _prepareHeaders(): Promise<{ [name: string]: string }> {
     const headers: { [name: string]: string } = {};
-    if (this._accessToken) {
-      headers["authorization"] = `bearer ${this._accessToken}`;
+    const accessToken = this._delegate?.getAccessToken();
+    if (accessToken != null) {
+      headers["authorization"] = `bearer ${accessToken}`;
     }
     if (this.userAgent != null) {
       headers["user-agent"] = this.userAgent;
@@ -114,76 +79,76 @@ export abstract class BaseAPIClient {
   /**
    * @internal
    */
-  async _fetch(url: string, init?: RequestInit): Promise<Response> {
-    if (!this.fetchFunction) {
+  async _fetchWithoutRefresh(
+    url: string,
+    init?: RequestInit
+  ): Promise<Response> {
+    if (!this._fetchFunction) {
       throw new Error("missing fetchFunction in api client");
     }
 
-    if (!this.requestClass) {
+    if (!this._requestClass) {
       throw new Error("missing requestClass in api client");
     }
-    const request = new this.requestClass(url, init);
-    return this.fetchFunction(request);
+    const request = new this._requestClass(url, init);
+    return this._fetchFunction(request);
   }
 
   async fetch(
     endpoint: string,
     input: string,
-    init?: RequestInit,
-    options: { autoRefreshToken?: boolean } = {}
+    init?: RequestInit
   ): Promise<Response> {
-    if (this.fetchFunction == null) {
+    if (this._fetchFunction == null) {
       throw new Error("missing fetchFunction in api client");
     }
 
-    if (this.requestClass == null) {
+    if (this._requestClass == null) {
       throw new Error("missing requestClass in api client");
     }
-
-    const { autoRefreshToken = !!this.refreshTokenFunction } = options;
 
     if (typeof input !== "string") {
       throw new Error("only string path is allowed for fetch input");
     }
 
-    // check if need to refresh token
-    const shouldRefreshToken =
-      this._accessToken &&
-      this._shouldRefreshTokenAt &&
-      this._shouldRefreshTokenAt < new Date().getTime();
-    if (shouldRefreshToken && autoRefreshToken) {
-      if (!this.refreshTokenFunction) {
-        throw new Error("missing refreshTokenFunction in api client");
-      }
-      await this.refreshTokenFunction();
+    if (this._delegate == null) {
+      throw new Error("missing delegate in api client");
+    }
+
+    const shouldRefresh = this._delegate.shouldRefreshAccessToken();
+    if (shouldRefresh) {
+      await this._delegate.refreshAccessToken();
     }
 
     const url = endpoint + "/" + input.replace(/^\//, "");
-    const request = new this.requestClass(url, init);
+    const request = new this._requestClass(url, init);
 
-    const headers = await this.prepareHeaders();
+    const headers = await this._prepareHeaders();
     for (const key of Object.keys(headers)) {
       request.headers.set(key, headers[key]);
     }
 
-    return this.fetchFunction(request);
+    return this._fetchFunction(request);
   }
 
   /**
    * @internal
    */
   // eslint-disable-next-line complexity
-  protected async request(
+  protected async _request(
     method: "GET" | "POST" | "DELETE",
-    endpoint: string,
     path: string,
     options: {
       json?: unknown;
       query?: [string, string][];
-      autoRefreshToken?: boolean;
     } = {}
   ): Promise<any> {
-    const { json, query, autoRefreshToken } = options;
+    if (this.endpoint == null) {
+      throw new Error("missing endpoint in api client");
+    }
+    const endpoint: string = this.endpoint;
+
+    const { json, query } = options;
     let p = path;
     if (query != null && query.length > 0) {
       const params = new URLSearchParams();
@@ -198,25 +163,20 @@ export abstract class BaseAPIClient {
       headers["content-type"] = "application/json";
     }
 
-    const response = await this.fetch(
-      endpoint,
-      p,
-      {
-        method,
-        headers,
-        mode: "cors",
-        credentials: "include",
-        body: json && JSON.stringify(json),
-      },
-      { autoRefreshToken }
-    );
+    const response = await this.fetch(endpoint, p, {
+      method,
+      headers,
+      mode: "cors",
+      credentials: "include",
+      body: json && JSON.stringify(json),
+    });
 
     let jsonBody;
     try {
       jsonBody = await response.json();
     } catch {
       if (response.status < 200 || response.status >= 300) {
-        throw new SkygearError(
+        throw new ServerError(
           "unexpected status code",
           "InternalError",
           "UnexpectedError",
@@ -225,7 +185,7 @@ export abstract class BaseAPIClient {
           }
         );
       } else {
-        throw new SkygearError(
+        throw new ServerError(
           "failed to decode response JSON",
           "InternalError",
           "UnexpectedError"
@@ -245,22 +205,21 @@ export abstract class BaseAPIClient {
   /**
    * @internal
    */
-  protected async postAuth(
+  protected async _post(
     path: string,
     options?: {
       json?: unknown;
       query?: [string, string][];
-      autoRefreshToken?: boolean;
     }
   ): Promise<any> {
-    return this.request("POST", this.authEndpoint, path, options);
+    return this._request("POST", path, options);
   }
 
   /**
    * @internal
    */
   async _fetchOIDCRequest(url: string, init?: RequestInit): Promise<Response> {
-    const resp = await this._fetch(url, init);
+    const resp = await this._fetchWithoutRefresh(url, init);
     if (resp.status === 200) {
       return resp;
     }
@@ -268,7 +227,7 @@ export abstract class BaseAPIClient {
     try {
       errJSON = await resp.json();
     } catch {
-      throw new SkygearError(
+      throw new ServerError(
         "failed to decode response JSON",
         "InternalError",
         "UnexpectedError",
@@ -294,7 +253,7 @@ export abstract class BaseAPIClient {
     try {
       jsonBody = await resp.json();
     } catch {
-      throw new SkygearError(
+      throw new ServerError(
         "failed to decode response JSON",
         "InternalError",
         "UnexpectedError"
@@ -307,12 +266,18 @@ export abstract class BaseAPIClient {
    * @internal
    */
   async _fetchOIDCConfiguration(): Promise<_OIDCConfiguration> {
-    if (!this.config) {
-      this.config = (await this._fetchOIDCJSON(
-        `${this.authEndpoint}/.well-known/openid-configuration`
+    if (this.endpoint == null) {
+      throw new Error("missing endpoint in api client");
+    }
+    const endpoint: string = this.endpoint;
+
+    if (!this._config) {
+      this._config = (await this._fetchOIDCJSON(
+        `${endpoint}/.well-known/openid-configuration`
       )) as _OIDCConfiguration;
     }
-    return this.config;
+
+    return this._config;
   }
 
   /**
@@ -350,7 +315,7 @@ export abstract class BaseAPIClient {
   /**
    * @internal
    */
-  async _oidcUserInfoRequest(accessToken?: string): Promise<AuthResponse> {
+  async _oidcUserInfoRequest(accessToken?: string): Promise<UserInfo> {
     const headers: { [name: string]: string } = {};
     if (accessToken) {
       headers["authorization"] = `bearer ${accessToken}`;
@@ -362,8 +327,7 @@ export abstract class BaseAPIClient {
       mode: "cors",
       credentials: "include",
     });
-    const result = _decodeAuthResponseFromOIDCUserinfo(userinfo);
-    return result;
+    return userinfo;
   }
 
   /**
@@ -384,6 +348,6 @@ export abstract class BaseAPIClient {
   }
 
   async oauthChallenge(purpose: string): Promise<ChallengeResponse> {
-    return this.postAuth("/oauth2/challenge", { json: { purpose } });
+    return this._post("/oauth2/challenge", { json: { purpose } });
   }
 }

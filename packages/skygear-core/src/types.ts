@@ -7,52 +7,98 @@ export interface _ByteArray {
 }
 
 /**
+ * Auth UI anonymous user promotion options
+ *
  * @public
  */
-export interface User {
+export interface PromoteOptions {
   /**
-   * User ID.
+   * Redirect uri. Redirection URI to which the response will be sent after authorization.
    */
-  id: string;
+  redirectURI: string;
   /**
-   * User creation time.
+   * OAuth 2.0 state value.
    */
-  createdAt: Date;
+  state?: string;
   /**
-   * User last login time.
+   * UI locale tags
    */
-  lastLoginAt: Date;
+  uiLocales?: string[];
+}
+
+/**
+ * Auth UI authorization options
+ *
+ * @public
+ */
+export interface AuthorizeOptions {
   /**
-   * Indicates whether the user is verified manually.
+   * Redirect uri. Redirection URI to which the response will be sent after authorization.
    */
-  isManuallyVerified: boolean;
+  redirectURI: string;
   /**
-   * Indicates whether the user is verified.
+   * OAuth 2.0 state value.
    */
-  isVerified: boolean;
+  state?: string;
   /**
-   * Indicates whether the user is disabled.
+   * OIDC prompt parameter.
    */
-  isDisabled: boolean;
+  prompt?: string;
   /**
-   * Indicates whether the user is anonymous user.
+   * OIDC login hint parameter
    */
-  isAnonymous: boolean;
+  loginHint?: string;
   /**
-   * User custom metadata.
+   * UI locale tags
    */
-  metadata: unknown;
+  uiLocales?: string[];
+}
+
+/**
+ * @internal
+ */
+export interface _APIClientDelegate {
+  /**
+   * Called by the API client to retrieve the access token to construct HTTP request.
+   *
+   * @internal
+   */
+  getAccessToken(): string | undefined;
+
+  /**
+   * Called by the API Client before sending HTTP request.
+   * If true is returned, refreshAccessToken() is then called.
+   *
+   * @internal
+   */
+  shouldRefreshAccessToken(): boolean;
+
+  /**
+   * Called by the API client to refresh the access token.
+   *
+   * @internal
+   */
+  refreshAccessToken(): Promise<void>;
 }
 
 /**
  * @public
  */
-export interface AuthResponse {
-  user: User;
-  accessToken?: string;
-  refreshToken?: string;
-  sessionID?: string;
-  expiresIn?: number;
+export interface ContainerDelegate {
+  /**
+   * Called when the server rejects the refresh token.
+   * When this function is called, the session is not cleared yet.
+   *
+   * @public
+   */
+  onRefreshTokenExpired(): Promise<void>;
+}
+
+/**
+ * @public
+ */
+export interface UserInfo {
+  sub: string;
 }
 
 /**
@@ -67,24 +113,15 @@ export interface ChallengeResponse {
  * @public
  */
 export interface ContainerStorage {
-  setUser(namespace: string, user: User): Promise<void>;
-  setAccessToken(namespace: string, accessToken: string): Promise<void>;
   setRefreshToken(namespace: string, refreshToken: string): Promise<void>;
-  setSessionID(namespace: string, sessionID: string): Promise<void>;
   setOIDCCodeVerifier(namespace: string, code: string): Promise<void>;
   setAnonymousKeyID(namespace: string, kid: string): Promise<void>;
 
-  getUser(namespace: string): Promise<User | null>;
-  getAccessToken(namespace: string): Promise<string | null>;
   getRefreshToken(namespace: string): Promise<string | null>;
-  getSessionID(namespace: string): Promise<string | null>;
   getOIDCCodeVerifier(namespace: string): Promise<string | null>;
   getAnonymousKeyID(namespace: string): Promise<string | null>;
 
-  delUser(namespace: string): Promise<void>;
-  delAccessToken(namespace: string): Promise<void>;
   delRefreshToken(namespace: string): Promise<void>;
-  delSessionID(namespace: string): Promise<void>;
   delOIDCCodeVerifier(namespace: string): Promise<void>;
   delAnonymousKeyID(namespace: string): Promise<void>;
 }

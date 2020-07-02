@@ -3,7 +3,6 @@ export * from "./types";
 export * from "./error";
 export * from "./client";
 export * from "./container";
-export * from "./encoding";
 export * from "./storage";
 export * from "./utf8";
 export * from "./base64";

@@ -6,7 +6,7 @@ import { WebContainer } from "./container";
 export * from "./container";
 
 /**
- * Default Skygear APIs container.
+ * Default container.
  *
  * @remarks
  * This is a global shared container, provided for convenience.

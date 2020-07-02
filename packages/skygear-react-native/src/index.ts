@@ -2,14 +2,13 @@
 import AsyncStorage from "@react-native-community/async-storage";
 import {
   BaseAPIClient,
-  Container,
   ContainerOptions,
   GlobalJSONContainerStorage,
   StorageDriver,
-  User,
-  OIDCContainer,
+  BaseContainer,
   AuthorizeOptions,
   PromoteOptions,
+  UserInfo,
 } from "@skygear/core";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import { openURL, openAuthorizeURL } from "./nativemodule";
@@ -17,14 +16,26 @@ import { getCallbackURLScheme } from "./url";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 export * from "@skygear/core";
 
-const globalFetch = fetch;
+/**
+ * @public
+ */
+export interface ConfigureOptions {
+  /**
+   * The OAuth client ID.
+   */
+  clientID: string;
+  /**
+   * The endpoint.
+   */
+  endpoint: string;
+}
 
 /**
  * @public
  */
 export class ReactNativeAPIClient extends BaseAPIClient {
-  fetchFunction = globalFetch;
-  requestClass = Request;
+  _fetchFunction = fetch;
+  _requestClass = Request;
 }
 
 /**
@@ -46,20 +57,46 @@ export class ReactNativeAsyncStorageStorageDriver implements StorageDriver {
 }
 
 /**
- * Skygear OIDC APIs (for React Native).
+ * React Native Container.
  *
  * @public
  */
-export class ReactNativeOIDCContainer<
+export class ReactNativeContainer<
   T extends ReactNativeAPIClient
-> extends OIDCContainer<T> {
-  clientID: string;
-  isThirdParty: boolean;
+> extends BaseContainer<T> {
+  constructor(options?: ContainerOptions<T>) {
+    const o = {
+      ...options,
+      apiClient: options?.apiClient ?? new ReactNativeAPIClient(),
+      storage:
+        options?.storage ??
+        new GlobalJSONContainerStorage(
+          new ReactNativeAsyncStorageStorageDriver()
+        ),
+    } as ContainerOptions<T>;
 
-  constructor(parent: ReactNativeContainer<T>) {
-    super(parent);
-    this.clientID = "";
+    super(o);
+
     this.isThirdParty = true;
+    this.apiClient._delegate = this;
+  }
+
+  /**
+   * Configure this container with connection information.
+   *
+   * @public
+   */
+  async configure(options: ConfigureOptions): Promise<void> {
+    const refreshToken = await this.storage.getRefreshToken(this.name);
+
+    this.clientID = options.clientID;
+    this.apiClient.endpoint = options.endpoint;
+
+    this.refreshToken = refreshToken ?? undefined;
+
+    if (this.shouldRefreshAccessToken()) {
+      await this.refreshAccessToken();
+    }
   }
 
   /**
@@ -80,9 +117,7 @@ export class ReactNativeOIDCContainer<
    *
    * @param options - authorize options
    */
-  async authorize(
-    options: AuthorizeOptions
-  ): Promise<{ user: User; state?: string }> {
+  async authorize(options: AuthorizeOptions): Promise<{ state?: string }> {
     const redirectURIScheme = getCallbackURLScheme(options.redirectURI);
     const authorizeURL = await this.authorizeEndpoint(options);
     const redirectURL = await openAuthorizeURL(authorizeURL, redirectURIScheme);
@@ -118,12 +153,15 @@ export class ReactNativeOIDCContainer<
   /**
    * Authenticate as an anonymous user.
    */
-  async authenticateAnonymously(): Promise<{ user: User }> {
-    const { token } = await this.parent.apiClient.oauthChallenge(
-      "anonymous_request"
-    );
+  async authenticateAnonymously(): Promise<{ userInfo: UserInfo }> {
+    const clientID = this.clientID;
+    if (clientID == null) {
+      throw new Error("missing client ID");
+    }
 
-    const keyID = await this.parent.storage.getAnonymousKeyID(this.parent.name);
+    const { token } = await this.apiClient.oauthChallenge("anonymous_request");
+
+    const keyID = await this.storage.getAnonymousKeyID(this.name);
     const key = await getAnonymousJWK(keyID);
 
     const now = Math.floor(+new Date() / 1000);
@@ -136,23 +174,19 @@ export class ReactNativeOIDCContainer<
     };
     const jwt = await signAnonymousJWT(key.kid, header, payload);
 
-    const tokenResponse = await this.parent.apiClient._oidcTokenRequest({
+    const tokenResponse = await this.apiClient._oidcTokenRequest({
       grant_type: "urn:skygear-auth:params:oauth:grant-type:anonymous-request",
-      client_id: this.clientID,
+      client_id: clientID,
       jwt,
     });
 
-    const authResponse = await this.parent.apiClient._oidcUserInfoRequest(
+    const userInfo = await this.apiClient._oidcUserInfoRequest(
       tokenResponse.access_token
     );
-    const ar = { ...authResponse };
-    ar.accessToken = tokenResponse.access_token;
-    ar.refreshToken = tokenResponse.refresh_token;
-    ar.expiresIn = tokenResponse.expires_in;
-    await this._persistAuthResponse(ar);
 
-    await this.parent.storage.setAnonymousKeyID(this.parent.name, key.kid);
-    return { user: authResponse.user };
+    await this._persistTokenResponse(tokenResponse);
+    await this.storage.setAnonymousKeyID(this.name, key.kid);
+    return { userInfo };
   }
 
   /**
@@ -162,16 +196,14 @@ export class ReactNativeOIDCContainer<
    */
   async promoteAnonymousUser(
     options: PromoteOptions
-  ): Promise<{ user: User; state?: string }> {
-    const keyID = await this.parent.storage.getAnonymousKeyID(this.parent.name);
+  ): Promise<{ userInfo: UserInfo; state?: string }> {
+    const keyID = await this.storage.getAnonymousKeyID(this.name);
     if (!keyID) {
       throw new Error("anonymous user credentials not found");
     }
     const key = await getAnonymousJWK(keyID);
 
-    const { token } = await this.parent.apiClient.oauthChallenge(
-      "anonymous_request"
-    );
+    const { token } = await this.apiClient.oauthChallenge("anonymous_request");
 
     const now = Math.floor(+new Date() / 1000);
     const header = { typ: "vnd.skygear.auth.anonymous-request", ...key };
@@ -195,73 +227,8 @@ export class ReactNativeOIDCContainer<
     const redirectURL = await openAuthorizeURL(authorizeURL, redirectURIScheme);
     const result = await this._finishAuthorization(redirectURL);
 
-    await this.parent.storage.delAnonymousKeyID(this.parent.name);
+    await this.storage.delAnonymousKeyID(this.name);
     return result;
-  }
-}
-
-/**
- * @public
- */
-export interface ConfigureOptions {
-  /**
-   * The OAuth client ID.
-   */
-  clientID: string;
-  /**
-   * The Skygear Auth endpoint.
-   */
-  authEndpoint: string;
-}
-
-/**
- * Skygear APIs container (for React Native).
- *
- * @public
- */
-export class ReactNativeContainer<
-  T extends ReactNativeAPIClient
-> extends Container<T> {
-  auth: ReactNativeOIDCContainer<T>;
-
-  constructor(options?: ContainerOptions<T>) {
-    const o = {
-      ...options,
-      apiClient: options?.apiClient ?? new ReactNativeAPIClient(),
-      storage:
-        options?.storage ??
-        new GlobalJSONContainerStorage(
-          new ReactNativeAsyncStorageStorageDriver()
-        ),
-    } as ContainerOptions<T>;
-
-    super(o);
-    this.auth = new ReactNativeOIDCContainer(this);
-  }
-
-  /**
-   * Configure this container with connection information.
-   *
-   * @param options - Skygear connection information
-   */
-  async configure(options: ConfigureOptions): Promise<void> {
-    this.apiClient.setEndpoint(options.authEndpoint);
-
-    const accessToken = await this.storage.getAccessToken(this.name);
-    this.apiClient._accessToken = accessToken;
-    // should refresh token when app start
-    this.apiClient.setShouldRefreshTokenNow();
-
-    const user = await this.storage.getUser(this.name);
-    this.auth.currentUser = user;
-
-    const sessionID = await this.storage.getSessionID(this.name);
-    this.auth.currentSessionID = sessionID;
-
-    this.apiClient.refreshTokenFunction = this.auth._refreshAccessToken.bind(
-      this.auth
-    );
-    this.auth.clientID = options.clientID;
   }
 }
 
