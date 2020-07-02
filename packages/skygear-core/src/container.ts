@@ -5,7 +5,7 @@ import {
   ContainerOptions,
   ContainerStorage,
   OAuthError,
-  APIClientDelegate,
+  _APIClientDelegate,
   ContainerDelegate,
   _OIDCTokenResponse,
   UserInfo,
@@ -17,8 +17,7 @@ import { BaseAPIClient } from "./client";
  *
  * @public
  */
-export abstract class BaseContainer<T extends BaseAPIClient>
-  implements APIClientDelegate {
+export abstract class BaseContainer<T extends BaseAPIClient> {
   /**
    *
    * Unique ID for this container.
@@ -125,14 +124,14 @@ export abstract class BaseContainer<T extends BaseAPIClient>
   }
 
   /**
-   * @public
+   * @internal
    */
   getAccessToken(): string | undefined {
     return this.accessToken;
   }
 
   /**
-   * @public
+   * @internal
    */
   shouldRefreshAccessToken(): boolean {
     // No need to refresh if we do not even have a refresh token.
@@ -161,7 +160,7 @@ export abstract class BaseContainer<T extends BaseAPIClient>
   }
 
   /**
-   * @public
+   * @internal
    */
   async refreshAccessToken(): Promise<void> {
     // If token request fails due to other reasons, session will be kept and

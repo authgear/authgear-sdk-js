@@ -55,13 +55,13 @@ export interface AuthorizeOptions {
 }
 
 /**
- * @public
+ * @internal
  */
-export interface APIClientDelegate {
+export interface _APIClientDelegate {
   /**
    * Called by the API client to retrieve the access token to construct HTTP request.
    *
-   * @public
+   * @internal
    */
   getAccessToken(): string | undefined;
 
@@ -69,14 +69,14 @@ export interface APIClientDelegate {
    * Called by the API Client before sending HTTP request.
    * If true is returned, refreshAccessToken() is then called.
    *
-   * @public
+   * @internal
    */
   shouldRefreshAccessToken(): boolean;
 
   /**
    * Called by the API client to refresh the access token.
    *
-   * @public
+   * @internal
    */
   refreshAccessToken(): Promise<void>;
 }

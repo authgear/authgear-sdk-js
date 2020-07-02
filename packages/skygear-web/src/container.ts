@@ -48,7 +48,7 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
     super(o);
 
     this.isThirdParty = false;
-    this.apiClient.delegate = this;
+    this.apiClient._delegate = this;
   }
 
   /**

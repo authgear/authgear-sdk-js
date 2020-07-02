@@ -78,7 +78,7 @@ export class ReactNativeContainer<
     super(o);
 
     this.isThirdParty = true;
-    this.apiClient.delegate = this;
+    this.apiClient._delegate = this;
   }
 
   /**

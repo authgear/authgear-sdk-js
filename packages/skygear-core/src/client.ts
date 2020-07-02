@@ -7,7 +7,7 @@ import {
   _OIDCTokenRequest,
   OAuthError,
   ChallengeResponse,
-  APIClientDelegate,
+  _APIClientDelegate,
 } from "./types";
 import { decodeError, ServerError } from "./error";
 
@@ -24,7 +24,10 @@ export function _removeTrailingSlash(s: string): string {
 export abstract class BaseAPIClient {
   userAgent?: string;
 
-  delegate?: APIClientDelegate;
+  /**
+   * @internal
+   */
+  _delegate?: _APIClientDelegate;
 
   /**
    * @internal
@@ -63,7 +66,7 @@ export abstract class BaseAPIClient {
    */
   protected async _prepareHeaders(): Promise<{ [name: string]: string }> {
     const headers: { [name: string]: string } = {};
-    const accessToken = this.delegate?.getAccessToken();
+    const accessToken = this._delegate?.getAccessToken();
     if (accessToken != null) {
       headers["authorization"] = `bearer ${accessToken}`;
     }
@@ -108,13 +111,13 @@ export abstract class BaseAPIClient {
       throw new Error("only string path is allowed for fetch input");
     }
 
-    if (this.delegate == null) {
+    if (this._delegate == null) {
       throw new Error("missing delegate in api client");
     }
 
-    const shouldRefresh = this.delegate.shouldRefreshAccessToken();
+    const shouldRefresh = this._delegate.shouldRefreshAccessToken();
     if (shouldRefresh) {
-      await this.delegate.refreshAccessToken();
+      await this._delegate.refreshAccessToken();
     }
 
     const url = endpoint + "/" + input.replace(/^\//, "");
