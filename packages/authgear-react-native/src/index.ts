@@ -165,7 +165,7 @@ export class ReactNativeContainer<
     const key = await getAnonymousJWK(keyID);
 
     const now = Math.floor(+new Date() / 1000);
-    const header = { typ: "vnd.skygear.auth.anonymous-request", ...key };
+    const header = { typ: "vnd.authgear.anonymous-request", ...key };
     const payload = {
       iat: +now,
       exp: +now + 60,
@@ -175,7 +175,7 @@ export class ReactNativeContainer<
     const jwt = await signAnonymousJWT(key.kid, header, payload);
 
     const tokenResponse = await this.apiClient._oidcTokenRequest({
-      grant_type: "urn:skygear-auth:params:oauth:grant-type:anonymous-request",
+      grant_type: "urn:authgear:params:oauth:grant-type:anonymous-request",
       client_id: clientID,
       jwt,
     });
@@ -206,7 +206,7 @@ export class ReactNativeContainer<
     const { token } = await this.apiClient.oauthChallenge("anonymous_request");
 
     const now = Math.floor(+new Date() / 1000);
-    const header = { typ: "vnd.skygear.auth.anonymous-request", ...key };
+    const header = { typ: "vnd.authgear.anonymous-request", ...key };
     const payload = {
       iat: +now,
       exp: +now + 60,
@@ -214,7 +214,7 @@ export class ReactNativeContainer<
       action: "promote",
     };
     const jwt = await signAnonymousJWT(key.kid, header, payload);
-    const loginHint = `https://auth.skygear.io/login_hint?type=anonymous&jwt=${encodeURIComponent(
+    const loginHint = `https://authgear.com/login_hint?type=anonymous&jwt=${encodeURIComponent(
       jwt
     )}`;
 
@@ -233,7 +233,7 @@ export class ReactNativeContainer<
 }
 
 /**
- * Default Skygear APIs container.
+ * Default Authgear APIs container.
  *
  * @remarks
  * This is a global shared container, provided for convenience.

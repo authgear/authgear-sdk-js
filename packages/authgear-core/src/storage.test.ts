@@ -50,7 +50,7 @@ describe("GlobalJSONStorage", () => {
       Object.prototype.hasOwnProperty.call(driver.backingStore, "a")
     ).toEqual(false);
     expect(
-      Object.prototype.hasOwnProperty.call(driver.backingStore, "skygear2_a")
+      Object.prototype.hasOwnProperty.call(driver.backingStore, "authgear_a")
     ).toEqual(true);
 
     await storage.safeSetJSON("json", {});
@@ -58,7 +58,7 @@ describe("GlobalJSONStorage", () => {
       Object.prototype.hasOwnProperty.call(driver.backingStore, "json")
     ).toEqual(false);
     expect(
-      Object.prototype.hasOwnProperty.call(driver.backingStore, "skygear2_json")
+      Object.prototype.hasOwnProperty.call(driver.backingStore, "authgear_json")
     ).toEqual(true);
   });
   it("should safeSet and safeGet", async () => {

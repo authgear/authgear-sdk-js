@@ -1,7 +1,7 @@
 import { ContainerStorage, StorageDriver } from "./types";
 
 function scopedKey(key: string): string {
-  return `skygear2_${key}`;
+  return `authgear_${key}`;
 }
 
 function keyRefreshToken(name: string): string {

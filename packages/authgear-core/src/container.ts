@@ -222,17 +222,14 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
       query.append("response_type", "code");
       query.append(
         "scope",
-        "openid offline_access https://auth.skygear.io/scopes/full-access"
+        "openid offline_access https://authgear.com/scopes/full-access"
       );
       query.append("code_challenge_method", "S256");
       query.append("code_challenge", codeVerifier.challenge);
     } else {
       // for first party app
       query.append("response_type", "none");
-      query.append(
-        "scope",
-        "openid https://auth.skygear.io/scopes/full-access"
-      );
+      query.append("scope", "openid https://authgear.com/scopes/full-access");
     }
 
     query.append("client_id", clientID);

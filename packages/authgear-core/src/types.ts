@@ -175,7 +175,7 @@ export interface _OIDCTokenRequest {
   grant_type:
     | "authorization_code"
     | "refresh_token"
-    | "urn:skygear-auth:params:oauth:grant-type:anonymous-request";
+    | "urn:authgear:params:oauth:grant-type:anonymous-request";
   client_id: string;
   redirect_uri?: string;
   code?: string;

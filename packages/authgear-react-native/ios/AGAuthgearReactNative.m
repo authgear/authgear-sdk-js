@@ -244,7 +244,7 @@ RCT_EXPORT_METHOD(getAnonymousKey:(NSString *)kid resolver:(RCTPromiseResolveBlo
       kid = [[NSUUID UUID] UUIDString];
     }
 
-    NSString *tag = [@"io.skygear.keys.anonymous." stringByAppendingString:kid];
+    NSString *tag = [@"io.authgear.keys.anonymous." stringByAppendingString:kid];
 
     NSMutableDictionary *jwk = [NSMutableDictionary dictionary];
     NSError *error = [self loadKey:tag keyRef:nil];
@@ -271,7 +271,7 @@ RCT_EXPORT_METHOD(signAnonymousToken:(NSString *)kid data:(NSString *)s resolver
 {
   if (@available(iOS 10.0, *)) {
     NSData *data = [s dataUsingEncoding:NSUTF8StringEncoding];
-    NSString *tag = [@"io.skygear.keys.anonymous." stringByAppendingString:kid];
+    NSString *tag = [@"io.authgear.keys.anonymous." stringByAppendingString:kid];
     NSData *sig = nil;
     NSError *error = [self signData:tag data:data psig:&sig];
     if (error) {

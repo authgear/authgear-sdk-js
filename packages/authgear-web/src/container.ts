@@ -24,7 +24,7 @@ export interface ConfigureOptions {
   endpoint: string;
   /**
    * isThirdPartyApp indicate if the application a third party app.
-   * A third party app means the app doesn't share common-domain with Skygear Auth thus the session cookie cannot be shared.
+   * A third party app means the app doesn't share common-domain with Authgea thus the session cookie cannot be shared.
    * If not specified, default to false. So by default the application is considered first party.
    */
   isThirdPartyApp?: boolean;

@@ -135,7 +135,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             header.putString("kid", kid);
             header.putString("alg", "RS256");
 
-            String alias = "io.skygear.keys.anonymous." + kid;
+            String alias = "io.authgear.keys.anonymous." + kid;
             KeyStore.PrivateKeyEntry entry = this.loadKey(alias);
             if (entry == null) {
                 KeyPair kp = this.generateKey(alias);
@@ -162,7 +162,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
 
         try {
-            String alias = "io.skygear.keys.anonymous." + kid;
+            String alias = "io.authgear.keys.anonymous." + kid;
             KeyStore.PrivateKeyEntry entry = this.loadKey(alias);
             if (entry == null) {
                 promise.reject("EUNSPECIFIED", "Anonymous user key not found.");
