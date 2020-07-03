@@ -12,8 +12,8 @@ const extensions = [".mjs", ".js", ".jsx", ".ts", ".tsx"];
 const plugins = [
   replace({
     values: {
-      "process.env.SKYGEAR_VERSION": JSON.stringify(
-        process.env.SKYGEAR_VERSION || "VERSION"
+      "process.env.VERSION": JSON.stringify(
+        process.env.VERSION || "VERSION"
       ),
     },
   }),
@@ -44,14 +44,14 @@ function makeBabelExternal(id) {
 
 function makeReactNativeExternal() {
   const reactNativePackageJSONString = readFileSync(
-    "packages/skygear-react-native/package.json",
+    "packages/authgear-react-native/package.json",
     { encoding: "utf8" }
   );
   const reactNativePackageJSON = JSON.parse(reactNativePackageJSONString);
 
   const deps = Object.keys(reactNativePackageJSON["dependencies"] || {});
   if (deps.length > 0) {
-    throw new Error("@skygear/react-native should not have any depdendencies");
+    throw new Error("@authgear/react-native should not have any depdendencies");
   }
 
   const peerDeps = Object.keys(
@@ -71,9 +71,9 @@ export default function makeConfig(commandLineArgs) {
     case "web-cjs":
       return {
         plugins,
-        input: "packages/skygear-web/src/index.ts",
+        input: "packages/authgear-web/src/index.ts",
         output: {
-          file: "packages/skygear-web/dist/skygear-web.cjs.js",
+          file: "packages/authgear-web/dist/authgear-web.cjs.js",
           format: "cjs",
           exports: "named",
         },
@@ -82,9 +82,9 @@ export default function makeConfig(commandLineArgs) {
     case "web-module":
       return {
         plugins,
-        input: "packages/skygear-web/src/index.ts",
+        input: "packages/authgear-web/src/index.ts",
         output: {
-          file: "packages/skygear-web/dist/skygear-web.module.js",
+          file: "packages/authgear-web/dist/authgear-web.module.js",
           format: "esm",
         },
         // external: makeBabelExternal,
@@ -92,9 +92,9 @@ export default function makeConfig(commandLineArgs) {
     case "react-native":
       return {
         plugins,
-        input: "packages/skygear-react-native/src/index.ts",
+        input: "packages/authgear-react-native/src/index.ts",
         output: {
-          file: "packages/skygear-react-native/dist/skygear-react-native.js",
+          file: "packages/authgear-react-native/dist/authgear-react-native.js",
           format: "cjs",
           exports: "named",
         },

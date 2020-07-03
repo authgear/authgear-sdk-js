@@ -1,4 +1,4 @@
-export * from "@skygear/core";
+export * from "@authgear/core";
 import { WebAPIClient } from "./client";
 export * from "./client";
 export * from "./storage";

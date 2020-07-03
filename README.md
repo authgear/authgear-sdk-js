@@ -1,28 +1,27 @@
-# Skygear SDK for JavaScript
+# Authgear SDK for JavaScript
 
-[![@skygear/web](https://img.shields.io/npm/v/@skygear/web.svg?label=@skygear/web)](https://www.npmjs.com/package/@skygear/web)
-[![@skygear/web](https://img.shields.io/npm/dt/@skygear/web.svg?label=@skygear/web)](https://www.npmjs.com/package/@skygear/web)
-[![@skygear/react-native](https://img.shields.io/npm/v/@skygear/react-native.svg?label=@skygear/react-native)](https://www.npmjs.com/package/@skygear/react-native)
-[![@skygear/react-native](https://img.shields.io/npm/dt/@skygear/react-native.svg?label=@skygear/react-native)](https://www.npmjs.com/package/@skygear/react-native)
-[![Build Status](https://travis-ci.org/SkygearIO/skygear-SDK-JS.svg?branch=next)](https://travis-ci.org/SkygearIO/skygear-SDK-JS)
+[![@authgear/web](https://img.shields.io/npm/v/@authgear/web.svg?label=@authgear/web)](https://www.npmjs.com/package/@authgear/web)
+[![@authgear/web](https://img.shields.io/npm/dt/@authgear/web.svg?label=@authgear/web)](https://www.npmjs.com/package/@authgear/web)
+[![@authgear/react-native](https://img.shields.io/npm/v/@authgear/react-native.svg?label=@authgear/react-native)](https://www.npmjs.com/package/@authgear/react-native)
+[![@authgear/react-native](https://img.shields.io/npm/dt/@authgear/react-native.svg?label=@authgear/react-native)](https://www.npmjs.com/package/@authgear/react-native)
 ![License](https://img.shields.io/badge/license-Apache%202-blue)
 
 ## Documentation
 
-View the API Reference at [https://skygeario.github.io/skygear-SDK-JS/](https://skygeario.github.io/skygear-SDK-JS/).
+View the API Reference at [https://authgear.github.io/authgear-sdk-js/](https://authgear.github.io/authgear-sdk-js/).
 
 ## Usage
 
 ### Web
 
 ```sh
-$ npm install --save @skygear/web
+$ npm install --save @authgear/web
 ```
 
 ### React Native
 
 ```sh
-$ npm install --save @skygear/react-native
+$ npm install --save @authgear/react-native
 ```
 
 ## Contributing
@@ -30,8 +29,8 @@ $ npm install --save @skygear/react-native
 First, fork the repository.
 
 ```sh
-$ git clone --branch next git@github.com:<myusername>/skygear-SDK-JS.git
-$ cd skygear-SDK-JS
+$ git clone --branch master git@github.com:<myusername>/authgear-sdk-js.git
+$ cd authgear-sdk-js
 $ npm install
 $ npm run lerna bootstrap
 ```
@@ -48,5 +47,5 @@ $ npm run prepare-new-release
 # It will be prepended to CHANGELOG.md
 # So make sure the style is consistent.
 $ vim new-release
-$ GIT_USER=<github-username> GITHUB_TOKEN=<github-token> GIT_BRANCH=master SKYGEAR_VERSION=<new-version> ./scripts/release.sh
+$ GIT_USER=<github-username> GITHUB_TOKEN=<github-token> GIT_BRANCH=master VERSION=<new-version> ./scripts/release.sh
 ```

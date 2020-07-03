@@ -5,7 +5,7 @@ import {
   GlobalJSONContainerStorage,
   BaseContainer,
   AuthorizeOptions,
-} from "@skygear/core";
+} from "@authgear/core";
 import { WebAPIClient } from "./client";
 import { localStorageStorageDriver } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";

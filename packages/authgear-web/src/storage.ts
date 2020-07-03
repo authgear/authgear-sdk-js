@@ -1,6 +1,6 @@
 /* global localStorage */
 
-import { StorageDriver } from "@skygear/core";
+import { StorageDriver } from "@authgear/core";
 
 const globalLocalStorage = localStorage;
 

@@ -15,8 +15,8 @@ docs:
 	npx typedoc \
 		--options typedoc/typedoc.json \
 		--tsconfig typedoc/tsconfig.web.json \
-		--name @skygear/web \
-		--inputFiles packages/skygear-web/index.d.ts \
+		--name @authgear/web \
+		--inputFiles packages/authgear-web/index.d.ts \
 		--out ./temp/docs/web \
 		--theme docusaurus2 \
 		--skipSidebar \
@@ -25,8 +25,8 @@ docs:
 	npx typedoc \
 		--options typedoc/typedoc.json \
 		--tsconfig typedoc/tsconfig.react-native.json \
-		--name @skygear/react-native \
-		--inputFiles packages/skygear-react-native/index.d.ts \
+		--name @authgear/react-native \
+		--inputFiles packages/authgear-react-native/index.d.ts \
 		--out ./temp/docs/react-native \
 		--theme docusaurus2 \
 		--namedAnchors \

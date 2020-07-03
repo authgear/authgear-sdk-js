@@ -9,12 +9,12 @@ import {
   AuthorizeOptions,
   PromoteOptions,
   UserInfo,
-} from "@skygear/core";
+} from "@authgear/core";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import { openURL, openAuthorizeURL } from "./nativemodule";
 import { getCallbackURLScheme } from "./url";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
-export * from "@skygear/core";
+export * from "@authgear/core";
 
 /**
  * @public

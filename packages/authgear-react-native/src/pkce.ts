@@ -1,4 +1,4 @@
-import { _encodeBase64URLFromByteArray } from "@skygear/core";
+import { _encodeBase64URLFromByteArray } from "@authgear/core";
 
 import { randomBytes, sha256String } from "./nativemodule";
 

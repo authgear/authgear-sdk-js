@@ -1,6 +1,6 @@
 /* global Uint8Array, window */
 
-import { _encodeUTF8, _encodeBase64URLFromByteArray } from "@skygear/core";
+import { _encodeUTF8, _encodeBase64URLFromByteArray } from "@authgear/core";
 
 function byteToHex(byte: number): string {
   return ("0" + byte.toString(16)).substr(-2);

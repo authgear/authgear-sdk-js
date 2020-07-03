@@ -1,4 +1,4 @@
-import { _encodeUTF8, _encodeBase64URLFromByteArray } from "@skygear/core";
+import { _encodeUTF8, _encodeBase64URLFromByteArray } from "@authgear/core";
 import { signAnonymousToken, getAnonymousKey } from "./nativemodule";
 
 function encodeRawBase64URL(input: string): string {

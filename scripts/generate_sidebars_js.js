@@ -11,7 +11,7 @@ const sidebar = {
     },
     {
       type: "category",
-      label: "@skygear/web",
+      label: "@authgear/web",
       items: [
         {
           type: "doc",
@@ -31,7 +31,7 @@ const sidebar = {
     },
     {
       type: "category",
-      label: "@skygear/react-native",
+      label: "@authgear/react-native",
       items: [
         {
           type: "doc",

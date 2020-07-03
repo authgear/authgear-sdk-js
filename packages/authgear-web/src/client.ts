@@ -1,6 +1,6 @@
 /* global window, Request */
 
-import { BaseAPIClient } from "@skygear/core";
+import { BaseAPIClient } from "@authgear/core";
 
 /**
  * @public

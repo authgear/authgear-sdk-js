@@ -1,5 +1,5 @@
 import { NativeModules } from "react-native";
-import { CANCEL } from "@skygear/core";
+import { CANCEL } from "@authgear/core";
 
 const { SGSkygearReactNative } = NativeModules;
 

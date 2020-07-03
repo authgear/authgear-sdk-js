@@ -4,10 +4,10 @@ const { Extractor, ExtractorConfig } = require("@microsoft/api-extractor");
 
 const projectRoot = path.join(__dirname, "..");
 
-const publishedPackages = ["skygear-web", "skygear-react-native"];
-const packages = ["skygear-core", ...publishedPackages];
+const publishedPackages = ["authgear-web", "authgear-react-native"];
+const packages = ["authgear-core", ...publishedPackages];
 
-const coreDtsPath = path.join(projectRoot, `packages/skygear-core/index.d.ts`);
+const coreDtsPath = path.join(projectRoot, `packages/authgear-core/index.d.ts`);
 
 // Generate index.d.ts
 for (const p of packages) {
@@ -52,9 +52,9 @@ for (const p of publishedPackages) {
   const lines = fs
     .readFileSync(dtsPath, { encoding: "utf8" })
     .split("\n")
-    // Remove lines that reference @skygear/core
+    // Remove lines that reference @authgear/core
     // because we are going to inline its index.d.ts
-    .filter(line => !/@skygear\/core/.test(line));
+    .filter(line => !/@authgear\/core/.test(line));
   const content =
     fs.readFileSync(coreDtsPath, { encoding: "utf8" }) + lines.join("\n");
   fs.writeFileSync(dtsPath, content);
