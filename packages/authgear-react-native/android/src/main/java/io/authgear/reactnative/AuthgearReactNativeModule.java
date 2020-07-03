@@ -1,4 +1,4 @@
-package io.skygear.reactnative;
+package io.authgear.reactnative;
 
 import java.nio.charset.Charset;
 import java.security.KeyPair;
@@ -31,7 +31,7 @@ import com.facebook.react.bridge.WritableMap;
 
 import androidx.annotation.RequiresApi;
 
-public class SGSkygearReactNativeModule extends ReactContextBaseJavaModule implements ActivityEventListener {
+public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implements ActivityEventListener {
 
     private static final int REQUEST_CODE_AUTHORIZATION = 1;
 
@@ -39,7 +39,7 @@ public class SGSkygearReactNativeModule extends ReactContextBaseJavaModule imple
 
     private Promise openURLPromise;
 
-    public SGSkygearReactNativeModule(ReactApplicationContext reactContext) {
+    public AuthgearReactNativeModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.reactContext = reactContext;
         reactContext.addActivityEventListener(this);
@@ -47,7 +47,7 @@ public class SGSkygearReactNativeModule extends ReactContextBaseJavaModule imple
 
     @Override
     public String getName() {
-        return "SGSkygearReactNative";
+        return "AuthgearReactNative";
     }
 
     @ReactMethod

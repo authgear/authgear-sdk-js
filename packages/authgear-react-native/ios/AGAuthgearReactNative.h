@@ -5,7 +5,7 @@
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
 
-@interface SGSkygearReactNative : RCTEventEmitter <RCTBridgeModule>
+@interface AGAuthgearReactNative : NSObject <RCTBridgeModule>
 
 + (BOOL)application:(nonnull UIApplication *)app
             openURL:(nonnull NSURL *)URL

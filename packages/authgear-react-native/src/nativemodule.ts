@@ -1,18 +1,18 @@
 import { NativeModules } from "react-native";
 import { CANCEL } from "@authgear/core";
 
-const { SGSkygearReactNative } = NativeModules;
+const { AuthgearReactNative } = NativeModules;
 
 export async function randomBytes(length: number): Promise<number[]> {
-  return SGSkygearReactNative.randomBytes(length);
+  return AuthgearReactNative.randomBytes(length);
 }
 
 export async function sha256String(input: string): Promise<number[]> {
-  return SGSkygearReactNative.sha256String(input);
+  return AuthgearReactNative.sha256String(input);
 }
 
 export async function openURL(url: string): Promise<void> {
-  return SGSkygearReactNative.openURL(url);
+  return AuthgearReactNative.openURL(url);
 }
 
 export async function openAuthorizeURL(
@@ -20,7 +20,7 @@ export async function openAuthorizeURL(
   callbackURLScheme: string
 ): Promise<string> {
   try {
-    const redirectURI = await SGSkygearReactNative.openAuthorizeURL(
+    const redirectURI = await AuthgearReactNative.openAuthorizeURL(
       url,
       callbackURLScheme
     );
@@ -35,18 +35,18 @@ export async function openAuthorizeURL(
 }
 
 export async function dismiss(): Promise<void> {
-  return SGSkygearReactNative.dismiss();
+  return AuthgearReactNative.dismiss();
 }
 
 export async function getAnonymousKey(
   kid: string | null
 ): Promise<{ kid: string; alg: string; jwk?: any }> {
-  return SGSkygearReactNative.getAnonymousKey(kid);
+  return AuthgearReactNative.getAnonymousKey(kid);
 }
 
 export async function signAnonymousToken(
   kid: string,
   tokenData: string
 ): Promise<string> {
-  return SGSkygearReactNative.signAnonymousToken(kid, tokenData);
+  return AuthgearReactNative.signAnonymousToken(kid, tokenData);
 }

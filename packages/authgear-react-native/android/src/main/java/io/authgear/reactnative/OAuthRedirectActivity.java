@@ -1,4 +1,4 @@
-package io.skygear.reactnative;
+package io.authgear.reactnative;
 
 import android.app.Activity;
 import android.content.Intent;

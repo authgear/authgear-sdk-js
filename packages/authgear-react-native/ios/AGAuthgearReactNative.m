@@ -4,9 +4,9 @@
 #import <SafariServices/SafariServices.h>
 #import <CommonCrypto/CommonDigest.h>
 #import <React/RCTUtils.h>
-#import "SGSkygearReactNative.h"
+#import "AGAuthgearReactNative.h"
 
-static NSString *const kOpenURLNotification = @"SGSkygearReactNativeOpenURLNotification";
+static NSString *const kOpenURLNotification = @"AGAuthgearReactNativeOpenURLNotification";
 
 static void postNotificationWithURL(NSURL *URL, id sender)
 {
@@ -16,13 +16,13 @@ static void postNotificationWithURL(NSURL *URL, id sender)
                                                     userInfo:payload];
 }
 
-@interface SGSkygearReactNative()
+@interface AGAuthgearReactNative()
 @property (nonatomic, strong) RCTPromiseResolveBlock openURLResolve;
 @property (nonatomic, strong) RCTPromiseRejectBlock openURLReject;
 @end
 
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 9000)
-@interface SGSkygearReactNative() <SFSafariViewControllerDelegate>
+@interface AGAuthgearReactNative() <SFSafariViewControllerDelegate>
 // We must have strong reference to the view controller otherwise it is closed immediately when
 // it goes out of scope.
 @property (nonatomic, strong) SFSafariViewController *sfViewController API_AVAILABLE(ios(9));
@@ -30,7 +30,7 @@ static void postNotificationWithURL(NSURL *URL, id sender)
 #endif
 
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 11000)
-@interface SGSkygearReactNative()
+@interface AGAuthgearReactNative()
 // We must have strong reference to the session otherwise it is closed immediately when
 // it goes out of scope.
 @property (nonatomic, strong) SFAuthenticationSession *sfSession API_AVAILABLE(ios(11));
@@ -38,16 +38,16 @@ static void postNotificationWithURL(NSURL *URL, id sender)
 #endif
 
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 12000)
-@interface SGSkygearReactNative() <ASWebAuthenticationPresentationContextProviding>
+@interface AGAuthgearReactNative() <ASWebAuthenticationPresentationContextProviding>
 // We must have strong reference to the session otherwise it is closed immediately when
 // it goes out of scope.
 @property (nonatomic, strong) ASWebAuthenticationSession *asSession API_AVAILABLE(ios(12));
 @end
 #endif
 
-@implementation SGSkygearReactNative
+@implementation AGAuthgearReactNative
 
-RCT_EXPORT_MODULE()
+RCT_EXPORT_MODULE(AuthgearReactNative)
 
 + (BOOL)requiresMainQueueSetup
 {

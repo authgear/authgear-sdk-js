@@ -1,4 +1,4 @@
-package io.skygear.reactnative;
+package io.authgear.reactnative;
 
 import java.util.ArrayList;
 import java.util.List;
