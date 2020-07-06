@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="io.authgear.reactnative">
+          package="com.authgear.reactnative">
 
     <application>
         <activity android:name=".OAuthCoordinatorActivity"

@@ -1,4 +1,4 @@
-package io.authgear.reactnative;
+package com.authgear.reactnative;
 
 import android.app.Activity;
 import android.content.Intent;

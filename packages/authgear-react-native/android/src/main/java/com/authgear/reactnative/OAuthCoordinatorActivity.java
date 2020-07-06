@@ -1,4 +1,4 @@
-package io.authgear.reactnative;
+package com.authgear.reactnative;
 
 import java.util.ArrayList;
 import java.util.List;
