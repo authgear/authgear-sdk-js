@@ -233,7 +233,7 @@ export class ReactNativeContainer<
 }
 
 /**
- * Default Authgear APIs container.
+ * Default container.
  *
  * @remarks
  * This is a global shared container, provided for convenience.
