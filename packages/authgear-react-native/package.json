@@ -1,6 +1,6 @@
 {
   "name": "@authgear/react-native",
-  "version": "2.4.2",
+  "version": "0.1.0",
   "license": "Apache-2.0",
   "main": "dist/authgear-react-native.js",
   "files": [
@@ -11,8 +11,8 @@
     "android"
   ],
   "devDependencies": {
+    "@authgear/core": "0.1.0",
     "@react-native-community/async-storage": "^1.0.0",
-    "@authgear/core": "2.4.2",
     "@types/react-native": "0.60.25"
   },
   "peerDependencies": {
