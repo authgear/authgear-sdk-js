@@ -1,4 +1,4 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["packages/skygear-web/index.d.ts"]
+  "include": ["packages/authgear-web/index.d.ts"]
 }
