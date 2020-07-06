@@ -37,15 +37,15 @@ $ npm run lerna bootstrap
 
 ## Releasing
 
-First, ensure `github-release` and `yarn` tool is installed.
+First, ensure these tools are installed:
+- `yarn` 
+- [`github-release`](https://github.com/github-release/github-release)
+- [`git-chglog`](https://github.com/git-chglog/git-chglog)
+
 Also, Git should be configured to be able to sign using GPG keys,
 and npm should be logged in as appropriate user.
 
 ```sh
-$ npm run prepare-new-release
-# Edit the file new-release.
-# It will be prepended to CHANGELOG.md
-# So make sure the style is consistent.
-$ vim new-release
+# VERSION should be in format like "0.1.0"
 $ GIT_USER=<github-username> GITHUB_TOKEN=<github-token> GIT_BRANCH=master VERSION=<new-version> ./scripts/release.sh
 ```

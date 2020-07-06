@@ -22,12 +22,7 @@ if [ -z "$VERSION" ]; then
   exit 1
 fi
 
-if [ -e "new-release" ]; then
-  echo "Making github release and release commit..."
-else
-  echo >&2 "file 'new-release' is required."
-  exit 1
-fi
+echo "Making github release and release commit..."
 
 npm run set-version "$VERSION"
 npm run clean
@@ -37,15 +32,14 @@ npm run typecheck
 npm run test
 VERSION="$VERSION" npm run build
 
-touch NEWCHANGELOG && cat new-release >NEWCHANGELOG && echo "" >>NEWCHANGELOG && cat CHANGELOG.md >>NEWCHANGELOG && mv NEWCHANGELOG CHANGELOG.md
+git-chglog --next-tag v"$VERSION" -o CHANGELOG.md
 git add lerna.json CHANGELOG.md 'packages/*/package.json' 'packages/*/package-lock.json'
 git commit -m "Update CHANGELOG for v$VERSION"
 git tag -a v"$VERSION" -s -m "Release v$VERSION"
 git push git@github.com:authgear/authgear-sdk-js.git "$GIT_BRANCH"
 git push git@github.com:authgear/authgear-sdk-js.git v"$VERSION"
 
-github-release release -u authgear -r authgear-sdk-js --draft --tag v"$VERSION" --name v"$VERSION" --description "$(cat new-release)"
-rm new-release
+github-release release -u authgear -r authgear-sdk-js --draft --tag v"$VERSION" --name v"$VERSION" --description "$(git-chglog v$VERSION)"
 
 (cd packages/authgear-web && npm publish --access public)
 (cd packages/authgear-react-native && npm publish --access public)
