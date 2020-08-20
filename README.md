@@ -31,8 +31,9 @@ First, fork the repository.
 ```sh
 $ git clone --branch master git@github.com:<myusername>/authgear-sdk-js.git
 $ cd authgear-sdk-js
-$ npm install
+$ npm ci
 $ npm run lerna bootstrap
+$ (cd website && yarn install --frozen-lockfile)
 ```
 
 ## Releasing
