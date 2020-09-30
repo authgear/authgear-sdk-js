@@ -16,6 +16,11 @@ import { getCallbackURLScheme } from "./url";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 export * from "@authgear/core";
 
+export enum Page {
+  Settings,
+  Identities
+}
+
 /**
  * @public
  */
@@ -140,6 +145,19 @@ export class ReactNativeContainer<
 
   // eslint-disable-next-line class-methods-use-this
   async openURL(url: string): Promise<void> {
+    await openURL(url);
+  }
+
+  async open(page: Page): Promise<void> {
+    let url: string;
+    switch (page) {
+      case Page.Settings:
+        url = "/settings/"
+        break;
+      case Page.Identities:
+        url = "/settings/identities";
+        break;
+    }
     await openURL(url);
   }
 
