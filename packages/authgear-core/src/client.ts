@@ -8,6 +8,7 @@ import {
   OAuthError,
   ChallengeResponse,
   _APIClientDelegate,
+  decodeUserInfo,
 } from "./types";
 import { decodeError, ServerError } from "./error";
 
@@ -321,13 +322,13 @@ export abstract class BaseAPIClient {
       headers["authorization"] = `bearer ${accessToken}`;
     }
     const config = await this._fetchOIDCConfiguration();
-    const userinfo = await this._fetchOIDCJSON(config.userinfo_endpoint, {
+    const response = await this._fetchOIDCJSON(config.userinfo_endpoint, {
       method: "GET",
       headers: headers,
       mode: "cors",
       credentials: "include",
     });
-    return userinfo;
+    return decodeUserInfo(response);
   }
 
   /**
