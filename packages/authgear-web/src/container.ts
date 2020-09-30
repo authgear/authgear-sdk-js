@@ -92,9 +92,14 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
   /**
    * Start authorization by opening authorize page
    *
+   * To allow re-authentication of different user smoothly for third-party app, default value for `options.prompt` is `login`.
+   * 
    * @param options - authorize options
    */
   async startAuthorization(options: AuthorizeOptions): Promise<void> {
+    if (this.isThirdParty === true && options.prompt === undefined) {
+      options.prompt = "login";
+    }
     const authorizeEndpoint = await this.authorizeEndpoint(options);
     window.location.href = authorizeEndpoint;
   }
