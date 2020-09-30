@@ -28,6 +28,10 @@ export interface ConfigureOptions {
    * If not specified, default to false. So by default the application is considered first party.
    */
   isThirdPartyApp?: boolean;
+  /**
+   * Skip refreshing access token. Default is false.
+   */
+  skipRefreshAccessToken?: boolean;
 }
 
 /**
@@ -65,7 +69,9 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
 
     this.refreshToken = refreshToken ?? undefined;
 
+    const { skipRefreshAccessToken = false } = options;
     if (this.shouldRefreshAccessToken()) {
+      if (skipRefreshAccessToken) return;
       await this.refreshAccessToken();
     }
   }
