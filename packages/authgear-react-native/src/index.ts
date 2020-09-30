@@ -258,6 +258,13 @@ export class ReactNativeContainer<
     await this.storage.delAnonymousKeyID(this.name);
     return result;
   }
+
+  /**
+   * Fetch user info.
+   */
+  async fetchUserInfo(): Promise<UserInfo> {
+    return await this.apiClient._oidcUserInfoRequest(this.accessToken);
+  }
 }
 
 /**
