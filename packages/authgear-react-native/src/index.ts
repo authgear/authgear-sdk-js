@@ -118,12 +118,17 @@ export class ReactNativeContainer<
   }
 
   /**
-   * Open authorize page
+   * Open authorize page.
+   * 
+   * To allow re-authentication of different user smoothly, default value for `options.prompt` is `login`.
    *
    * @param options - authorize options
    */
   async authorize(options: AuthorizeOptions): Promise<{ state?: string }> {
     const redirectURIScheme = getCallbackURLScheme(options.redirectURI);
+    if (options.prompt === undefined) {
+      options.prompt = "login";
+    }
     const authorizeURL = await this.authorizeEndpoint(options);
     const redirectURL = await openAuthorizeURL(authorizeURL, redirectURIScheme);
     return this._finishAuthorization(redirectURL);
