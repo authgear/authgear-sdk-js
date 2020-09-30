@@ -158,7 +158,7 @@ export class ReactNativeContainer<
         url = "/settings/identities";
         break;
     }
-    await openURL(url);
+    await this.openURL(url);
   }
 
   /**
@@ -263,7 +263,7 @@ export class ReactNativeContainer<
    * Fetch user info.
    */
   async fetchUserInfo(): Promise<UserInfo> {
-    return await this.apiClient._oidcUserInfoRequest(this.accessToken);
+    return this.apiClient._oidcUserInfoRequest(this.accessToken);
   }
 }
 

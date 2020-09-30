@@ -139,6 +139,6 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
    * Fetch user info.
    */
   async fetchUserInfo(): Promise<UserInfo> {
-    return await this.apiClient._oidcUserInfoRequest(this.accessToken);
+    return this.apiClient._oidcUserInfoRequest(this.accessToken);
   }
 }
