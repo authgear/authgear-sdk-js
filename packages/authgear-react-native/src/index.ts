@@ -28,6 +28,10 @@ export interface ConfigureOptions {
    * The endpoint.
    */
   endpoint: string;
+  /**
+   * Skip refreshing access token. Default is false.
+   */
+  skipRefreshAccessToken?: boolean
 }
 
 /**
@@ -91,10 +95,11 @@ export class ReactNativeContainer<
 
     this.clientID = options.clientID;
     this.apiClient.endpoint = options.endpoint;
-
     this.refreshToken = refreshToken ?? undefined;
 
+    const { skipRefreshAccessToken = false } = options;
     if (this.shouldRefreshAccessToken()) {
+      if (skipRefreshAccessToken) return;
       await this.refreshAccessToken();
     }
   }
