@@ -18,7 +18,7 @@ export * from "@authgear/core";
 
 export enum Page {
   Settings,
-  Identities
+  Identities,
 }
 
 /**
@@ -36,7 +36,7 @@ export interface ConfigureOptions {
   /**
    * Skip refreshing access token. Default is false.
    */
-  skipRefreshAccessToken?: boolean
+  skipRefreshAccessToken?: boolean;
 }
 
 /**
@@ -124,7 +124,7 @@ export class ReactNativeContainer<
 
   /**
    * Open authorize page.
-   * 
+   *
    * To allow re-authentication of different user smoothly, default value for `options.prompt` is `login`.
    *
    * @param options - authorize options
@@ -152,7 +152,7 @@ export class ReactNativeContainer<
     let url: string;
     switch (page) {
       case Page.Settings:
-        url = "/settings/"
+        url = "/settings/";
         break;
       case Page.Identities:
         url = "/settings/identities";
