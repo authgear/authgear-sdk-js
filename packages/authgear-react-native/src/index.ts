@@ -17,8 +17,8 @@ import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 export * from "@authgear/core";
 
 export enum Page {
-  Settings,
-  Identities,
+  Settings = "/settings",
+  Identities = "/settings/identities",
 }
 
 /**
@@ -149,16 +149,7 @@ export class ReactNativeContainer<
   }
 
   async open(page: Page): Promise<void> {
-    let url: string;
-    switch (page) {
-      case Page.Settings:
-        url = "/settings/";
-        break;
-      case Page.Identities:
-        url = "/settings/identities";
-        break;
-    }
-    await this.openURL(url);
+    await this.openURL(page);
   }
 
   /**
