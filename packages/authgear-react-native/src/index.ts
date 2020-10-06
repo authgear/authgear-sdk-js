@@ -16,6 +16,11 @@ import { getCallbackURLScheme } from "./url";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 export * from "@authgear/core";
 
+export enum Page {
+  Settings = "/settings",
+  Identities = "/settings/identities",
+}
+
 /**
  * @public
  */
@@ -28,6 +33,10 @@ export interface ConfigureOptions {
    * The endpoint.
    */
   endpoint: string;
+  /**
+   * Skip refreshing access token. Default is false.
+   */
+  skipRefreshAccessToken?: boolean;
 }
 
 /**
@@ -91,10 +100,11 @@ export class ReactNativeContainer<
 
     this.clientID = options.clientID;
     this.apiClient.endpoint = options.endpoint;
-
     this.refreshToken = refreshToken ?? undefined;
 
+    const { skipRefreshAccessToken = false } = options;
     if (this.shouldRefreshAccessToken()) {
+      if (skipRefreshAccessToken) return;
       await this.refreshAccessToken();
     }
   }
@@ -113,12 +123,17 @@ export class ReactNativeContainer<
   }
 
   /**
-   * Open authorize page
+   * Open authorize page.
+   *
+   * To allow re-authentication of different user smoothly, default value for `options.prompt` is `login`.
    *
    * @param options - authorize options
    */
   async authorize(options: AuthorizeOptions): Promise<{ state?: string }> {
     const redirectURIScheme = getCallbackURLScheme(options.redirectURI);
+    if (options.prompt === undefined) {
+      options.prompt = "login";
+    }
     const authorizeURL = await this.authorizeEndpoint(options);
     const redirectURL = await openAuthorizeURL(authorizeURL, redirectURIScheme);
     return this._finishAuthorization(redirectURL);
@@ -131,6 +146,10 @@ export class ReactNativeContainer<
   // eslint-disable-next-line class-methods-use-this
   async openURL(url: string): Promise<void> {
     await openURL(url);
+  }
+
+  async open(page: Page): Promise<void> {
+    await this.openURL(page);
   }
 
   /**
@@ -229,6 +248,13 @@ export class ReactNativeContainer<
 
     await this.storage.delAnonymousKeyID(this.name);
     return result;
+  }
+
+  /**
+   * Fetch user info.
+   */
+  async fetchUserInfo(): Promise<UserInfo> {
+    return this.apiClient._oidcUserInfoRequest(this.accessToken);
   }
 }
 

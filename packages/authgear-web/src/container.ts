@@ -28,6 +28,10 @@ export interface ConfigureOptions {
    * If not specified, default to false. So by default the application is considered first party.
    */
   isThirdPartyApp?: boolean;
+  /**
+   * Skip refreshing access token. Default is false.
+   */
+  skipRefreshAccessToken?: boolean;
 }
 
 /**
@@ -65,7 +69,9 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
 
     this.refreshToken = refreshToken ?? undefined;
 
+    const { skipRefreshAccessToken = false } = options;
     if (this.shouldRefreshAccessToken()) {
+      if (skipRefreshAccessToken) return;
       await this.refreshAccessToken();
     }
   }
@@ -86,9 +92,14 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
   /**
    * Start authorization by opening authorize page
    *
+   * To allow re-authentication of different user smoothly for third-party app, default value for `options.prompt` is `login`.
+   *
    * @param options - authorize options
    */
   async startAuthorization(options: AuthorizeOptions): Promise<void> {
+    if (this.isThirdParty === true && options.prompt === undefined) {
+      options.prompt = "login";
+    }
     const authorizeEndpoint = await this.authorizeEndpoint(options);
     window.location.href = authorizeEndpoint;
   }
@@ -122,5 +133,12 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
     } = {}
   ): Promise<void> {
     return this._logout(options);
+  }
+
+  /**
+   * Fetch user info.
+   */
+  async fetchUserInfo(): Promise<UserInfo> {
+    return this.apiClient._oidcUserInfoRequest(this.accessToken);
   }
 }

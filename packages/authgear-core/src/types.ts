@@ -99,6 +99,16 @@ export interface ContainerDelegate {
  */
 export interface UserInfo {
   sub: string;
+  isVerified: boolean;
+  isAnonymous: boolean;
+}
+
+export function decodeUserInfo(r: any): UserInfo {
+  return {
+    sub: r["sub"],
+    isVerified: r["https://authgear.com/claims/user/is_verified"] ?? false,
+    isAnonymous: r["https://authgear.com/claims/user/is_anonymous"] ?? false,
+  };
 }
 
 /**
