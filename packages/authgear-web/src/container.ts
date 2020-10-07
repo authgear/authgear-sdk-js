@@ -5,6 +5,7 @@ import {
   GlobalJSONContainerStorage,
   BaseContainer,
   AuthorizeOptions,
+  AuthorizeResult,
 } from "@authgear/core";
 import { WebAPIClient } from "./client";
 import { localStorageStorageDriver } from "./storage";
@@ -111,7 +112,7 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
    * It checks if error is present and rejects with OAuthError.
    * Otherwise assume code is present, make a token request.
    */
-  async finishAuthorization(): Promise<{ userInfo: UserInfo; state?: string }> {
+  async finishAuthorization(): Promise<AuthorizeResult> {
     return this._finishAuthorization(window.location.href);
   }
 

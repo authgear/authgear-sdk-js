@@ -7,6 +7,15 @@ export interface _ByteArray {
 }
 
 /**
+ * @public
+ */
+export interface UserInfo {
+  sub: string;
+  isVerified: boolean;
+  isAnonymous: boolean;
+}
+
+/**
  * Auth UI anonymous user promotion options
  *
  * @public
@@ -54,6 +63,17 @@ export interface AuthorizeOptions {
   uiLocales?: string[];
 }
 
+export interface AuthorizeResult {
+  /**
+   * OAuth 2.0 state value.
+   */
+  state?: string;
+  /**
+   * UserInfo.
+   */
+  userInfo: UserInfo;
+}
+
 /**
  * @internal
  */
@@ -92,15 +112,6 @@ export interface ContainerDelegate {
    * @public
    */
   onRefreshTokenExpired(): Promise<void>;
-}
-
-/**
- * @public
- */
-export interface UserInfo {
-  sub: string;
-  isVerified: boolean;
-  isAnonymous: boolean;
 }
 
 export function decodeUserInfo(r: any): UserInfo {

@@ -2,13 +2,13 @@ import URL from "core-js-pure/features/url";
 import URLSearchParams from "core-js-pure/features/url-search-params";
 import {
   AuthorizeOptions,
+  AuthorizeResult,
   ContainerOptions,
   ContainerStorage,
   OAuthError,
   _APIClientDelegate,
   ContainerDelegate,
   _OIDCTokenResponse,
-  UserInfo,
 } from "./types";
 import { BaseAPIClient } from "./client";
 
@@ -253,9 +253,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   /**
    * @internal
    */
-  async _finishAuthorization(
-    url: string
-  ): Promise<{ userInfo: UserInfo; state?: string }> {
+  async _finishAuthorization(url: string): Promise<AuthorizeResult> {
     const clientID = this.clientID;
     if (clientID == null) {
       throw new Error("missing client ID");

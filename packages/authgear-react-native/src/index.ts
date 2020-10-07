@@ -7,6 +7,7 @@ import {
   StorageDriver,
   BaseContainer,
   AuthorizeOptions,
+  AuthorizeResult,
   PromoteOptions,
   UserInfo,
 } from "@authgear/core";
@@ -129,7 +130,7 @@ export class ReactNativeContainer<
    *
    * @param options - authorize options
    */
-  async authorize(options: AuthorizeOptions): Promise<{ state?: string }> {
+  async authorize(options: AuthorizeOptions): Promise<AuthorizeResult> {
     const redirectURIScheme = getCallbackURLScheme(options.redirectURI);
     if (options.prompt === undefined) {
       options.prompt = "login";
@@ -172,7 +173,7 @@ export class ReactNativeContainer<
   /**
    * Authenticate as an anonymous user.
    */
-  async authenticateAnonymously(): Promise<{ userInfo: UserInfo }> {
+  async authenticateAnonymously(): Promise<AuthorizeResult> {
     const clientID = this.clientID;
     if (clientID == null) {
       throw new Error("missing client ID");
@@ -215,7 +216,7 @@ export class ReactNativeContainer<
    */
   async promoteAnonymousUser(
     options: PromoteOptions
-  ): Promise<{ userInfo: UserInfo; state?: string }> {
+  ): Promise<AuthorizeResult> {
     const keyID = await this.storage.getAnonymousKeyID(this.name);
     if (!keyID) {
       throw new Error("anonymous user credentials not found");
