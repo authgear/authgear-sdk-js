@@ -27,6 +27,11 @@ const sidebar = {
           label: "Classes",
           items: [],
         },
+        {
+          type: "category",
+          label: "Enums",
+          items: [],
+        },
       ],
     },
     {
@@ -45,6 +50,11 @@ const sidebar = {
         {
           type: "category",
           label: "Classes",
+          items: [],
+        },
+        {
+          type: "category",
+          label: "Enums",
           items: [],
         },
       ],
@@ -102,6 +112,8 @@ function recur(dir) {
         j = 1;
       } else if (kind == "classes") {
         j = 2;
+      } else if (kind == "enums") {
+        j = 3;
       } else {
         throw new Error("unexpected kind " + kind);
       }
