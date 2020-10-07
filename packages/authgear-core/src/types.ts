@@ -63,6 +63,11 @@ export interface AuthorizeOptions {
   uiLocales?: string[];
 }
 
+/**
+ * Result of authorization.
+ *
+ * @public
+ */
 export interface AuthorizeResult {
   /**
    * OAuth 2.0 state value.
@@ -114,6 +119,9 @@ export interface ContainerDelegate {
   onRefreshTokenExpired(): Promise<void>;
 }
 
+/**
+ * @public
+ */
 export function decodeUserInfo(r: any): UserInfo {
   return {
     sub: r["sub"],

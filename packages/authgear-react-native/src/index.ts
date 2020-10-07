@@ -17,6 +17,9 @@ import { getCallbackURLScheme } from "./url";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 export * from "@authgear/core";
 
+/**
+ * @public
+ */
 export enum Page {
   Settings = "/settings",
   Identities = "/settings/identities",
