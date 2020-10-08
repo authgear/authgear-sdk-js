@@ -13,6 +13,21 @@ import {
 import { BaseAPIClient } from "./client";
 
 /**
+ * To prevent user from using expired access token, we have to check in advance
+ * whether it had expired in `shouldRefreshAccessToke`. If we
+ * use the expiry time in {@link _OIDCTokenResponse} directly to check for expiry, it is possible
+ * that the access token had passed the check but ends up being expired when it arrives at
+ * the server due to slow traffic or unfair scheduler.
+ *
+ * To compat this, we should consider the access token expired earlier than the expiry time
+ * calculated using {@link _OIDCTokenResponse.expires_in}. Current implementation uses
+ * {@link EXPIRE_IN_PERCENTAGE} of {@link _OIDCTokenResponse.expires_in} to calculate the expiry time.
+ * 
+ * @internal
+ */
+const EXPIRE_IN_PERCENTAGE = 0.9;
+
+/**
  * Base Container
  *
  * @public
@@ -105,7 +120,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     this.accessToken = access_token;
     this.refreshToken = refresh_token;
     this.expireAt = new Date(
-      new Date(Date.now()).getTime() + expires_in * 1000
+      new Date(Date.now()).getTime() + expires_in * EXPIRE_IN_PERCENTAGE * 1000
     );
 
     if (refresh_token) {
