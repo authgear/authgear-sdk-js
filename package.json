@@ -17,7 +17,7 @@
     "set-version": "npm run lerna -- version --no-changelog --no-commit-hooks --no-git-tag-version --no-push --exact --yes"
   },
   "devDependencies": {
-    "@babel/cli": "7.10.1",
+    "@babel/cli": "^7.12.1",
     "@babel/core": "7.10.2",
     "@babel/plugin-proposal-class-properties": "7.10.1",
     "@babel/plugin-transform-for-of": "7.10.1",
