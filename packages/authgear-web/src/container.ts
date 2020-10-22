@@ -62,6 +62,8 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
    * @public
    */
   async configure(options: ConfigureOptions): Promise<void> {
+    // TODO: verify if we need to support configure for second time
+    // and guard if initialized
     const refreshToken = await this.storage.getRefreshToken(this.name);
 
     this.clientID = options.clientID;
@@ -72,8 +74,20 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
 
     const { skipRefreshAccessToken = false } = options;
     if (this.shouldRefreshAccessToken()) {
-      if (skipRefreshAccessToken) return;
-      await this.refreshAccessToken();
+      if (skipRefreshAccessToken) {
+        // shouldRefreshAccessToken is true => refresh token exist
+        // consider user as logged in if refresh token is available
+        this._updateSessionState("LoggedIn", "FoundToken");
+      } else {
+        // update session state will be handled in refreshAccessToken
+        await this.refreshAccessToken();
+      }
+    } else {
+      if (this.accessToken != null) {
+        this._updateSessionState("LoggedIn", "FoundToken");
+      } else {
+        this._updateSessionState("NoSession", "NoToken");
+      }
     }
   }
 

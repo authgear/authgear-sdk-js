@@ -1,3 +1,6 @@
+import { BaseContainer } from "./container";
+import { BaseAPIClient } from "./client";
+
 /**
  * @internal
  */
@@ -222,4 +225,71 @@ export interface _OIDCTokenResponse {
   access_token: string;
   expires_in: number;
   refresh_token?: string;
+}
+
+/**
+ * Possible values: "LoggedIn" | "NoSession" | "Unknown"
+ *
+ * The state of the user session in authgear. An authgear instance is in one and only one specific
+ * state at any given point in time.
+ *
+ * For example, the session state of an authgear instance that is just constructed always has
+ * "Unknown". After a call to [Authgear.configure], the session state would be
+ * "LoggedIn" if a previous session is found, or "NoSession" if there is
+ * no such sessions.
+ *
+ * @public
+ */
+export type SessionState = "LoggedIn" | "NoSession" | "Unknown";
+
+/**
+ * Possible values: "NoToken" | "FoundToken" | "Authorized" | "Logout" | "Expired"
+ *
+ * The reason that [SessionState] is changed in a user session represented by an authgear instance.
+ *
+ * These reasons can be thought of as the transition of a [SessionState], which is described as
+ * follows:
+ * ```
+ *                                                      Logout/Expiry
+ *                                             +-----------------------------------------+
+ *                                             v                                         |
+ *    State: Unknown ----- NoToken ----> State: NoSession ---- Authorized -----> State: LoggedIn
+ *      |                                                                                ^
+ *      +--------------------------------------------------------------------------------+
+ *                                         FoundToken
+ * ```
+ *
+ * These transitions and states can be used in [OnSessionStateChangedListener]
+ * to examine the current state of authgear.
+ *
+ * The same can be done for login. A "LoggedIn" with "Authorized" means the
+ * user had just logged in, or if the reason is "FoundToken" instead, a
+ * previous session of the user is found.
+ *
+ * @public
+ */
+export type SessionStateChangeReason =
+  | "NoToken"
+  | "FoundToken"
+  | "Authorized"
+  | "Logout"
+  | "Expired";
+
+/**
+ * [OnSessionStateChangedListener] can be used to listen to state changes and inspect
+ * the reason of the state change.
+ *
+ * For example, to check if a user is logged out, check if the new state is "NoSession"
+ * and reason "Logout"
+ *
+ * To check if the session is expired, check if the new state is "NoSession" and
+ * reason "Expired"
+ *
+ * @public
+ */
+export interface OnSessionStateChangedListener {
+  onSessionStateChanged: <T extends BaseAPIClient>(
+    container: BaseContainer<T>,
+    reason: SessionStateChangeReason
+  ) => void;
 }

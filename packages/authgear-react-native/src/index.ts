@@ -116,6 +116,8 @@ export class ReactNativeContainer<
    * @public
    */
   async configure(options: ConfigureOptions): Promise<void> {
+    // TODO: verify if we need to support configure for second time
+    // and guard if initialized
     const refreshToken = await this.storage.getRefreshToken(this.name);
 
     this.clientID = options.clientID;
@@ -125,8 +127,20 @@ export class ReactNativeContainer<
 
     const { skipRefreshAccessToken = false } = options;
     if (this.shouldRefreshAccessToken()) {
-      if (skipRefreshAccessToken) return;
-      await this.refreshAccessToken();
+      if (skipRefreshAccessToken) {
+        // shouldRefreshAccessToken is true => refresh token exist
+        // consider user as logged in if refresh token is available
+        this._updateSessionState("LoggedIn", "FoundToken");
+      } else {
+        // update session state will be handled in refreshAccessToken
+        await this.refreshAccessToken();
+      }
+    } else {
+      if (this.accessToken != null) {
+        this._updateSessionState("LoggedIn", "FoundToken");
+      } else {
+        this._updateSessionState("NoSession", "NoToken");
+      }
     }
   }
 
@@ -240,7 +254,7 @@ export class ReactNativeContainer<
       tokenResponse.access_token
     );
 
-    await this._persistTokenResponse(tokenResponse);
+    await this._persistTokenResponse(tokenResponse, "Authorized");
     await this.storage.setAnonymousKeyID(this.name, key.kid);
     return { userInfo };
   }
