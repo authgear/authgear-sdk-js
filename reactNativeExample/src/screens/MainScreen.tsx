@@ -1,7 +1,7 @@
-import React, {useState, useCallback} from 'react';
-import {ScrollView, Text, StyleSheet, Button, View} from 'react-native';
+import React, {useState, useCallback, useMemo} from 'react';
+import {ScrollView, Text, StyleSheet, Button, View, Alert} from 'react-native';
 import Config from 'react-native-config';
-import authgear from '@authgear/react-native';
+import authgear, {Page} from '@authgear/react-native';
 
 import {LoadingModal} from '../LoadingModal';
 
@@ -37,6 +37,8 @@ const styles = StyleSheet.create({
 });
 
 const FALLBACK_TEXT = 'N/A';
+const redirectURI = Config.AUTHGEAR_REDIRECT_URI;
+const ANONYMOUS_USERS_DISABLED_ERROR = 'unauthorized_client';
 
 const HomeScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -50,27 +52,112 @@ const HomeScreen: React.FC = () => {
   }, [userID]);
 
   const login = useCallback(() => {
-    // TODO: to be implemented
+    setLoading(true);
+    authgear
+      .authorize({
+        redirectURI,
+      })
+      .then(({userInfo}) => {
+        setIsAnonymous(userInfo.isAnonymous);
+        setUserID(userInfo.sub);
+        Alert.alert('Success', 'Logged in successfully');
+      })
+      .catch(() => {
+        Alert.alert('Error', 'Failed to authorize');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const loginAnonymously = useCallback(() => {
-    // TODO: to be implemented
+    setLoading(true);
+    authgear
+      .authenticateAnonymously()
+      .then(({userInfo}) => {
+        setIsAnonymous(userInfo.isAnonymous);
+        setUserID(userInfo.sub);
+        Alert.alert('Success', 'Logged in anonymously');
+      })
+      .catch((err) => {
+        if (err.error === ANONYMOUS_USERS_DISABLED_ERROR) {
+          Alert.alert('Error', 'Anonymous users are not allowed');
+        } else {
+          console.error(err);
+          Alert.alert('Error', 'Failed to authenticate anonymously');
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const openSettings = useCallback(() => {
-    // TODO: to be implemented
+    // FIXME: crash on Android
+    authgear
+      .open(Page.Settings)
+      .catch(() => Alert.alert('Error', 'Failed to open setting page'));
   }, []);
 
   const promoteAnonymousUser = useCallback(() => {
-    // TODO: to be implemented
+    setLoading(true);
+    authgear
+      .promoteAnonymousUser({
+        redirectURI,
+      })
+      .then(({userInfo}) => {
+        setIsAnonymous(userInfo.isAnonymous);
+        setUserID(userInfo.sub);
+        Alert.alert(
+          'Success',
+          'Successfully promoted to normal authenticated user',
+        );
+      })
+      .catch(() => Alert.alert('Error', 'Failed to promote anonymous user'))
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const fetchUserInfo = useCallback(() => {
-    // TODO: to be implemented
+    setLoading(true);
+    authgear
+      .fetchUserInfo()
+      .then((userInfo) => {
+        setIsAnonymous(userInfo.isAnonymous);
+        setUserID(userInfo.sub);
+        Alert.alert(
+          'Success',
+          [
+            'Fetched user info successfully',
+            '',
+            `User ID: ${userInfo.sub}`,
+            `Is Anonymous: ${userInfo.isAnonymous}`,
+            `Is Verified: ${userInfo.isVerified}`,
+          ].join('\n'),
+        );
+      })
+      .catch(() => Alert.alert('Error', 'Failed to fetch user info'))
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const logout = useCallback(() => {
-    // TODO: to be implemented
+    setLoading(true);
+    authgear
+      .logout()
+      .then(() => {
+        setIsAnonymous(undefined);
+        setUserID(undefined);
+        Alert.alert('Success', 'Logged out successfully');
+      })
+      .catch(() => {
+        Alert.alert('Error', 'Failed to logout');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   return (
