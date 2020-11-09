@@ -1,3 +1,3 @@
 module.exports = {
-  modulePathIgnorePatterns: ["<rootDir>/reactNativeExample"],
+  modulePathIgnorePatterns: ["<rootDir>/example/reactnative"],
 };

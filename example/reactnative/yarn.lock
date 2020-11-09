@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@authgear/react-native@../packages/authgear-react-native":
+"@authgear/react-native@../../packages/authgear-react-native":
   version "0.1.0"
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.10.4":
