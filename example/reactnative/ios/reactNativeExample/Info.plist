@@ -27,7 +27,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.myapp</string>
+				<string>com.authgear.example</string>
 			</array>
 		</dict>
 	</array>
