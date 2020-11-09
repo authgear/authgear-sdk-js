@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useMemo} from 'react';
+import React, {useState, useCallback, useMemo, useEffect} from 'react';
 import {ScrollView, Text, StyleSheet, Button, View, Alert} from 'react-native';
 import Config from 'react-native-config';
 import authgear, {Page} from '@authgear/react-native';
@@ -44,12 +44,34 @@ const HomeScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const clientID = Config.AUTHGEAR_CLIENT_ID;
   const endpoint = Config.AUTHGEAR_ENDPOINT;
+  const [accessToken, setAccessToken] = useState<string | undefined>(
+    authgear.getAccessToken(),
+  );
   const [isAnonymous, setIsAnonymous] = useState<boolean | undefined>();
   const [userID, setUserID] = useState<string | undefined>();
 
+  useEffect(() => {
+    if (accessToken != null) {
+      authgear
+        .fetchUserInfo()
+        .then((userInfo) => {
+          setIsAnonymous(userInfo.isAnonymous);
+          setUserID(userInfo.sub);
+        })
+        .catch(() => {
+          Alert.alert('Error', 'Failed to initialize screen state');
+        });
+    }
+  }, []);
+
+  const updateAccessToken = useCallback(() => {
+    setAccessToken(authgear.getAccessToken());
+  }, []);
+
+  // TODO: use on session state change after implementation is merged
   const loggedIn = useMemo(() => {
-    return userID != null;
-  }, [userID]);
+    return accessToken != null;
+  }, [accessToken]);
 
   const login = useCallback(() => {
     setLoading(true);
@@ -60,6 +82,7 @@ const HomeScreen: React.FC = () => {
       .then(({userInfo}) => {
         setIsAnonymous(userInfo.isAnonymous);
         setUserID(userInfo.sub);
+        updateAccessToken();
         Alert.alert('Success', 'Logged in successfully');
       })
       .catch(() => {
@@ -77,6 +100,7 @@ const HomeScreen: React.FC = () => {
       .then(({userInfo}) => {
         setIsAnonymous(userInfo.isAnonymous);
         setUserID(userInfo.sub);
+        updateAccessToken();
         Alert.alert('Success', 'Logged in anonymously');
       })
       .catch((err) => {
@@ -108,6 +132,7 @@ const HomeScreen: React.FC = () => {
       .then(({userInfo}) => {
         setIsAnonymous(userInfo.isAnonymous);
         setUserID(userInfo.sub);
+        updateAccessToken();
         Alert.alert(
           'Success',
           'Successfully promoted to normal authenticated user',
@@ -150,6 +175,7 @@ const HomeScreen: React.FC = () => {
       .then(() => {
         setIsAnonymous(undefined);
         setUserID(undefined);
+        updateAccessToken();
         Alert.alert('Success', 'Logged out successfully');
       })
       .catch(() => {
