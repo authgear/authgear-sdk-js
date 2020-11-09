@@ -122,7 +122,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     this.name = options.name ?? "default";
     this.apiClient = options.apiClient;
     this.storage = options.storage;
-    this.sessionState = "Unknown";
+    this.sessionState = "UNKNOWN";
     this.onSessionStateChangedListeners = [];
   }
 
@@ -140,7 +140,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     this.expireAt = new Date(
       new Date(Date.now()).getTime() + expires_in * EXPIRE_IN_PERCENTAGE * 1000
     );
-    this._updateSessionState("LoggedIn", reason);
+    this._updateSessionState("LOGGED_IN", reason);
 
     if (refresh_token) {
       await this.storage.setRefreshToken(this.name, refresh_token);
@@ -155,7 +155,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     this.accessToken = undefined;
     this.refreshToken = undefined;
     this.expireAt = undefined;
-    this._updateSessionState("NoSession", reason);
+    this._updateSessionState("NO_SESSION", reason);
   }
 
   /**
@@ -208,7 +208,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     const refreshToken = await this.storage.getRefreshToken(this.name);
     if (refreshToken == null) {
       // The API client has access token but we do not have the refresh token.
-      await this._clearSession("NoToken");
+      await this._clearSession("NO_TOKEN");
       return;
     }
 
@@ -228,14 +228,14 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
           await this.delegate.onRefreshTokenExpired();
         }
 
-        await this._clearSession("Expired");
+        await this._clearSession("EXPIRED");
         return;
       }
 
       throw error;
     }
 
-    await this._persistTokenResponse(tokenResponse, "FoundToken");
+    await this._persistTokenResponse(tokenResponse, "FOUND_TOKEN");
   }
 
   /**
@@ -339,7 +339,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     }
 
     if (tokenResponse) {
-      await this._persistTokenResponse(tokenResponse, "Authorized");
+      await this._persistTokenResponse(tokenResponse, "AUTHORIZED");
     }
 
     return {
@@ -418,7 +418,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
           throw error;
         }
       }
-      await this._clearSession("Logout");
+      await this._clearSession("LOGOUT");
     } else {
       const config = await this.apiClient._fetchOIDCConfiguration();
       const query = new URLSearchParams();
@@ -428,7 +428,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
       const endSessionEndpoint = `${
         config.end_session_endpoint
       }?${query.toString()}`;
-      await this._clearSession("Logout");
+      await this._clearSession("LOGOUT");
       if (typeof window !== "undefined") {
         // eslint-disable-next-line no-undef
         window.location.href = endSessionEndpoint;

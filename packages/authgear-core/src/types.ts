@@ -228,62 +228,62 @@ export interface _OIDCTokenResponse {
 }
 
 /**
- * Possible values: "LoggedIn" | "NoSession" | "Unknown"
+ * Possible values: "LOGGED_IN" | "NO_SESSION" | "UNKNOWN"
  *
  * The state of the user session in authgear. An authgear instance is in one and only one specific
  * state at any given point in time.
  *
  * For example, the session state of an authgear instance that is just constructed always has
- * "Unknown". After a call to [Authgear.configure], the session state would be
- * "LoggedIn" if a previous session is found, or "NoSession" if there is
+ * "UNKNOWN". After a call to [Authgear.configure], the session state would be
+ * "LOGGED_IN" if a previous session is found, or "NO_SESSION" if there is
  * no such sessions.
  *
  * @public
  */
-export type SessionState = "LoggedIn" | "NoSession" | "Unknown";
+export type SessionState = "LOGGED_IN" | "NO_SESSION" | "UNKNOWN";
 
 /**
- * Possible values: "NoToken" | "FoundToken" | "Authorized" | "Logout" | "Expired"
+ * Possible values: "NO_TOKEN" | "FOUND_TOKEN" | "AUTHORIZED" | "LOGOUT" | "EXPIRED"
  *
  * The reason that [SessionState] is changed in a user session represented by an authgear instance.
  *
  * These reasons can be thought of as the transition of a [SessionState], which is described as
  * follows:
  * ```
- *                                                      Logout/Expiry
- *                                             +-----------------------------------------+
- *                                             v                                         |
- *    State: Unknown ----- NoToken ----> State: NoSession ---- Authorized -----> State: LoggedIn
+ *                                                          Logout/Expiry
+ *                                                +-----------------------------------------+
+ *                                                v                                         |
+ *    State: UNKNOWN ----- NO_TOKEN ----> State: NO_SESSION ---- AUTHORIZED -----> State: LOGGED_IN
  *      |                                                                                ^
  *      +--------------------------------------------------------------------------------+
- *                                         FoundToken
+ *                                         FOUND_TOKEN
  * ```
  *
  * These transitions and states can be used in [OnSessionStateChangedListener]
  * to examine the current state of authgear.
  *
- * The same can be done for login. A "LoggedIn" with "Authorized" means the
- * user had just logged in, or if the reason is "FoundToken" instead, a
+ * The same can be done for login. A "LOGGED_IN" with "AUTHORIZED" means the
+ * user had just logged in, or if the reason is "FOUND_TOKEN" instead, a
  * previous session of the user is found.
  *
  * @public
  */
 export type SessionStateChangeReason =
-  | "NoToken"
-  | "FoundToken"
-  | "Authorized"
-  | "Logout"
-  | "Expired";
+  | "NO_TOKEN"
+  | "FOUND_TOKEN"
+  | "AUTHORIZED"
+  | "LOGOUT"
+  | "EXPIRED";
 
 /**
  * [OnSessionStateChangedListener] can be used to listen to state changes and inspect
  * the reason of the state change.
  *
- * For example, to check if a user is logged out, check if the new state is "NoSession"
- * and reason "Logout"
+ * For example, to check if a user is logged out, check if the new state is "NO_SESSION"
+ * and reason "LOGOUT"
  *
- * To check if the session is expired, check if the new state is "NoSession" and
- * reason "Expired"
+ * To check if the session is expired, check if the new state is "NO_SESSION" and
+ * reason "EXPIRED"
  *
  * @public
  */
