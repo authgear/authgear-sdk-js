@@ -15,7 +15,7 @@ import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import { openURL, openAuthorizeURL } from "./nativemodule";
 import { getCallbackURLScheme } from "./url";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
-import URL from 'core-js-pure/features/url';
+import URL from "core-js-pure/features/url";
 export * from "@authgear/core";
 
 /**
@@ -153,17 +153,19 @@ export class ReactNativeContainer<
     // validate url to avoid error in native code
     const urlObj = new URL(url);
     if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") {
-      throw new Error("Only allows http / https scheme")
+      throw new Error("Only allows http / https scheme");
     }
     await openURL(url);
   }
 
   async open(page: Page): Promise<void> {
-    const {endpoint} = this.apiClient
+    const { endpoint } = this.apiClient;
     if (endpoint == null) {
-      throw new Error("Endpoint cannot be undefined, please double check whether you have run configure()")
+      throw new Error(
+        "Endpoint cannot be undefined, please double check whether you have run configure()"
+      );
     }
-    const endpointWithoutTrailingSlash = endpoint.replace(/\/$/, "")
+    const endpointWithoutTrailingSlash = endpoint.replace(/\/$/, "");
     await this.openURL(`${endpointWithoutTrailingSlash}${page}`);
   }
 

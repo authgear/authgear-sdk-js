@@ -22,7 +22,7 @@ import { BaseAPIClient } from "./client";
  * To compat this, we should consider the access token expired earlier than the expiry time
  * calculated using {@link _OIDCTokenResponse.expires_in}. Current implementation uses
  * {@link EXPIRE_IN_PERCENTAGE} of {@link _OIDCTokenResponse.expires_in} to calculate the expiry time.
- * 
+ *
  * @internal
  */
 const EXPIRE_IN_PERCENTAGE = 0.9;
