@@ -73,6 +73,16 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   delegate?: ContainerDelegate;
 
   /**
+   * @public
+   */
+  sessionState: SessionState;
+
+  /**
+   * @public
+   */
+  onSessionStateChangedListeners: OnSessionStateChangedListener[];
+
+  /**
    * @internal
    */
   storage: ContainerStorage;
@@ -91,16 +101,6 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
    * @internal
    */
   expireAt?: Date;
-
-  /**
-   * @internal
-   */
-  sessionState: SessionState;
-
-  /**
-   * @internal
-   */
-  onSessionStateChangedListeners: OnSessionStateChangedListener[];
 
   /**
    * @internal
