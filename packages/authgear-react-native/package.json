@@ -12,12 +12,12 @@
   ],
   "devDependencies": {
     "@authgear/core": "0.1.0",
-    "@react-native-community/async-storage": "^1.0.0",
+    "@react-native-async-storage/async-storage": "1.13.2",
     "@types/react-native": "0.60.25",
     "core-js-pure": "3.6.5"
   },
   "peerDependencies": {
-    "@react-native-community/async-storage": "^1.0.0",
+    "@react-native-async-storage/async-storage": "^1.0.0",
     "react-native": ">=0.60.0 <1.0.0"
   }
 }

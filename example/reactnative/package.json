@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@authgear/react-native": "../../packages/authgear-react-native",
-    "@react-native-community/async-storage": "1.12.1",
+    "@react-native-async-storage/async-storage": "1.13.2",
     "react": "16.13.1",
     "react-native": "0.63.3",
     "react-native-config": "1.4.0"
