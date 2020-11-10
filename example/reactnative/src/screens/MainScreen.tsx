@@ -3,7 +3,7 @@ import {ScrollView, Text, StyleSheet, Button, View, Alert} from 'react-native';
 import Config from 'react-native-config';
 import authgear, {Page} from '@authgear/react-native';
 
-import {LoadingModal} from '../LoadingModal';
+import {ShowLoading} from '../ShowLoading';
 
 const styles = StyleSheet.create({
   root: {
@@ -187,61 +187,59 @@ const HomeScreen: React.FC = () => {
   }, []);
 
   return (
-    <>
-      <LoadingModal loading={loading} />
-      <ScrollView style={styles.root} contentContainerStyle={styles.container}>
-        <View style={styles.fieldGroup}>
-          <View style={styles.field}>
-            <Text style={styles.fieldTitle}>Client ID</Text>
-            <Text style={styles.fieldText}>{clientID ?? FALLBACK_TEXT}</Text>
-          </View>
-          <View style={styles.field}>
-            <Text style={styles.fieldTitle}>Endpoint</Text>
-            <Text style={styles.fieldText}>{endpoint ?? FALLBACK_TEXT}</Text>
-          </View>
-          <View style={styles.field}>
-            <Text style={styles.fieldTitle}>Is Anonymous</Text>
-            <Text style={styles.fieldText}>
-              {isAnonymous?.toString() ?? FALLBACK_TEXT}
-            </Text>
-          </View>
-          <View style={styles.field}>
-            <Text style={styles.fieldTitle}>User ID</Text>
-            <Text style={styles.fieldText}>{userID ?? FALLBACK_TEXT}</Text>
-          </View>
+    <ScrollView style={styles.root} contentContainerStyle={styles.container}>
+      <View style={styles.fieldGroup}>
+        <View style={styles.field}>
+          <Text style={styles.fieldTitle}>Client ID</Text>
+          <Text style={styles.fieldText}>{clientID ?? FALLBACK_TEXT}</Text>
         </View>
-        <View style={styles.button}>
-          <Button
-            title="Authenticate Anonymously"
-            onPress={loginAnonymously}
-            disabled={loggedIn}
-          />
+        <View style={styles.field}>
+          <Text style={styles.fieldTitle}>Endpoint</Text>
+          <Text style={styles.fieldText}>{endpoint ?? FALLBACK_TEXT}</Text>
         </View>
-        <View style={styles.button}>
-          <Button title="Authorize" onPress={login} disabled={loggedIn} />
+        <View style={styles.field}>
+          <Text style={styles.fieldTitle}>Is Anonymous</Text>
+          <Text style={styles.fieldText}>
+            {isAnonymous?.toString() ?? FALLBACK_TEXT}
+          </Text>
         </View>
-        <View style={styles.button}>
-          <Button title="Open Settings" onPress={openSettings} />
+        <View style={styles.field}>
+          <Text style={styles.fieldTitle}>User ID</Text>
+          <Text style={styles.fieldText}>{userID ?? FALLBACK_TEXT}</Text>
         </View>
-        <View style={styles.button}>
-          <Button
-            title="Promote Anonymous User"
-            onPress={promoteAnonymousUser}
-            disabled={!isAnonymous || !loggedIn}
-          />
-        </View>
-        <View style={styles.button}>
-          <Button
-            title="Fetch User Info"
-            onPress={fetchUserInfo}
-            disabled={!loggedIn}
-          />
-        </View>
-        <View style={styles.button}>
-          <Button title="Logout" onPress={logout} disabled={!loggedIn} />
-        </View>
-      </ScrollView>
-    </>
+      </View>
+      <ShowLoading loading={loading} />
+      <View style={styles.button}>
+        <Button
+          title="Authenticate Anonymously"
+          onPress={loginAnonymously}
+          disabled={loggedIn}
+        />
+      </View>
+      <View style={styles.button}>
+        <Button title="Authorize" onPress={login} disabled={loggedIn} />
+      </View>
+      <View style={styles.button}>
+        <Button title="Open Settings" onPress={openSettings} />
+      </View>
+      <View style={styles.button}>
+        <Button
+          title="Promote Anonymous User"
+          onPress={promoteAnonymousUser}
+          disabled={!isAnonymous || !loggedIn}
+        />
+      </View>
+      <View style={styles.button}>
+        <Button
+          title="Fetch User Info"
+          onPress={fetchUserInfo}
+          disabled={!loggedIn}
+        />
+      </View>
+      <View style={styles.button}>
+        <Button title="Logout" onPress={logout} disabled={!loggedIn} />
+      </View>
+    </ScrollView>
   );
 };
 

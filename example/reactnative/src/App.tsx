@@ -4,7 +4,7 @@ import Config from 'react-native-config';
 import authgear from '@authgear/react-native';
 
 import MainScreen from './screens/MainScreen';
-import {LoadingModal} from './LoadingModal';
+import {ShowLoading} from './ShowLoading';
 
 const clientID = Config.AUTHGEAR_CLIENT_ID;
 const endpoint = Config.AUTHGEAR_ENDPOINT;
@@ -29,7 +29,7 @@ const App: React.FC = () => {
     <>
       <StatusBar barStyle="light-content" />
       <SafeAreaView>
-        {initialized ? <MainScreen /> : <LoadingModal loading={true} />}
+        {initialized ? <MainScreen /> : <ShowLoading loading={true} />}
       </SafeAreaView>
     </>
   );
