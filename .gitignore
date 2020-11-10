@@ -10,4 +10,5 @@ dist/
 
 xcuserdata/
 xcshareddata/
+!**/reactNativeExample.xcodeproj/xcshareddata/
 temp/
