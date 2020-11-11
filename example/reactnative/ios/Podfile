@@ -24,12 +24,3 @@ target 'reactNativeExample' do
     flipper_post_install(installer)
   end
 end
-
-target 'reactNativeExample-tvOS' do
-  # Pods for reactNativeExample-tvOS
-
-  target 'reactNativeExample-tvOSTests' do
-    inherit! :search_paths
-    # Pods for testing
-  end
-end
