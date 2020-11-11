@@ -58,6 +58,12 @@ NOTE: make sure you enabled XCode command line tools (XCode Preference -> Locati
 
 3. Click `Build` button in XCode (play button)
 
+4. As we need to configure the port for metro server
+
+   a. If you are using physical device, you need to go to AppDelegate.m, change the jsLocation to
+   local IP address leaving port number as 8082
+   b. If you are using simulator, you do not need to do extra configuration
+
 # Key points for setting up your React Native app with Authgear
 
 ## Deep-link / custom scheme (for redirection back to app after authorization)
