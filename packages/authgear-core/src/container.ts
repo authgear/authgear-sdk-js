@@ -78,7 +78,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   sessionState: SessionState;
 
   /**
-   * @public
+   * @internal
    */
   onSessionStateChangedListeners: OnSessionStateChangedListener[];
 
@@ -352,9 +352,9 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
    * Add listener on session state change.
    * Listeners are distinguished by reference.
    *
-   * @internal
+   * @public
    */
-  _addOnSessionStateChangedListener(
+  addOnSessionStateChangedListener(
     listener: OnSessionStateChangedListener
   ): void {
     this.onSessionStateChangedListeners.push(listener);
@@ -364,9 +364,9 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
    * Remove listener on session state change.
    * Listeners are distinguished by reference.
    *
-   * @internal
+   * @public
    */
-  _removeOnSessionStateChangedListener(
+  removeOnSessionStateChangedListener(
     listener: OnSessionStateChangedListener
   ): void {
     const targetIndex = this.onSessionStateChangedListeners.findIndex(
