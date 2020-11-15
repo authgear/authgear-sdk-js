@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 20,
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   inputLabel: {
     fontWeight: '600',
@@ -46,6 +47,8 @@ const styles = StyleSheet.create({
   },
   inputField: {
     width: 200,
+    paddingBottom: 5,
+    paddingTop: 0,
     borderBottomWidth: 1,
     borderColor: '#888888',
     fontSize: 16,
