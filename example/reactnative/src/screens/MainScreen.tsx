@@ -292,8 +292,11 @@ const HomeScreen: React.FC = () => {
       </View>
       <ShowLoading loading={loading} />
       <Text style={styles.actionDesc}>
-        After that, click one of the following buttons to try different
-        features.
+        After that, remember to add redirect URI {redirectURI} to OAuth client
+        through Authgear portal or editing authgear.yaml config file.{' '}
+      </Text>
+      <Text style={styles.actionDesc}>
+        Click one of the following buttons to try different features.
       </Text>
       <View style={styles.actionButtons}>
         <View style={styles.button}>
