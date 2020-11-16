@@ -9,7 +9,6 @@ import {
   TextInput,
 } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
-import Config from 'react-native-config';
 import authgear, {Page} from '@authgear/react-native';
 
 import {ShowLoading} from '../ShowLoading';
@@ -87,7 +86,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const redirectURI = Config.AUTHGEAR_REDIRECT_URI;
+const redirectURI = 'com.authgear.example://host/path';
 const ANONYMOUS_USERS_DISABLED_ERROR = 'unauthorized_client';
 
 const HomeScreen: React.FC = () => {
