@@ -74,8 +74,9 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
+    // prefersSFSafariViewController is used by iOS app only
     @ReactMethod
-    public void openURL(String urlString, Promise promise) {
+    public void openURL(String urlString, Boolean prefersSFSafariViewController, Promise promise) {
         try {
             Activity currentActivity = getCurrentActivity();
             if (currentActivity == null) {
@@ -96,8 +97,9 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
+    // prefersSFSafariViewController is used by iOS app only
     @ReactMethod
-    public void openAuthorizeURL(String urlString, String scheme, Promise promise) {
+    public void openAuthorizeURL(String urlString, String scheme, Boolean prefersSFSafariViewController, Promise promise) {
         this.openURLPromise = promise;
 
         try {

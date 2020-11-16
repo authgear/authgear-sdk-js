@@ -108,10 +108,11 @@ RCT_EXPORT_METHOD(dismiss:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseReje
 }
 
 RCT_EXPORT_METHOD(openURL:(NSURL *)url
+                  prefersSFSafariViewController:(BOOL)prefersSFSafariViewController
                   resolve:(RCTPromiseResolveBlock)resolve
                    reject:(RCTPromiseRejectBlock)reject)
 {
-    if (@available(iOS 12.0, *)) {
+    if (@available(iOS 12.0, *) && !prefersSFSafariViewController) {
         self.asSession = [[ASWebAuthenticationSession alloc] initWithURL:url
                                                        callbackURLScheme:nil
                                                        completionHandler:^(NSURL *url, NSError *error) {
@@ -130,7 +131,7 @@ RCT_EXPORT_METHOD(openURL:(NSURL *)url
                 resolve(nil);
             }
         }
-    } else if (@available(iOS 11.0, *)) {
+    } else if (@available(iOS 11.0, *) && !prefersSFSafariViewController) {
         self.sfSession = [[SFAuthenticationSession alloc] initWithURL:url
                                                     callbackURLScheme:nil
                                                     completionHandler:^(NSURL *url, NSError *error){
@@ -149,6 +150,7 @@ RCT_EXPORT_METHOD(openURL:(NSURL *)url
     } else if (@available(iOS 9.0, *)) {
         SFSafariViewController *vc = [[SFSafariViewController alloc] initWithURL:url];
         vc.delegate = self;
+        vc.modalPresentationStyle = UIModalPresentationPageSheet;
         self.sfViewController = vc;
         UIViewController *rootViewController = RCTPresentedViewController();
         [rootViewController presentViewController:vc animated:YES completion:nil];
@@ -160,13 +162,14 @@ RCT_EXPORT_METHOD(openURL:(NSURL *)url
 
 RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
                             scheme:(NSString *)scheme
+      prefersSFSafariViewController:(BOOL)prefersSFSafariViewController
                            resolve:(RCTPromiseResolveBlock)resolve
                             reject:(RCTPromiseRejectBlock)reject)
 {
     self.openURLResolve = resolve;
     self.openURLReject = reject;
 
-    if (@available(iOS 12.0, *)) {
+    if (@available(iOS 12.0, *) && !prefersSFSafariViewController) {
         self.asSession = [[ASWebAuthenticationSession alloc] initWithURL:url
                                                                             callbackURLScheme:scheme
                                                                             completionHandler:^(NSURL *url, NSError *error) {
@@ -191,7 +194,7 @@ RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
             self.asSession.presentationContextProvider = self;
         }
         [self.asSession start];
-    } else if (@available(iOS 11.0, *)) {
+    } else if (@available(iOS 11.0, *) && !prefersSFSafariViewController) {
         self.sfSession = [[SFAuthenticationSession alloc] initWithURL:url
                                                                       callbackURLScheme:scheme
                                                                       completionHandler:^(NSURL *url, NSError *error) {
@@ -216,6 +219,7 @@ RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
     } else if (@available(iOS 9.0, *)) {
         SFSafariViewController *vc = [[SFSafariViewController alloc] initWithURL:url];
         vc.delegate = self;
+        vc.modalPresentationStyle = UIModalPresentationPageSheet;
         self.sfViewController = vc;
         UIViewController *rootViewController = RCTPresentedViewController();
         [rootViewController presentViewController:vc animated:YES completion:nil];

@@ -42,6 +42,12 @@ export interface ConfigureOptions {
    * Skip refreshing access token. Default is false.
    */
   skipRefreshAccessToken?: boolean;
+  /**
+   * Prefer using SFSafariViewController for iOS app.
+   * No effect on Android app.
+   * Default: false
+   */
+  prefersSFSafariViewController?: boolean;
 }
 
 /**
@@ -78,6 +84,15 @@ export class ReactNativeAsyncStorageStorageDriver implements StorageDriver {
 export class ReactNativeContainer<
   T extends ReactNativeAPIClient
 > extends BaseContainer<T> {
+  /**
+   * Prefer using SFSafariViewController for iOS app.
+   * No effect on Android app.
+   * Default: false
+   *
+   * @public
+   */
+  prefersSFSafariViewController?: boolean;
+
   constructor(options?: ContainerOptions<T>) {
     const o = {
       ...options,
@@ -105,6 +120,7 @@ export class ReactNativeContainer<
 
     this.clientID = options.clientID;
     this.apiClient.endpoint = options.endpoint;
+    this.prefersSFSafariViewController = options.prefersSFSafariViewController;
     this.refreshToken = refreshToken ?? undefined;
 
     const { skipRefreshAccessToken = false } = options;
@@ -140,7 +156,11 @@ export class ReactNativeContainer<
       options.prompt = "login";
     }
     const authorizeURL = await this.authorizeEndpoint(options);
-    const redirectURL = await openAuthorizeURL(authorizeURL, redirectURIScheme);
+    const redirectURL = await openAuthorizeURL(
+      authorizeURL,
+      redirectURIScheme,
+      this.prefersSFSafariViewController ?? false
+    );
     return this._finishAuthorization(redirectURL);
   }
 
@@ -155,7 +175,7 @@ export class ReactNativeContainer<
     if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") {
       throw new Error("Only allows http / https scheme");
     }
-    await openURL(url);
+    await openURL(url, this.prefersSFSafariViewController ?? false);
   }
 
   async open(page: Page): Promise<void> {
@@ -260,7 +280,11 @@ export class ReactNativeContainer<
       prompt: "login",
       loginHint,
     });
-    const redirectURL = await openAuthorizeURL(authorizeURL, redirectURIScheme);
+    const redirectURL = await openAuthorizeURL(
+      authorizeURL,
+      redirectURIScheme,
+      this.prefersSFSafariViewController ?? false
+    );
     const result = await this._finishAuthorization(redirectURL);
 
     await this.storage.delAnonymousKeyID(this.name);
