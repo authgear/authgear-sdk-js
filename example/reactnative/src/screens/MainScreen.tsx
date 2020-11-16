@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useMemo} from 'react';
+import React, {useState, useCallback, useMemo, useEffect} from 'react';
 import {
   ScrollView,
   Text,
@@ -95,17 +95,26 @@ const HomeScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [clientID, setClientID] = useState('');
   const [endpoint, setEndpoint] = useState('');
-  const [accessToken, setAccessToken] = useState<string | undefined>(
-    authgear.getAccessToken(),
-  );
+  const [loggedIn, setLoggedIn] = useState<boolean>(false);
   const [isAnonymous, setIsAnonymous] = useState<boolean | undefined>();
 
-  const updateAccessToken = useCallback(() => {
-    setAccessToken(authgear.getAccessToken());
+  const onSessionStateChangeListener = useMemo(() => {
+    return {
+      onSessionStateChanged: (container) => {
+        setLoggedIn(container.sessionState === 'LOGGED_IN');
+      },
+    };
+  }, []);
+
+  useEffect(() => {
+    authgear.addOnSessionStateChangedListener(onSessionStateChangeListener);
+
+    return () => {
+      authgear.addOnSessionStateChangedListener(onSessionStateChangeListener);
+    };
   }, []);
 
   const postConfigure = useCallback(() => {
-    updateAccessToken();
     if (authgear.getAccessToken() == null) {
       setInitialized(true);
       return;
@@ -121,7 +130,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setInitialized(true);
       });
-  }, [updateAccessToken]);
+  }, []);
 
   const configure = useCallback(() => {
     setLoading(true);
@@ -147,11 +156,6 @@ const HomeScreen: React.FC = () => {
       });
   }, [clientID, endpoint, prefersSFSafariVC, postConfigure]);
 
-  // TODO: use on session state change after implementation is merged
-  const loggedIn = useMemo(() => {
-    return accessToken != null;
-  }, [accessToken]);
-
   const login = useCallback(() => {
     setLoading(true);
     authgear
@@ -160,7 +164,6 @@ const HomeScreen: React.FC = () => {
       })
       .then(({userInfo}) => {
         setIsAnonymous(userInfo.isAnonymous);
-        updateAccessToken();
         Alert.alert('Success', 'Logged in successfully');
       })
       .catch(() => {
@@ -169,7 +172,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [updateAccessToken]);
+  }, []);
 
   const loginAnonymously = useCallback(() => {
     setLoading(true);
@@ -177,7 +180,6 @@ const HomeScreen: React.FC = () => {
       .authenticateAnonymously()
       .then(({userInfo}) => {
         setIsAnonymous(userInfo.isAnonymous);
-        updateAccessToken();
         Alert.alert('Success', 'Logged in anonymously');
       })
       .catch((err) => {
@@ -190,7 +192,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [updateAccessToken]);
+  }, []);
 
   const openSettings = useCallback(() => {
     authgear
@@ -206,7 +208,6 @@ const HomeScreen: React.FC = () => {
       })
       .then(({userInfo}) => {
         setIsAnonymous(userInfo.isAnonymous);
-        updateAccessToken();
         Alert.alert(
           'Success',
           'Successfully promoted to normal authenticated user',
@@ -216,7 +217,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [updateAccessToken]);
+  }, []);
 
   const fetchUserInfo = useCallback(() => {
     setLoading(true);
@@ -247,7 +248,6 @@ const HomeScreen: React.FC = () => {
       .logout()
       .then(() => {
         setIsAnonymous(undefined);
-        updateAccessToken();
         Alert.alert('Success', 'Logged out successfully');
       })
       .catch(() => {
@@ -256,7 +256,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [updateAccessToken]);
+  }, []);
 
   return (
     <ScrollView style={styles.root}>
