@@ -7,8 +7,8 @@ import {
   View,
   Alert,
   TextInput,
+  Switch,
 } from 'react-native';
-import CheckBox from '@react-native-community/checkbox';
 import authgear, {Page} from '@authgear/react-native';
 
 import {ShowLoading} from '../ShowLoading';
@@ -282,9 +282,8 @@ const HomeScreen: React.FC = () => {
             </Text>
             {/* TODO: use prefersSFSafariViewController option in configure
                       after PR is merged */}
-            <CheckBox
+            <Switch
               style={styles.checkbox}
-              boxType="square"
               disabled={true}
               value={prefersSFSafariVC}
               onValueChange={setPrefersSFSafariVC}
