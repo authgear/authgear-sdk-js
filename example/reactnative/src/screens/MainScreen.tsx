@@ -133,6 +133,7 @@ const HomeScreen: React.FC = () => {
       .configure({
         clientID,
         endpoint,
+        prefersSFSafariViewController: prefersSFSafariVC,
       })
       .then(() => {
         postConfigure();
@@ -144,7 +145,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [clientID, endpoint, postConfigure]);
+  }, [clientID, endpoint, prefersSFSafariVC, postConfigure]);
 
   // TODO: use on session state change after implementation is merged
   const loggedIn = useMemo(() => {
@@ -280,11 +281,8 @@ const HomeScreen: React.FC = () => {
             <Text style={styles.safariCheckboxDesc}>
               Prefer Safari VC (iOS only)
             </Text>
-            {/* TODO: use prefersSFSafariViewController option in configure
-                      after PR is merged */}
             <Switch
               style={styles.checkbox}
-              disabled={true}
               value={prefersSFSafariVC}
               onValueChange={setPrefersSFSafariVC}
             />
