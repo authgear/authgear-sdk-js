@@ -9,6 +9,9 @@ import {
   _APIClientDelegate,
   ContainerDelegate,
   _OIDCTokenResponse,
+  OnSessionStateChangedListener,
+  SessionStateChangeReason,
+  SessionState,
 } from "./types";
 import { BaseAPIClient } from "./client";
 
@@ -70,6 +73,16 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   delegate?: ContainerDelegate;
 
   /**
+   * @public
+   */
+  sessionState: SessionState;
+
+  /**
+   * @internal
+   */
+  onSessionStateChangedListeners: OnSessionStateChangedListener[];
+
+  /**
    * @internal
    */
   storage: ContainerStorage;
@@ -109,12 +122,17 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     this.name = options.name ?? "default";
     this.apiClient = options.apiClient;
     this.storage = options.storage;
+    this.sessionState = "UNKNOWN";
+    this.onSessionStateChangedListeners = [];
   }
 
   /**
    * @internal
    */
-  async _persistTokenResponse(response: _OIDCTokenResponse): Promise<void> {
+  async _persistTokenResponse(
+    response: _OIDCTokenResponse,
+    reason: SessionStateChangeReason
+  ): Promise<void> {
     const { access_token, refresh_token, expires_in } = response;
 
     this.accessToken = access_token;
@@ -122,6 +140,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     this.expireAt = new Date(
       new Date(Date.now()).getTime() + expires_in * EXPIRE_IN_PERCENTAGE * 1000
     );
+    this._updateSessionState("LOGGED_IN", reason);
 
     if (refresh_token) {
       await this.storage.setRefreshToken(this.name, refresh_token);
@@ -131,11 +150,12 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   /**
    * @internal
    */
-  async _clearSession(): Promise<void> {
+  async _clearSession(reason: SessionStateChangeReason): Promise<void> {
     await this.storage.delRefreshToken(this.name);
     this.accessToken = undefined;
     this.refreshToken = undefined;
     this.expireAt = undefined;
+    this._updateSessionState("NO_SESSION", reason);
   }
 
   /**
@@ -188,7 +208,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     const refreshToken = await this.storage.getRefreshToken(this.name);
     if (refreshToken == null) {
       // The API client has access token but we do not have the refresh token.
-      await this._clearSession();
+      await this._clearSession("NO_TOKEN");
       return;
     }
 
@@ -208,14 +228,14 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
           await this.delegate.onRefreshTokenExpired();
         }
 
-        await this._clearSession();
+        await this._clearSession("EXPIRED");
         return;
       }
 
       throw error;
     }
 
-    await this._persistTokenResponse(tokenResponse);
+    await this._persistTokenResponse(tokenResponse, "FOUND_TOKEN");
   }
 
   /**
@@ -319,13 +339,57 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     }
 
     if (tokenResponse) {
-      await this._persistTokenResponse(tokenResponse);
+      await this._persistTokenResponse(tokenResponse, "AUTHORIZED");
     }
 
     return {
       userInfo,
       state: params.get("state") ?? undefined,
     };
+  }
+
+  /**
+   * Add listener on session state change.
+   * Listeners are distinguished by reference.
+   *
+   * @public
+   */
+  addOnSessionStateChangedListener(
+    listener: OnSessionStateChangedListener
+  ): void {
+    this.onSessionStateChangedListeners.push(listener);
+  }
+
+  /**
+   * Remove listener on session state change.
+   * Listeners are distinguished by reference.
+   *
+   * @public
+   */
+  removeOnSessionStateChangedListener(
+    listener: OnSessionStateChangedListener
+  ): void {
+    const targetIndex = this.onSessionStateChangedListeners.findIndex(
+      (listListener) => listListener === listener
+    );
+    if (targetIndex > -1) {
+      this.onSessionStateChangedListeners.splice(targetIndex, 1);
+    }
+  }
+
+  /**
+   * Update session state.
+   *
+   * @internal
+   */
+  _updateSessionState(
+    state: SessionState,
+    reason: SessionStateChangeReason
+  ): void {
+    this.sessionState = state;
+    for (const listener of this.onSessionStateChangedListeners) {
+      listener.onSessionStateChanged(this, reason);
+    }
   }
 
   /**
@@ -354,7 +418,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
           throw error;
         }
       }
-      await this._clearSession();
+      await this._clearSession("LOGOUT");
     } else {
       const config = await this.apiClient._fetchOIDCConfiguration();
       const query = new URLSearchParams();
@@ -364,7 +428,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
       const endSessionEndpoint = `${
         config.end_session_endpoint
       }?${query.toString()}`;
-      await this._clearSession();
+      await this._clearSession("LOGOUT");
       if (typeof window !== "undefined") {
         // eslint-disable-next-line no-undef
         window.location.href = endSessionEndpoint;
