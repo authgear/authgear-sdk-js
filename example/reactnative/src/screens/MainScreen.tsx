@@ -1,6 +1,14 @@
 import React, {useState, useCallback, useMemo, useEffect} from 'react';
-import {ScrollView, Text, StyleSheet, Button, View, Alert} from 'react-native';
-import Config from 'react-native-config';
+import {
+  ScrollView,
+  Text,
+  StyleSheet,
+  Button,
+  View,
+  Alert,
+  TextInput,
+  Switch,
+} from 'react-native';
 import authgear, {Page} from '@authgear/react-native';
 
 import {ShowLoading} from '../ShowLoading';
@@ -8,70 +16,145 @@ import {ShowLoading} from '../ShowLoading';
 const styles = StyleSheet.create({
   root: {
     backgroundColor: 'white',
-    padding: 20,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
     flexDirection: 'column',
   },
-  container: {
+  configure: {
+    marginBottom: 15,
+  },
+  configureDesc: {
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+  },
+  configureDescText: {
+    fontSize: 15,
+    color: '#888888',
+    marginBottom: 20,
+  },
+  input: {
+    flexDirection: 'row',
+    marginBottom: 20,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  inputLabel: {
+    fontWeight: '600',
+    color: '#707070',
+    fontSize: 15,
+    width: 80,
+  },
+  inputField: {
+    width: 200,
+    paddingBottom: 5,
+    paddingTop: 0,
+    borderBottomWidth: 1,
+    borderColor: '#888888',
+    fontSize: 16,
+  },
+  configureAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    marginTop: 5,
+  },
+  safariCheckboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  safariCheckboxDesc: {
+    width: 100,
+    fontSize: 14,
+    color: '#888888',
+  },
+  checkbox: {
+    marginLeft: 8,
+  },
+  actionDesc: {
+    fontSize: 15,
+    color: '#888888',
+    marginBottom: 20,
+  },
+  actionButtons: {
+    flexDirection: 'column',
     alignItems: 'center',
   },
   button: {
     flexDirection: 'row',
     marginBottom: 20,
   },
-  fieldGroup: {
-    width: '100%',
-    marginBottom: 15,
-  },
-  field: {
-    marginBottom: 8,
-  },
-  fieldTitle: {
-    fontWeight: '600',
-    fontSize: 16,
-    color: '#707070',
-  },
-  fieldText: {
-    fontSize: 15,
-    color: '#888888',
-  },
 });
 
-const FALLBACK_TEXT = 'N/A';
-const redirectURI = Config.AUTHGEAR_REDIRECT_URI;
+const redirectURI = 'com.authgear.example://host/path';
 const ANONYMOUS_USERS_DISABLED_ERROR = 'unauthorized_client';
 
 const HomeScreen: React.FC = () => {
+  const [initialized, setInitialized] = useState(false);
+  const [prefersSFSafariVC, setPrefersSFSafariVC] = useState(false);
   const [loading, setLoading] = useState(false);
-  const clientID = Config.AUTHGEAR_CLIENT_ID;
-  const endpoint = Config.AUTHGEAR_ENDPOINT;
-  const [accessToken, setAccessToken] = useState<string | undefined>(
-    authgear.getAccessToken(),
-  );
+  const [clientID, setClientID] = useState('');
+  const [endpoint, setEndpoint] = useState('');
+  const [loggedIn, setLoggedIn] = useState<boolean>(false);
   const [isAnonymous, setIsAnonymous] = useState<boolean | undefined>();
-  const [userID, setUserID] = useState<string | undefined>();
+
+  const onSessionStateChangeListener = useMemo(() => {
+    return {
+      onSessionStateChanged: (container) => {
+        setLoggedIn(container.sessionState === 'LOGGED_IN');
+      },
+    };
+  }, []);
 
   useEffect(() => {
-    if (accessToken != null) {
-      authgear
-        .fetchUserInfo()
-        .then((userInfo) => {
-          setIsAnonymous(userInfo.isAnonymous);
-          setUserID(userInfo.sub);
-        })
-        .catch(() => {
-          Alert.alert('Error', 'Failed to initialize screen state');
-        });
+    authgear.addOnSessionStateChangedListener(onSessionStateChangeListener);
+
+    return () => {
+      authgear.addOnSessionStateChangedListener(onSessionStateChangeListener);
+    };
+  }, []);
+
+  const postConfigure = useCallback(() => {
+    if (authgear.getAccessToken() == null) {
+      setInitialized(true);
+      return;
     }
+    authgear
+      .fetchUserInfo()
+      .then((userInfo) => {
+        setIsAnonymous(userInfo.isAnonymous);
+      })
+      .catch(() => {
+        Alert.alert('Error', 'Failed to fetch user info');
+      })
+      .finally(() => {
+        setInitialized(true);
+      });
   }, []);
 
-  const updateAccessToken = useCallback(() => {
-    setAccessToken(authgear.getAccessToken());
-  }, []);
-
-  // TODO: use on session state change after implementation is merged
-  const loggedIn = useMemo(() => {
-    return accessToken != null;
-  }, [accessToken]);
+  const configure = useCallback(() => {
+    setLoading(true);
+    if (clientID === '' || endpoint === '') {
+      Alert.alert('Error', 'Please fill in client ID and endpoint');
+      return;
+    }
+    authgear
+      .configure({
+        clientID,
+        endpoint,
+        prefersSFSafariViewController: prefersSFSafariVC,
+      })
+      .then(() => {
+        postConfigure();
+        Alert.alert('Success', 'Configured Authgear container successfully');
+      })
+      .catch(() => {
+        Alert.alert('Error', 'Failed to configure Authgear container');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [clientID, endpoint, prefersSFSafariVC, postConfigure]);
 
   const login = useCallback(() => {
     setLoading(true);
@@ -81,8 +164,6 @@ const HomeScreen: React.FC = () => {
       })
       .then(({userInfo}) => {
         setIsAnonymous(userInfo.isAnonymous);
-        setUserID(userInfo.sub);
-        updateAccessToken();
         Alert.alert('Success', 'Logged in successfully');
       })
       .catch(() => {
@@ -99,15 +180,12 @@ const HomeScreen: React.FC = () => {
       .authenticateAnonymously()
       .then(({userInfo}) => {
         setIsAnonymous(userInfo.isAnonymous);
-        setUserID(userInfo.sub);
-        updateAccessToken();
         Alert.alert('Success', 'Logged in anonymously');
       })
       .catch((err) => {
         if (err.error === ANONYMOUS_USERS_DISABLED_ERROR) {
           Alert.alert('Error', 'Anonymous users are not allowed');
         } else {
-          console.error(err);
           Alert.alert('Error', 'Failed to authenticate anonymously');
         }
       })
@@ -117,7 +195,6 @@ const HomeScreen: React.FC = () => {
   }, []);
 
   const openSettings = useCallback(() => {
-    // FIXME: crash on Android
     authgear
       .open(Page.Settings)
       .catch(() => Alert.alert('Error', 'Failed to open setting page'));
@@ -131,8 +208,6 @@ const HomeScreen: React.FC = () => {
       })
       .then(({userInfo}) => {
         setIsAnonymous(userInfo.isAnonymous);
-        setUserID(userInfo.sub);
-        updateAccessToken();
         Alert.alert(
           'Success',
           'Successfully promoted to normal authenticated user',
@@ -150,7 +225,6 @@ const HomeScreen: React.FC = () => {
       .fetchUserInfo()
       .then((userInfo) => {
         setIsAnonymous(userInfo.isAnonymous);
-        setUserID(userInfo.sub);
         Alert.alert(
           'Success',
           [
@@ -174,8 +248,6 @@ const HomeScreen: React.FC = () => {
       .logout()
       .then(() => {
         setIsAnonymous(undefined);
-        setUserID(undefined);
-        updateAccessToken();
         Alert.alert('Success', 'Logged out successfully');
       })
       .catch(() => {
@@ -187,57 +259,87 @@ const HomeScreen: React.FC = () => {
   }, []);
 
   return (
-    <ScrollView style={styles.root} contentContainerStyle={styles.container}>
-      <View style={styles.fieldGroup}>
-        <View style={styles.field}>
-          <Text style={styles.fieldTitle}>Client ID</Text>
-          <Text style={styles.fieldText}>{clientID ?? FALLBACK_TEXT}</Text>
-        </View>
-        <View style={styles.field}>
-          <Text style={styles.fieldTitle}>Endpoint</Text>
-          <Text style={styles.fieldText}>{endpoint ?? FALLBACK_TEXT}</Text>
-        </View>
-        <View style={styles.field}>
-          <Text style={styles.fieldTitle}>Is Anonymous</Text>
-          <Text style={styles.fieldText}>
-            {isAnonymous?.toString() ?? FALLBACK_TEXT}
+    <ScrollView style={styles.root}>
+      <View style={styles.configure}>
+        <View style={styles.configureDesc}>
+          <Text style={styles.configureDescText}>
+            Enter Client ID and Endpoint, and then click Configure to initialize
+            SDK
           </Text>
         </View>
-        <View style={styles.field}>
-          <Text style={styles.fieldTitle}>User ID</Text>
-          <Text style={styles.fieldText}>{userID ?? FALLBACK_TEXT}</Text>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>Client ID</Text>
+          <TextInput style={styles.inputField} onChangeText={setClientID} />
+        </View>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>Endpoint</Text>
+          <TextInput style={styles.inputField} onChangeText={setEndpoint} />
+        </View>
+        <View style={styles.configureAction}>
+          <Button title="Configure" onPress={configure} disabled={loading} />
+          <View style={styles.safariCheckboxContainer}>
+            <Text style={styles.safariCheckboxDesc}>
+              Prefer Safari VC (iOS only)
+            </Text>
+            <Switch
+              style={styles.checkbox}
+              value={prefersSFSafariVC}
+              onValueChange={setPrefersSFSafariVC}
+            />
+          </View>
         </View>
       </View>
       <ShowLoading loading={loading} />
-      <View style={styles.button}>
-        <Button
-          title="Authenticate Anonymously"
-          onPress={loginAnonymously}
-          disabled={loggedIn}
-        />
-      </View>
-      <View style={styles.button}>
-        <Button title="Authorize" onPress={login} disabled={loggedIn} />
-      </View>
-      <View style={styles.button}>
-        <Button title="Open Settings" onPress={openSettings} />
-      </View>
-      <View style={styles.button}>
-        <Button
-          title="Promote Anonymous User"
-          onPress={promoteAnonymousUser}
-          disabled={!isAnonymous || !loggedIn}
-        />
-      </View>
-      <View style={styles.button}>
-        <Button
-          title="Fetch User Info"
-          onPress={fetchUserInfo}
-          disabled={!loggedIn}
-        />
-      </View>
-      <View style={styles.button}>
-        <Button title="Logout" onPress={logout} disabled={!loggedIn} />
+      <Text style={styles.actionDesc}>
+        After that, remember to add redirect URI {redirectURI} to OAuth client
+        through Authgear portal or editing authgear.yaml config file.{' '}
+      </Text>
+      <Text style={styles.actionDesc}>
+        Click one of the following buttons to try different features.
+      </Text>
+      <View style={styles.actionButtons}>
+        <View style={styles.button}>
+          <Button
+            title="Authenticate Anonymously"
+            onPress={loginAnonymously}
+            disabled={!initialized || loggedIn}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Authorize"
+            onPress={login}
+            disabled={!initialized || loggedIn}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Open Settings"
+            onPress={openSettings}
+            disabled={!initialized}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Promote Anonymous User"
+            onPress={promoteAnonymousUser}
+            disabled={!initialized || !isAnonymous || !loggedIn}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Fetch User Info"
+            onPress={fetchUserInfo}
+            disabled={!initialized || !loggedIn}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Logout"
+            onPress={logout}
+            disabled={!initialized || !loggedIn}
+          />
+        </View>
       </View>
     </ScrollView>
   );
