@@ -159,14 +159,14 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   }
 
   /**
-   * @internal
+   * @public
    */
   getAccessToken(): string | undefined {
     return this.accessToken;
   }
 
   /**
-   * @internal
+   * @public
    */
   shouldRefreshAccessToken(): boolean {
     // No need to refresh if we do not even have a refresh token.
@@ -195,7 +195,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   }
 
   /**
-   * @internal
+   * @public
    */
   async refreshAccessToken(): Promise<void> {
     // If token request fails due to other reasons, session will be kept and
