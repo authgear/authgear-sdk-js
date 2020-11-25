@@ -133,7 +133,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     this.expireAt = new Date(
       new Date(Date.now()).getTime() + expires_in * EXPIRE_IN_PERCENTAGE * 1000
     );
-    this._updateSessionState("LOGGED_IN", reason);
+    this._updateSessionState("AUTHENTICATED", reason);
 
     if (refresh_token) {
       await this.storage.setRefreshToken(this.name, refresh_token);
@@ -217,7 +217,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
       // Clear the session in this case.
       // https://tools.ietf.org/html/rfc6749#section-5.2
       if (error.error === "invalid_grant") {
-        await this._clearSession("EXPIRED");
+        await this._clearSession("INVALID");
         return;
       }
 
@@ -328,7 +328,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     }
 
     if (tokenResponse) {
-      await this._persistTokenResponse(tokenResponse, "AUTHORIZED");
+      await this._persistTokenResponse(tokenResponse, "AUTHENTICATED");
     }
 
     return {

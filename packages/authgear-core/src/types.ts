@@ -215,45 +215,39 @@ export interface _OIDCTokenResponse {
 }
 
 /**
- * The state of the user session in authgear. An authgear instance is in one and only one specific
- * state at any given point in time.
+ * The session state.
  *
- * For example, the session state of an authgear instance that is just constructed always has "UNKNOWN".
- * After a call to [Authgear.configure], the session state would be
- * "LOGGED_IN" if a previous session is found, or "NO_SESSION" if there is
- * no such session.
+ * An freshly constructed instance has the session state "UNKNOWN";
+ *
+ * After a call to configure, the session state would become "AUTHENTICATED" if a previous session was found,
+ * or "NO_SESSION" if such session was not found.
  *
  * @public
  */
-export type SessionState = "LOGGED_IN" | "NO_SESSION" | "UNKNOWN";
+export type SessionState = "UNKNOWN" | "NO_SESSION" | "AUTHENTICATED";
 
 /**
- * The reason that [SessionState] is changed in a user session represented by an authgear instance.
+ * The reason why SessionState is changed.
  *
- * These reasons can be thought of as the transition of a [SessionState], which is described as
- * follows:
+ * These reasons can be thought of as the transition of a SessionState, which is described as follows:
+ *
  * ```
- *                                                          Logout/Expiry
- *                                                +-----------------------------------------+
- *                                                v                                         |
- *    State: UNKNOWN ----- NO_TOKEN ----> State: NO_SESSION ---- AUTHORIZED -----> State: LOGGED_IN
+ *                                                          LOGOUT / INVALID
+ *                                           +----------------------------------------------+
+ *                                           v                                              |
+ *    State: UNKNOWN ----- NO_TOKEN ----> State: NO_SESSION ---- AUTHENTICATED -----> State: AUTHENTICATED
  *      |                                                                                ^
  *      +--------------------------------------------------------------------------------+
  *                                         FOUND_TOKEN
  * ```
- *
- * The same can be done for login. A "LOGGED_IN" with "AUTHORIZED" means the
- * user had just logged in, or if the reason is "FOUND_TOKEN" instead, a
- * previous session of the user is found.
- *
  * @public
  */
 export type SessionStateChangeReason =
   | "NO_TOKEN"
   | "FOUND_TOKEN"
-  | "AUTHORIZED"
+  | "AUTHENTICATED"
   | "LOGOUT"
-  | "EXPIRED";
+  | "INVALID";
 
 /**
  * @public
