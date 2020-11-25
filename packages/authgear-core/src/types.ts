@@ -112,19 +112,6 @@ export interface _APIClientDelegate {
 /**
  * @public
  */
-export interface ContainerDelegate {
-  /**
-   * Called when the server rejects the refresh token.
-   * When this function is called, the session is not cleared yet.
-   *
-   * @public
-   */
-  onRefreshTokenExpired(): Promise<void>;
-}
-
-/**
- * @public
- */
 export function decodeUserInfo(r: any): UserInfo {
   return {
     sub: r["sub"],
@@ -228,23 +215,19 @@ export interface _OIDCTokenResponse {
 }
 
 /**
- * Possible values: "LOGGED_IN" | "NO_SESSION" | "UNKNOWN"
- *
  * The state of the user session in authgear. An authgear instance is in one and only one specific
  * state at any given point in time.
  *
- * For example, the session state of an authgear instance that is just constructed always has
- * "UNKNOWN". After a call to [Authgear.configure], the session state would be
+ * For example, the session state of an authgear instance that is just constructed always has "UNKNOWN".
+ * After a call to [Authgear.configure], the session state would be
  * "LOGGED_IN" if a previous session is found, or "NO_SESSION" if there is
- * no such sessions.
+ * no such session.
  *
  * @public
  */
 export type SessionState = "LOGGED_IN" | "NO_SESSION" | "UNKNOWN";
 
 /**
- * Possible values: "NO_TOKEN" | "FOUND_TOKEN" | "AUTHORIZED" | "LOGOUT" | "EXPIRED"
- *
  * The reason that [SessionState] is changed in a user session represented by an authgear instance.
  *
  * These reasons can be thought of as the transition of a [SessionState], which is described as
@@ -258,9 +241,6 @@ export type SessionState = "LOGGED_IN" | "NO_SESSION" | "UNKNOWN";
  *      +--------------------------------------------------------------------------------+
  *                                         FOUND_TOKEN
  * ```
- *
- * These transitions and states can be used in [OnSessionStateChangedListener]
- * to examine the current state of authgear.
  *
  * The same can be done for login. A "LOGGED_IN" with "AUTHORIZED" means the
  * user had just logged in, or if the reason is "FOUND_TOKEN" instead, a
@@ -276,19 +256,18 @@ export type SessionStateChangeReason =
   | "EXPIRED";
 
 /**
- * [OnSessionStateChangedListener] can be used to listen to state changes and inspect
- * the reason of the state change.
- *
- * For example, to check if a user is logged out, check if the new state is "NO_SESSION"
- * and reason "LOGOUT"
- *
- * To check if the session is expired, check if the new state is "NO_SESSION" and
- * reason "EXPIRED"
- *
  * @public
  */
-export interface OnSessionStateChangedListener {
-  onSessionStateChanged: <T extends BaseAPIClient>(
+export interface ContainerDelegate {
+  /**
+   * This callback will be called when the session state is changed.
+   *
+   * For example, when the user logs out, the new state is "NO_SESSION"
+   * and the reason is "LOGOUT".
+   *
+   * @public
+   */
+  onSessionStateChange: <T extends BaseAPIClient>(
     container: BaseContainer<T>,
     reason: SessionStateChangeReason
   ) => void;
