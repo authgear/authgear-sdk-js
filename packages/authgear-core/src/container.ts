@@ -9,7 +9,6 @@ import {
   _APIClientDelegate,
   ContainerDelegate,
   _OIDCTokenResponse,
-  OnSessionStateChangedListener,
   SessionStateChangeReason,
   SessionState,
 } from "./types";
@@ -80,11 +79,6 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   /**
    * @internal
    */
-  onSessionStateChangedListeners: OnSessionStateChangedListener[];
-
-  /**
-   * @internal
-   */
   storage: ContainerStorage;
 
   /**
@@ -123,7 +117,6 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     this.apiClient = options.apiClient;
     this.storage = options.storage;
     this.sessionState = "UNKNOWN";
-    this.onSessionStateChangedListeners = [];
   }
 
   /**
@@ -140,7 +133,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     this.expireAt = new Date(
       new Date(Date.now()).getTime() + expires_in * EXPIRE_IN_PERCENTAGE * 1000
     );
-    this._updateSessionState("LOGGED_IN", reason);
+    this._updateSessionState("AUTHENTICATED", reason);
 
     if (refresh_token) {
       await this.storage.setRefreshToken(this.name, refresh_token);
@@ -224,11 +217,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
       // Clear the session in this case.
       // https://tools.ietf.org/html/rfc6749#section-5.2
       if (error.error === "invalid_grant") {
-        if (this.delegate != null) {
-          await this.delegate.onRefreshTokenExpired();
-        }
-
-        await this._clearSession("EXPIRED");
+        await this._clearSession("INVALID");
         return;
       }
 
@@ -339,42 +328,13 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     }
 
     if (tokenResponse) {
-      await this._persistTokenResponse(tokenResponse, "AUTHORIZED");
+      await this._persistTokenResponse(tokenResponse, "AUTHENTICATED");
     }
 
     return {
       userInfo,
       state: params.get("state") ?? undefined,
     };
-  }
-
-  /**
-   * Add listener on session state change.
-   * Listeners are distinguished by reference.
-   *
-   * @public
-   */
-  addOnSessionStateChangedListener(
-    listener: OnSessionStateChangedListener
-  ): void {
-    this.onSessionStateChangedListeners.push(listener);
-  }
-
-  /**
-   * Remove listener on session state change.
-   * Listeners are distinguished by reference.
-   *
-   * @public
-   */
-  removeOnSessionStateChangedListener(
-    listener: OnSessionStateChangedListener
-  ): void {
-    const targetIndex = this.onSessionStateChangedListeners.findIndex(
-      (listListener) => listListener === listener
-    );
-    if (targetIndex > -1) {
-      this.onSessionStateChangedListeners.splice(targetIndex, 1);
-    }
   }
 
   /**
@@ -387,9 +347,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     reason: SessionStateChangeReason
   ): void {
     this.sessionState = state;
-    for (const listener of this.onSessionStateChangedListeners) {
-      listener.onSessionStateChanged(this, reason);
-    }
+    this.delegate?.onSessionStateChange(this, reason);
   }
 
   /**

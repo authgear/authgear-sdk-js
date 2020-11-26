@@ -9,7 +9,13 @@ import {
   TextInput,
   Switch,
 } from 'react-native';
-import authgear, {Page} from '@authgear/react-native';
+import authgear, {
+  Page,
+  ContainerDelegate,
+  BaseContainer,
+  BaseAPIClient,
+  SessionStateChangeReason,
+} from '@authgear/react-native';
 
 import {ShowLoading} from '../ShowLoading';
 
@@ -98,21 +104,25 @@ const HomeScreen: React.FC = () => {
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
   const [isAnonymous, setIsAnonymous] = useState<boolean | undefined>();
 
-  const onSessionStateChangeListener = useMemo(() => {
-    return {
-      onSessionStateChanged: (container) => {
-        setLoggedIn(container.sessionState === 'LOGGED_IN');
+  const delegate: ContainerDelegate = useMemo(() => {
+    const d: ContainerDelegate = {
+      onSessionStateChange: (
+        container: BaseContainer<BaseAPIClient>,
+        _reason: SessionStateChangeReason,
+      ) => {
+        setLoggedIn(container.sessionState === 'AUTHENTICATED');
       },
     };
+    return d;
   }, []);
 
   useEffect(() => {
-    authgear.addOnSessionStateChangedListener(onSessionStateChangeListener);
+    authgear.delegate = delegate;
 
     return () => {
-      authgear.addOnSessionStateChangedListener(onSessionStateChangeListener);
+      authgear.delegate = undefined;
     };
-  }, []);
+  }, [delegate]);
 
   const postConfigure = useCallback(() => {
     if (authgear.getAccessToken() == null) {
