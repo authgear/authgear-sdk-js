@@ -64,6 +64,10 @@ export interface AuthorizeOptions {
    * UI locale tags
    */
   uiLocales?: string[];
+  /**
+   * OAuth response type
+   */
+  responseType?: string;
 }
 
 /**

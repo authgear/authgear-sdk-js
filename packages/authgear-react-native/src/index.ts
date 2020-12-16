@@ -48,6 +48,12 @@ export interface ConfigureOptions {
    * Default: false
    */
   prefersSFSafariViewController?: boolean;
+  /**
+   * isThirdPartyApp indicate if the application a third party app.
+   * A third party app means the app doesn't share common-domain with Authgear thus the session cookie cannot be shared.
+   * If not specified, default to true. So by default the application is considered third party.
+   */
+  isThirdPartyApp?: boolean;
 }
 
 /**
@@ -123,6 +129,7 @@ export class ReactNativeContainer<
     this.clientID = options.clientID;
     this.apiClient.endpoint = options.endpoint;
     this.prefersSFSafariViewController = options.prefersSFSafariViewController;
+    this.isThirdParty = options.isThirdPartyApp ?? true;
     this.refreshToken = refreshToken ?? undefined;
 
     const { skipRefreshAccessToken = false } = options;
