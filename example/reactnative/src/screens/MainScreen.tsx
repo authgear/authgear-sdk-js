@@ -65,11 +65,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginTop: 5,
   },
-  safariCheckboxContainer: {
+  optionsContainer: {
+    flexDirection: 'column',
+  },
+  checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    margin: 16,
   },
-  safariCheckboxDesc: {
+  checkboxDesc: {
     width: 100,
     fontSize: 14,
     color: '#888888',
@@ -98,6 +102,7 @@ const ANONYMOUS_USERS_DISABLED_ERROR = 'unauthorized_client';
 const HomeScreen: React.FC = () => {
   const [initialized, setInitialized] = useState(false);
   const [prefersSFSafariVC, setPrefersSFSafariVC] = useState(false);
+  const [isThirdParty, setIsThirdParty] = useState(true);
   const [loading, setLoading] = useState(false);
   const [clientID, setClientID] = useState('');
   const [endpoint, setEndpoint] = useState('');
@@ -153,6 +158,7 @@ const HomeScreen: React.FC = () => {
         clientID,
         endpoint,
         prefersSFSafariViewController: prefersSFSafariVC,
+        isThirdPartyApp: isThirdParty,
       })
       .then(() => {
         postConfigure();
@@ -279,16 +285,17 @@ const HomeScreen: React.FC = () => {
         </View>
         <View style={styles.input}>
           <Text style={styles.inputLabel}>Client ID</Text>
-          <TextInput style={styles.inputField} onChangeText={setClientID} />
+          <TextInput style={styles.inputField} onChangeText={setClientID} autoCapitalize="none" autoCompleteType="off" autoCorrect={false} />
         </View>
         <View style={styles.input}>
           <Text style={styles.inputLabel}>Endpoint</Text>
-          <TextInput style={styles.inputField} onChangeText={setEndpoint} />
+          <TextInput style={styles.inputField} onChangeText={setEndpoint} autoCapitalize="none" autoCompleteType="off" autoCorrect={false} />
         </View>
         <View style={styles.configureAction}>
           <Button title="Configure" onPress={configure} disabled={loading} />
-          <View style={styles.safariCheckboxContainer}>
-            <Text style={styles.safariCheckboxDesc}>
+        <View style={styles.optionsContainer}>
+          <View style={styles.checkboxContainer}>
+            <Text style={styles.checkboxDesc}>
               Prefer Safari VC (iOS only)
             </Text>
             <Switch
@@ -296,6 +303,17 @@ const HomeScreen: React.FC = () => {
               value={prefersSFSafariVC}
               onValueChange={setPrefersSFSafariVC}
             />
+          </View>
+          <View style={styles.checkboxContainer}>
+            <Text style={styles.checkboxDesc}>
+              Third-party client
+            </Text>
+            <Switch
+              style={styles.checkbox}
+              value={isThirdParty}
+              onValueChange={setIsThirdParty}
+            />
+          </View>
           </View>
         </View>
       </View>
@@ -312,7 +330,7 @@ const HomeScreen: React.FC = () => {
           <Button
             title="Authenticate Anonymously"
             onPress={loginAnonymously}
-            disabled={!initialized || loggedIn}
+            disabled={!initialized || loggedIn || isThirdParty}
           />
         </View>
         <View style={styles.button}>
