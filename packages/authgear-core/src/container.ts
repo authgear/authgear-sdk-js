@@ -244,10 +244,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
       await this.storage.setOIDCCodeVerifier(this.name, codeVerifier.verifier);
 
       query.append("response_type", "code");
-      query.append(
-        "scope",
-        "openid offline_access https://authgear.com/scopes/full-access"
-      );
+      query.append("scope", "openid offline_access");
       query.append("code_challenge_method", "S256");
       query.append("code_challenge", codeVerifier.challenge);
     } else {
