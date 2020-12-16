@@ -85,8 +85,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             }
 
             Context context = currentActivity;
-            Uri uri = Uri.parse(urlString).normalizeScheme();
-            Intent intent = OAuthCoordinatorActivity.createAuthorizationIntent(context, uri);
+            Intent intent = WebViewActivity.createIntent(context, urlString);
             currentActivity.startActivity(intent);
 
             promise.resolve(null);

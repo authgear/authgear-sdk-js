@@ -1,6 +1,7 @@
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 12000)
 #import <AuthenticationServices/AuthenticationServices.h>
 #endif
+#import <WebKit/WebKit.h>
 #import <SafariServices/SafariServices.h>
 #import <CommonCrypto/CommonDigest.h>
 #import <React/RCTUtils.h>
@@ -26,6 +27,7 @@ static void postNotificationWithURL(NSURL *URL, id sender)
 // We must have strong reference to the view controller otherwise it is closed immediately when
 // it goes out of scope.
 @property (nonatomic, strong) SFSafariViewController *sfViewController API_AVAILABLE(ios(9));
+@property (nonatomic, strong) UIViewController *webViewViewController API_AVAILABLE(ios(8));
 @end
 #endif
 
@@ -112,41 +114,21 @@ RCT_EXPORT_METHOD(openURL:(NSURL *)url
                   resolve:(RCTPromiseResolveBlock)resolve
                    reject:(RCTPromiseRejectBlock)reject)
 {
-    if (@available(iOS 12.0, *) && !prefersSFSafariViewController) {
-        self.asSession = [[ASWebAuthenticationSession alloc] initWithURL:url
-                                                       callbackURLScheme:nil
-                                                       completionHandler:^(NSURL *url, NSError *error) {
-            self.asSession = nil;
-        }];
-        if (@available(iOS 13.0, *)) {
-            self.asSession.presentationContextProvider = self;
-        }
-        BOOL started = [self.asSession start];
-        if (!started) {
-            if (reject) {
-                reject(RCTErrorUnspecified, [NSString stringWithFormat:@"Unable to open URL: %@", url], nil);
-            }
-        } else {
-            if (resolve) {
-                resolve(nil);
-            }
-        }
-    } else if (@available(iOS 11.0, *) && !prefersSFSafariViewController) {
-        self.sfSession = [[SFAuthenticationSession alloc] initWithURL:url
-                                                    callbackURLScheme:nil
-                                                    completionHandler:^(NSURL *url, NSError *error){
-            self.sfSession = nil;
-        }];
-        BOOL started = [self.sfSession start];
-        if (!started) {
-            if (reject) {
-                reject(RCTErrorUnspecified, [NSString stringWithFormat:@"Unable to open URL: %@", url], nil);
-            }
-        } else {
-            if (resolve) {
-                resolve(nil);
-            }
-        }
+    if (!prefersSFSafariViewController) {
+        UIViewController *vc = [[UIViewController alloc] init];
+        WKWebView *wv = [[WKWebView alloc] initWithFrame:vc.view.bounds];
+        wv.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [wv loadRequest:[NSURLRequest requestWithURL:url]];
+        [vc.view addSubview:wv];
+        vc.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissWebView)];
+        self.webViewViewController = vc;
+
+        UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
+        nav.modalPresentationStyle = UIModalPresentationPageSheet;
+
+        UIViewController *rootViewController = RCTPresentedViewController();
+        [rootViewController presentViewController:nav animated:YES completion:nil];
+        resolve(nil);
     } else if (@available(iOS 9.0, *)) {
         SFSafariViewController *vc = [[SFSafariViewController alloc] initWithURL:url];
         vc.delegate = self;
@@ -302,9 +284,19 @@ RCT_EXPORT_METHOD(signAnonymousToken:(NSString *)kid data:(NSString *)s resolver
             self.sfViewController = nil;
           }];
         }
+        if (self.webViewViewController != nil) {
+          [self.webViewViewController.presentingViewController dismissViewControllerAnimated:true completion:^ {
+            self.webViewViewController = nil;
+          }];
+        }
     }
     self.openURLResolve = nil;
     self.openURLReject = nil;
+}
+
+- (void)dismissWebView API_AVAILABLE(ios(9))
+{
+    [self cleanup];
 }
 
 - (void)safariViewControllerDidFinish:(SFSafariViewController *)controller API_AVAILABLE(ios(9))

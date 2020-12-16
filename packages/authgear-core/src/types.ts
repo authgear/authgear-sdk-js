@@ -135,6 +135,14 @@ export interface ChallengeResponse {
 /**
  * @public
  */
+export interface AppSessionTokenResponse {
+  app_session_token: string;
+  expire_at: string;
+}
+
+/**
+ * @public
+ */
 export interface ContainerStorage {
   setRefreshToken(namespace: string, refreshToken: string): Promise<void>;
   setOIDCCodeVerifier(namespace: string, code: string): Promise<void>;

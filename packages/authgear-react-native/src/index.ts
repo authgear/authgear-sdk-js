@@ -15,7 +15,6 @@ import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import { openURL, openAuthorizeURL } from "./nativemodule";
 import { getCallbackURLScheme } from "./url";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
-import URL from "core-js-pure/features/url";
 export * from "@authgear/core";
 
 /**
@@ -186,17 +185,33 @@ export class ReactNativeContainer<
   }
 
   /**
-   * Open the URL with the user agent that is used to perform authentication.
+   * Open the URL with the user agent authenticated with current user.
    */
 
   // eslint-disable-next-line class-methods-use-this
   async openURL(url: string): Promise<void> {
-    // validate url to avoid error in native code
-    const urlObj = new URL(url);
-    if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") {
-      throw new Error("Only allows http / https scheme");
+    let targetURL = url;
+
+    const refreshToken = await this.storage.getRefreshToken(this.name);
+    if (refreshToken) {
+      // Use app session token to copy session into webview.
+      const { app_session_token } = await this.apiClient.appSessionToken(
+        refreshToken
+      );
+
+      const loginHint = `https://authgear.com/login_hint?type=app_session_token&app_session_token=${encodeURIComponent(
+        app_session_token
+      )}`;
+
+      targetURL = await this.authorizeEndpoint({
+        redirectURI: url,
+        prompt: "none",
+        responseType: "none",
+        loginHint,
+      });
     }
-    await openURL(url, this.prefersSFSafariViewController ?? false);
+
+    await openURL(targetURL, this.prefersSFSafariViewController ?? false);
   }
 
   async open(page: Page): Promise<void> {
