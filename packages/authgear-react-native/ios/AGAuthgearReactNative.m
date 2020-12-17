@@ -20,16 +20,8 @@ static void postNotificationWithURL(NSURL *URL, id sender)
 @interface AGAuthgearReactNative()
 @property (nonatomic, strong) RCTPromiseResolveBlock openURLResolve;
 @property (nonatomic, strong) RCTPromiseRejectBlock openURLReject;
+@property (nonatomic, strong) UIViewController *webViewViewController;
 @end
-
-#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 9000)
-@interface AGAuthgearReactNative() <SFSafariViewControllerDelegate>
-// We must have strong reference to the view controller otherwise it is closed immediately when
-// it goes out of scope.
-@property (nonatomic, strong) SFSafariViewController *sfViewController API_AVAILABLE(ios(9));
-@property (nonatomic, strong) UIViewController *webViewViewController API_AVAILABLE(ios(8));
-@end
-#endif
 
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 11000)
 @interface AGAuthgearReactNative()
@@ -110,48 +102,34 @@ RCT_EXPORT_METHOD(dismiss:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseReje
 }
 
 RCT_EXPORT_METHOD(openURL:(NSURL *)url
-                  prefersSFSafariViewController:(BOOL)prefersSFSafariViewController
                   resolve:(RCTPromiseResolveBlock)resolve
                    reject:(RCTPromiseRejectBlock)reject)
 {
-    if (!prefersSFSafariViewController) {
-        UIViewController *vc = [[UIViewController alloc] init];
-        WKWebView *wv = [[WKWebView alloc] initWithFrame:vc.view.bounds];
-        wv.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        [wv loadRequest:[NSURLRequest requestWithURL:url]];
-        [vc.view addSubview:wv];
-        vc.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissWebView)];
-        self.webViewViewController = vc;
+    UIViewController *vc = [[UIViewController alloc] init];
+    WKWebView *wv = [[WKWebView alloc] initWithFrame:vc.view.bounds];
+    wv.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    [wv loadRequest:[NSURLRequest requestWithURL:url]];
+    [vc.view addSubview:wv];
+    vc.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissWebView)];
+    self.webViewViewController = vc;
 
-        UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
-        nav.modalPresentationStyle = UIModalPresentationPageSheet;
+    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
+    nav.modalPresentationStyle = UIModalPresentationPageSheet;
 
-        UIViewController *rootViewController = RCTPresentedViewController();
-        [rootViewController presentViewController:nav animated:YES completion:nil];
-        resolve(nil);
-    } else if (@available(iOS 9.0, *)) {
-        SFSafariViewController *vc = [[SFSafariViewController alloc] initWithURL:url];
-        vc.delegate = self;
-        vc.modalPresentationStyle = UIModalPresentationPageSheet;
-        self.sfViewController = vc;
-        UIViewController *rootViewController = RCTPresentedViewController();
-        [rootViewController presentViewController:vc animated:YES completion:nil];
-        resolve(nil);
-    } else {
-        reject(RCTErrorUnspecified, @"iOS >= 9 is required", nil);
-    }
+    UIViewController *rootViewController = RCTPresentedViewController();
+    [rootViewController presentViewController:nav animated:YES completion:nil];
+    resolve(nil);
 }
 
 RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
                             scheme:(NSString *)scheme
-      prefersSFSafariViewController:(BOOL)prefersSFSafariViewController
                            resolve:(RCTPromiseResolveBlock)resolve
                             reject:(RCTPromiseRejectBlock)reject)
 {
     self.openURLResolve = resolve;
     self.openURLReject = reject;
 
-    if (@available(iOS 12.0, *) && !prefersSFSafariViewController) {
+    if (@available(iOS 12.0, *)) {
         self.asSession = [[ASWebAuthenticationSession alloc] initWithURL:url
                                                                             callbackURLScheme:scheme
                                                                             completionHandler:^(NSURL *url, NSError *error) {
@@ -176,7 +154,7 @@ RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
             self.asSession.presentationContextProvider = self;
         }
         [self.asSession start];
-    } else if (@available(iOS 11.0, *) && !prefersSFSafariViewController) {
+    } else if (@available(iOS 11.0, *)) {
         self.sfSession = [[SFAuthenticationSession alloc] initWithURL:url
                                                                       callbackURLScheme:scheme
                                                                       completionHandler:^(NSURL *url, NSError *error) {
@@ -198,18 +176,20 @@ RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
             [self cleanup];
         }];
         [self.sfSession start];
-    } else if (@available(iOS 9.0, *)) {
-        SFSafariViewController *vc = [[SFSafariViewController alloc] initWithURL:url];
-        vc.delegate = self;
-        vc.modalPresentationStyle = UIModalPresentationPageSheet;
-        self.sfViewController = vc;
-        UIViewController *rootViewController = RCTPresentedViewController();
-        [rootViewController presentViewController:vc animated:YES completion:nil];
     } else {
-        if (self.openURLReject) {
-            self.openURLReject(RCTErrorUnspecified, @"iOS >= 9 is required", nil);
-        }
-        [self cleanup];
+        UIViewController *vc = [[UIViewController alloc] init];
+        WKWebView *wv = [[WKWebView alloc] initWithFrame:vc.view.bounds];
+        wv.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [wv loadRequest:[NSURLRequest requestWithURL:url]];
+        [vc.view addSubview:wv];
+        vc.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissWebView)];
+        self.webViewViewController = vc;
+
+        UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
+        nav.modalPresentationStyle = UIModalPresentationPageSheet;
+
+        UIViewController *rootViewController = RCTPresentedViewController();
+        [rootViewController presentViewController:nav animated:YES completion:nil];
     }
 }
 
@@ -278,37 +258,21 @@ RCT_EXPORT_METHOD(signAnonymousToken:(NSString *)kid data:(NSString *)s resolver
     if (@available(iOS 11.0, *)) {
         self.sfSession = nil;
     }
-    if (@available(iOS 9.0, *)) {
-        if (self.sfViewController != nil) {
-          [self.sfViewController.presentingViewController dismissViewControllerAnimated:true completion:^ {
-            self.sfViewController = nil;
-          }];
-        }
-        if (self.webViewViewController != nil) {
-          [self.webViewViewController.presentingViewController dismissViewControllerAnimated:true completion:^ {
-            self.webViewViewController = nil;
-          }];
-        }
+    if (self.webViewViewController != nil) {
+      [self.webViewViewController.presentingViewController dismissViewControllerAnimated:true completion:^ {
+        self.webViewViewController = nil;
+      }];
     }
     self.openURLResolve = nil;
     self.openURLReject = nil;
 }
 
-- (void)dismissWebView API_AVAILABLE(ios(9))
+- (void)dismissWebView
 {
-    [self cleanup];
-}
-
-- (void)safariViewControllerDidFinish:(SFSafariViewController *)controller API_AVAILABLE(ios(9))
-{
-    if (controller != self.sfViewController) {
-        return;
-    }
-
     if (self.openURLReject) {
         self.openURLReject(@"CANCEL", @"CANCEL", nil);
-        [self cleanup];
     }
+    [self cleanup];
 }
 
 - (ASPresentationAnchor)presentationAnchorForWebAuthenticationSession:(ASWebAuthenticationSession *)session API_AVAILABLE(ios(12))

@@ -101,7 +101,6 @@ const ANONYMOUS_USERS_DISABLED_ERROR = 'unauthorized_client';
 
 const HomeScreen: React.FC = () => {
   const [initialized, setInitialized] = useState(false);
-  const [prefersSFSafariVC, setPrefersSFSafariVC] = useState(false);
   const [isThirdParty, setIsThirdParty] = useState(true);
   const [loading, setLoading] = useState(false);
   const [clientID, setClientID] = useState('');
@@ -157,7 +156,6 @@ const HomeScreen: React.FC = () => {
       .configure({
         clientID,
         endpoint,
-        prefersSFSafariViewController: prefersSFSafariVC,
         isThirdPartyApp: isThirdParty,
       })
       .then(() => {
@@ -170,7 +168,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [clientID, endpoint, prefersSFSafariVC, postConfigure]);
+  }, [clientID, endpoint, postConfigure]);
 
   const login = useCallback(() => {
     setLoading(true);
@@ -294,16 +292,6 @@ const HomeScreen: React.FC = () => {
         <View style={styles.configureAction}>
           <Button title="Configure" onPress={configure} disabled={loading} />
         <View style={styles.optionsContainer}>
-          <View style={styles.checkboxContainer}>
-            <Text style={styles.checkboxDesc}>
-              Prefer Safari VC (iOS only)
-            </Text>
-            <Switch
-              style={styles.checkbox}
-              value={prefersSFSafariVC}
-              onValueChange={setPrefersSFSafariVC}
-            />
-          </View>
           <View style={styles.checkboxContainer}>
             <Text style={styles.checkboxDesc}>
               Third-party client

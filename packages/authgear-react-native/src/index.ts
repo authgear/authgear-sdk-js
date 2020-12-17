@@ -42,12 +42,6 @@ export interface ConfigureOptions {
    */
   skipRefreshAccessToken?: boolean;
   /**
-   * Prefer using SFSafariViewController for iOS app.
-   * No effect on Android app.
-   * Default: false
-   */
-  prefersSFSafariViewController?: boolean;
-  /**
    * isThirdPartyApp indicate if the application a third party app.
    * A third party app means the app doesn't share common-domain with Authgear thus the session cookie cannot be shared.
    * If not specified, default to true. So by default the application is considered third party.
@@ -89,15 +83,6 @@ export class ReactNativeAsyncStorageStorageDriver implements StorageDriver {
 export class ReactNativeContainer<
   T extends ReactNativeAPIClient
 > extends BaseContainer<T> {
-  /**
-   * Prefer using SFSafariViewController for iOS app.
-   * No effect on Android app.
-   * Default: false
-   *
-   * @public
-   */
-  prefersSFSafariViewController?: boolean;
-
   constructor(options?: ContainerOptions<T>) {
     const o = {
       ...options,
@@ -127,7 +112,6 @@ export class ReactNativeContainer<
 
     this.clientID = options.clientID;
     this.apiClient.endpoint = options.endpoint;
-    this.prefersSFSafariViewController = options.prefersSFSafariViewController;
     this.isThirdParty = options.isThirdPartyApp ?? true;
     this.refreshToken = refreshToken ?? undefined;
 
@@ -176,11 +160,7 @@ export class ReactNativeContainer<
       options.prompt = "login";
     }
     const authorizeURL = await this.authorizeEndpoint(options);
-    const redirectURL = await openAuthorizeURL(
-      authorizeURL,
-      redirectURIScheme,
-      this.prefersSFSafariViewController ?? false
-    );
+    const redirectURL = await openAuthorizeURL(authorizeURL, redirectURIScheme);
     return this._finishAuthorization(redirectURL);
   }
 
@@ -211,7 +191,7 @@ export class ReactNativeContainer<
       });
     }
 
-    await openURL(targetURL, this.prefersSFSafariViewController ?? false);
+    await openURL(targetURL);
   }
 
   async open(page: Page): Promise<void> {
@@ -316,11 +296,7 @@ export class ReactNativeContainer<
       prompt: "login",
       loginHint,
     });
-    const redirectURL = await openAuthorizeURL(
-      authorizeURL,
-      redirectURIScheme,
-      this.prefersSFSafariViewController ?? false
-    );
+    const redirectURL = await openAuthorizeURL(authorizeURL, redirectURIScheme);
     const result = await this._finishAuthorization(redirectURL);
 
     await this.storage.delAnonymousKeyID(this.name);

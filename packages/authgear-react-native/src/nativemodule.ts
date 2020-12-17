@@ -11,23 +11,18 @@ export async function sha256String(input: string): Promise<number[]> {
   return AuthgearReactNative.sha256String(input);
 }
 
-export async function openURL(
-  url: string,
-  prefersSFSafariViewController: boolean
-): Promise<void> {
-  return AuthgearReactNative.openURL(url, prefersSFSafariViewController);
+export async function openURL(url: string): Promise<void> {
+  return AuthgearReactNative.openURL(url);
 }
 
 export async function openAuthorizeURL(
   url: string,
-  callbackURLScheme: string,
-  prefersSFSafariViewController: boolean
+  callbackURLScheme: string
 ): Promise<string> {
   try {
     const redirectURI = await AuthgearReactNative.openAuthorizeURL(
       url,
-      callbackURLScheme,
-      prefersSFSafariViewController
+      callbackURLScheme
     );
     await dismiss();
     return redirectURI;
