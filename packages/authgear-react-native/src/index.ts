@@ -173,23 +173,25 @@ export class ReactNativeContainer<
     let targetURL = url;
 
     const refreshToken = await this.storage.getRefreshToken(this.name);
-    if (refreshToken) {
-      // Use app session token to copy session into webview.
-      const { app_session_token } = await this.apiClient.appSessionToken(
-        refreshToken
-      );
-
-      const loginHint = `https://authgear.com/login_hint?type=app_session_token&app_session_token=${encodeURIComponent(
-        app_session_token
-      )}`;
-
-      targetURL = await this.authorizeEndpoint({
-        redirectURI: url,
-        prompt: "none",
-        responseType: "none",
-        loginHint,
-      });
+    if (!refreshToken) {
+      throw new Error("refresh token not found");
     }
+
+    // Use app session token to copy session into webview.
+    const { app_session_token } = await this.apiClient.appSessionToken(
+      refreshToken
+    );
+
+    const loginHint = `https://authgear.com/login_hint?type=app_session_token&app_session_token=${encodeURIComponent(
+      app_session_token
+    )}`;
+
+    targetURL = await this.authorizeEndpoint({
+      redirectURI: url,
+      prompt: "none",
+      responseType: "none",
+      loginHint,
+    });
 
     await openURL(targetURL);
   }
