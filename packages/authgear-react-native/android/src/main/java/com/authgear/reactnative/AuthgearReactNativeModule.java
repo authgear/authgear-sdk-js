@@ -74,9 +74,8 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
-    // prefersSFSafariViewController is used by iOS app only
     @ReactMethod
-    public void openURL(String urlString, Boolean prefersSFSafariViewController, Promise promise) {
+    public void openURL(String urlString, Promise promise) {
         try {
             Activity currentActivity = getCurrentActivity();
             if (currentActivity == null) {
@@ -85,8 +84,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             }
 
             Context context = currentActivity;
-            Uri uri = Uri.parse(urlString).normalizeScheme();
-            Intent intent = OAuthCoordinatorActivity.createAuthorizationIntent(context, uri);
+            Intent intent = WebViewActivity.createIntent(context, urlString);
             currentActivity.startActivity(intent);
 
             promise.resolve(null);
@@ -97,9 +95,8 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
-    // prefersSFSafariViewController is used by iOS app only
     @ReactMethod
-    public void openAuthorizeURL(String urlString, String scheme, Boolean prefersSFSafariViewController, Promise promise) {
+    public void openAuthorizeURL(String urlString, String scheme, Promise promise) {
         this.openURLPromise = promise;
 
         try {

@@ -64,6 +64,10 @@ export interface AuthorizeOptions {
    * UI locale tags
    */
   uiLocales?: string[];
+  /**
+   * OAuth response type
+   */
+  responseType?: string;
 }
 
 /**
@@ -125,6 +129,14 @@ export function decodeUserInfo(r: any): UserInfo {
  */
 export interface ChallengeResponse {
   token: string;
+  expire_at: string;
+}
+
+/**
+ * @public
+ */
+export interface AppSessionTokenResponse {
+  app_session_token: string;
   expire_at: string;
 }
 

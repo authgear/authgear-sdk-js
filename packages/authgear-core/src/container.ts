@@ -52,10 +52,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   clientID?: string;
 
   /**
-   * Whether the application shares cookies with Authgear.
-   *
-   * Only web application can shares cookies so all native applications
-   * are considered third party.
+   * Whether the application is a third-party app.
    *
    * @public
    */
@@ -239,21 +236,28 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     const config = await this.apiClient._fetchOIDCConfiguration();
     const query = new URLSearchParams();
 
-    if (this.isThirdParty) {
+    const responseType = options.responseType ?? "code";
+    query.append("response_type", responseType);
+    if (responseType === "code") {
+      // Authorization code need PKCE.
       const codeVerifier = await this._setupCodeVerifier();
       await this.storage.setOIDCCodeVerifier(this.name, codeVerifier.verifier);
 
-      query.append("response_type", "code");
-      query.append(
-        "scope",
-        "openid offline_access https://authgear.com/scopes/full-access"
-      );
       query.append("code_challenge_method", "S256");
       query.append("code_challenge", codeVerifier.challenge);
+    }
+
+    if (this.isThirdParty) {
+      query.append("scope", "openid offline_access");
     } else {
-      // for first party app
-      query.append("response_type", "none");
-      query.append("scope", "openid https://authgear.com/scopes/full-access");
+      if (responseType === "code") {
+        query.append(
+          "scope",
+          "openid offline_access https://authgear.com/scopes/full-access"
+        );
+      } else {
+        query.append("scope", "openid https://authgear.com/scopes/full-access");
+      }
     }
 
     query.append("client_id", clientID);
@@ -300,9 +304,9 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
 
     let userInfo;
     let tokenResponse;
-    if (!this.isThirdParty) {
-      // if the app is first party app, use session cookie for authorization
-      // no code exchange is needed.
+    if (!params.has("code")) {
+      // if authorization code is not provided (i.e. first-party web app), use
+      // session cookie for authorization; no code exchange is needed.
       userInfo = await this.apiClient._oidcUserInfoRequest();
     } else {
       const code = params.get("code");
@@ -366,10 +370,9 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   async _logout(
     options: { force?: boolean; redirectURI?: string } = {}
   ): Promise<void> {
-    if (this.isThirdParty) {
+    const refreshToken = (await this.storage.getRefreshToken(this.name)) ?? "";
+    if (refreshToken !== "") {
       try {
-        const refreshToken =
-          (await this.storage.getRefreshToken(this.name)) ?? "";
         await this.apiClient._oidcRevocationRequest(refreshToken);
       } catch (error) {
         if (!options.force) {

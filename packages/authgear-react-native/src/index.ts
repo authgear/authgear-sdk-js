@@ -15,7 +15,6 @@ import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import { openURL, openAuthorizeURL } from "./nativemodule";
 import { getCallbackURLScheme } from "./url";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
-import URL from "core-js-pure/features/url";
 export * from "@authgear/core";
 
 /**
@@ -43,11 +42,11 @@ export interface ConfigureOptions {
    */
   skipRefreshAccessToken?: boolean;
   /**
-   * Prefer using SFSafariViewController for iOS app.
-   * No effect on Android app.
-   * Default: false
+   * isThirdPartyApp indicate if the application a third party app.
+   * A third party app means the app doesn't share common-domain with Authgear thus the session cookie cannot be shared.
+   * If not specified, default to true. So by default the application is considered third party.
    */
-  prefersSFSafariViewController?: boolean;
+  isThirdPartyApp?: boolean;
 }
 
 /**
@@ -84,15 +83,6 @@ export class ReactNativeAsyncStorageStorageDriver implements StorageDriver {
 export class ReactNativeContainer<
   T extends ReactNativeAPIClient
 > extends BaseContainer<T> {
-  /**
-   * Prefer using SFSafariViewController for iOS app.
-   * No effect on Android app.
-   * Default: false
-   *
-   * @public
-   */
-  prefersSFSafariViewController?: boolean;
-
   constructor(options?: ContainerOptions<T>) {
     const o = {
       ...options,
@@ -122,7 +112,7 @@ export class ReactNativeContainer<
 
     this.clientID = options.clientID;
     this.apiClient.endpoint = options.endpoint;
-    this.prefersSFSafariViewController = options.prefersSFSafariViewController;
+    this.isThirdParty = options.isThirdPartyApp ?? true;
     this.refreshToken = refreshToken ?? undefined;
 
     const { skipRefreshAccessToken = false } = options;
@@ -170,26 +160,40 @@ export class ReactNativeContainer<
       options.prompt = "login";
     }
     const authorizeURL = await this.authorizeEndpoint(options);
-    const redirectURL = await openAuthorizeURL(
-      authorizeURL,
-      redirectURIScheme,
-      this.prefersSFSafariViewController ?? false
-    );
+    const redirectURL = await openAuthorizeURL(authorizeURL, redirectURIScheme);
     return this._finishAuthorization(redirectURL);
   }
 
   /**
-   * Open the URL with the user agent that is used to perform authentication.
+   * Open the URL with the user agent authenticated with current user.
    */
 
   // eslint-disable-next-line class-methods-use-this
   async openURL(url: string): Promise<void> {
-    // validate url to avoid error in native code
-    const urlObj = new URL(url);
-    if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") {
-      throw new Error("Only allows http / https scheme");
+    let targetURL = url;
+
+    const refreshToken = await this.storage.getRefreshToken(this.name);
+    if (!refreshToken) {
+      throw new Error("refresh token not found");
     }
-    await openURL(url, this.prefersSFSafariViewController ?? false);
+
+    // Use app session token to copy session into webview.
+    const { app_session_token } = await this.apiClient.appSessionToken(
+      refreshToken
+    );
+
+    const loginHint = `https://authgear.com/login_hint?type=app_session_token&app_session_token=${encodeURIComponent(
+      app_session_token
+    )}`;
+
+    targetURL = await this.authorizeEndpoint({
+      redirectURI: url,
+      prompt: "none",
+      responseType: "none",
+      loginHint,
+    });
+
+    await openURL(targetURL);
   }
 
   async open(page: Page): Promise<void> {
@@ -294,11 +298,7 @@ export class ReactNativeContainer<
       prompt: "login",
       loginHint,
     });
-    const redirectURL = await openAuthorizeURL(
-      authorizeURL,
-      redirectURIScheme,
-      this.prefersSFSafariViewController ?? false
-    );
+    const redirectURL = await openAuthorizeURL(authorizeURL, redirectURIScheme);
     const result = await this._finishAuthorization(redirectURL);
 
     await this.storage.delAnonymousKeyID(this.name);

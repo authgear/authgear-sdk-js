@@ -9,6 +9,7 @@ import {
   ChallengeResponse,
   _APIClientDelegate,
   decodeUserInfo,
+  AppSessionTokenResponse,
 } from "./types";
 import { decodeError, ServerError } from "./error";
 
@@ -345,6 +346,14 @@ export abstract class BaseAPIClient {
         "content-type": "application/x-www-form-urlencoded",
       },
       body: query.toString(),
+    });
+  }
+
+  async appSessionToken(
+    refreshToken: string
+  ): Promise<AppSessionTokenResponse> {
+    return this._post("/oauth2/app_session_token", {
+      json: { refresh_token: refreshToken },
     });
   }
 
