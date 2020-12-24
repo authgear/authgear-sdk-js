@@ -24,11 +24,11 @@ export interface ConfigureOptions {
    */
   endpoint: string;
   /**
-   * isThirdPartyApp indicate if the application a third party app.
+   * isThirdParty indicate if the application a third party app.
    * A third party app means the app doesn't share common-domain with Authgear thus the session cookie cannot be shared.
    * If not specified, default to false. So by default the application is considered first party.
    */
-  isThirdPartyApp?: boolean;
+  isThirdParty?: boolean;
   /**
    * Skip refreshing access token. Default is false.
    */
@@ -67,7 +67,7 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
     const refreshToken = await this.storage.getRefreshToken(this.name);
 
     this.clientID = options.clientID;
-    this.isThirdParty = !!options.isThirdPartyApp;
+    this.isThirdParty = !!options.isThirdParty;
     this.apiClient.endpoint = options.endpoint;
 
     this.refreshToken = refreshToken ?? undefined;

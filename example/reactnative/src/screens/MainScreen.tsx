@@ -156,7 +156,7 @@ const HomeScreen: React.FC = () => {
       .configure({
         clientID,
         endpoint,
-        isThirdPartyApp: isThirdParty,
+        isThirdParty,
       })
       .then(() => {
         postConfigure();
@@ -294,7 +294,7 @@ const HomeScreen: React.FC = () => {
         <View style={styles.optionsContainer}>
           <View style={styles.checkboxContainer}>
             <Text style={styles.checkboxDesc}>
-              Third-party client
+              Third-party app
             </Text>
             <Switch
               style={styles.checkbox}
