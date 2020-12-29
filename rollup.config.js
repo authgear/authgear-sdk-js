@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import babel from "rollup-plugin-babel";
+import { babel } from "@rollup/plugin-babel";
 import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
@@ -12,9 +12,7 @@ const extensions = [".mjs", ".js", ".jsx", ".ts", ".tsx"];
 const plugins = [
   replace({
     values: {
-      "process.env.VERSION": JSON.stringify(
-        process.env.VERSION || "VERSION"
-      ),
+      "process.env.VERSION": JSON.stringify(process.env.VERSION || "VERSION"),
     },
   }),
   resolve({
@@ -26,7 +24,7 @@ const plugins = [
   babel({
     extensions,
     exclude: ["node_modules/**", "packages/**/node_modules/**"],
-    runtimeHelpers: true,
+    babelHelpers: "runtime",
   }),
   json({
     preferConst: true,

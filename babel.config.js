@@ -7,6 +7,7 @@ var plugins = [
       assumeArray: true,
     },
   ],
+  "@babel/plugin-transform-runtime",
 ];
 
 const presetEnvOptions = {

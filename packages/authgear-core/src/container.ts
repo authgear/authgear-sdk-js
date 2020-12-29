@@ -96,7 +96,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   /**
    * @internal
    */
-  abstract async _setupCodeVerifier(): Promise<{
+  abstract _setupCodeVerifier(): Promise<{
     verifier: string;
     challenge: string;
   }>;

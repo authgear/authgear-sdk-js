@@ -165,12 +165,14 @@ export abstract class BaseAPIClient {
       headers["content-type"] = "application/json";
     }
 
+    const body = json != null ? JSON.stringify(json) : undefined;
+
     const response = await this.fetch(endpoint, p, {
       method,
       headers,
+      body,
       mode: "cors",
       credentials: "include",
-      body: json && JSON.stringify(json),
     });
 
     let jsonBody;
