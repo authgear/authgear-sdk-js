@@ -15,6 +15,7 @@ import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import { openURL, openAuthorizeURL } from "./nativemodule";
 import { getCallbackURLScheme } from "./url";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
+import { Platform } from "react-native";
 export * from "@authgear/core";
 
 /**
@@ -159,7 +160,11 @@ export class ReactNativeContainer<
     if (options.prompt === undefined) {
       options.prompt = "login";
     }
-    const authorizeURL = await this.authorizeEndpoint(options);
+    const platform = Platform.OS;
+    const authorizeURL = await this.authorizeEndpoint({
+      ...options,
+      platform,
+    });
     const redirectURL = await openAuthorizeURL(authorizeURL, redirectURIScheme);
     return this._finishAuthorization(redirectURL);
   }
@@ -293,10 +298,12 @@ export class ReactNativeContainer<
     )}`;
 
     const redirectURIScheme = getCallbackURLScheme(options.redirectURI);
+    const platform = Platform.OS;
     const authorizeURL = await this.authorizeEndpoint({
       ...options,
       prompt: "login",
       loginHint,
+      platform,
     });
     const redirectURL = await openAuthorizeURL(authorizeURL, redirectURIScheme);
     const result = await this._finishAuthorization(redirectURL);
