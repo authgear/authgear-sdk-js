@@ -17,12 +17,12 @@ export async function openURL(url: string): Promise<void> {
 
 export async function openAuthorizeURL(
   url: string,
-  callbackURLScheme: string
+  callbackURL: string
 ): Promise<string> {
   try {
     const redirectURI = await AuthgearReactNative.openAuthorizeURL(
       url,
-      callbackURLScheme
+      callbackURL
     );
     await dismiss();
     return redirectURI;

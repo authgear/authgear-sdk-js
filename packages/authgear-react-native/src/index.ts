@@ -13,7 +13,6 @@ import {
 } from "@authgear/core";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import { openURL, openAuthorizeURL } from "./nativemodule";
-import { getCallbackURLScheme } from "./url";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 import { Platform } from "react-native";
 export * from "@authgear/core";
@@ -156,7 +155,6 @@ export class ReactNativeContainer<
    * @param options - authorize options
    */
   async authorize(options: AuthorizeOptions): Promise<AuthorizeResult> {
-    const redirectURIScheme = getCallbackURLScheme(options.redirectURI);
     if (options.prompt === undefined) {
       options.prompt = "login";
     }
@@ -165,7 +163,10 @@ export class ReactNativeContainer<
       ...options,
       platform,
     });
-    const redirectURL = await openAuthorizeURL(authorizeURL, redirectURIScheme);
+    const redirectURL = await openAuthorizeURL(
+      authorizeURL,
+      options.redirectURI
+    );
     return this._finishAuthorization(redirectURL);
   }
 
@@ -297,7 +298,6 @@ export class ReactNativeContainer<
       jwt
     )}`;
 
-    const redirectURIScheme = getCallbackURLScheme(options.redirectURI);
     const platform = Platform.OS;
     const authorizeURL = await this.authorizeEndpoint({
       ...options,
@@ -305,7 +305,10 @@ export class ReactNativeContainer<
       loginHint,
       platform,
     });
-    const redirectURL = await openAuthorizeURL(authorizeURL, redirectURIScheme);
+    const redirectURL = await openAuthorizeURL(
+      authorizeURL,
+      options.redirectURI
+    );
     const result = await this._finishAuthorization(redirectURL);
 
     await this.storage.delAnonymousKeyID(this.name);

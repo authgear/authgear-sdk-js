@@ -122,13 +122,14 @@ RCT_EXPORT_METHOD(openURL:(NSURL *)url
 }
 
 RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
-                            scheme:(NSString *)scheme
+                       callbackURL:(NSString *)callbackURL
                            resolve:(RCTPromiseResolveBlock)resolve
                             reject:(RCTPromiseRejectBlock)reject)
 {
     self.openURLResolve = resolve;
     self.openURLReject = reject;
 
+    NSString *scheme = [self getCallbackURLScheme:callbackURL];
     if (@available(iOS 12.0, *)) {
         self.asSession = [[ASWebAuthenticationSession alloc] initWithURL:url
                                                                             callbackURLScheme:scheme
@@ -406,6 +407,15 @@ RCT_EXPORT_METHOD(signAnonymousToken:(NSString *)kid data:(NSString *)s resolver
 
   *psig = sig;
   return nil;
+}
+
+-(NSString *)getCallbackURLScheme:(NSString *)url
+{
+  NSRange range = [url rangeOfString:@":"];
+  if (range.location == NSNotFound) {
+    return @"";
+  }
+  return [url substringToIndex:range.location];
 }
 
 @end
