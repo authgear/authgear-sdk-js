@@ -28,6 +28,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import androidx.annotation.RequiresApi;
 
@@ -39,10 +40,18 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
     private Promise openURLPromise;
 
-    public AuthgearReactNativeModule(ReactApplicationContext reactContext) {
-        super(reactContext);
-        this.reactContext = reactContext;
+    public AuthgearReactNativeModule(ReactApplicationContext context) {
+        super(context);
+        this.reactContext = context;
         reactContext.addActivityEventListener(this);
+
+        OAuthRedirectActivity.setOnDeepLinkListener(new OAuthRedirectActivity.OnDeepLinkListener() {
+            @Override
+            public void OnURI(Uri uri) {
+                reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                        .emit("onAuthgearDeepLink", uri.toString());
+            }
+        });
     }
 
     @Override
@@ -199,6 +208,12 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     @Override
     public void onNewIntent(Intent intent) {
         // no-op
+    }
+
+    @Override
+    public void onCatalystInstanceDestroy() {
+        super.onCatalystInstanceDestroy();
+        OAuthRedirectActivity.setOnDeepLinkListener(null);
     }
 
     private void cleanup() {

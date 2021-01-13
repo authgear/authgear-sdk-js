@@ -7,6 +7,11 @@ import android.os.Bundle;
 public class OAuthRedirectActivity extends Activity {
 
     private static String callbackURL;
+    private static OnDeepLinkListener onDeepLinkListener;
+
+    public static void setOnDeepLinkListener(OnDeepLinkListener listener) {
+        onDeepLinkListener = listener;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,6 +21,7 @@ public class OAuthRedirectActivity extends Activity {
             // callbackURL is handled, clear it
             callbackURL = null;
         }
+        this.sendEvent(this.getIntent().getData());
         this.finish();
     }
 
@@ -28,8 +34,17 @@ public class OAuthRedirectActivity extends Activity {
         return uriWithoutQuery.toString().equals(callbackURL);
     }
 
+    private void sendEvent(Uri uri) {
+        if (onDeepLinkListener != null) {
+            onDeepLinkListener.OnURI(uri);
+        }
+    }
+
     public static void registerCallbackURL(String callbackURL) {
         OAuthRedirectActivity.callbackURL = callbackURL;
     }
 
+    public interface OnDeepLinkListener{
+        void OnURI(Uri uri);
+    }
 }

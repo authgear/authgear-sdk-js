@@ -7,8 +7,6 @@
 #import <React/RCTUtils.h>
 #import "AGAuthgearReactNative.h"
 
-static NSString *const kOpenURLNotification = @"AGAuthgearReactNativeOpenURLNotification";
-
 static void postNotificationWithURL(NSURL *URL, id sender)
 {
   NSDictionary<NSString *, id> *payload = @{@"url": URL.absoluteString};
