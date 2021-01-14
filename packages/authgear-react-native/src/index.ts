@@ -336,6 +336,17 @@ export class ReactNativeContainer<
   }
 
   /**
+   * WeChat auth callback function. In WeChat login flow, after returning from the WeChat SDK,
+   * this function should be called to complete the authorization.
+   *
+   * @param code - WeChat Authorization code.
+   * @param state - WeChat Authorization state.
+   */
+  async weChatAuthCallback(code: string, state: string): Promise<void> {
+    return this.apiClient._weChatAuthCallbackRequest(code, state, Platform.OS);
+  }
+
+  /**
    * @internal
    */
   _handleWeChatRedirectURI(deepLink: string, weChatRedirectURI?: string): void {

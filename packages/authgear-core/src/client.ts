@@ -372,6 +372,27 @@ export abstract class BaseAPIClient {
     });
   }
 
+  /**
+   * @internal
+   */
+  async _weChatAuthCallbackRequest(
+    code: string,
+    state: string,
+    platform: string
+  ): Promise<void> {
+    const query = new URLSearchParams({
+      code,
+      state,
+      x_platform: platform,
+    });
+    await this._request("POST", "/sso/wechat/callback", {
+      headers: {
+        "content-type": "application/x-www-form-urlencoded",
+      },
+      body: query.toString(),
+    });
+  }
+
   async appSessionToken(
     refreshToken: string
   ): Promise<AppSessionTokenResponse> {
