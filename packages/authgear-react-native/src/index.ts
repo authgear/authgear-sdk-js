@@ -1,4 +1,5 @@
 /* global fetch, Request */
+import URL from "core-js-pure/features/url";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   BaseAPIClient,
@@ -16,6 +17,8 @@ import { openURL, openAuthorizeURL } from "./nativemodule";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 import { Platform } from "react-native";
 export * from "@authgear/core";
+import EventEmitter from "./eventEmitter";
+import { getURLWithoutQuery } from "./url";
 
 /**
  * @public
@@ -163,10 +166,15 @@ export class ReactNativeContainer<
       ...options,
       platform,
     });
+    const deepLinkListener = (url: string) => {
+      this._handleWeChatRedirectURI(url, options.weChatRedirectURI);
+    };
+    EventEmitter.addListener("onAuthgearDeepLink", deepLinkListener);
     const redirectURL = await openAuthorizeURL(
       authorizeURL,
       options.redirectURI
     );
+    EventEmitter.removeListener("onAuthgearDeepLink", deepLinkListener);
     return this._finishAuthorization(redirectURL);
   }
 
@@ -305,10 +313,15 @@ export class ReactNativeContainer<
       loginHint,
       platform,
     });
+    const deepLinkListener = (url: string) => {
+      this._handleWeChatRedirectURI(url, options.weChatRedirectURI);
+    };
+    EventEmitter.addListener("onAuthgearDeepLink", deepLinkListener);
     const redirectURL = await openAuthorizeURL(
       authorizeURL,
       options.redirectURI
     );
+    EventEmitter.removeListener("onAuthgearDeepLink", deepLinkListener);
     const result = await this._finishAuthorization(redirectURL);
 
     await this.storage.delAnonymousKeyID(this.name);
@@ -320,6 +333,26 @@ export class ReactNativeContainer<
    */
   async fetchUserInfo(): Promise<UserInfo> {
     return this.apiClient._oidcUserInfoRequest(this.accessToken);
+  }
+
+  /**
+   * @internal
+   */
+  _handleWeChatRedirectURI(deepLink: string, weChatRedirectURI?: string): void {
+    if (!weChatRedirectURI) {
+      return;
+    }
+    const urlWithoutQuery = getURLWithoutQuery(deepLink);
+    if (urlWithoutQuery === weChatRedirectURI) {
+      const u = new URL(deepLink);
+      const params = u.searchParams;
+      const state = params.get("state");
+      if (state) {
+        this.delegate?.sendWeChatAuthRequest(state);
+      } else {
+        throw new Error("missing WeChat state");
+      }
+    }
   }
 }
 
