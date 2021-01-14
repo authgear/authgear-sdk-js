@@ -50,12 +50,7 @@ RCT_EXPORT_MODULE(AuthgearReactNative)
 
 - (instancetype)init
 {
-    if ((self = [super init])) {
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleOpenURLNotification:)
-                                                     name:kOpenURLNotification
-                                                   object:nil];
-    }
+    self = [super init];
     return self;
 }
 
@@ -177,20 +172,6 @@ RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
             [self cleanup];
         }];
         [self.sfSession start];
-    } else {
-        UIViewController *vc = [[UIViewController alloc] init];
-        WKWebView *wv = [[WKWebView alloc] initWithFrame:vc.view.bounds];
-        wv.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        [wv loadRequest:[NSURLRequest requestWithURL:url]];
-        [vc.view addSubview:wv];
-        vc.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissWebView)];
-        self.webViewViewController = vc;
-
-        UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
-        nav.modalPresentationStyle = UIModalPresentationPageSheet;
-
-        UIViewController *rootViewController = RCTPresentedViewController();
-        [rootViewController presentViewController:nav animated:YES completion:nil];
     }
 }
 
@@ -284,15 +265,6 @@ RCT_EXPORT_METHOD(signAnonymousToken:(NSString *)kid data:(NSString *)s resolver
     }
   }
   return nil;
-}
-
-- (void)handleOpenURLNotification:(NSNotification *)notification
-{
-    NSString *urlString = notification.userInfo[@"url"];
-    if (self.openURLResolve) {
-        self.openURLResolve(urlString);
-        [self cleanup];
-    }
 }
 
 -(NSArray *)randomBytes:(NSUInteger)length
