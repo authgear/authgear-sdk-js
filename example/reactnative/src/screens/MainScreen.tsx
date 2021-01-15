@@ -8,6 +8,8 @@ import {
   Alert,
   TextInput,
   Switch,
+  Platform,
+  NativeModules,
 } from 'react-native';
 import authgear, {
   Page,
@@ -97,6 +99,11 @@ const styles = StyleSheet.create({
 });
 
 const redirectURI = 'com.authgear.example://host/path';
+const weChatRedirectURI = Platform.select<string>({
+  android: 'com.authgear.example.rn://host/open_wechat_app',
+  ios: 'https://authgear-demo-rn.pandawork.com/authgear/open_wechat_app',
+});
+
 const ANONYMOUS_USERS_DISABLED_ERROR = 'unauthorized_client';
 
 const HomeScreen: React.FC = () => {
@@ -115,6 +122,21 @@ const HomeScreen: React.FC = () => {
         _reason: SessionStateChangeReason,
       ) => {
         setLoggedIn(container.sessionState === 'AUTHENTICATED');
+      },
+      sendWeChatAuthRequest: (state) => {
+        console.log('user click login with wechat, open wechat sdk');
+        const {WeChatAuth} = NativeModules;
+        WeChatAuth.sendWeChatAuthRequest(state)
+          .then((result: {code: string; state: string}) => {
+            console.log('sending wechat auth callback');
+            return authgear.weChatAuthCallback(result.code, result.state);
+          })
+          .then(() => {
+            console.log('send wechat auth callback successfully');
+          })
+          .catch((err: Error) => {
+            console.error('failed to login with WeChat', err);
+          });
       },
     };
     return d;
@@ -175,6 +197,7 @@ const HomeScreen: React.FC = () => {
     authgear
       .authorize({
         redirectURI,
+        weChatRedirectURI,
       })
       .then(({userInfo}) => {
         setIsAnonymous(userInfo.isAnonymous);
@@ -219,6 +242,7 @@ const HomeScreen: React.FC = () => {
     authgear
       .promoteAnonymousUser({
         redirectURI,
+        weChatRedirectURI,
       })
       .then(({userInfo}) => {
         setIsAnonymous(userInfo.isAnonymous);
