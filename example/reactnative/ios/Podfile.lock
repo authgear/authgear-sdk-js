@@ -1,5 +1,5 @@
 PODS:
-  - authgear-react-native (0.2.0):
+  - authgear-react-native (0.5.0):
     - React
   - boost-for-react-native (1.63.0)
   - CocoaAsyncSocket (7.6.4)
@@ -300,6 +300,7 @@ PODS:
     - React-jsi (= 0.63.3)
   - RNCAsyncStorage (1.13.2):
     - React
+  - WechatOpenSDK (1.8.7.1)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
@@ -353,6 +354,7 @@ DEPENDENCIES:
   - React-RCTVibration (from `../node_modules/react-native/Libraries/Vibration`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
+  - WechatOpenSDK
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -368,6 +370,7 @@ SPEC REPOS:
     - Flipper-RSocket
     - FlipperKit
     - OpenSSL-Universal
+    - WechatOpenSDK
     - YogaKit
 
 EXTERNAL SOURCES:
@@ -429,7 +432,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  authgear-react-native: 272a43cce790c990c50285debd37254cadb0b811
+  authgear-react-native: 5d067477ef61bea7ec910b8c9553a2ae653264be
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   CocoaAsyncSocket: 694058e7c0ed05a9e217d1b3c7ded962f4180845
   CocoaLibEvent: 2fab71b8bd46dd33ddb959f7928ec5909f838e3f
@@ -467,9 +470,10 @@ SPEC CHECKSUMS:
   React-RCTVibration: 8e9fb25724a0805107fc1acc9075e26f814df454
   ReactCommon: 4167844018c9ed375cc01a843e9ee564399e53c3
   RNCAsyncStorage: 05bae7ecfab1cbd5441993f1ca098f7c3b3f8d0e
+  WechatOpenSDK: 6a4d1436c15b3b5fe2a0bd383f3046010186da44
   Yoga: 7d13633d129fd179e01b8953d38d47be90db185a
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 4bac0ce5b53c1aeaf792de811792fb9f5ea88581
+PODFILE CHECKSUM: d5fefd3ce0972fac375db6fed38bf5d18b2c5339
 
-COCOAPODS: 1.9.0
+COCOAPODS: 1.10.0

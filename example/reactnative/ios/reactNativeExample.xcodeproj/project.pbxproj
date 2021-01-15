@@ -14,6 +14,9 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		9084083FDC3D92FDB8085671 /* libPods-reactNativeExample-reactNativeExampleTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DAB22DFFB9DADF57F65B5E99 /* libPods-reactNativeExample-reactNativeExampleTests.a */; };
+		CCEE95F225B15B4B002CA82D /* RCTWeChatAuthModule.m in Sources */ = {isa = PBXBuildFile; fileRef = CCEE95F125B15B4B002CA82D /* RCTWeChatAuthModule.m */; };
+		CCEE962725B15DD6002CA82D /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CCEE962625B15DD6002CA82D /* WebKit.framework */; };
+		CCEE966C25B176A1002CA82D /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = CCEE963A25B17659002CA82D /* libc++.tbd */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,6 +46,11 @@
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = reactNativeExample/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9088AD237B59819E51901C43 /* Pods-reactNativeExample-reactNativeExampleTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-reactNativeExample-reactNativeExampleTests.release.xcconfig"; path = "Target Support Files/Pods-reactNativeExample-reactNativeExampleTests/Pods-reactNativeExample-reactNativeExampleTests.release.xcconfig"; sourceTree = "<group>"; };
 		CC9957439A5FCF48A0FCAB9F /* libPods-reactNativeExample-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-reactNativeExample-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		CCE9782025AFBCA500AF53FF /* reactNativeExample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = reactNativeExample.entitlements; path = reactNativeExample/reactNativeExample.entitlements; sourceTree = "<group>"; };
+		CCEE95F025B15B4B002CA82D /* RCTWeChatAuthModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RCTWeChatAuthModule.h; path = reactNativeExample/RCTWeChatAuthModule.h; sourceTree = "<group>"; };
+		CCEE95F125B15B4B002CA82D /* RCTWeChatAuthModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = RCTWeChatAuthModule.m; path = reactNativeExample/RCTWeChatAuthModule.m; sourceTree = "<group>"; };
+		CCEE962625B15DD6002CA82D /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		CCEE963A25B17659002CA82D /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
 		DAB22DFFB9DADF57F65B5E99 /* libPods-reactNativeExample-reactNativeExampleTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-reactNativeExample-reactNativeExampleTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E32512DC73AB5F3BD2B5EB05 /* libPods-reactNativeExample-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-reactNativeExample-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
@@ -63,6 +71,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CCEE966C25B176A1002CA82D /* libc++.tbd in Frameworks */,
+				CCEE962725B15DD6002CA82D /* WebKit.framework in Frameworks */,
 				121E702CEBAAC86A652A7ADC /* libPods-reactNativeExample.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -90,6 +100,7 @@
 		13B07FAE1A68108700A75B9A /* reactNativeExample */ = {
 			isa = PBXGroup;
 			children = (
+				CCE9782025AFBCA500AF53FF /* reactNativeExample.entitlements */,
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
@@ -97,6 +108,8 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				CCEE95F025B15B4B002CA82D /* RCTWeChatAuthModule.h */,
+				CCEE95F125B15B4B002CA82D /* RCTWeChatAuthModule.m */,
 			);
 			name = reactNativeExample;
 			sourceTree = "<group>";
@@ -104,6 +117,8 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				CCEE963A25B17659002CA82D /* libc++.tbd */,
+				CCEE962625B15DD6002CA82D /* WebKit.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
 				7E099D09EF0312A99BD8580D /* libPods-reactNativeExample.a */,
@@ -385,6 +400,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
+				CCEE95F225B15B4B002CA82D /* RCTWeChatAuthModule.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -449,6 +465,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = reactNativeExample/reactNativeExample.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = reactNativeExample/Info.plist;
@@ -472,6 +489,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = reactNativeExample/reactNativeExample.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = reactNativeExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
