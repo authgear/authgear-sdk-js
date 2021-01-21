@@ -381,11 +381,11 @@ RCT_EXPORT_METHOD(signAnonymousToken:(NSString *)kid data:(NSString *)s resolver
 
 -(NSString *)getCallbackURLScheme:(NSString *)url
 {
-  NSRange range = [url rangeOfString:@":"];
-  if (range.location == NSNotFound) {
-    return @"";
+  NSURL *u = [NSURL URLWithString:url];
+  if (u == nil) {
+    return url;
   }
-  return [url substringToIndex:range.location];
+  return u.scheme;
 }
 
 @end
