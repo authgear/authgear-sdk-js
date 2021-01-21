@@ -1,12 +1,5 @@
-import {
-  NativeModules,
-  Platform,
-  NativeEventEmitter,
-  DeviceEventEmitter,
-  EventEmitter,
-} from "react-native";
+import { NativeModules, Platform, NativeEventEmitter } from "react-native";
 
-export default Platform.select<EventEmitter>({
-  ios: new NativeEventEmitter(NativeModules.AuthgearManager),
-  android: DeviceEventEmitter,
-});
+export default new NativeEventEmitter(
+  Platform.OS === "ios" ? NativeModules.AuthgearManager : undefined
+);
