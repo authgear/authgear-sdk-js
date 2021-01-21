@@ -170,11 +170,13 @@ export class ReactNativeContainer<
       this._handleWeChatRedirectURI(url, options.weChatRedirectURI);
     };
     EventEmitter.addListener("onAuthgearDeepLink", deepLinkListener);
-    const redirectURL = await openAuthorizeURL(
-      authorizeURL,
-      options.redirectURI
-    );
-    EventEmitter.removeListener("onAuthgearDeepLink", deepLinkListener);
+    let redirectURL;
+    try {
+      redirectURL = await openAuthorizeURL(authorizeURL, options.redirectURI);
+    } finally {
+      EventEmitter.removeListener("onAuthgearDeepLink", deepLinkListener);
+    }
+
     return this._finishAuthorization(redirectURL);
   }
 
@@ -317,11 +319,12 @@ export class ReactNativeContainer<
       this._handleWeChatRedirectURI(url, options.weChatRedirectURI);
     };
     EventEmitter.addListener("onAuthgearDeepLink", deepLinkListener);
-    const redirectURL = await openAuthorizeURL(
-      authorizeURL,
-      options.redirectURI
-    );
-    EventEmitter.removeListener("onAuthgearDeepLink", deepLinkListener);
+    let redirectURL;
+    try {
+      redirectURL = await openAuthorizeURL(authorizeURL, options.redirectURI);
+    } finally {
+      EventEmitter.removeListener("onAuthgearDeepLink", deepLinkListener);
+    }
     const result = await this._finishAuthorization(redirectURL);
 
     await this.storage.delAnonymousKeyID(this.name);
