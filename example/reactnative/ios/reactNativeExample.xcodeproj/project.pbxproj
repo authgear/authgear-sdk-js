@@ -433,7 +433,7 @@
 					"-lc++",
 					"$(inherited)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.authgear.example.reactnative";
+				PRODUCT_BUNDLE_IDENTIFIER = com.authgear.exampleapp.reactnative;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/reactNativeExample.app/reactNativeExample";
 			};
@@ -453,7 +453,7 @@
 					"-lc++",
 					"$(inherited)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.authgear.example.reactnative";
+				PRODUCT_BUNDLE_IDENTIFIER = com.authgear.exampleapp.reactnative;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/reactNativeExample.app/reactNativeExample";
 			};
@@ -475,7 +475,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.authgear.example.reactnative;
+				PRODUCT_BUNDLE_IDENTIFIER = com.authgear.exampleapp.reactnative;
 				PRODUCT_NAME = reactNativeExample;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -498,7 +498,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.authgear.example.reactnative;
+				PRODUCT_BUNDLE_IDENTIFIER = com.authgear.exampleapp.reactnative;
 				PRODUCT_NAME = reactNativeExample;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
