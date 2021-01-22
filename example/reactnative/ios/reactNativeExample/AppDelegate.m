@@ -4,6 +4,7 @@
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
 #import <AGAuthgearReactNative.h>
+#import "RCTWeChatAuthModule.h"
 
 #ifdef FB_SONARKIT_ENABLED
 #import <FlipperKit/FlipperClient.h>
@@ -23,6 +24,13 @@ static void InitializeFlipper(UIApplication *application) {
   [client start];
 }
 #endif
+
+// config
+NSString* const WeChatAppID = @"wxe64ed6a7605b5021";
+NSString* const WeChatUniversalLink = @"https://authgear-demo-rn.pandawork.com/wechat/";
+
+// Error domain
+NSString* const WeChatAuthErrorDomain = @"com.authgear.example.reactnative.wechatauth_error";
 
 @implementation AppDelegate
 
@@ -44,6 +52,16 @@ static void InitializeFlipper(UIApplication *application) {
   rootViewController.view = rootView;
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
+
+  // Setup WeChat SDK
+  [WXApi registerApp:WeChatAppID universalLink:WeChatUniversalLink];
+
+  return YES;
+}
+
+- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray *))restorationHandler {
+  [WXApi handleOpenUniversalLink:userActivity delegate:self];
+  [AGAuthgearReactNative application:application continueUserActivity:userActivity restorationHandler:restorationHandler];
   return YES;
 }
 
@@ -57,6 +75,49 @@ static void InitializeFlipper(UIApplication *application) {
 #else
   return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
+}
+
+-(void) onReq:(BaseReq*)req
+{
+}
+
+-(void) onResp:(BaseResp*)resp
+{
+  SendAuthResp *sendAuthResp;
+  if([resp isKindOfClass:[SendAuthResp class]])
+  {
+    sendAuthResp = (SendAuthResp*)resp;
+    NSDictionary<NSString *, id> *payload;
+    if (sendAuthResp.errCode == WXSuccess) {
+      payload = @{
+        @"code": sendAuthResp.code,
+        @"state": sendAuthResp.state,
+      };
+    } else {
+      NSString *message;
+      switch (resp.errCode) {
+        case WXErrCodeUserCancel:
+          message = @"errcode_cancel";
+          break;
+        case WXErrCodeAuthDeny:
+          message = @"errcode_deny";
+          break;
+        case WXErrCodeUnsupport:
+          message = @"errcode_unsupported";
+          break;
+        default:
+          message = @"errcode_unknown";
+          break;
+      }
+      payload = @{
+        @"error": [NSError errorWithDomain:WeChatAuthErrorDomain code:resp.errCode userInfo:nil],
+        @"error_message": message,
+      };
+    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:kWeChatAuthResultNotification
+                                                        object:nil
+                                                      userInfo:payload];
+  }
 }
 
 @end

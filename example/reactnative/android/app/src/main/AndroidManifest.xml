@@ -23,6 +23,15 @@
         </activity>
         <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
 
+        <!-- WeChat SDK -->
+        <activity
+            android:name=".wxapi.WXEntryActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:taskAffinity="com.reactnativeexample"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"></activity>
+
         <!-- Authgear SDK -->
         <activity
             android:name="com.authgear.reactnative.OAuthRedirectActivity"
@@ -36,7 +45,11 @@
                 <data
                     android:host="host"
                     android:pathPrefix="/path"
-                    android:scheme="com.authgear.example" />
+                    android:scheme="com.authgear.example.rn" />
+                <data
+                    android:host="host"
+                    android:pathPrefix="/open_wechat_app"
+                    android:scheme="com.authgear.example.rn" />
             </intent-filter>
         </activity>
     </application>
