@@ -36,6 +36,11 @@ export interface PromoteOptions {
    * UI locale tags
    */
   uiLocales?: string[];
+  /**
+   * WeChat Redirect URI is needed when integrating WeChat login in react-native
+   * The weChatRedirectURI will be called when user click the login with WeChat button
+   */
+  weChatRedirectURI?: string;
 }
 
 /**
@@ -68,6 +73,16 @@ export interface AuthorizeOptions {
    * OAuth response type
    */
   responseType?: string;
+  /**
+   * WeChat Redirect URI is needed when integrating WeChat login in react-native
+   * The weChatRedirectURI will be called when user click the login with WeChat button
+   */
+  weChatRedirectURI?: string;
+  /**
+   * @internal
+   * Platform is provided by the sdk
+   */
+  platform?: string;
 }
 
 /**
@@ -277,4 +292,17 @@ export interface ContainerDelegate {
     container: BaseContainer<T>,
     reason: SessionStateChangeReason
   ) => void;
+
+  /**
+   * This callback will be called when user click login with WeChat in
+   * react-native.
+   *
+   * Developer should implement this function to use WeChat SDK to
+   * obtain WeChat authentication code. After obtaining the code, developer
+   * should call weChatAuthCallback with code and state to complete the
+   * WeChat login.
+   *
+   * @public
+   */
+  sendWeChatAuthRequest(state: string): void;
 }

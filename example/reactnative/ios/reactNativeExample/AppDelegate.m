@@ -47,13 +47,6 @@ static void InitializeFlipper(UIApplication *application) {
   return YES;
 }
 
-- (BOOL)application:(UIApplication *)application
-            openURL:(NSURL *)url
-            options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
-{
-  return [AGAuthgearReactNative application:application openURL:url options:options];
-}
-
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {
 #if DEBUG

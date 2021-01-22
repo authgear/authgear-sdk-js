@@ -7,8 +7,6 @@
 #import <React/RCTUtils.h>
 #import "AGAuthgearReactNative.h"
 
-static NSString *const kOpenURLNotification = @"AGAuthgearReactNativeOpenURLNotification";
-
 static void postNotificationWithURL(NSURL *URL, id sender)
 {
   NSDictionary<NSString *, id> *payload = @{@"url": URL.absoluteString};
@@ -50,12 +48,7 @@ RCT_EXPORT_MODULE(AuthgearReactNative)
 
 - (instancetype)init
 {
-    if ((self = [super init])) {
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(handleOpenURLNotification:)
-                                                     name:kOpenURLNotification
-                                                   object:nil];
-    }
+    self = [super init];
     return self;
 }
 
@@ -122,13 +115,14 @@ RCT_EXPORT_METHOD(openURL:(NSURL *)url
 }
 
 RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
-                            scheme:(NSString *)scheme
+                       callbackURL:(NSString *)callbackURL
                            resolve:(RCTPromiseResolveBlock)resolve
                             reject:(RCTPromiseRejectBlock)reject)
 {
     self.openURLResolve = resolve;
     self.openURLReject = reject;
 
+    NSString *scheme = [self getCallbackURLScheme:callbackURL];
     if (@available(iOS 12.0, *)) {
         self.asSession = [[ASWebAuthenticationSession alloc] initWithURL:url
                                                                             callbackURLScheme:scheme
@@ -176,20 +170,6 @@ RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
             [self cleanup];
         }];
         [self.sfSession start];
-    } else {
-        UIViewController *vc = [[UIViewController alloc] init];
-        WKWebView *wv = [[WKWebView alloc] initWithFrame:vc.view.bounds];
-        wv.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        [wv loadRequest:[NSURLRequest requestWithURL:url]];
-        [vc.view addSubview:wv];
-        vc.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissWebView)];
-        self.webViewViewController = vc;
-
-        UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
-        nav.modalPresentationStyle = UIModalPresentationPageSheet;
-
-        UIViewController *rootViewController = RCTPresentedViewController();
-        [rootViewController presentViewController:nav animated:YES completion:nil];
     }
 }
 
@@ -283,15 +263,6 @@ RCT_EXPORT_METHOD(signAnonymousToken:(NSString *)kid data:(NSString *)s resolver
     }
   }
   return nil;
-}
-
-- (void)handleOpenURLNotification:(NSNotification *)notification
-{
-    NSString *urlString = notification.userInfo[@"url"];
-    if (self.openURLResolve) {
-        self.openURLResolve(urlString);
-        [self cleanup];
-    }
 }
 
 -(NSArray *)randomBytes:(NSUInteger)length
@@ -406,6 +377,15 @@ RCT_EXPORT_METHOD(signAnonymousToken:(NSString *)kid data:(NSString *)s resolver
 
   *psig = sig;
   return nil;
+}
+
+-(NSString *)getCallbackURLScheme:(NSString *)url
+{
+  NSURL *u = [NSURL URLWithString:url];
+  if (u == nil) {
+    return url;
+  }
+  return u.scheme;
 }
 
 @end

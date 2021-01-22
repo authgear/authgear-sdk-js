@@ -1,4 +1,5 @@
 /* global fetch, Request */
+import URL from "core-js-pure/features/url";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   BaseAPIClient,
@@ -13,9 +14,11 @@ import {
 } from "@authgear/core";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import { openURL, openAuthorizeURL } from "./nativemodule";
-import { getCallbackURLScheme } from "./url";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
+import { Platform } from "react-native";
 export * from "@authgear/core";
+import EventEmitter from "./eventEmitter";
+import { getURLWithoutQuery } from "./url";
 
 /**
  * @public
@@ -155,12 +158,25 @@ export class ReactNativeContainer<
    * @param options - authorize options
    */
   async authorize(options: AuthorizeOptions): Promise<AuthorizeResult> {
-    const redirectURIScheme = getCallbackURLScheme(options.redirectURI);
     if (options.prompt === undefined) {
       options.prompt = "login";
     }
-    const authorizeURL = await this.authorizeEndpoint(options);
-    const redirectURL = await openAuthorizeURL(authorizeURL, redirectURIScheme);
+    const platform = Platform.OS;
+    const authorizeURL = await this.authorizeEndpoint({
+      ...options,
+      platform,
+    });
+    const deepLinkListener = (url: string) => {
+      this._handleWeChatRedirectURI(url, options.weChatRedirectURI);
+    };
+    EventEmitter.addListener("onAuthgearDeepLink", deepLinkListener);
+    let redirectURL;
+    try {
+      redirectURL = await openAuthorizeURL(authorizeURL, options.redirectURI);
+    } finally {
+      EventEmitter.removeListener("onAuthgearDeepLink", deepLinkListener);
+    }
+
     return this._finishAuthorization(redirectURL);
   }
 
@@ -292,13 +308,23 @@ export class ReactNativeContainer<
       jwt
     )}`;
 
-    const redirectURIScheme = getCallbackURLScheme(options.redirectURI);
+    const platform = Platform.OS;
     const authorizeURL = await this.authorizeEndpoint({
       ...options,
       prompt: "login",
       loginHint,
+      platform,
     });
-    const redirectURL = await openAuthorizeURL(authorizeURL, redirectURIScheme);
+    const deepLinkListener = (url: string) => {
+      this._handleWeChatRedirectURI(url, options.weChatRedirectURI);
+    };
+    EventEmitter.addListener("onAuthgearDeepLink", deepLinkListener);
+    let redirectURL;
+    try {
+      redirectURL = await openAuthorizeURL(authorizeURL, options.redirectURI);
+    } finally {
+      EventEmitter.removeListener("onAuthgearDeepLink", deepLinkListener);
+    }
     const result = await this._finishAuthorization(redirectURL);
 
     await this.storage.delAnonymousKeyID(this.name);
@@ -310,6 +336,37 @@ export class ReactNativeContainer<
    */
   async fetchUserInfo(): Promise<UserInfo> {
     return this.apiClient._oidcUserInfoRequest(this.accessToken);
+  }
+
+  /**
+   * WeChat auth callback function. In WeChat login flow, after returning from the WeChat SDK,
+   * this function should be called to complete the authorization.
+   *
+   * @param code - WeChat Authorization code.
+   * @param state - WeChat Authorization state.
+   */
+  async weChatAuthCallback(code: string, state: string): Promise<void> {
+    return this.apiClient._weChatAuthCallbackRequest(code, state, Platform.OS);
+  }
+
+  /**
+   * @internal
+   */
+  _handleWeChatRedirectURI(deepLink: string, weChatRedirectURI?: string): void {
+    if (!weChatRedirectURI) {
+      return;
+    }
+    const urlWithoutQuery = getURLWithoutQuery(deepLink);
+    if (urlWithoutQuery === weChatRedirectURI) {
+      const u = new URL(deepLink);
+      const params = u.searchParams;
+      const state = params.get("state");
+      if (state) {
+        this.delegate?.sendWeChatAuthRequest(state);
+      } else {
+        throw new Error("missing WeChat state");
+      }
+    }
   }
 }
 

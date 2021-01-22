@@ -1,10 +1,10 @@
+import URL from "core-js-pure/features/url";
 /**
  * @internal
  */
-export function getCallbackURLScheme(url: string): string {
-  const idx = url.indexOf(":");
-  if (idx < 0) {
-    return "";
-  }
-  return url.substring(0, idx);
+export function getURLWithoutQuery(url: string): string {
+  const u = new URL(url);
+  u.search = "";
+  u.hash = "";
+  return u.toString();
 }

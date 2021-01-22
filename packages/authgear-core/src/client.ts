@@ -136,8 +136,7 @@ export abstract class BaseAPIClient {
   /**
    * @internal
    */
-  // eslint-disable-next-line complexity
-  protected async _request(
+  protected async _requestJSON(
     method: "GET" | "POST" | "DELETE",
     path: string,
     options: {
@@ -145,12 +144,41 @@ export abstract class BaseAPIClient {
       query?: [string, string][];
     } = {}
   ): Promise<any> {
+    const { json, query } = options;
+
+    const headers: { [name: string]: string } = {};
+    if (json != null) {
+      headers["content-type"] = "application/json";
+    }
+
+    const body = json != null ? JSON.stringify(json) : undefined;
+
+    return this._request(method, path, {
+      headers,
+      query,
+      body: body,
+    });
+  }
+
+  /**
+   * @internal
+   */
+  // eslint-disable-next-line complexity
+  protected async _request(
+    method: "GET" | "POST" | "DELETE",
+    path: string,
+    options: {
+      headers?: { [name: string]: string };
+      query?: [string, string][];
+      body?: string;
+    } = {}
+  ): Promise<any> {
     if (this.endpoint == null) {
       throw new Error("missing endpoint in api client");
     }
     const endpoint: string = this.endpoint;
 
-    const { json, query } = options;
+    const { headers, query, body } = options;
     let p = path;
     if (query != null && query.length > 0) {
       const params = new URLSearchParams();
@@ -160,19 +188,12 @@ export abstract class BaseAPIClient {
       p += "?" + params.toString();
     }
 
-    const headers: { [name: string]: string } = {};
-    if (json != null) {
-      headers["content-type"] = "application/json";
-    }
-
-    const body = json != null ? JSON.stringify(json) : undefined;
-
     const response = await this.fetch(endpoint, p, {
       method,
-      headers,
-      body,
+      headers: headers ?? {},
       mode: "cors",
       credentials: "include",
+      body: body,
     });
 
     let jsonBody;
@@ -216,7 +237,7 @@ export abstract class BaseAPIClient {
       query?: [string, string][];
     }
   ): Promise<any> {
-    return this._request("POST", path, options);
+    return this._requestJSON("POST", path, options);
   }
 
   /**
@@ -344,6 +365,27 @@ export abstract class BaseAPIClient {
     });
     await this._fetchOIDCRequest(config.revocation_endpoint, {
       method: "POST",
+      headers: {
+        "content-type": "application/x-www-form-urlencoded",
+      },
+      body: query.toString(),
+    });
+  }
+
+  /**
+   * @internal
+   */
+  async _weChatAuthCallbackRequest(
+    code: string,
+    state: string,
+    platform: string
+  ): Promise<void> {
+    const query = new URLSearchParams({
+      code,
+      state,
+      x_platform: platform,
+    });
+    await this._request("POST", "/sso/wechat/callback", {
       headers: {
         "content-type": "application/x-www-form-urlencoded",
       },

@@ -5,6 +5,8 @@
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
 
+static NSString *const kOpenURLNotification = @"AGAuthgearReactNativeOpenURLNotification";
+
 @interface AGAuthgearReactNative : NSObject <RCTBridgeModule>
 
 + (BOOL)application:(nonnull UIApplication *)app

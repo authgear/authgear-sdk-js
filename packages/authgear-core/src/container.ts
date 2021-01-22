@@ -227,6 +227,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   /**
    * @internal
    */
+  // eslint-disable-next-line complexity
   async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
     const clientID = this.clientID;
     if (clientID == null) {
@@ -273,6 +274,12 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     }
     if (options.uiLocales) {
       query.append("ui_locales", options.uiLocales.join(" "));
+    }
+    if (options.weChatRedirectURI) {
+      query.append("x_wechat_redirect_uri", options.weChatRedirectURI);
+    }
+    if (options.platform) {
+      query.append("x_platform", options.platform);
     }
 
     return `${config.authorization_endpoint}?${query.toString()}`;
