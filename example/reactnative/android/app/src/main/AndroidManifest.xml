@@ -45,7 +45,7 @@
                 <data
                     android:host="host"
                     android:pathPrefix="/path"
-                    android:scheme="com.authgear.example" />
+                    android:scheme="com.authgear.example.rn" />
                 <data
                     android:host="host"
                     android:pathPrefix="/open_wechat_app"
