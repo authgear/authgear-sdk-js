@@ -17,12 +17,14 @@ export async function openURL(url: string): Promise<void> {
 
 export async function openAuthorizeURL(
   url: string,
-  callbackURL: string
+  callbackURL: string,
+  weChatRedirectURI?: string
 ): Promise<string> {
   try {
     const redirectURI = await AuthgearReactNative.openAuthorizeURL(
       url,
-      callbackURL
+      callbackURL,
+      weChatRedirectURI
     );
     await dismiss();
     return redirectURI;

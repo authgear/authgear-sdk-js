@@ -10,7 +10,7 @@ RCT_EXPORT_MODULE(AuthgearManager)
 {
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleOpenURLNotification:)
-                                                 name:kOpenURLNotification
+                                                 name:kOpenWeChatRedirectURINotification
                                                object:nil];
 }
 
@@ -21,12 +21,12 @@ RCT_EXPORT_MODULE(AuthgearManager)
 
 - (NSArray<NSString *> *)supportedEvents
 {
-    return @[@"onAuthgearDeepLink"];
+    return @[@"onAuthgearOpenWeChatRedirectURI"];
 }
 
 - (void)handleOpenURLNotification:(NSNotification *)notification
 {
-    [self sendEventWithName:@"onAuthgearDeepLink" body:notification.userInfo[@"url"]];
+    [self sendEventWithName:@"onAuthgearOpenWeChatRedirectURI" body:notification.userInfo[@"url"]];
 }
 
 @end

@@ -7,10 +7,11 @@
 #import <React/RCTUtils.h>
 #import "AGAuthgearReactNative.h"
 
-static void postNotificationWithURL(NSURL *URL, id sender)
+static NSString *currentWeChatRedirectURI = nil;
+static void postOpenWeChatRedirectURINotification(NSURL *URL, id sender)
 {
   NSDictionary<NSString *, id> *payload = @{@"url": URL.absoluteString};
-  [[NSNotificationCenter defaultCenter] postNotificationName:kOpenURLNotification
+  [[NSNotificationCenter defaultCenter] postNotificationName:kOpenWeChatRedirectURINotification
                                                       object:sender
                                                     userInfo:payload];
 }
@@ -61,7 +62,7 @@ RCT_EXPORT_MODULE(AuthgearReactNative)
             openURL:(NSURL *)URL
             options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
-  postNotificationWithURL(URL, self);
+  [self handleWeChatRedirectURI:URL];
   return YES;
 }
 
@@ -70,7 +71,7 @@ RCT_EXPORT_MODULE(AuthgearReactNative)
   sourceApplication:(NSString *)sourceApplication
          annotation:(id)annotation
 {
-  postNotificationWithURL(URL, self);
+  [self handleWeChatRedirectURI:URL];
   return YES;
 }
 
@@ -83,7 +84,7 @@ continueUserActivity:(NSUserActivity *)userActivity
         (nonnull void (^)(NSArray *_Nullable))restorationHandler {
     #endif
   if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb]) {
-    postNotificationWithURL(userActivity.webpageURL, self);
+    return [self handleWeChatRedirectURI:userActivity.webpageURL];
   }
   return YES;
 }
@@ -116,6 +117,7 @@ RCT_EXPORT_METHOD(openURL:(NSURL *)url
 
 RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
                        callbackURL:(NSString *)callbackURL
+                 weChatRedirectURI:(NSString *)weChatRedirectURI
                            resolve:(RCTPromiseResolveBlock)resolve
                             reject:(RCTPromiseRejectBlock)reject)
 {
@@ -123,10 +125,12 @@ RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
     self.openURLReject = reject;
 
     NSString *scheme = [self getCallbackURLScheme:callbackURL];
+    [AGAuthgearReactNative registerCurrentWeChatRedirectURI:weChatRedirectURI];
     if (@available(iOS 12.0, *)) {
         self.asSession = [[ASWebAuthenticationSession alloc] initWithURL:url
                                                                             callbackURLScheme:scheme
                                                                             completionHandler:^(NSURL *url, NSError *error) {
+            [AGAuthgearReactNative unregisterCurrentWeChatRedirectURI];
             if (error) {
                 BOOL isUserCancelled = ([[error domain] isEqualToString:ASWebAuthenticationSessionErrorDomain] &&
                 [error code] == ASWebAuthenticationSessionErrorCodeCanceledLogin);
@@ -152,6 +156,7 @@ RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
         self.sfSession = [[SFAuthenticationSession alloc] initWithURL:url
                                                                       callbackURLScheme:scheme
                                                                       completionHandler:^(NSURL *url, NSError *error) {
+            [AGAuthgearReactNative unregisterCurrentWeChatRedirectURI];
             if (error) {
                 BOOL isUserCancelled = ([[error domain] isEqualToString:SFAuthenticationErrorDomain] &&
                 [error code] == SFAuthenticationErrorCanceledLogin);
@@ -379,6 +384,29 @@ RCT_EXPORT_METHOD(signAnonymousToken:(NSString *)kid data:(NSString *)s resolver
   return nil;
 }
 
+#pragma mark - Handle WeChat Redirect uri functions
+
++(void)registerCurrentWeChatRedirectURI:(NSString*)uri {
+    currentWeChatRedirectURI = uri;
+}
+
+
++(void)unregisterCurrentWeChatRedirectURI{
+    currentWeChatRedirectURI = nil;
+}
+
++(BOOL)handleWeChatRedirectURI:(NSURL*)url {
+    if(currentWeChatRedirectURI == nil) return NO;
+    NSString *urlWithoutQuery = [self getURLWithoutQuery:url];
+    if (urlWithoutQuery != nil && [urlWithoutQuery isEqualToString:currentWeChatRedirectURI]) {
+        postOpenWeChatRedirectURINotification(url, self);
+        return YES;
+    }
+    return NO;
+}
+
+#pragma mark - URL functions
+
 -(NSString *)getCallbackURLScheme:(NSString *)url
 {
   NSURL *u = [NSURL URLWithString:url];
@@ -386,6 +414,14 @@ RCT_EXPORT_METHOD(signAnonymousToken:(NSString *)kid data:(NSString *)s resolver
     return url;
   }
   return u.scheme;
+}
+
++(NSString *)getURLWithoutQuery:(NSURL *)url
+{
+    NSURLComponents* uc = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
+    uc.query = nil;
+    uc.fragment = nil;
+    return [uc string];
 }
 
 @end
