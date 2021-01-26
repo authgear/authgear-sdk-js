@@ -11,8 +11,11 @@ export async function sha256String(input: string): Promise<number[]> {
   return AuthgearReactNative.sha256String(input);
 }
 
-export async function openURL(url: string): Promise<void> {
-  return AuthgearReactNative.openURL(url);
+export async function openURL(
+  url: string,
+  weChatRedirectURI?: string
+): Promise<void> {
+  return AuthgearReactNative.openURL(url, weChatRedirectURI);
 }
 
 export async function openAuthorizeURL(

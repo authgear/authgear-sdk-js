@@ -233,8 +233,10 @@ const HomeScreen: React.FC = () => {
 
   const openSettings = useCallback(() => {
     authgear
-      .open(Page.Settings)
-      .catch(() => Alert.alert('Error', 'Failed to open setting page'));
+      .open(Page.Settings, {
+        weChatRedirectURI,
+      })
+      .catch((err) => Alert.alert('Error', 'Failed to open setting page'));
   }, []);
 
   const promoteAnonymousUser = useCallback(() => {

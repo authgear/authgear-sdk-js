@@ -11,6 +11,7 @@ import {
   AuthorizeResult,
   PromoteOptions,
   UserInfo,
+  SettingOptions,
 } from "@authgear/core";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import { openURL, openAuthorizeURL } from "./nativemodule";
@@ -188,7 +189,7 @@ export class ReactNativeContainer<
    */
 
   // eslint-disable-next-line class-methods-use-this
-  async openURL(url: string): Promise<void> {
+  async openURL(url: string, options?: SettingOptions): Promise<void> {
     let targetURL = url;
 
     const refreshToken = await this.storage.getRefreshToken(this.name);
@@ -205,17 +206,22 @@ export class ReactNativeContainer<
       app_session_token
     )}`;
 
+    const platform = Platform.OS;
     targetURL = await this.authorizeEndpoint({
       redirectURI: url,
       prompt: "none",
       responseType: "none",
       loginHint,
+      platform,
+      ...(options?.weChatRedirectURI
+        ? { weChatRedirectURI: options.weChatRedirectURI }
+        : {}),
     });
 
-    await openURL(targetURL);
+    await openURL(targetURL, options?.weChatRedirectURI);
   }
 
-  async open(page: Page): Promise<void> {
+  async open(page: Page, options?: SettingOptions): Promise<void> {
     const { endpoint } = this.apiClient;
     if (endpoint == null) {
       throw new Error(
@@ -223,7 +229,7 @@ export class ReactNativeContainer<
       );
     }
     const endpointWithoutTrailingSlash = endpoint.replace(/\/$/, "");
-    await this.openURL(`${endpointWithoutTrailingSlash}${page}`);
+    await this.openURL(`${endpointWithoutTrailingSlash}${page}`, options);
   }
 
   /**

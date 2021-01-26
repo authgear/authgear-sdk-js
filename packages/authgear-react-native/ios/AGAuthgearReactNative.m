@@ -16,7 +16,7 @@ static void postOpenWeChatRedirectURINotification(NSURL *URL, id sender)
                                                     userInfo:payload];
 }
 
-@interface AGAuthgearReactNative()
+@interface AGAuthgearReactNative() <WKNavigationDelegate>
 @property (nonatomic, strong) RCTPromiseResolveBlock openURLResolve;
 @property (nonatomic, strong) RCTPromiseRejectBlock openURLReject;
 @property (nonatomic, strong) UIViewController *webViewViewController;
@@ -96,12 +96,22 @@ RCT_EXPORT_METHOD(dismiss:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseReje
 }
 
 RCT_EXPORT_METHOD(openURL:(NSURL *)url
+        weChatRedirectURI:(NSString *)weChatRedirectURI
                   resolve:(RCTPromiseResolveBlock)resolve
                    reject:(RCTPromiseRejectBlock)reject)
 {
+    // For opening setting page, sdk will not know when user end
+    // the setting page.
+    // So we cannot unregister the wechat uri in this case
+    // It is fine to not unresgister it, as everytime we open a
+    // new authorize section (authorize or setting page)
+    // registerCurrentWeChatRedirectURI will be called and overwrite
+    // previous registered wechatRedirectURI
+    [AGAuthgearReactNative registerCurrentWeChatRedirectURI:weChatRedirectURI];
     UIViewController *vc = [[UIViewController alloc] init];
     WKWebView *wv = [[WKWebView alloc] initWithFrame:vc.view.bounds];
     wv.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    wv.navigationDelegate = self;
     [wv loadRequest:[NSURLRequest requestWithURL:url]];
     [vc.view addSubview:wv];
     vc.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissWebView)];
@@ -403,6 +413,17 @@ RCT_EXPORT_METHOD(signAnonymousToken:(NSString *)kid data:(NSString *)s resolver
         return YES;
     }
     return NO;
+}
+
+- (void)webView:(WKWebView *)webView
+decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction
+decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
+    NSURL *url = navigationAction.request.URL;
+    if (url != nil && [self.class handleWeChatRedirectURI:url]) {
+        decisionHandler(WKNavigationActionPolicyCancel);
+        return;
+    }
+    decisionHandler(WKNavigationActionPolicyAllow);
 }
 
 #pragma mark - URL functions

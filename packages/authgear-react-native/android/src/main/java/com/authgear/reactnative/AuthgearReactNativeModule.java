@@ -109,7 +109,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     }
 
     @ReactMethod
-    public void openURL(String urlString, Promise promise) {
+    public void openURL(String urlString, String weChatRedirectURI, Promise promise) {
         try {
             Activity currentActivity = getCurrentActivity();
             if (currentActivity == null) {
@@ -118,6 +118,12 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             }
 
             Context context = currentActivity;
+            registerWeChatRedirectURI(weChatRedirectURI, new OnOpenWeChatRedirectURIListener() {
+                @Override
+                public void OnURI(Uri uri) {
+                    sendOpenWeChatRedirectURI(uri);
+                }
+            });
             Intent intent = WebViewActivity.createIntent(context, urlString);
             currentActivity.startActivity(intent);
 

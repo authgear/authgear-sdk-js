@@ -86,6 +86,19 @@ export interface AuthorizeOptions {
 }
 
 /**
+ * Auth UI setting options
+ *
+ * @public
+ */
+export interface SettingOptions {
+  /**
+   * WeChat Redirect URI is needed when integrating WeChat login in react-native
+   * The weChatRedirectURI will be called when user click the login with WeChat button
+   */
+  weChatRedirectURI?: string;
+}
+
+/**
  * Result of authorization.
  *
  * @public
