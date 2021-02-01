@@ -11,6 +11,7 @@ import {
   AuthorizeResult,
   PromoteOptions,
   UserInfo,
+  SettingOptions,
 } from "@authgear/core";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import { openURL, openAuthorizeURL } from "./nativemodule";
@@ -18,7 +19,6 @@ import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 import { Platform } from "react-native";
 export * from "@authgear/core";
 import EventEmitter from "./eventEmitter";
-import { getURLWithoutQuery } from "./url";
 
 /**
  * @public
@@ -86,6 +86,8 @@ export class ReactNativeAsyncStorageStorageDriver implements StorageDriver {
 export class ReactNativeContainer<
   T extends ReactNativeAPIClient
 > extends BaseContainer<T> {
+  weChatRedirectDeepLinkListener: (url: string) => void;
+
   constructor(options?: ContainerOptions<T>) {
     const o = {
       ...options,
@@ -101,6 +103,14 @@ export class ReactNativeContainer<
 
     this.isThirdParty = true;
     this.apiClient._delegate = this;
+
+    this.weChatRedirectDeepLinkListener = (url: string) => {
+      this._sendWeChatRedirectURIToDelegate(url);
+    };
+    EventEmitter.addListener(
+      "onAuthgearOpenWeChatRedirectURI",
+      this.weChatRedirectDeepLinkListener
+    );
   }
 
   /**
@@ -166,17 +176,11 @@ export class ReactNativeContainer<
       ...options,
       platform,
     });
-    const deepLinkListener = (url: string) => {
-      this._handleWeChatRedirectURI(url, options.weChatRedirectURI);
-    };
-    EventEmitter.addListener("onAuthgearDeepLink", deepLinkListener);
-    let redirectURL;
-    try {
-      redirectURL = await openAuthorizeURL(authorizeURL, options.redirectURI);
-    } finally {
-      EventEmitter.removeListener("onAuthgearDeepLink", deepLinkListener);
-    }
-
+    const redirectURL = await openAuthorizeURL(
+      authorizeURL,
+      options.redirectURI,
+      options.weChatRedirectURI
+    );
     return this._finishAuthorization(redirectURL);
   }
 
@@ -185,7 +189,7 @@ export class ReactNativeContainer<
    */
 
   // eslint-disable-next-line class-methods-use-this
-  async openURL(url: string): Promise<void> {
+  async openURL(url: string, options?: SettingOptions): Promise<void> {
     let targetURL = url;
 
     const refreshToken = await this.storage.getRefreshToken(this.name);
@@ -202,17 +206,22 @@ export class ReactNativeContainer<
       app_session_token
     )}`;
 
+    const platform = Platform.OS;
     targetURL = await this.authorizeEndpoint({
       redirectURI: url,
       prompt: "none",
       responseType: "none",
       loginHint,
+      platform,
+      ...(options?.weChatRedirectURI
+        ? { weChatRedirectURI: options.weChatRedirectURI }
+        : {}),
     });
 
-    await openURL(targetURL);
+    await openURL(targetURL, options?.weChatRedirectURI);
   }
 
-  async open(page: Page): Promise<void> {
+  async open(page: Page, options?: SettingOptions): Promise<void> {
     const { endpoint } = this.apiClient;
     if (endpoint == null) {
       throw new Error(
@@ -220,7 +229,7 @@ export class ReactNativeContainer<
       );
     }
     const endpointWithoutTrailingSlash = endpoint.replace(/\/$/, "");
-    await this.openURL(`${endpointWithoutTrailingSlash}${page}`);
+    await this.openURL(`${endpointWithoutTrailingSlash}${page}`, options);
   }
 
   /**
@@ -315,16 +324,11 @@ export class ReactNativeContainer<
       loginHint,
       platform,
     });
-    const deepLinkListener = (url: string) => {
-      this._handleWeChatRedirectURI(url, options.weChatRedirectURI);
-    };
-    EventEmitter.addListener("onAuthgearDeepLink", deepLinkListener);
-    let redirectURL;
-    try {
-      redirectURL = await openAuthorizeURL(authorizeURL, options.redirectURI);
-    } finally {
-      EventEmitter.removeListener("onAuthgearDeepLink", deepLinkListener);
-    }
+    const redirectURL = await openAuthorizeURL(
+      authorizeURL,
+      options.redirectURI,
+      options.weChatRedirectURI
+    );
     const result = await this._finishAuthorization(redirectURL);
 
     await this.storage.delAnonymousKeyID(this.name);
@@ -352,20 +356,12 @@ export class ReactNativeContainer<
   /**
    * @internal
    */
-  _handleWeChatRedirectURI(deepLink: string, weChatRedirectURI?: string): void {
-    if (!weChatRedirectURI) {
-      return;
-    }
-    const urlWithoutQuery = getURLWithoutQuery(deepLink);
-    if (urlWithoutQuery === weChatRedirectURI) {
-      const u = new URL(deepLink);
-      const params = u.searchParams;
-      const state = params.get("state");
-      if (state) {
-        this.delegate?.sendWeChatAuthRequest(state);
-      } else {
-        throw new Error("missing WeChat state");
-      }
+  _sendWeChatRedirectURIToDelegate(deepLink: string): void {
+    const u = new URL(deepLink);
+    const params = u.searchParams;
+    const state = params.get("state");
+    if (state) {
+      this.delegate?.sendWeChatAuthRequest(state);
     }
   }
 }

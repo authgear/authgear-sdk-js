@@ -5,7 +5,7 @@
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
 
-static NSString *const kOpenURLNotification = @"AGAuthgearReactNativeOpenURLNotification";
+static NSString * _Nonnull const kOpenWeChatRedirectURINotification = @"AGAuthgearReactNativeOpenWeChatRedirectURINotification";
 
 @interface AGAuthgearReactNative : NSObject <RCTBridgeModule>
 
