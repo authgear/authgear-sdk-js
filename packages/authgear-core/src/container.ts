@@ -126,7 +126,9 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     const { access_token, refresh_token, expires_in } = response;
 
     this.accessToken = access_token;
-    this.refreshToken = refresh_token;
+    if (refresh_token) {
+      this.refreshToken = refresh_token;
+    }
     this.expireAt = new Date(
       new Date(Date.now()).getTime() + expires_in * EXPIRE_IN_PERCENTAGE * 1000
     );
