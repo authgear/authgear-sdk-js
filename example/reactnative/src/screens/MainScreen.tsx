@@ -112,6 +112,7 @@ const HomeScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [clientID, setClientID] = useState('');
   const [endpoint, setEndpoint] = useState('');
+  const [page, setPage] = useState('');
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
   const [isAnonymous, setIsAnonymous] = useState<boolean | undefined>();
 
@@ -190,7 +191,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [clientID, endpoint, postConfigure]);
+  }, [clientID, endpoint, postConfigure, isThirdParty]);
 
   const login = useCallback(() => {
     setLoading(true);
@@ -198,6 +199,7 @@ const HomeScreen: React.FC = () => {
       .authorize({
         redirectURI,
         weChatRedirectURI,
+        page,
       })
       .then(({userInfo}) => {
         setIsAnonymous(userInfo.isAnonymous);
@@ -209,7 +211,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [page]);
 
   const loginAnonymously = useCallback(() => {
     setLoading(true);
@@ -309,25 +311,48 @@ const HomeScreen: React.FC = () => {
         </View>
         <View style={styles.input}>
           <Text style={styles.inputLabel}>Client ID</Text>
-          <TextInput style={styles.inputField} onChangeText={setClientID} autoCapitalize="none" autoCompleteType="off" autoCorrect={false} />
+          <TextInput
+            style={styles.inputField}
+            onChangeText={setClientID}
+            autoCapitalize="none"
+            autoCompleteType="off"
+            autoCorrect={false}
+            placeholder="Enter client ID"
+          />
         </View>
         <View style={styles.input}>
           <Text style={styles.inputLabel}>Endpoint</Text>
-          <TextInput style={styles.inputField} onChangeText={setEndpoint} autoCapitalize="none" autoCompleteType="off" autoCorrect={false} />
+          <TextInput
+            style={styles.inputField}
+            onChangeText={setEndpoint}
+            autoCapitalize="none"
+            autoCompleteType="off"
+            autoCorrect={false}
+            placeholder="Enter endpoint"
+          />
+        </View>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>Page</Text>
+          <TextInput
+            style={styles.inputField}
+            onChangeText={setPage}
+            autoCapitalize="none"
+            autoCompleteType="off"
+            autoCorrect={false}
+            placeholder="'login' or 'signup'"
+          />
         </View>
         <View style={styles.configureAction}>
           <Button title="Configure" onPress={configure} disabled={loading} />
-        <View style={styles.optionsContainer}>
-          <View style={styles.checkboxContainer}>
-            <Text style={styles.checkboxDesc}>
-              Third-party app
-            </Text>
-            <Switch
-              style={styles.checkbox}
-              value={isThirdParty}
-              onValueChange={setIsThirdParty}
-            />
-          </View>
+          <View style={styles.optionsContainer}>
+            <View style={styles.checkboxContainer}>
+              <Text style={styles.checkboxDesc}>Third-party app</Text>
+              <Switch
+                style={styles.checkbox}
+                value={isThirdParty}
+                onValueChange={setIsThirdParty}
+              />
+            </View>
           </View>
         </View>
       </View>
