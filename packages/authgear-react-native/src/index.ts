@@ -168,9 +168,6 @@ export class ReactNativeContainer<
    * @param options - authorize options
    */
   async authorize(options: AuthorizeOptions): Promise<AuthorizeResult> {
-    if (options.prompt === undefined) {
-      options.prompt = "login";
-    }
     const platform = Platform.OS;
     const authorizeURL = await this.authorizeEndpoint({
       ...options,
