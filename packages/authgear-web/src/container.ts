@@ -113,9 +113,7 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
    */
   async startAuthorization(options: AuthorizeOptions): Promise<void> {
     const isThirdParty = this.isThirdParty ?? false;
-    if (isThirdParty) {
-      options.prompt = options.prompt ?? "login";
-    } else {
+    if (!isThirdParty) {
       // Use shared session cookie by default for first-party web apps.
       options.responseType = options.responseType ?? "none";
     }

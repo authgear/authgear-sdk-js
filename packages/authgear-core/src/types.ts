@@ -83,6 +83,11 @@ export interface AuthorizeOptions {
    * Platform is provided by the sdk
    */
   platform?: string;
+
+  /**
+   * Initial page to open. Valid values are 'login' and 'signup'.
+   */
+  page?: string;
 }
 
 /**
