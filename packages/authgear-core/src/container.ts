@@ -283,6 +283,9 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     if (options.platform) {
       query.append("x_platform", options.platform);
     }
+    if (options.page) {
+      query.append("x_page", options.page);
+    }
 
     return `${config.authorization_endpoint}?${query.toString()}`;
   }
