@@ -57,7 +57,15 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
   }
 
   /**
-   * Configure this container with connection information.
+   * configure() configures the container with the client ID and the endpoint.
+   * It also does local IO to retrieve the refresh token.
+   * It finally does network IO to refresh the access token.
+   *
+   * Therefore, it is possible that configure() could fail for many reasons.
+   * If your application is offline first, be prepared for handling errors.
+   *
+   * configure() can be called more than once if it failed.
+   * Otherwise, it is NOT recommended to call it more than once.
    *
    * @public
    */
