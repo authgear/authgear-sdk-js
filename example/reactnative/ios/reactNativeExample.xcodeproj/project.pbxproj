@@ -228,7 +228,9 @@
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
+						DevelopmentTeam = E2F6KNYMR6;
 						LastSwiftMigration = 1120;
+						ProvisioningStyle = Manual;
 					};
 				};
 			};
@@ -466,7 +468,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = reactNativeExample/reactNativeExample.entitlements;
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = E2F6KNYMR6;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = reactNativeExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -477,6 +481,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.authgear.exampleapp.reactnative;
 				PRODUCT_NAME = reactNativeExample;
+				PROVISIONING_PROFILE_SPECIFIER = "Authgear demo app iOS react native development";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -490,7 +495,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = reactNativeExample/reactNativeExample.entitlements;
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = E2F6KNYMR6;
 				INFOPLIST_FILE = reactNativeExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
@@ -500,6 +507,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.authgear.exampleapp.reactnative;
 				PRODUCT_NAME = reactNativeExample;
+				PROVISIONING_PROFILE_SPECIFIER = "Authgear demo app iOS react native development";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
