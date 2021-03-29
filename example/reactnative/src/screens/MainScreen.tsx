@@ -17,9 +17,8 @@ import authgear, {
   BaseContainer,
   BaseAPIClient,
   SessionStateChangeReason,
+  UserInfo,
 } from '@authgear/react-native';
-
-import {ShowLoading} from '../ShowLoading';
 
 const styles = StyleSheet.create({
   root: {
@@ -104,7 +103,20 @@ const weChatRedirectURI = Platform.select<string>({
   ios: 'https://authgear-demo-rn.pandawork.com/authgear/open_wechat_app',
 });
 
-const ANONYMOUS_USERS_DISABLED_ERROR = 'unauthorized_client';
+const biometricOptions = {
+  ios: {
+    localizedReason: 'Use biometric to authenticate',
+    constraint: 'biometryCurrentSet' as const,
+  },
+  android: {
+    title: 'Biometric Authentication',
+    subtitle: 'Biometric authentication',
+    description: 'Use biometric to authenticate',
+    negativeButtonText: 'Cancel',
+    constraint: ['BIOMETRIC_STRONG' as const],
+    invalidatedByBiometricEnrollment: true,
+  },
+};
 
 const HomeScreen: React.FC = () => {
   const [initialized, setInitialized] = useState(false);
@@ -113,8 +125,50 @@ const HomeScreen: React.FC = () => {
   const [clientID, setClientID] = useState('');
   const [endpoint, setEndpoint] = useState('');
   const [page, setPage] = useState('');
-  const [loggedIn, setLoggedIn] = useState<boolean>(false);
-  const [isAnonymous, setIsAnonymous] = useState<boolean | undefined>();
+  const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const loggedIn = userInfo != null;
+
+  const showUser = useCallback((userInfo: UserInfo) => {
+    Alert.alert(
+      'User Info',
+      [
+        `User ID: ${userInfo.sub}`,
+        `Is Anonymous: ${userInfo.isAnonymous}`,
+        `Is Verified: ${userInfo.isVerified}`,
+      ].join('\n'),
+    );
+  }, []);
+
+  const showError = useCallback((e: any) => {
+    const json = JSON.parse(JSON.stringify(e));
+    delete json['line'];
+    delete json['column'];
+    delete json['sourceURL'];
+    json['constructor.name'] = e?.constructor?.name;
+    json['message'] = e.message;
+    const message = JSON.stringify(json);
+    const title = 'Error';
+    Alert.alert(title, message);
+  }, []);
+
+  const updateBiometricState = useCallback(() => {
+    authgear
+      .checkBiometricSupported(biometricOptions)
+      .then(() => {
+        authgear
+          .isBiometricEnabled()
+          .then((enabled) => {
+            setBiometricEnabled(enabled);
+          })
+          .catch(() => {
+            // ignore the error.
+          });
+      })
+      .catch(() => {
+        // ignore the error.
+      });
+  }, []);
 
   const delegate: ContainerDelegate = useMemo(() => {
     const d: ContainerDelegate = {
@@ -122,7 +176,9 @@ const HomeScreen: React.FC = () => {
         container: BaseContainer<BaseAPIClient>,
         _reason: SessionStateChangeReason,
       ) => {
-        setLoggedIn(container.sessionState === 'AUTHENTICATED');
+        if (container.sessionState !== 'AUTHENTICATED') {
+          setUserInfo(null);
+        }
       },
       sendWeChatAuthRequest: (state) => {
         console.log('user click login with wechat, open wechat sdk');
@@ -136,12 +192,12 @@ const HomeScreen: React.FC = () => {
             console.log('send wechat auth callback successfully');
           })
           .catch((err: Error) => {
-            console.error('failed to login with WeChat', err);
+            showError(err);
           });
       },
     };
     return d;
-  }, []);
+  }, [showError]);
 
   useEffect(() => {
     authgear.delegate = delegate;
@@ -152,22 +208,23 @@ const HomeScreen: React.FC = () => {
   }, [delegate]);
 
   const postConfigure = useCallback(() => {
-    if (authgear.getAccessToken() == null) {
+    updateBiometricState();
+    if (authgear.sessionState !== 'AUTHENTICATED') {
       setInitialized(true);
       return;
     }
     authgear
       .fetchUserInfo()
       .then((userInfo) => {
-        setIsAnonymous(userInfo.isAnonymous);
+        setUserInfo(userInfo);
       })
-      .catch(() => {
-        Alert.alert('Error', 'Failed to fetch user info');
+      .catch((e) => {
+        showError(e);
       })
       .finally(() => {
         setInitialized(true);
       });
-  }, []);
+  }, [updateBiometricState, showError]);
 
   const configure = useCallback(() => {
     setLoading(true);
@@ -185,13 +242,13 @@ const HomeScreen: React.FC = () => {
         postConfigure();
         Alert.alert('Success', 'Configured Authgear container successfully');
       })
-      .catch(() => {
-        Alert.alert('Error', 'Failed to configure Authgear container');
+      .catch((e) => {
+        showError(e);
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [clientID, endpoint, postConfigure, isThirdParty]);
+  }, [clientID, endpoint, postConfigure, isThirdParty, showError]);
 
   const login = useCallback(() => {
     setLoading(true);
@@ -200,46 +257,37 @@ const HomeScreen: React.FC = () => {
         redirectURI,
         weChatRedirectURI,
         page,
+        prompt: 'login',
       })
       .then(({userInfo}) => {
-        setIsAnonymous(userInfo.isAnonymous);
-        Alert.alert('Success', 'Logged in successfully');
+        setUserInfo(userInfo);
+        showUser(userInfo);
       })
-      .catch(() => {
-        Alert.alert('Error', 'Failed to authorize');
+      .catch((e) => {
+        showError(e);
       })
       .finally(() => {
         setLoading(false);
+        updateBiometricState();
       });
-  }, [page]);
+  }, [page, updateBiometricState, showError, showUser]);
 
   const loginAnonymously = useCallback(() => {
     setLoading(true);
     authgear
       .authenticateAnonymously()
       .then(({userInfo}) => {
-        setIsAnonymous(userInfo.isAnonymous);
-        Alert.alert('Success', 'Logged in anonymously');
+        setUserInfo(userInfo);
+        showUser(userInfo);
       })
       .catch((err) => {
-        if (err.error === ANONYMOUS_USERS_DISABLED_ERROR) {
-          Alert.alert('Error', 'Anonymous users are not allowed');
-        } else {
-          Alert.alert('Error', 'Failed to authenticate anonymously');
-        }
+        showError(err);
       })
       .finally(() => {
         setLoading(false);
+        updateBiometricState();
       });
-  }, []);
-
-  const openSettings = useCallback(() => {
-    authgear
-      .open(Page.Settings, {
-        weChatRedirectURI,
-      })
-      .catch((err) => Alert.alert('Error', 'Failed to open setting page'));
-  }, []);
+  }, [showError, showUser, updateBiometricState]);
 
   const promoteAnonymousUser = useCallback(() => {
     setLoading(true);
@@ -249,56 +297,93 @@ const HomeScreen: React.FC = () => {
         weChatRedirectURI,
       })
       .then(({userInfo}) => {
-        setIsAnonymous(userInfo.isAnonymous);
-        Alert.alert(
-          'Success',
-          'Successfully promoted to normal authenticated user',
-        );
+        setUserInfo(userInfo);
+        showUser(userInfo);
       })
-      .catch(() => Alert.alert('Error', 'Failed to promote anonymous user'))
+      .catch((e) => showError(e))
       .finally(() => {
+        updateBiometricState();
         setLoading(false);
       });
-  }, []);
+  }, [showError, showUser, updateBiometricState]);
+
+  const enableBiometric = useCallback(() => {
+    setLoading(true);
+    authgear
+      .enableBiometric(biometricOptions)
+      .catch((err) => {
+        showError(err);
+      })
+      .finally(() => {
+        setLoading(false);
+        updateBiometricState();
+      });
+  }, [showError, updateBiometricState]);
+
+  const authenticateBiometric = useCallback(() => {
+    setLoading(true);
+    authgear
+      .authenticateBiometric(biometricOptions)
+      .then(({userInfo}) => {
+        setUserInfo(userInfo);
+        showUser(userInfo);
+      })
+      .catch((e) => showError(e))
+      .finally(() => {
+        updateBiometricState();
+        setLoading(false);
+      });
+  }, [showError, showUser, updateBiometricState]);
+
+  const disableBiometric = useCallback(() => {
+    setLoading(true);
+    authgear
+      .disableBiometric()
+      .catch((err) => {
+        showError(err);
+      })
+      .finally(() => {
+        setLoading(false);
+        updateBiometricState();
+      });
+  }, [showError, updateBiometricState]);
+
+  const openSettings = useCallback(() => {
+    authgear
+      .open(Page.Settings, {
+        weChatRedirectURI,
+      })
+      .catch((err) => showError(err));
+  }, [showError]);
 
   const fetchUserInfo = useCallback(() => {
     setLoading(true);
     authgear
       .fetchUserInfo()
       .then((userInfo) => {
-        setIsAnonymous(userInfo.isAnonymous);
-        Alert.alert(
-          'Success',
-          [
-            'Fetched user info successfully',
-            '',
-            `User ID: ${userInfo.sub}`,
-            `Is Anonymous: ${userInfo.isAnonymous}`,
-            `Is Verified: ${userInfo.isVerified}`,
-          ].join('\n'),
-        );
+        setUserInfo(userInfo);
+        showUser(userInfo);
       })
-      .catch(() => Alert.alert('Error', 'Failed to fetch user info'))
+      .catch((e) => showError(e))
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [showError, showUser]);
 
   const logout = useCallback(() => {
     setLoading(true);
     authgear
       .logout()
       .then(() => {
-        setIsAnonymous(undefined);
-        Alert.alert('Success', 'Logged out successfully');
+        setUserInfo(null);
       })
-      .catch(() => {
-        Alert.alert('Error', 'Failed to logout');
+      .catch((e) => {
+        showError(e);
       })
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [showError]);
 
   return (
     <ScrollView style={styles.root}>
@@ -313,6 +398,7 @@ const HomeScreen: React.FC = () => {
           <Text style={styles.inputLabel}>Client ID</Text>
           <TextInput
             style={styles.inputField}
+            value={clientID}
             onChangeText={setClientID}
             autoCapitalize="none"
             autoCompleteType="off"
@@ -324,6 +410,7 @@ const HomeScreen: React.FC = () => {
           <Text style={styles.inputLabel}>Endpoint</Text>
           <TextInput
             style={styles.inputField}
+            value={endpoint}
             onChangeText={setEndpoint}
             autoCapitalize="none"
             autoCompleteType="off"
@@ -356,7 +443,6 @@ const HomeScreen: React.FC = () => {
           </View>
         </View>
       </View>
-      <ShowLoading loading={loading} />
       <Text style={styles.actionDesc}>
         After that, remember to add redirect URI {redirectURI} to OAuth client
         through Authgear portal or editing authgear.yaml config file.{' '}
@@ -367,44 +453,70 @@ const HomeScreen: React.FC = () => {
       <View style={styles.actionButtons}>
         <View style={styles.button}>
           <Button
+            title="Authenticate"
+            onPress={login}
+            disabled={!initialized || loading || loggedIn}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
             title="Authenticate Anonymously"
             onPress={loginAnonymously}
-            disabled={!initialized || loggedIn || isThirdParty}
-          />
-        </View>
-        <View style={styles.button}>
-          <Button
-            title="Authorize"
-            onPress={login}
-            disabled={!initialized || loggedIn}
-          />
-        </View>
-        <View style={styles.button}>
-          <Button
-            title="Open Settings"
-            onPress={openSettings}
-            disabled={!initialized}
+            disabled={!initialized || loading || loggedIn || isThirdParty}
           />
         </View>
         <View style={styles.button}>
           <Button
             title="Promote Anonymous User"
             onPress={promoteAnonymousUser}
-            disabled={!initialized || !isAnonymous || !loggedIn}
+            disabled={
+              !initialized ||
+              loading ||
+              !(userInfo?.isAnonymous ?? false) ||
+              !loggedIn
+            }
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Enable Biometric"
+            onPress={enableBiometric}
+            disabled={!initialized || loading || !loggedIn || biometricEnabled}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Disable Biometric"
+            onPress={disableBiometric}
+            disabled={!initialized || loading || !biometricEnabled}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Authenticate with biometric"
+            onPress={authenticateBiometric}
+            disabled={!initialized || loading || loggedIn || !biometricEnabled}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Open Settings"
+            onPress={openSettings}
+            disabled={!initialized || !loggedIn}
           />
         </View>
         <View style={styles.button}>
           <Button
             title="Fetch User Info"
             onPress={fetchUserInfo}
-            disabled={!initialized || !loggedIn}
+            disabled={!initialized || loading || !loggedIn}
           />
         </View>
         <View style={styles.button}>
           <Button
             title="Logout"
             onPress={logout}
-            disabled={!initialized || !loggedIn}
+            disabled={!initialized || loading || !loggedIn}
           />
         </View>
       </View>
