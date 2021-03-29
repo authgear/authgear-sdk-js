@@ -73,6 +73,37 @@ export class ServerError extends Error {
 }
 
 /**
+ * OAuthError represents the oauth error response.
+ * https://tools.ietf.org/html/rfc6749#section-4.1.2.1
+ *
+ * @public
+ */
+export class OAuthError extends Error {
+  state?: string;
+  error: string;
+  error_description?: string;
+  error_uri?: string;
+
+  constructor({
+    state,
+    error,
+    error_description,
+    error_uri,
+  }: {
+    state?: string;
+    error: string;
+    error_description?: string;
+    error_uri?: string;
+  }) {
+    super(error + (error_description != null ? ": " + error_description : ""));
+    this.state = state;
+    this.error = error;
+    this.error_description = error_description;
+    this.error_uri = error_uri;
+  }
+}
+
+/**
  * @public
  */
 // eslint-disable-next-line complexity

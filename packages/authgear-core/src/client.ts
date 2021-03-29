@@ -5,13 +5,13 @@ import {
   _OIDCConfiguration,
   _OIDCTokenResponse,
   _OIDCTokenRequest,
-  OAuthError,
+  _SetupBiometricRequest,
   ChallengeResponse,
   _APIClientDelegate,
   decodeUserInfo,
   AppSessionTokenResponse,
 } from "./types";
-import { decodeError, ServerError } from "./error";
+import { decodeError, ServerError, OAuthError } from "./error";
 
 /**
  * @internal
@@ -261,12 +261,10 @@ export abstract class BaseAPIClient {
         }
       );
     }
-    const oauthError: OAuthError = {
+    throw new OAuthError({
       error: errJSON["error"],
       error_description: errJSON["error_description"],
-    };
-    // eslint-disable-next-line @typescript-eslint/no-throw-literal
-    throw oauthError;
+    });
   }
 
   /**
@@ -333,6 +331,29 @@ export abstract class BaseAPIClient {
       headers: {
         "content-type": "application/x-www-form-urlencoded",
       },
+      body: query.toString(),
+    });
+  }
+
+  /**
+   * @internal
+   */
+  async _setupBiometricRequest(req: _SetupBiometricRequest): Promise<void> {
+    const config = await this._fetchOIDCConfiguration();
+    const headers: { [name: string]: string } = {
+      authorization: `bearer ${req.access_token}`,
+      "content-type": "application/x-www-form-urlencoded",
+    };
+    const query = new URLSearchParams();
+    query.append(
+      "grant_type",
+      "urn:authgear:params:oauth:grant-type:biometric-request"
+    );
+    query.append("client_id", req.client_id);
+    query.append("jwt", req.jwt);
+    await this._fetchOIDCRequest(config.token_endpoint, {
+      method: "POST",
+      headers,
       body: query.toString(),
     });
   }

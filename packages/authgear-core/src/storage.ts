@@ -16,6 +16,10 @@ function keyAnonymousKeyID(name: string): string {
   return `${name}_anonymousKeyID`;
 }
 
+function keyBiometricKeyID(name: string): string {
+  return `${name}_biometricKeyID`;
+}
+
 /**
  * @internal
  */
@@ -96,6 +100,10 @@ export class GlobalJSONContainerStorage implements ContainerStorage {
     await this.storage.safeSet(keyAnonymousKeyID(namespace), kid);
   }
 
+  async setBiometricKeyID(namespace: string, kid: string): Promise<void> {
+    await this.storage.safeSet(keyBiometricKeyID(namespace), kid);
+  }
+
   async getRefreshToken(namespace: string): Promise<string | null> {
     return this.storage.safeGet(keyRefreshToken(namespace));
   }
@@ -108,6 +116,10 @@ export class GlobalJSONContainerStorage implements ContainerStorage {
     return this.storage.safeGet(keyAnonymousKeyID(namespace));
   }
 
+  async getBiometricKeyID(namespace: string): Promise<string | null> {
+    return this.storage.safeGet(keyBiometricKeyID(namespace));
+  }
+
   async delRefreshToken(namespace: string): Promise<void> {
     await this.storage.safeDel(keyRefreshToken(namespace));
   }
@@ -118,5 +130,9 @@ export class GlobalJSONContainerStorage implements ContainerStorage {
 
   async delAnonymousKeyID(namespace: string): Promise<void> {
     await this.storage.safeDel(keyAnonymousKeyID(namespace));
+  }
+
+  async delBiometricKeyID(namespace: string): Promise<void> {
+    await this.storage.safeDel(keyBiometricKeyID(namespace));
   }
 }

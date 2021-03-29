@@ -12,12 +12,25 @@ import {
   PromoteOptions,
   UserInfo,
   SettingOptions,
+  OAuthError,
 } from "@authgear/core";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
-import { openURL, openAuthorizeURL } from "./nativemodule";
+import {
+  openURL,
+  openAuthorizeURL,
+  createBiometricPrivateKey,
+  checkBiometricSupported,
+  removeBiometricPrivateKey,
+  signWithBiometricPrivateKey,
+  generateUUID,
+  getDeviceInfo,
+} from "./nativemodule";
+import { BiometricOptions } from "./types";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
+import { isBiometricPrivateKeyNotFoundError } from "./error";
 import { Platform } from "react-native";
 export * from "@authgear/core";
+export * from "./types";
 import EventEmitter from "./eventEmitter";
 
 /**
@@ -186,7 +199,9 @@ export class ReactNativeContainer<
       options.redirectURI,
       options.weChatRedirectURI
     );
-    return this._finishAuthorization(redirectURL);
+    const result = await this._finishAuthorization(redirectURL);
+    await this.disableBiometric();
+    return result;
   }
 
   /**
@@ -290,6 +305,7 @@ export class ReactNativeContainer<
 
     await this._persistTokenResponse(tokenResponse, "AUTHENTICATED");
     await this.storage.setAnonymousKeyID(this.name, key.kid);
+    await this.disableBiometric();
     return { userInfo };
   }
 
@@ -335,8 +351,8 @@ export class ReactNativeContainer<
       options.weChatRedirectURI
     );
     const result = await this._finishAuthorization(redirectURL);
-
     await this.storage.delAnonymousKeyID(this.name);
+    await this.disableBiometric();
     return result;
   }
 
@@ -367,6 +383,119 @@ export class ReactNativeContainer<
     const state = params.get("state");
     if (state) {
       this.delegate?.sendWeChatAuthRequest(state);
+    }
+  }
+
+  /**
+   * Check whether biometric is supported on the current device.
+   * If biometric is not supported, then a platform specific error is thrown.
+   */
+  // eslint-disable-next-line class-methods-use-this
+  async checkBiometricSupported(options: BiometricOptions): Promise<void> {
+    await checkBiometricSupported(options);
+  }
+
+  /**
+   * Check whether biometric was enabled for the last logged in user.
+   */
+  async isBiometricEnabled(): Promise<boolean> {
+    const keyID = await this.storage.getBiometricKeyID(this.name);
+    return keyID != null;
+  }
+
+  async disableBiometric(): Promise<void> {
+    const keyID = await this.storage.getBiometricKeyID(this.name);
+    if (keyID != null) {
+      await removeBiometricPrivateKey(keyID);
+      await this.storage.delBiometricKeyID(this.name);
+    }
+  }
+
+  async enableBiometric(options: BiometricOptions): Promise<void> {
+    const clientID = this.clientID;
+    if (clientID == null) {
+      throw new Error("missing client ID");
+    }
+    const accessToken = this.accessToken;
+    if (accessToken == null) {
+      throw new Error("enableBiometric requires authenticated user");
+    }
+
+    const kid = await generateUUID();
+    const deviceInfo = await getDeviceInfo();
+    const { token } = await this.apiClient.oauthChallenge("biometric_request");
+    const now = Math.floor(+new Date() / 1000);
+    const payload = {
+      iat: now,
+      exp: now + 300,
+      challenge: token,
+      action: "setup",
+      device_info: deviceInfo,
+    };
+    const jwt = await createBiometricPrivateKey({
+      ...options,
+      kid,
+      payload,
+    });
+    await this.apiClient._setupBiometricRequest({
+      access_token: accessToken,
+      client_id: clientID,
+      jwt,
+    });
+    await this.storage.setBiometricKeyID(this.name, kid);
+  }
+
+  async authenticateBiometric(
+    options: BiometricOptions
+  ): Promise<AuthorizeResult> {
+    const kid = await this.storage.getBiometricKeyID(this.name);
+    if (kid == null) {
+      throw new Error("biometric key ID not found");
+    }
+    const clientID = this.clientID;
+    if (clientID == null) {
+      throw new Error("missing client ID");
+    }
+    const deviceInfo = await getDeviceInfo();
+    const { token } = await this.apiClient.oauthChallenge("biometric_request");
+    const now = Math.floor(+new Date() / 1000);
+    const payload = {
+      iat: now,
+      exp: now + 300,
+      challenge: token,
+      action: "authenticate",
+      device_info: deviceInfo,
+    };
+
+    try {
+      const jwt = await signWithBiometricPrivateKey({
+        ...options,
+        kid,
+        payload,
+      });
+      const tokenResponse = await this.apiClient._oidcTokenRequest({
+        grant_type: "urn:authgear:params:oauth:grant-type:biometric-request",
+        client_id: clientID,
+        jwt,
+      });
+
+      const userInfo = await this.apiClient._oidcUserInfoRequest(
+        tokenResponse.access_token
+      );
+      await this._persistTokenResponse(tokenResponse, "AUTHENTICATED");
+      return { userInfo };
+    } catch (e) {
+      if (isBiometricPrivateKeyNotFoundError(e)) {
+        await this.disableBiometric();
+      }
+      if (
+        e instanceof OAuthError &&
+        e.error === "invalid_grant" &&
+        e.error_description === "InvalidCredentials"
+      ) {
+        await this.disableBiometric();
+      }
+      throw e;
     }
   }
 }
