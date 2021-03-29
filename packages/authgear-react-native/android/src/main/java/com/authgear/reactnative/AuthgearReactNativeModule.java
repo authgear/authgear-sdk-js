@@ -6,6 +6,8 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.interfaces.RSAPublicKey;
@@ -16,9 +18,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
-import android.security.keystore.UserNotAuthenticatedException;
 import android.util.Base64;
 
 import com.facebook.react.bridge.Arguments;
@@ -27,13 +30,23 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
+import androidx.fragment.app.FragmentActivity;
+
+import org.json.JSONObject;
 
 public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implements ActivityEventListener {
+
+    private static final Charset UTF8 = Charset.forName("UTF-8");
 
     private static final int REQUEST_CODE_AUTHORIZATION = 1;
 
@@ -53,7 +66,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     private static String currentWeChatRedirectURI;
     private static OnOpenWeChatRedirectURIListener onOpenWeChatRedirectURIListener;
 
-    public static void registerWeChatRedirectURI(String uri, OnOpenWeChatRedirectURIListener listener){
+    public static void registerWeChatRedirectURI(String uri, OnOpenWeChatRedirectURIListener listener) {
         if (uri != null) {
             currentWeChatRedirectURI = uri;
             onOpenWeChatRedirectURIListener = listener;
@@ -62,12 +75,12 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
-    public static void unregisterWeChatRedirectURI(){
+    public static void unregisterWeChatRedirectURI() {
         currentWeChatRedirectURI = null;
         onOpenWeChatRedirectURIListener = null;
     }
 
-    public static Boolean handleWeChatRedirectDeepLink(Uri deepLink){
+    public static Boolean handleWeChatRedirectDeepLink(Uri deepLink) {
         if (currentWeChatRedirectURI == null) {
             return false;
         }
@@ -82,6 +95,380 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     @Override
     public String getName() {
         return "AuthgearReactNative";
+    }
+
+    @ReactMethod
+    public void generateUUID(Promise promise) {
+        String uuid = UUID.randomUUID().toString();
+        promise.resolve(uuid);
+    }
+
+    @ReactMethod
+    public void getDeviceInfo(Promise promise) {
+        WritableMap build = Arguments.createMap();
+        build.putString("BOARD", Build.BOARD);
+        build.putString("BRAND", Build.BRAND);
+        build.putString("MODEL", Build.MODEL);
+        build.putString("DEVICE", Build.DEVICE);
+        build.putString("DISPLAY", Build.DISPLAY);
+        build.putString("HARDWARE", Build.HARDWARE);
+        build.putString("MANUFACTURER", Build.MANUFACTURER);
+        build.putString("PRODUCT", Build.PRODUCT);
+
+        WritableMap android = Arguments.createMap();
+        android.putMap("Build", build);
+
+        WritableMap root = Arguments.createMap();
+        root.putMap("android", android);
+
+        promise.resolve(root);
+    }
+
+    private String base64URLEncode(byte[] bytes) {
+        return Base64.encodeToString(bytes, Base64.NO_WRAP | Base64.URL_SAFE | Base64.NO_PADDING);
+    }
+
+    private void rejectMinimumBiometricAPILevel(Promise promise) {
+        promise.reject("DeviceAPILevelTooLow", "Biometric authentication requires at least API Level 23");
+    }
+
+    private int constraintToFlag(ReadableArray constraint) {
+        int flag = 0;
+        for (int i = 0; i < constraint.size(); i++) {
+            String c = constraint.getString(i);
+            if (c.equals("BIOMETRIC_STRONG")) {
+                flag |= BiometricManager.Authenticators.BIOMETRIC_STRONG;
+            }
+            if (c.equals("DEVICE_CREDENTIAL")) {
+                flag |= BiometricManager.Authenticators.DEVICE_CREDENTIAL;
+            }
+        }
+        return flag;
+    }
+
+    private String resultToString(int result) {
+        switch (result) {
+            case BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE:
+                return "BIOMETRIC_ERROR_HW_UNAVAILABLE";
+            case BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED:
+                return "BIOMETRIC_ERROR_NONE_ENROLLED";
+            case BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE:
+                return "BIOMETRIC_ERROR_NO_HARDWARE";
+            case BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED:
+                return "BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED";
+            case BiometricManager.BIOMETRIC_ERROR_UNSUPPORTED:
+                return "BIOMETRIC_ERROR_UNSUPPORTED";
+            case BiometricManager.BIOMETRIC_STATUS_UNKNOWN:
+                return "BIOMETRIC_STATUS_UNKNOWN";
+            default:
+                return "BIOMETRIC_ERROR_UNKNOWN";
+        }
+    }
+
+    @ReactMethod
+    public void checkBiometricSupported(ReadableMap options, Promise promise) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            this.rejectMinimumBiometricAPILevel(promise);
+            return;
+        }
+        ReadableMap android = options.getMap("android");
+        ReadableArray constraint = android.getArray("constraint");
+        BiometricManager manager = BiometricManager.from(this.getReactApplicationContext());
+        int flags = constraintToFlag(constraint);
+        int result = manager.canAuthenticate(flags);
+        if (result == BiometricManager.BIOMETRIC_SUCCESS) {
+            promise.resolve(null);
+            return;
+        }
+        String resultString = resultToString(result);
+        promise.reject(resultString, resultString);
+    }
+
+    @ReactMethod
+    public void removeBiometricPrivateKey(String kid, Promise promise) {
+        String alias = "com.authgear.keys.biometric." + kid;
+        try {
+            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyStore.load(null);
+            keyStore.deleteEntry(alias);
+            promise.resolve(null);
+        } catch (Exception e) {
+            promise.reject(e.getClass().getName(), e.getMessage(), e);
+        }
+    }
+
+    private BiometricPrompt.PromptInfo buildPromptInfo(
+            ReadableMap android,
+            int flags
+    ) {
+        String title = android.getString("title");
+        String subtitle = android.getString("subtitle");
+        String description = android.getString("description");
+        String negativeButtonText = android.getString("negativeButtonText");
+
+        BiometricPrompt.PromptInfo.Builder builder = new BiometricPrompt.PromptInfo.Builder();
+        builder.setTitle(title);
+        builder.setSubtitle(subtitle);
+        builder.setDescription(description);
+        builder.setAllowedAuthenticators(flags);
+        if ((flags & BiometricManager.Authenticators.DEVICE_CREDENTIAL) == 0) {
+            builder.setNegativeButtonText(negativeButtonText);
+        }
+        return builder.build();
+    }
+
+    private int authenticatorTypesToKeyProperties(int flags) {
+        int out = 0;
+        if ((flags & BiometricManager.Authenticators.BIOMETRIC_STRONG) != 0) {
+            out |= KeyProperties.AUTH_BIOMETRIC_STRONG;
+        }
+        if ((flags & BiometricManager.Authenticators.DEVICE_CREDENTIAL) != 0) {
+            out |= KeyProperties.AUTH_DEVICE_CREDENTIAL;
+        }
+        return out;
+    }
+
+    private String errorCodeToString(int errorCode) {
+        switch (errorCode) {
+            case BiometricPrompt.ERROR_CANCELED:
+                return "ERROR_CANCELED";
+            case BiometricPrompt.ERROR_HW_NOT_PRESENT:
+                return "ERROR_HW_NOT_PRESENT";
+            case BiometricPrompt.ERROR_HW_UNAVAILABLE:
+                return "ERROR_HW_UNAVAILABLE";
+            case BiometricPrompt.ERROR_LOCKOUT:
+                return "ERROR_LOCKOUT";
+            case BiometricPrompt.ERROR_LOCKOUT_PERMANENT:
+                return "ERROR_LOCKOUT_PERMANENT";
+            case BiometricPrompt.ERROR_NEGATIVE_BUTTON:
+                return "ERROR_NEGATIVE_BUTTON";
+            case BiometricPrompt.ERROR_NO_BIOMETRICS:
+                return "ERROR_NO_BIOMETRICS";
+            case BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL:
+                return "ERROR_NO_DEVICE_CREDENTIAL";
+            case BiometricPrompt.ERROR_NO_SPACE:
+                return "ERROR_NO_SPACE";
+            case BiometricPrompt.ERROR_SECURITY_UPDATE_REQUIRED:
+                return "ERROR_SECURITY_UPDATE_REQUIRED";
+            case BiometricPrompt.ERROR_TIMEOUT:
+                return "ERROR_TIMEOUT";
+            case BiometricPrompt.ERROR_UNABLE_TO_PROCESS:
+                return "ERROR_UNABLE_TO_PROCESS";
+            case BiometricPrompt.ERROR_USER_CANCELED:
+                return "ERROR_USER_CANCELED";
+            case BiometricPrompt.ERROR_VENDOR:
+                return "ERROR_VENDOR";
+            default:
+                return "ERROR_UNKNOWN";
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private KeyGenParameterSpec makeGenerateKeyPairSpec(String alias, int flags, boolean invalidatedByBiometricEnrollment) {
+        KeyGenParameterSpec.Builder builder = new KeyGenParameterSpec.Builder(
+                alias, KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY
+        );
+        builder.setKeySize(2048);
+        builder.setDigests(KeyProperties.DIGEST_SHA256);
+        builder.setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1);
+        builder.setUserAuthenticationRequired(true);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            builder.setUserAuthenticationParameters(
+                    0,
+                    flags
+            );
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            builder.setInvalidatedByBiometricEnrollment(invalidatedByBiometricEnrollment);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            builder.setUnlockedDeviceRequired(true);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            // User confirmation is not needed because the BiometricPrompt itself is a kind of confirmation.
+            // builder.setUserConfirmationRequired(true)
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            // User presence requires a physical button which is not our intended use case.
+            // builder.setUserPresenceRequired(true)
+        }
+
+        return builder.build();
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private KeyPair createKeyPair(KeyGenParameterSpec spec) throws Exception {
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
+        keyPairGenerator.initialize(spec);
+        return keyPairGenerator.generateKeyPair();
+    }
+
+    private WritableMap getJWK(KeyPair keyPair, String kid) {
+        WritableMap jwk = Arguments.createMap();
+        jwk.putString("kid", kid);
+        PublicKey publicKey = keyPair.getPublic();
+        RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
+        jwk.putString("alg", "RS256");
+        jwk.putString("kty", "RSA");
+        jwk.putString("n", this.base64URLEncode(rsaPublicKey.getModulus().toByteArray()));
+        jwk.putString("e", this.base64URLEncode(rsaPublicKey.getPublicExponent().toByteArray()));
+        return jwk;
+    }
+
+    private WritableMap makeBiometricJWTHeader(WritableMap jwk) {
+        WritableMap header = Arguments.createMap();
+        header.putString("typ", "vnd.authgear.biometric-request");
+        header.putString("kid", jwk.getString("kid"));
+        header.putString("alg", jwk.getString("alg"));
+        header.putMap("jwk", jwk);
+        return header;
+    }
+
+    private Signature makeSignature(PrivateKey privateKey) throws Exception {
+        Signature signature = Signature.getInstance("SHA256withRSA");
+        signature.initSign(privateKey);
+        return signature;
+    }
+
+    private String signJWT(Signature signature, ReadableMap header, ReadableMap payload) throws Exception {
+        String headerJSON = new JSONObject(header.toHashMap()).toString();
+        String payloadJSON = new JSONObject(payload.toHashMap()).toString();
+        String headerString = this.base64URLEncode(headerJSON.getBytes(UTF8));
+        String payloadString = this.base64URLEncode(payloadJSON.getBytes(UTF8));
+        String strToSign = headerString + "." + payloadString;
+        signature.update(strToSign.getBytes(UTF8));
+        byte[] sig = signature.sign();
+        return strToSign + "." + this.base64URLEncode(sig);
+    }
+
+    private void signBiometricJWT(FragmentActivity activity, KeyPair keyPair, String kid, final ReadableMap payload, final BiometricPrompt.PromptInfo promptInfo, final Promise promise) {
+        WritableMap jwk = this.getJWK(keyPair, kid);
+        final WritableMap header = this.makeBiometricJWTHeader(jwk);
+        try {
+            Signature lockedSigature = this.makeSignature(keyPair.getPrivate());
+            final BiometricPrompt.CryptoObject cryptoObject = new BiometricPrompt.CryptoObject(lockedSigature);
+            final BiometricPrompt prompt = new BiometricPrompt(activity, new BiometricPrompt.AuthenticationCallback() {
+                @Override
+                public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                    promise.reject(AuthgearReactNativeModule.this.errorCodeToString(errorCode), errString.toString());
+                }
+
+                @Override
+                public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                    Signature signature = result.getCryptoObject().getSignature();
+                    try {
+                        String jwt = AuthgearReactNativeModule.this.signJWT(signature, header, payload);
+                        promise.resolve(jwt);
+                    } catch (Exception e) {
+                        promise.reject(e.getClass().getName(), e.getMessage(), e);
+                    }
+                }
+
+                @Override
+                public void onAuthenticationFailed() {
+                    // This callback will be invoked EVERY time the recognition failed.
+                    // So while the prompt is still opened, this callback can be called repetitively.
+                    // Finally, either onAuthenticationError or onAuthenticationSucceeded will be called.
+                    // So this callback is not important to the developer.
+                }
+            });
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    prompt.authenticate(promptInfo, cryptoObject);
+                }
+            });
+        } catch (Exception e) {
+            promise.reject(e.getClass().getName(), e.getMessage(), e);
+        }
+    }
+
+    private FragmentActivity rejectFragmentActivity(Promise promise) {
+        Activity activity = this.getCurrentActivity();
+        if (activity instanceof FragmentActivity) {
+            return (FragmentActivity) activity;
+        }
+        promise.reject("FragmentActivity", "getCurrentActivity must be androidx.fragment.app.FragmentActivity");
+        return null;
+    }
+
+    @ReactMethod
+    public void createBiometricPrivateKey(ReadableMap options, Promise promise) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            this.rejectMinimumBiometricAPILevel(promise);
+            return;
+        }
+
+        FragmentActivity fragmentActivity = this.rejectFragmentActivity(promise);
+        if (fragmentActivity == null) {
+            return;
+        }
+
+        String kid = options.getString("kid");
+        ReadableMap payload = options.getMap("payload");
+        ReadableMap android = options.getMap("android");
+        ReadableArray constraint = android.getArray("constraint");
+        boolean invalidatedByBiometricEnrollment = android.getBoolean("invalidatedByBiometricEnrollment");
+        int flags = constraintToFlag(constraint);
+
+        String alias = "com.authgear.keys.biometric." + kid;
+        BiometricPrompt.PromptInfo promptInfo = this.buildPromptInfo(android, flags);
+        KeyGenParameterSpec spec = this.makeGenerateKeyPairSpec(alias, authenticatorTypesToKeyProperties(flags), invalidatedByBiometricEnrollment);
+
+        try {
+            KeyPair keyPair = this.createKeyPair(spec);
+            this.signBiometricJWT(fragmentActivity, keyPair, kid, payload, promptInfo, promise);
+        } catch (Exception e) {
+            promise.reject(e.getClass().getName(), e.getMessage(), e);
+            return;
+        }
+    }
+
+    private KeyPair getPrivateKey(String alias) throws Exception {
+        KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+        keyStore.load(null);
+        KeyStore.Entry entry = keyStore.getEntry(alias, null);
+        if (entry instanceof KeyStore.PrivateKeyEntry) {
+            KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry) entry;
+            return new KeyPair(privateKeyEntry.getCertificate().getPublicKey(), privateKeyEntry.getPrivateKey());
+        }
+        throw new KeyNotFoundException();
+    }
+
+    @ReactMethod
+    public void signWithBiometricPrivateKey(ReadableMap options, Promise promise) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            this.rejectMinimumBiometricAPILevel(promise);
+            return;
+        }
+
+        FragmentActivity fragmentActivity = this.rejectFragmentActivity(promise);
+        if (fragmentActivity == null) {
+            return;
+        }
+
+        String kid = options.getString("kid");
+        ReadableMap payload = options.getMap("payload");
+        ReadableMap android = options.getMap("android");
+        ReadableArray constraint = android.getArray("constraint");
+        int flags = constraintToFlag(constraint);
+
+        String alias = "com.authgear.keys.biometric." + kid;
+        BiometricPrompt.PromptInfo promptInfo = this.buildPromptInfo(android, flags);
+
+        try {
+            KeyPair keyPair = this.getPrivateKey(alias);
+            this.signBiometricJWT(fragmentActivity, keyPair, kid, payload, promptInfo, promise);
+        } catch (Exception e) {
+            promise.reject(e.getClass().getName(), e.getMessage(), e);
+            return;
+        }
     }
 
     @ReactMethod
@@ -184,12 +571,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             KeyStore.PrivateKeyEntry entry = this.loadKey(alias);
             if (entry == null) {
                 KeyPair kp = this.generateKey(alias);
-                RSAPublicKey pubKey = (RSAPublicKey)kp.getPublic();
-                WritableMap jwk = Arguments.createMap();
-                jwk.putString("kid", kid);
-                jwk.putString("kty", "RSA");
-                jwk.putString("n", Base64.encodeToString(pubKey.getModulus().toByteArray(), Base64.NO_WRAP));
-                jwk.putString("e", Base64.encodeToString(pubKey.getPublicExponent().toByteArray(), Base64.NO_WRAP));
+                WritableMap jwk = this.getJWK(kp, kid);
                 header.putMap("jwk", jwk);
             }
 
@@ -218,7 +600,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             s.initSign(entry.getPrivateKey());
             s.update(data.getBytes("UTF-8"));
             byte[] signature = s.sign();
-            promise.resolve(Base64.encodeToString(signature, Base64.NO_WRAP));
+            promise.resolve(this.base64URLEncode(signature));
         } catch (Exception e) {
             promise.reject(e);
         }
@@ -271,7 +653,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         if (!(entry instanceof KeyStore.PrivateKeyEntry)) {
             return null;
         }
-        KeyStore.PrivateKeyEntry pke = (KeyStore.PrivateKeyEntry)entry;
+        KeyStore.PrivateKeyEntry pke = (KeyStore.PrivateKeyEntry) entry;
         return pke;
     }
 
@@ -298,10 +680,10 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
     private void sendOpenWeChatRedirectURI(Uri uri) {
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                            .emit("onAuthgearOpenWeChatRedirectURI", uri.toString());
+                .emit("onAuthgearOpenWeChatRedirectURI", uri.toString());
     }
 
-    public interface OnOpenWeChatRedirectURIListener{
+    public interface OnOpenWeChatRedirectURIListener {
         void OnURI(Uri uri);
     }
 }
