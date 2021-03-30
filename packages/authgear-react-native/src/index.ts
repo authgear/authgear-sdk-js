@@ -31,6 +31,13 @@ import { isBiometricPrivateKeyNotFoundError } from "./error";
 import { Platform } from "react-native";
 export * from "@authgear/core";
 export * from "./types";
+export {
+  isBiometricCancel,
+  isBiometricNotSupportedOrPermissionDenied,
+  isBiometricNoEnrollment,
+  isBiometricNoPasscode,
+  isBiometricLockout,
+} from "./error";
 import EventEmitter from "./eventEmitter";
 
 /**
