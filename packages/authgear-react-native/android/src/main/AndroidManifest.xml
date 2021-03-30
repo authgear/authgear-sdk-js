@@ -1,5 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
           package="com.authgear.reactnative">
+
+    <!-- androidx.security requires API 23 -->
+    <!-- If we do not add this line, we will have compilation error -->
+    <!-- We will do runtime API level checking before accessing the features from androidx.security -->
+    <uses-sdk tools:overrideLibrary="androidx.security" />
 
     <application>
         <activity android:name=".OAuthCoordinatorActivity"

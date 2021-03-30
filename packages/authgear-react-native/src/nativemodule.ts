@@ -4,6 +4,21 @@ import { BiometricPrivateKeyOptions, BiometricOptions } from "./types";
 
 const { AuthgearReactNative } = NativeModules;
 
+export async function storageGetItem(key: string): Promise<string | null> {
+  return AuthgearReactNative.storageGetItem(key);
+}
+
+export async function storageSetItem(
+  key: string,
+  value: string
+): Promise<void> {
+  return AuthgearReactNative.storageSetItem(key, value);
+}
+
+export async function storageDeleteItem(key: string): Promise<void> {
+  return AuthgearReactNative.storageDeleteItem(key);
+}
+
 export async function getDeviceInfo(): Promise<unknown> {
   return AuthgearReactNative.getDeviceInfo();
 }

@@ -91,6 +91,91 @@ continueUserActivity:(NSUserActivity *)userActivity
   return YES;
 }
 
+RCT_EXPORT_METHOD(storageGetItem:(NSString *)key resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
+{
+    NSDictionary *query = @{
+        (id)kSecClass: (id)kSecClassGenericPassword,
+        (id)kSecAttrAccount: key,
+        (id)kSecMatchLimit: (id)kSecMatchLimitOne,
+        (id)kSecReturnData: @YES,
+    };
+    CFTypeRef item = NULL;
+    OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, &item);
+    if (status == errSecSuccess) {
+        NSData *data = CFBridgingRelease((CFDataRef)item);
+        NSString *value = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        resolve(value);
+    } else if (status == errSecItemNotFound) {
+        resolve([NSNull null]);
+    } else {
+        NSError *error = [[NSError alloc] initWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
+        reject([@(error.code) stringValue], error.localizedDescription, error);
+    }
+}
+
+RCT_EXPORT_METHOD(storageSetItem:(NSString *)key value:(NSString *)value resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
+{
+    // We first attempt an update, followed by an addition.
+    NSData *data = [value dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *updateQuery = @{
+        (id)kSecClass: (id)kSecClassGenericPassword,
+        (id)kSecAttrAccount: key,
+    };
+    NSDictionary *update = @{
+        (id)kSecValueData: data,
+    };
+    OSStatus status = SecItemUpdate((__bridge CFDictionaryRef)updateQuery, (__bridge CFDictionaryRef)update);
+    if (status == errSecSuccess) {
+        resolve(nil);
+    } else if (status == errSecItemNotFound) {
+        // The item is stored on this device only.
+        CFErrorRef cfError = NULL;
+        SecAccessControlRef accessControl = SecAccessControlCreateWithFlags(
+            NULL,
+            kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+            0,
+            &cfError
+        );
+        if (cfError) {
+            NSError *error = CFBridgingRelease(cfError);
+            reject([@(error.code) stringValue], error.localizedDescription, error);
+        } else {
+            NSDictionary *addQuery = @{
+                (id)kSecClass: (id)kSecClassGenericPassword,
+                (id)kSecAttrAccount: key,
+                (id)kSecValueData: data,
+                (id)kSecAttrAccessControl: (__bridge id)accessControl,
+            };
+            status = SecItemAdd((__bridge CFDictionaryRef)addQuery, NULL);
+            CFRelease(accessControl);
+            if (status == errSecSuccess) {
+                resolve(nil);
+            } else {
+                NSError *error = [[NSError alloc] initWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
+                reject([@(error.code) stringValue], error.localizedDescription, error);
+            }
+        }
+    } else {
+        NSError *error = [[NSError alloc] initWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
+        reject([@(error.code) stringValue], error.localizedDescription, error);
+    }
+}
+
+RCT_EXPORT_METHOD(storageDeleteItem:(NSString *)key resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
+{
+    NSDictionary *query = @{
+        (id)kSecClass: (id)kSecClassGenericPassword,
+        (id)kSecAttrAccount: key,
+    };
+    OSStatus status = SecItemDelete((__bridge CFDictionaryRef)query);
+    if (status == errSecSuccess || status == errSecItemNotFound) {
+        resolve(nil);
+    } else {
+        NSError *error = [[NSError alloc] initWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
+        reject([@(error.code) stringValue], error.localizedDescription, error);
+    }
+}
+
 RCT_EXPORT_METHOD(getDeviceInfo:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
     struct utsname systemInfo;
