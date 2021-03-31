@@ -24,11 +24,19 @@ export interface ConfigureOptions {
    */
   endpoint: string;
   /**
-   * isThirdParty indicate if the application a third party app.
-   * A third party app means the app doesn't share common-domain with Authgear thus the session cookie cannot be shared.
-   * If not specified, default to false. So by default the application is considered first party.
+   * sessionType indicates how session is supposed to be stored.
+   * This must match the server side configuration.
+   *
+   * If your backend is a server-side rendering website or webapp,
+   * then you should use cookie.
+   *
+   * Normally, you need to set up a custom domain so that
+   * your backend and Authgear can both read and write cookie in the same root domain.
+   * You also need to tell the SDK cookie is being used, by specifying "cookie" here.
+   *
+   * If not specified, default to "refresh_token".
    */
-  isThirdParty?: boolean;
+  sessionType?: "cookie" | "refresh_token";
   /**
    * Skip refreshing access token. Default is false.
    */
@@ -41,6 +49,11 @@ export interface ConfigureOptions {
  * @public
  */
 export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
+  /**
+   * @public
+   */
+  sessionType: "cookie" | "refresh_token";
+
   constructor(options?: ContainerOptions<T>) {
     const o = {
       ...options,
@@ -52,7 +65,7 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
 
     super(o);
 
-    this.isThirdParty = false;
+    this.sessionType = "refresh_token";
     this.apiClient._delegate = this;
   }
 
@@ -75,8 +88,10 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
     const refreshToken = await this.storage.getRefreshToken(this.name);
 
     this.clientID = options.clientID;
-    this.isThirdParty = !!options.isThirdParty;
     this.apiClient.endpoint = options.endpoint;
+    if (options.sessionType != null) {
+      this.sessionType = options.sessionType;
+    }
 
     this.refreshToken = refreshToken ?? undefined;
 
@@ -115,13 +130,10 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
   /**
    * Start authorization by opening authorize page
    *
-   * To allow re-authentication of different user smoothly for third-party app, default value for `options.prompt` is `login`.
-   *
    * @param options - authorize options
    */
   async startAuthorization(options: AuthorizeOptions): Promise<void> {
-    const isThirdParty = this.isThirdParty ?? false;
-    if (!isThirdParty) {
+    if (this.sessionType === "cookie") {
       // Use shared session cookie by default for first-party web apps.
       options.responseType = options.responseType ?? "none";
     }

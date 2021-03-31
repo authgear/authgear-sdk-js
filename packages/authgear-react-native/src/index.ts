@@ -67,12 +67,6 @@ export interface ConfigureOptions {
    * Skip refreshing access token. Default is false.
    */
   skipRefreshAccessToken?: boolean;
-  /**
-   * isThirdParty indicate if the application a third party app.
-   * A third party app means the app doesn't share common-domain with Authgear thus the session cookie cannot be shared.
-   * If not specified, default to true. So by default the application is considered third party.
-   */
-  isThirdParty?: boolean;
 }
 
 /**
@@ -122,7 +116,6 @@ export class ReactNativeContainer<
 
     super(o);
 
-    this.isThirdParty = true;
     this.apiClient._delegate = this;
 
     this.weChatRedirectDeepLinkListener = (url: string) => {
@@ -154,7 +147,6 @@ export class ReactNativeContainer<
 
     this.clientID = options.clientID;
     this.apiClient.endpoint = options.endpoint;
-    this.isThirdParty = options.isThirdParty ?? true;
     this.refreshToken = refreshToken ?? undefined;
 
     const { skipRefreshAccessToken = false } = options;
