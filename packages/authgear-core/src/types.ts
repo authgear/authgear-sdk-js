@@ -180,14 +180,17 @@ export interface ContainerStorage {
   setRefreshToken(namespace: string, refreshToken: string): Promise<void>;
   setOIDCCodeVerifier(namespace: string, code: string): Promise<void>;
   setAnonymousKeyID(namespace: string, kid: string): Promise<void>;
+  setBiometricKeyID(namespace: string, kid: string): Promise<void>;
 
   getRefreshToken(namespace: string): Promise<string | null>;
   getOIDCCodeVerifier(namespace: string): Promise<string | null>;
   getAnonymousKeyID(namespace: string): Promise<string | null>;
+  getBiometricKeyID(namespace: string): Promise<string | null>;
 
   delRefreshToken(namespace: string): Promise<void>;
   delOIDCCodeVerifier(namespace: string): Promise<void>;
   delAnonymousKeyID(namespace: string): Promise<void>;
+  delBiometricKeyID(namespace: string): Promise<void>;
 }
 
 /**
@@ -209,19 +212,6 @@ export interface ContainerOptions<T> {
 }
 
 /**
- * OAuthError represents the oauth error response.
- * https://tools.ietf.org/html/rfc6749#section-4.1.2.1
- *
- * @public
- */
-export interface OAuthError {
-  state?: string;
-  error: string;
-  error_description?: string;
-  error_uri?: string;
-}
-
-/**
  * @internal
  */
 export interface _OIDCConfiguration {
@@ -239,13 +229,23 @@ export interface _OIDCTokenRequest {
   grant_type:
     | "authorization_code"
     | "refresh_token"
-    | "urn:authgear:params:oauth:grant-type:anonymous-request";
+    | "urn:authgear:params:oauth:grant-type:anonymous-request"
+    | "urn:authgear:params:oauth:grant-type:biometric-request";
   client_id: string;
   redirect_uri?: string;
   code?: string;
   code_verifier?: string;
   refresh_token?: string;
   jwt?: string;
+}
+
+/**
+ * @internal
+ */
+export interface _SetupBiometricRequest {
+  access_token: string;
+  client_id: string;
+  jwt: string;
 }
 
 /**

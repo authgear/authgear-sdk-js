@@ -1,7 +1,12 @@
 import { NativeModules } from "react-native";
 import { CANCEL } from "@authgear/core";
+import { BiometricPrivateKeyOptions, BiometricOptions } from "./types";
 
 const { AuthgearReactNative } = NativeModules;
+
+export async function getDeviceInfo(): Promise<unknown> {
+  return AuthgearReactNative.getDeviceInfo();
+}
 
 export async function randomBytes(length: number): Promise<number[]> {
   return AuthgearReactNative.randomBytes(length);
@@ -9,6 +14,10 @@ export async function randomBytes(length: number): Promise<number[]> {
 
 export async function sha256String(input: string): Promise<number[]> {
   return AuthgearReactNative.sha256String(input);
+}
+
+export async function generateUUID(): Promise<string> {
+  return AuthgearReactNative.generateUUID();
 }
 
 export async function openURL(
@@ -54,4 +63,26 @@ export async function signAnonymousToken(
   tokenData: string
 ): Promise<string> {
   return AuthgearReactNative.signAnonymousToken(kid, tokenData);
+}
+
+export async function createBiometricPrivateKey(
+  options: BiometricPrivateKeyOptions
+): Promise<string> {
+  return AuthgearReactNative.createBiometricPrivateKey(options);
+}
+
+export async function signWithBiometricPrivateKey(
+  options: BiometricPrivateKeyOptions
+): Promise<string> {
+  return AuthgearReactNative.signWithBiometricPrivateKey(options);
+}
+
+export async function removeBiometricPrivateKey(kid: string): Promise<void> {
+  return AuthgearReactNative.removeBiometricPrivateKey(kid);
+}
+
+export async function checkBiometricSupported(
+  options: BiometricOptions
+): Promise<void> {
+  return AuthgearReactNative.checkBiometricSupported(options);
 }

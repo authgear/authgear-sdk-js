@@ -5,13 +5,13 @@ import {
   AuthorizeResult,
   ContainerOptions,
   ContainerStorage,
-  OAuthError,
   _APIClientDelegate,
   ContainerDelegate,
   _OIDCTokenResponse,
   SessionStateChangeReason,
   SessionState,
 } from "./types";
+import { OAuthError } from "./error";
 import { BaseAPIClient } from "./client";
 
 /**
@@ -306,12 +306,10 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     uu.search = "";
     const redirectURI: string = uu.toString();
     if (params.get("error")) {
-      const err = {
-        error: params.get("error"),
-        error_description: params.get("error_description"),
-      } as OAuthError;
-      // eslint-disable-next-line @typescript-eslint/no-throw-literal
-      throw err;
+      throw new OAuthError({
+        error: params.get("error")!,
+        error_description: params.get("error_description") ?? undefined,
+      });
     }
 
     let userInfo;
@@ -323,12 +321,10 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     } else {
       const code = params.get("code");
       if (!code) {
-        const missingCodeError = {
+        throw new OAuthError({
           error: "invalid_request",
           error_description: "Missing parameter: code",
-        } as OAuthError;
-        // eslint-disable-next-line @typescript-eslint/no-throw-literal
-        throw missingCodeError;
+        });
       }
       const codeVerifier = await this.storage.getOIDCCodeVerifier(this.name);
       tokenResponse = await this.apiClient._oidcTokenRequest({
