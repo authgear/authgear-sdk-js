@@ -127,6 +127,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         try {
             SharedPreferences sharedPreferences = this.getSharePreferences();
             sharedPreferences.edit().remove(key).commit();
+            promise.resolve(null);
         } catch (Exception e) {
             promise.reject(e.getClass().getName(), e.getMessage(), e);
         }
