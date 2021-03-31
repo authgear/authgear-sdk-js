@@ -35,6 +35,7 @@ export * from "@authgear/core";
 export * from "./types";
 export {
   isBiometricCancel,
+  isBiometricPrivateKeyNotFoundError,
   isBiometricNotSupportedOrPermissionDenied,
   isBiometricNoEnrollment,
   isBiometricNoPasscode,
