@@ -1,6 +1,5 @@
 /* global fetch, Request */
 import URL from "core-js-pure/features/url";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   BaseAPIClient,
   ContainerOptions,
@@ -24,6 +23,9 @@ import {
   signWithBiometricPrivateKey,
   generateUUID,
   getDeviceInfo,
+  storageGetItem,
+  storageSetItem,
+  storageDeleteItem,
 } from "./nativemodule";
 import { BiometricOptions } from "./types";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
@@ -83,18 +85,18 @@ export class ReactNativeAPIClient extends BaseAPIClient {
 /**
  * @public
  */
-export class ReactNativeAsyncStorageStorageDriver implements StorageDriver {
+export class PlatformStorageDriver implements StorageDriver {
   // eslint-disable-next-line class-methods-use-this
   async get(key: string): Promise<string | null> {
-    return AsyncStorage.getItem(key);
+    return storageGetItem(key);
   }
   // eslint-disable-next-line class-methods-use-this
   async set(key: string, value: string): Promise<void> {
-    return AsyncStorage.setItem(key, value);
+    return storageSetItem(key, value);
   }
   // eslint-disable-next-line class-methods-use-this
   async del(key: string): Promise<void> {
-    return AsyncStorage.removeItem(key);
+    return storageDeleteItem(key);
   }
 }
 
@@ -114,9 +116,7 @@ export class ReactNativeContainer<
       apiClient: options?.apiClient ?? new ReactNativeAPIClient(),
       storage:
         options?.storage ??
-        new GlobalJSONContainerStorage(
-          new ReactNativeAsyncStorageStorageDriver()
-        ),
+        new GlobalJSONContainerStorage(new PlatformStorageDriver()),
     } as ContainerOptions<T>;
 
     super(o);

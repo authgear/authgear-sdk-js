@@ -16,6 +16,7 @@ import java.util.UUID;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -41,6 +42,8 @@ import androidx.annotation.RequiresApi;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.fragment.app.FragmentActivity;
+import androidx.security.crypto.MasterKey;
+import androidx.security.crypto.EncryptedSharedPreferences;
 
 import org.json.JSONObject;
 
@@ -95,6 +98,54 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     @Override
     public String getName() {
         return "AuthgearReactNative";
+    }
+
+    @ReactMethod
+    public void storageGetItem(String key, Promise promise) {
+        try {
+            SharedPreferences sharedPreferences = this.getSharePreferences();
+            String value = sharedPreferences.getString(key, null);
+            promise.resolve(value);
+        } catch (Exception e) {
+            promise.reject(e.getClass().getName(), e.getMessage(), e);
+        }
+    }
+
+    @ReactMethod
+    public void storageSetItem(String key, String value, Promise promise) {
+        try {
+            SharedPreferences sharedPreferences = this.getSharePreferences();
+            sharedPreferences.edit().putString(key, value).commit();
+            promise.resolve(null);
+        } catch (Exception e) {
+            promise.reject(e.getClass().getName(), e.getMessage(), e);
+        }
+    }
+
+    @ReactMethod
+    public void storageDeleteItem(String key, Promise promise) {
+        try {
+            SharedPreferences sharedPreferences = this.getSharePreferences();
+            sharedPreferences.edit().remove(key).commit();
+        } catch (Exception e) {
+            promise.reject(e.getClass().getName(), e.getMessage(), e);
+        }
+    }
+
+    private SharedPreferences getSharePreferences() throws Exception {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            MasterKey masterKey = new MasterKey.Builder(getReactApplicationContext())
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .build();
+            return EncryptedSharedPreferences.create(
+                    getReactApplicationContext(),
+                    "authgear_encrypted_shared_preferences",
+                    masterKey,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+        }
+        return getReactApplicationContext().getSharedPreferences("authgear_shared_preferences", Context.MODE_PRIVATE);
     }
 
     @ReactMethod
