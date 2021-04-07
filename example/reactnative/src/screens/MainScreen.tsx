@@ -7,7 +7,6 @@ import {
   View,
   Alert,
   TextInput,
-  Switch,
   Platform,
   NativeModules,
 } from 'react-native';
@@ -68,7 +67,7 @@ const styles = StyleSheet.create({
   configureAction: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     marginBottom: 10,
     marginTop: 5,
   },
@@ -126,7 +125,6 @@ const biometricOptions = {
 
 const HomeScreen: React.FC = () => {
   const [initialized, setInitialized] = useState(false);
-  const [isThirdParty, setIsThirdParty] = useState(true);
   const [loading, setLoading] = useState(false);
   const [clientID, setClientID] = useState('');
   const [endpoint, setEndpoint] = useState('');
@@ -293,7 +291,6 @@ const HomeScreen: React.FC = () => {
       .configure({
         clientID,
         endpoint,
-        isThirdParty,
       })
       .then(() => {
         postConfigure();
@@ -305,7 +302,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [clientID, endpoint, postConfigure, isThirdParty, showError]);
+  }, [clientID, endpoint, postConfigure, showError]);
 
   const login = useCallback(() => {
     setLoading(true);
@@ -488,16 +485,6 @@ const HomeScreen: React.FC = () => {
         </View>
         <View style={styles.configureAction}>
           <Button title="Configure" onPress={configure} disabled={loading} />
-          <View style={styles.optionsContainer}>
-            <View style={styles.checkboxContainer}>
-              <Text style={styles.checkboxDesc}>Third-party app</Text>
-              <Switch
-                style={styles.checkbox}
-                value={isThirdParty}
-                onValueChange={setIsThirdParty}
-              />
-            </View>
-          </View>
         </View>
       </View>
       <Text style={styles.actionDesc}>
@@ -519,7 +506,7 @@ const HomeScreen: React.FC = () => {
           <Button
             title="Authenticate Anonymously"
             onPress={loginAnonymously}
-            disabled={!initialized || loading || loggedIn || isThirdParty}
+            disabled={!initialized || loading || loggedIn}
           />
         </View>
         <View style={styles.button}>

@@ -52,13 +52,6 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   clientID?: string;
 
   /**
-   * Whether the application is a third-party app.
-   *
-   * @public
-   */
-  isThirdParty?: boolean;
-
-  /**
    * @public
    */
   apiClient: T;
@@ -250,17 +243,13 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
       query.append("code_challenge", codeVerifier.challenge);
     }
 
-    if (this.isThirdParty) {
-      query.append("scope", "openid offline_access");
+    if (responseType === "code") {
+      query.append(
+        "scope",
+        "openid offline_access https://authgear.com/scopes/full-access"
+      );
     } else {
-      if (responseType === "code") {
-        query.append(
-          "scope",
-          "openid offline_access https://authgear.com/scopes/full-access"
-        );
-      } else {
-        query.append("scope", "openid https://authgear.com/scopes/full-access");
-      }
+      query.append("scope", "openid https://authgear.com/scopes/full-access");
     }
 
     query.append("client_id", clientID);
