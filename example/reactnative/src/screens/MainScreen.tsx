@@ -9,6 +9,7 @@ import {
   TextInput,
   Platform,
   NativeModules,
+  Switch,
 } from 'react-native';
 import authgear, {
   Page,
@@ -129,6 +130,7 @@ const HomeScreen: React.FC = () => {
   const [clientID, setClientID] = useState('');
   const [endpoint, setEndpoint] = useState('');
   const [page, setPage] = useState('');
+  const [transientSession, setTransientSession] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const loggedIn = userInfo != null;
@@ -291,6 +293,7 @@ const HomeScreen: React.FC = () => {
       .configure({
         clientID,
         endpoint,
+        transientSession,
       })
       .then(() => {
         postConfigure();
@@ -302,7 +305,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [clientID, endpoint, postConfigure, showError]);
+  }, [clientID, endpoint, transientSession, postConfigure, showError]);
 
   const login = useCallback(() => {
     setLoading(true);
@@ -481,6 +484,14 @@ const HomeScreen: React.FC = () => {
             autoCompleteType="off"
             autoCorrect={false}
             placeholder="'login' or 'signup'"
+          />
+        </View>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>Transient Session</Text>
+          <Switch
+            style={styles.checkbox}
+            value={transientSession}
+            onValueChange={setTransientSession}
           />
         </View>
         <View style={styles.configureAction}>
