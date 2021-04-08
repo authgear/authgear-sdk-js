@@ -45,6 +45,10 @@ export {
 } from "./error";
 import EventEmitter from "./eventEmitter";
 
+const globalMemoryStore = new GlobalJSONContainerStorage(
+  new MemoryStorageDriver()
+);
+
 /**
  * @public
  */
@@ -153,9 +157,7 @@ export class ReactNativeContainer<
    */
   async configure(options: ConfigureOptions): Promise<void> {
     if (options.transientSession) {
-      this.refreshTokenStorage = new GlobalJSONContainerStorage(
-        new MemoryStorageDriver()
-      );
+      this.refreshTokenStorage = globalMemoryStore;
     } else {
       this.refreshTokenStorage = this.storage;
     }
