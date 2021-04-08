@@ -74,6 +74,11 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   /**
    * @internal
    */
+  abstract refreshTokenStorage: ContainerStorage;
+
+  /**
+   * @internal
+   */
   accessToken?: string;
 
   /**
@@ -128,7 +133,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     this._updateSessionState("AUTHENTICATED", reason);
 
     if (refresh_token) {
-      await this.storage.setRefreshToken(this.name, refresh_token);
+      await this.refreshTokenStorage.setRefreshToken(this.name, refresh_token);
     }
   }
 
@@ -136,7 +141,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
    * @internal
    */
   async _clearSession(reason: SessionStateChangeReason): Promise<void> {
-    await this.storage.delRefreshToken(this.name);
+    await this.refreshTokenStorage.delRefreshToken(this.name);
     this.accessToken = undefined;
     this.refreshToken = undefined;
     this.expireAt = undefined;
@@ -190,7 +195,9 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
       throw new Error("missing client ID");
     }
 
-    const refreshToken = await this.storage.getRefreshToken(this.name);
+    const refreshToken = await this.refreshTokenStorage.getRefreshToken(
+      this.name
+    );
     if (refreshToken == null) {
       // The API client has access token but we do not have the refresh token.
       await this._clearSession("NO_TOKEN");
@@ -367,7 +374,8 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   async _logout(
     options: { force?: boolean; redirectURI?: string } = {}
   ): Promise<void> {
-    const refreshToken = (await this.storage.getRefreshToken(this.name)) ?? "";
+    const refreshToken =
+      (await this.refreshTokenStorage.getRefreshToken(this.name)) ?? "";
     if (refreshToken !== "") {
       try {
         await this.apiClient._oidcRevocationRequest(refreshToken);
