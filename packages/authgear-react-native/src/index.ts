@@ -4,6 +4,7 @@ import {
   BaseAPIClient,
   ContainerOptions,
   GlobalJSONContainerStorage,
+  MemoryStorageDriver,
   StorageDriver,
   BaseContainer,
   AuthorizeOptions,
@@ -12,6 +13,7 @@ import {
   UserInfo,
   SettingOptions,
   OAuthError,
+  ContainerStorage,
 } from "@authgear/core";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
@@ -43,6 +45,10 @@ export {
 } from "./error";
 import EventEmitter from "./eventEmitter";
 
+const globalMemoryStore = new GlobalJSONContainerStorage(
+  new MemoryStorageDriver()
+);
+
 /**
  * @public
  */
@@ -67,6 +73,12 @@ export interface ConfigureOptions {
    * Skip refreshing access token. Default is false.
    */
   skipRefreshAccessToken?: boolean;
+  /**
+   * transientSession indicate if the session in SDK is short-lived session.
+   * If transientSession is true means the session is short-lived session and won't be persist.
+   * In react-native app, the session will be gone when calling authgear.configure.
+   */
+  transientSession?: boolean;
 }
 
 /**
@@ -105,6 +117,8 @@ export class ReactNativeContainer<
 > extends BaseContainer<T> {
   weChatRedirectDeepLinkListener: (url: string) => void;
 
+  refreshTokenStorage: ContainerStorage;
+
   constructor(options?: ContainerOptions<T>) {
     const o = {
       ...options,
@@ -116,6 +130,7 @@ export class ReactNativeContainer<
 
     super(o);
 
+    this.refreshTokenStorage = this.storage;
     this.apiClient._delegate = this;
 
     this.weChatRedirectDeepLinkListener = (url: string) => {
@@ -141,9 +156,16 @@ export class ReactNativeContainer<
    * @public
    */
   async configure(options: ConfigureOptions): Promise<void> {
+    if (options.transientSession) {
+      this.refreshTokenStorage = globalMemoryStore;
+    } else {
+      this.refreshTokenStorage = this.storage;
+    }
     // TODO: verify if we need to support configure for second time
     // and guard if initialized
-    const refreshToken = await this.storage.getRefreshToken(this.name);
+    const refreshToken = await this.refreshTokenStorage.getRefreshToken(
+      this.name
+    );
 
     this.clientID = options.clientID;
     this.apiClient.endpoint = options.endpoint;
@@ -212,7 +234,9 @@ export class ReactNativeContainer<
   async openURL(url: string, options?: SettingOptions): Promise<void> {
     let targetURL = url;
 
-    const refreshToken = await this.storage.getRefreshToken(this.name);
+    const refreshToken = await this.refreshTokenStorage.getRefreshToken(
+      this.name
+    );
     if (!refreshToken) {
       throw new Error("refresh token not found");
     }

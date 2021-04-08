@@ -6,9 +6,13 @@ import {
   BaseContainer,
   AuthorizeOptions,
   AuthorizeResult,
+  ContainerStorage,
 } from "@authgear/core";
 import { WebAPIClient } from "./client";
-import { localStorageStorageDriver } from "./storage";
+import {
+  localStorageStorageDriver,
+  sessionStorageStorageDriver,
+} from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 
 /**
@@ -41,6 +45,12 @@ export interface ConfigureOptions {
    * Skip refreshing access token. Default is false.
    */
   skipRefreshAccessToken?: boolean;
+  /**
+   * transientSession indicate if the session in SDK is short-lived session.
+   * If transientSession is true means the session is short-lived session.
+   * In web, the session will be stored in sessionStorage, that means it only persists within the same browser tab.
+   */
+  transientSession?: boolean;
 }
 
 /**
@@ -54,6 +64,8 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
    */
   sessionType: "cookie" | "refresh_token";
 
+  refreshTokenStorage: ContainerStorage;
+
   constructor(options?: ContainerOptions<T>) {
     const o = {
       ...options,
@@ -65,6 +77,7 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
 
     super(o);
 
+    this.refreshTokenStorage = this.storage;
     this.sessionType = "refresh_token";
     this.apiClient._delegate = this;
   }
@@ -83,9 +96,18 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
    * @public
    */
   async configure(options: ConfigureOptions): Promise<void> {
+    if (options.transientSession) {
+      this.refreshTokenStorage = new GlobalJSONContainerStorage(
+        sessionStorageStorageDriver
+      );
+    } else {
+      this.refreshTokenStorage = this.storage;
+    }
     // TODO: verify if we need to support configure for second time
     // and guard if initialized
-    const refreshToken = await this.storage.getRefreshToken(this.name);
+    const refreshToken = await this.refreshTokenStorage.getRefreshToken(
+      this.name
+    );
 
     this.clientID = options.clientID;
     this.apiClient.endpoint = options.endpoint;

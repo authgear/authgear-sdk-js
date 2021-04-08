@@ -136,3 +136,28 @@ export class GlobalJSONContainerStorage implements ContainerStorage {
     await this.storage.safeDel(keyBiometricKeyID(namespace));
   }
 }
+
+/**
+ * @public
+ */
+export class MemoryStorageDriver implements StorageDriver {
+  backingStore: { [key: string]: string | undefined };
+
+  constructor() {
+    this.backingStore = {};
+  }
+
+  async get(key: string): Promise<string | null> {
+    const value = this.backingStore[key];
+    if (value != null) {
+      return value;
+    }
+    return null;
+  }
+  async set(key: string, value: string): Promise<void> {
+    this.backingStore[key] = value;
+  }
+  async del(key: string): Promise<void> {
+    delete this.backingStore[key];
+  }
+}
