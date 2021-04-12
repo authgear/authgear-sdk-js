@@ -15,12 +15,15 @@ import java.util.UUID;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
@@ -167,8 +170,52 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         build.putString("MANUFACTURER", Build.MANUFACTURER);
         build.putString("PRODUCT", Build.PRODUCT);
 
+        Context context = this.getReactApplicationContext();
+
+        String packageName = context.getPackageName();
+        PackageInfo packageInfo;
+        try {
+            packageInfo = context.getPackageManager().getPackageInfo(packageName, 0);
+        } catch (Exception e) {
+            promise.reject(e.getClass().getName(), e.getMessage(), e);
+            return;
+        }
+        String versionCode = String.valueOf(packageInfo.versionCode);
+        String versionName = packageInfo.versionName;
+        String longVersionCode = "";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            longVersionCode = String.valueOf(packageInfo.getLongVersionCode());
+        }
+        WritableMap packageInfoMap = Arguments.createMap();
+        packageInfoMap.putString("packageName", packageName);
+        packageInfoMap.putString("versionName", versionName);
+        packageInfoMap.putString("versionCode", versionCode);
+        packageInfoMap.putString("longVersionCode", longVersionCode);
+
+        ContentResolver contentResolver = context.getContentResolver();
+        String bluetoothName = Settings.Secure.getString(contentResolver, "bluetooth_name");
+        if (bluetoothName == null) {
+            bluetoothName = "";
+        }
+        String deviceName = "";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            deviceName = Settings.Global.getString(contentResolver, Settings.Global.DEVICE_NAME);
+            if (deviceName == null) {
+                deviceName = "";
+            }
+        }
+        WritableMap settingsMap = Arguments.createMap();
+        WritableMap settingsGlobalMap = Arguments.createMap();
+        settingsGlobalMap.putString("DEVICE_NAME", deviceName);
+        WritableMap settingsSecureMap = Arguments.createMap();
+        settingsSecureMap.putString("bluetooth_name", bluetoothName);
+        settingsMap.putMap("Secure", settingsSecureMap);
+        settingsMap.putMap("Global", settingsGlobalMap);
+
         WritableMap android = Arguments.createMap();
         android.putMap("Build", build);
+        android.putMap("PackageInfo", packageInfoMap);
+        android.putMap("Settings", settingsMap);
 
         WritableMap root = Arguments.createMap();
         root.putMap("android", android);

@@ -237,6 +237,7 @@ export interface _OIDCTokenRequest {
   code_verifier?: string;
   refresh_token?: string;
   jwt?: string;
+  x_device_info?: string;
 }
 
 /**

@@ -7,6 +7,7 @@ import {
   ContainerStorage,
   _APIClientDelegate,
   ContainerDelegate,
+  _OIDCTokenRequest,
   _OIDCTokenResponse,
   SessionStateChangeReason,
   SessionState,
@@ -185,9 +186,11 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   }
 
   /**
-   * @public
+   * @internal
    */
-  async refreshAccessToken(): Promise<void> {
+  async _refreshAccessToken(
+    tokenRequest?: Partial<_OIDCTokenRequest>
+  ): Promise<void> {
     // If token request fails due to other reasons, session will be kept and
     // the whole process can be retried.
     const clientID = this.clientID;
@@ -207,6 +210,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     let tokenResponse;
     try {
       tokenResponse = await this.apiClient._oidcTokenRequest({
+        ...tokenRequest,
         grant_type: "refresh_token",
         client_id: clientID,
         refresh_token: refreshToken,
@@ -289,7 +293,10 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   /**
    * @internal
    */
-  async _finishAuthorization(url: string): Promise<AuthorizeResult> {
+  async _finishAuthorization(
+    url: string,
+    tokenRequest?: Partial<_OIDCTokenRequest>
+  ): Promise<AuthorizeResult> {
     const clientID = this.clientID;
     if (clientID == null) {
       throw new Error("missing client ID");
@@ -324,6 +331,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
       }
       const codeVerifier = await this.storage.getOIDCCodeVerifier(this.name);
       tokenResponse = await this.apiClient._oidcTokenRequest({
+        ...tokenRequest,
         grant_type: "authorization_code",
         code: code,
         redirect_uri: redirectURI,
