@@ -1,4 +1,5 @@
 /* global window */
+import URLSearchParams from "core-js-pure/features/url-search-params";
 import {
   UserInfo,
   ContainerOptions,
@@ -192,7 +193,45 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
       redirectURI?: string;
     } = {}
   ): Promise<void> {
-    return this._logout(options);
+    switch (this.sessionType) {
+      case "cookie":
+        await this._logoutCookie(options);
+        break;
+      case "refresh_token":
+        await this._logoutRefreshToken(options);
+        break;
+    }
+  }
+
+  private async _logoutRefreshToken(options: {
+    force?: boolean;
+  }): Promise<void> {
+    const refreshToken =
+      (await this.refreshTokenStorage.getRefreshToken(this.name)) ?? "";
+    if (refreshToken !== "") {
+      try {
+        await this.apiClient._oidcRevocationRequest(refreshToken);
+      } catch (error) {
+        if (!options.force) {
+          throw error;
+        }
+      }
+      await this._clearSession("LOGOUT");
+    }
+  }
+
+  private async _logoutCookie(options: {
+    redirectURI?: string;
+  }): Promise<void> {
+    const config = await this.apiClient._fetchOIDCConfiguration();
+    const query = new URLSearchParams();
+    if (options.redirectURI) {
+      query.append("post_logout_redirect_uri", options.redirectURI);
+    }
+    const endSessionEndpoint = `${
+      config.end_session_endpoint
+    }?${query.toString()}`;
+    window.location.href = endSessionEndpoint;
   }
 
   /**

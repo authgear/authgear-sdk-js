@@ -365,48 +365,4 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     this.sessionState = state;
     this.delegate?.onSessionStateChange(this, reason);
   }
-
-  /**
-   * Logout current session.
-   *
-   * @internal
-   *
-   * @remarks
-   * If `force` parameter is set to `true`, all potential errors (e.g. network
-   * error) would be ignored.
-   *
-   * `redirectURI` will be used only for the first party app
-   *
-   * @param options - Logout options
-   */
-  async _logout(
-    options: { force?: boolean; redirectURI?: string } = {}
-  ): Promise<void> {
-    const refreshToken =
-      (await this.refreshTokenStorage.getRefreshToken(this.name)) ?? "";
-    if (refreshToken !== "") {
-      try {
-        await this.apiClient._oidcRevocationRequest(refreshToken);
-      } catch (error) {
-        if (!options.force) {
-          throw error;
-        }
-      }
-      await this._clearSession("LOGOUT");
-    } else {
-      const config = await this.apiClient._fetchOIDCConfiguration();
-      const query = new URLSearchParams();
-      if (options.redirectURI) {
-        query.append("post_logout_redirect_uri", options.redirectURI);
-      }
-      const endSessionEndpoint = `${
-        config.end_session_endpoint
-      }?${query.toString()}`;
-      await this._clearSession("LOGOUT");
-      if (typeof window !== "undefined") {
-        // eslint-disable-next-line no-undef
-        window.location.href = endSessionEndpoint;
-      }
-    }
-  }
 }

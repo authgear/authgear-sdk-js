@@ -10,6 +10,7 @@
     "dist/authgear-web.cjs.js"
   ],
   "devDependencies": {
+    "core-js-pure": "3.6.5",
     "@authgear/core": "0.8.0"
   }
 }
