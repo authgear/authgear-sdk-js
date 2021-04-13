@@ -326,6 +326,9 @@ export abstract class BaseAPIClient {
     if (req.jwt) {
       query.append("jwt", req.jwt);
     }
+    if (req.x_device_info) {
+      query.append("x_device_info", req.x_device_info);
+    }
     return this._fetchOIDCJSON(config.token_endpoint, {
       method: "POST",
       headers: {

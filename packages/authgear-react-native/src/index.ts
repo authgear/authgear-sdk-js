@@ -14,6 +14,8 @@ import {
   SettingOptions,
   OAuthError,
   ContainerStorage,
+  _encodeUTF8,
+  _encodeBase64URLFromByteArray,
 } from "@authgear/core";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
@@ -105,6 +107,15 @@ export class PlatformStorageDriver implements StorageDriver {
   async del(key: string): Promise<void> {
     return storageDeleteItem(key);
   }
+}
+
+async function getXDeviceInfo(): Promise<string> {
+  const deviceInfo = await getDeviceInfo();
+  const deviceInfoJSON = JSON.stringify(deviceInfo);
+  const xDeviceInfo = _encodeBase64URLFromByteArray(
+    _encodeUTF8(deviceInfoJSON)
+  );
+  return xDeviceInfo;
 }
 
 /**
@@ -221,7 +232,10 @@ export class ReactNativeContainer<
       options.redirectURI,
       options.weChatRedirectURI
     );
-    const result = await this._finishAuthorization(redirectURL);
+    const xDeviceInfo = await getXDeviceInfo();
+    const result = await this._finishAuthorization(redirectURL, {
+      x_device_info: xDeviceInfo,
+    });
     await this.disableBiometric();
     return result;
   }
@@ -385,6 +399,13 @@ export class ReactNativeContainer<
    */
   async fetchUserInfo(): Promise<UserInfo> {
     return this.apiClient._oidcUserInfoRequest(this.accessToken);
+  }
+
+  async refreshAccessToken(): Promise<void> {
+    const xDeviceInfo = await getXDeviceInfo();
+    await this._refreshAccessToken({
+      x_device_info: xDeviceInfo,
+    });
   }
 
   /**

@@ -216,11 +216,21 @@ RCT_EXPORT_METHOD(getDeviceInfo:(RCTPromiseResolveBlock)resolve reject:(RCTPromi
         }
     }
 
+    NSDictionary *mainInfoDict = [NSBundle mainBundle].infoDictionary;
+    NSDictionary *bundleInfo = @{
+      @"CFBundleIdentifier": mainInfoDict[@"CFBundleIdentifier"],
+      @"CFBundleDisplayName": mainInfoDict[@"CFBundleDisplayName"],
+      @"CFBundleExecutable": mainInfoDict[@"CFBundleExecutable"],
+      @"CFBundleShortVersionString": mainInfoDict[@"CFBundleShortVersionString"],
+      @"CFBundleVersion": mainInfoDict[@"CFBundleVersion"],
+    };
+
     resolve(@{
         @"ios": @{
                 @"uname": unameInfo,
                 @"UIDevice": uiDeviceInfo,
                 @"NSProcessInfo": processInfo,
+                @"NSBundle": bundleInfo,
         },
     });
 }
