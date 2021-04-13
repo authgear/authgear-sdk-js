@@ -223,8 +223,19 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
   private async _logoutCookie(options: {
     redirectURI?: string;
   }): Promise<void> {
+    const clientID = this.clientID;
+    if (clientID == null) {
+      throw new Error("missing client ID");
+    }
     const config = await this.apiClient._fetchOIDCConfiguration();
+
+    const { id_token } = await this.apiClient._oidcTokenRequest({
+      grant_type: "urn:authgear:params:oauth:grant-type:id-token",
+      client_id: clientID,
+    });
+
     const query = new URLSearchParams();
+    query.append("id_token_hint", id_token);
     if (options.redirectURI) {
       query.append("post_logout_redirect_uri", options.redirectURI);
     }

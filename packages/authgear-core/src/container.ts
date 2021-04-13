@@ -124,6 +124,10 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   ): Promise<void> {
     const { access_token, refresh_token, expires_in } = response;
 
+    if (access_token == null || expires_in == null) {
+      throw new Error("access_token or expires_in missing in Token Response");
+    }
+
     this.accessToken = access_token;
     if (refresh_token) {
       this.refreshToken = refresh_token;
