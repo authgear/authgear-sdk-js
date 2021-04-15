@@ -3,7 +3,9 @@ import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import authgear from "@authgear/web";
 import "./App.css";
 
+// Switch the session type by uncommenting.
 const SESSION_TYPE = "refresh_token";
+// const SESSION_TYPE = "cookie";
 
 function readClientID(): string {
   return window.sessionStorage.getItem("authgear.demo.clientID") ?? "";
@@ -92,12 +94,16 @@ function Root() {
   const onClickSignOut = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    authgear.logout().then(
-      () => {
-        setUserInfo(null);
-      },
-      (err) => setError(err)
-    );
+    authgear
+      .logout({
+        redirectURI: window.location.origin + "/",
+      })
+      .then(
+        () => {
+          setUserInfo(null);
+        },
+        (err) => setError(err)
+      );
   }, []);
 
   const onClickSignIn = useCallback((e: React.MouseEvent<HTMLElement>) => {

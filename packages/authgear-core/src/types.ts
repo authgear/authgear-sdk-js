@@ -230,7 +230,8 @@ export interface _OIDCTokenRequest {
     | "authorization_code"
     | "refresh_token"
     | "urn:authgear:params:oauth:grant-type:anonymous-request"
-    | "urn:authgear:params:oauth:grant-type:biometric-request";
+    | "urn:authgear:params:oauth:grant-type:biometric-request"
+    | "urn:authgear:params:oauth:grant-type:id-token";
   client_id: string;
   redirect_uri?: string;
   code?: string;
@@ -254,9 +255,9 @@ export interface _SetupBiometricRequest {
  */
 export interface _OIDCTokenResponse {
   id_token: string;
-  token_type: string;
-  access_token: string;
-  expires_in: number;
+  token_type?: string;
+  access_token?: string;
+  expires_in?: number;
   refresh_token?: string;
 }
 

@@ -335,6 +335,8 @@ export abstract class BaseAPIClient {
         "content-type": "application/x-www-form-urlencoded",
       },
       body: query.toString(),
+      mode: "cors",
+      credentials: "include",
     });
   }
 

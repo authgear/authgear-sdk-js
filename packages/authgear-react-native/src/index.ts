@@ -304,7 +304,18 @@ export class ReactNativeContainer<
       force?: boolean;
     } = {}
   ): Promise<void> {
-    return this._logout(options);
+    const refreshToken =
+      (await this.refreshTokenStorage.getRefreshToken(this.name)) ?? "";
+    if (refreshToken !== "") {
+      try {
+        await this.apiClient._oidcRevocationRequest(refreshToken);
+      } catch (error) {
+        if (!options.force) {
+          throw error;
+        }
+      }
+      await this._clearSession("LOGOUT");
+    }
   }
 
   /**
