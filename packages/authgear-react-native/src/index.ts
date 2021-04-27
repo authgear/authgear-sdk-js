@@ -398,6 +398,7 @@ export class ReactNativeContainer<
    * Fetch user info.
    */
   async fetchUserInfo(): Promise<UserInfo> {
+    await this.refreshAccessTokenIfNeeded();
     return this.apiClient._oidcUserInfoRequest(this.accessToken);
   }
 
@@ -461,6 +462,7 @@ export class ReactNativeContainer<
     if (clientID == null) {
       throw new Error("missing client ID");
     }
+    await this.refreshAccessTokenIfNeeded();
     const accessToken = this.accessToken;
     if (accessToken == null) {
       throw new Error("enableBiometric requires authenticated user");
