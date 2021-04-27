@@ -53,7 +53,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   clientID?: string;
 
   /**
-   * @public
+   * @internal
    */
   apiClient: T;
 
@@ -187,6 +187,13 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
 
     // Otherwise no need to refresh.
     return false;
+  }
+
+  /**
+   * @public
+   */
+  async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
+    return this.apiClient.fetch(input, init);
   }
 
   /**

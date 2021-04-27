@@ -96,21 +96,13 @@ export abstract class BaseAPIClient {
     return this._fetchFunction(request);
   }
 
-  async fetch(
-    endpoint: string,
-    input: string,
-    init?: RequestInit
-  ): Promise<Response> {
+  async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
     if (this._fetchFunction == null) {
       throw new Error("missing fetchFunction in api client");
     }
 
     if (this._requestClass == null) {
       throw new Error("missing requestClass in api client");
-    }
-
-    if (typeof input !== "string") {
-      throw new Error("only string path is allowed for fetch input");
     }
 
     if (this._delegate == null) {
@@ -122,8 +114,7 @@ export abstract class BaseAPIClient {
       await this._delegate.refreshAccessToken();
     }
 
-    const url = endpoint + "/" + input.replace(/^\//, "");
-    const request = new this._requestClass(url, init);
+    const request = new this._requestClass(input, init);
 
     const headers = await this._prepareHeaders();
     for (const key of Object.keys(headers)) {
@@ -188,7 +179,8 @@ export abstract class BaseAPIClient {
       p += "?" + params.toString();
     }
 
-    const response = await this.fetch(endpoint, p, {
+    const input = endpoint + "/" + p.replace(/^\//, "");
+    const response = await this.fetch(input, {
       method,
       headers: headers ?? {},
       mode: "cors",
