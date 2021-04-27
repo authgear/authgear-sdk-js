@@ -182,22 +182,11 @@ export class ReactNativeContainer<
     this.apiClient.endpoint = options.endpoint;
     this.refreshToken = refreshToken ?? undefined;
 
-    const { skipRefreshAccessToken = false } = options;
-    if (this.shouldRefreshAccessToken()) {
-      if (skipRefreshAccessToken) {
-        // shouldRefreshAccessToken is true => refresh token exist
-        // consider user as logged in if refresh token is available
-        this._updateSessionState("AUTHENTICATED", "FOUND_TOKEN");
-      } else {
-        // update session state will be handled in refreshAccessToken
-        await this.refreshAccessToken();
-      }
+    if (this.refreshToken != null) {
+      // consider user as logged in if refresh token is available
+      this._updateSessionState("AUTHENTICATED", "FOUND_TOKEN");
     } else {
-      if (this.accessToken != null) {
-        this._updateSessionState("AUTHENTICATED", "FOUND_TOKEN");
-      } else {
-        this._updateSessionState("NO_SESSION", "NO_TOKEN");
-      }
+      this._updateSessionState("NO_SESSION", "NO_TOKEN");
     }
   }
 

@@ -43,10 +43,6 @@ export interface ConfigureOptions {
    */
   sessionType?: "cookie" | "refresh_token";
   /**
-   * Skip refreshing access token. Default is false.
-   */
-  skipRefreshAccessToken?: boolean;
-  /**
    * transientSession indicate if the session in SDK is short-lived session.
    * If transientSession is true means the session is short-lived session.
    * In web, the session will be stored in sessionStorage, that means it only persists within the same browser tab.
@@ -118,22 +114,11 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
 
     this.refreshToken = refreshToken ?? undefined;
 
-    const { skipRefreshAccessToken = false } = options;
-    if (this.shouldRefreshAccessToken()) {
-      if (skipRefreshAccessToken) {
-        // shouldRefreshAccessToken is true => refresh token exist
-        // consider user as logged in if refresh token is available
-        this._updateSessionState("AUTHENTICATED", "FOUND_TOKEN");
-      } else {
-        // update session state will be handled in refreshAccessToken
-        await this.refreshAccessToken();
-      }
+    if (this.refreshToken != null) {
+      // consider user as logged in if refresh token is available
+      this._updateSessionState("AUTHENTICATED", "FOUND_TOKEN");
     } else {
-      if (this.accessToken != null) {
-        this._updateSessionState("AUTHENTICATED", "FOUND_TOKEN");
-      } else {
-        this._updateSessionState("NO_SESSION", "NO_TOKEN");
-      }
+      this._updateSessionState("NO_SESSION", "NO_TOKEN");
     }
   }
 
