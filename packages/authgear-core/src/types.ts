@@ -294,7 +294,8 @@ export type SessionStateChangeReason =
   | "FOUND_TOKEN"
   | "AUTHENTICATED"
   | "LOGOUT"
-  | "INVALID";
+  | "INVALID"
+  | "CLEAR";
 
 /**
  * @public

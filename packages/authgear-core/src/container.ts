@@ -100,6 +100,8 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     challenge: string;
   }>;
 
+  abstract refreshAccessToken(): Promise<void>;
+
   constructor(options: ContainerOptions<T>) {
     if (!options.apiClient) {
       throw Error("missing apiClient");
@@ -162,6 +164,22 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
 
   /**
    * @public
+   */
+  async refreshAccessTokenIfNeeded(): Promise<void> {
+    if (this.shouldRefreshAccessToken()) {
+      await this.refreshAccessToken();
+    }
+  }
+
+  /**
+   * @public
+   */
+  async clearSessionState(): Promise<void> {
+    await this._clearSession("CLEAR");
+  }
+
+  /**
+   * @internal
    */
   shouldRefreshAccessToken(): boolean {
     // No need to refresh if we do not even have a refresh token.
