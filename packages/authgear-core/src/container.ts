@@ -78,7 +78,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   abstract refreshTokenStorage: ContainerStorage;
 
   /**
-   * @internal
+   * @public
    */
   accessToken?: string;
 
@@ -156,7 +156,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   }
 
   /**
-   * @public
+   * @internal
    */
   getAccessToken(): string | undefined {
     return this.accessToken;
