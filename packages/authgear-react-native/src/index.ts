@@ -72,10 +72,6 @@ export interface ConfigureOptions {
    */
   endpoint: string;
   /**
-   * Skip refreshing access token. Default is false.
-   */
-  skipRefreshAccessToken?: boolean;
-  /**
    * transientSession indicate if the session in SDK is short-lived session.
    * If transientSession is true means the session is short-lived session and won't be persist.
    * In react-native app, the session will be gone when calling authgear.configure.
@@ -182,22 +178,11 @@ export class ReactNativeContainer<
     this.apiClient.endpoint = options.endpoint;
     this.refreshToken = refreshToken ?? undefined;
 
-    const { skipRefreshAccessToken = false } = options;
-    if (this.shouldRefreshAccessToken()) {
-      if (skipRefreshAccessToken) {
-        // shouldRefreshAccessToken is true => refresh token exist
-        // consider user as logged in if refresh token is available
-        this._updateSessionState("AUTHENTICATED", "FOUND_TOKEN");
-      } else {
-        // update session state will be handled in refreshAccessToken
-        await this.refreshAccessToken();
-      }
+    if (this.refreshToken != null) {
+      // consider user as logged in if refresh token is available
+      this._updateSessionState("AUTHENTICATED", "FOUND_TOKEN");
     } else {
-      if (this.accessToken != null) {
-        this._updateSessionState("AUTHENTICATED", "FOUND_TOKEN");
-      } else {
-        this._updateSessionState("NO_SESSION", "NO_TOKEN");
-      }
+      this._updateSessionState("NO_SESSION", "NO_TOKEN");
     }
   }
 
@@ -409,6 +394,7 @@ export class ReactNativeContainer<
    * Fetch user info.
    */
   async fetchUserInfo(): Promise<UserInfo> {
+    await this.refreshAccessTokenIfNeeded();
     return this.apiClient._oidcUserInfoRequest(this.accessToken);
   }
 
@@ -472,6 +458,7 @@ export class ReactNativeContainer<
     if (clientID == null) {
       throw new Error("missing client ID");
     }
+    await this.refreshAccessTokenIfNeeded();
     const accessToken = this.accessToken;
     if (accessToken == null) {
       throw new Error("enableBiometric requires authenticated user");

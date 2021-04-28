@@ -53,7 +53,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   clientID?: string;
 
   /**
-   * @public
+   * @internal
    */
   apiClient: T;
 
@@ -78,7 +78,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   abstract refreshTokenStorage: ContainerStorage;
 
   /**
-   * @internal
+   * @public
    */
   accessToken?: string;
 
@@ -99,6 +99,8 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     verifier: string;
     challenge: string;
   }>;
+
+  abstract refreshAccessToken(): Promise<void>;
 
   constructor(options: ContainerOptions<T>) {
     if (!options.apiClient) {
@@ -154,7 +156,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   }
 
   /**
-   * @public
+   * @internal
    */
   getAccessToken(): string | undefined {
     return this.accessToken;
@@ -162,6 +164,22 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
 
   /**
    * @public
+   */
+  async refreshAccessTokenIfNeeded(): Promise<void> {
+    if (this.shouldRefreshAccessToken()) {
+      await this.refreshAccessToken();
+    }
+  }
+
+  /**
+   * @public
+   */
+  async clearSessionState(): Promise<void> {
+    await this._clearSession("CLEAR");
+  }
+
+  /**
+   * @internal
    */
   shouldRefreshAccessToken(): boolean {
     // No need to refresh if we do not even have a refresh token.
@@ -187,6 +205,13 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
 
     // Otherwise no need to refresh.
     return false;
+  }
+
+  /**
+   * @public
+   */
+  async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
+    return this.apiClient.fetch(input, init);
   }
 
   /**
