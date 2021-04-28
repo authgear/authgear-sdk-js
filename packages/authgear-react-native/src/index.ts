@@ -72,10 +72,6 @@ export interface ConfigureOptions {
    */
   endpoint: string;
   /**
-   * Skip refreshing access token. Default is false.
-   */
-  skipRefreshAccessToken?: boolean;
-  /**
    * transientSession indicate if the session in SDK is short-lived session.
    * If transientSession is true means the session is short-lived session and won't be persist.
    * In react-native app, the session will be gone when calling authgear.configure.
