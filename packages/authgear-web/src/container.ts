@@ -114,11 +114,18 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
 
     this.refreshToken = refreshToken ?? undefined;
 
-    if (this.refreshToken != null) {
-      // consider user as logged in if refresh token is available
-      this._updateSessionState("AUTHENTICATED", "FOUND_TOKEN");
-    } else {
-      this._updateSessionState("NO_SESSION", "NO_TOKEN");
+    switch (this.sessionType) {
+      case "cookie":
+        this._updateSessionState("UNKNOWN", "NO_TOKEN");
+        break;
+      case "refresh_token":
+        if (this.refreshToken != null) {
+          // consider user as logged in if refresh token is available
+          this._updateSessionState("AUTHENTICATED", "FOUND_TOKEN");
+        } else {
+          this._updateSessionState("NO_SESSION", "NO_TOKEN");
+        }
+        break;
     }
   }
 
