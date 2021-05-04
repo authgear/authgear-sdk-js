@@ -1,6 +1,3 @@
-import { BaseContainer } from "./container";
-import { BaseAPIClient } from "./client";
-
 /**
  * @internal
  */
@@ -296,34 +293,3 @@ export type SessionStateChangeReason =
   | "LOGOUT"
   | "INVALID"
   | "CLEAR";
-
-/**
- * @public
- */
-export interface ContainerDelegate {
-  /**
-   * This callback will be called when the session state is changed.
-   *
-   * For example, when the user logs out, the new state is "NO_SESSION"
-   * and the reason is "LOGOUT".
-   *
-   * @public
-   */
-  onSessionStateChange: <T extends BaseAPIClient>(
-    container: BaseContainer<T>,
-    reason: SessionStateChangeReason
-  ) => void;
-
-  /**
-   * This callback will be called when user click login with WeChat in
-   * react-native.
-   *
-   * Developer should implement this function to use WeChat SDK to
-   * obtain WeChat authentication code. After obtaining the code, developer
-   * should call weChatAuthCallback with code and state to complete the
-   * WeChat login.
-   *
-   * @public
-   */
-  sendWeChatAuthRequest(state: string): void;
-}

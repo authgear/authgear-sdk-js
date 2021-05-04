@@ -1,9 +1,9 @@
 export * from "@authgear/core";
-import { WebAPIClient } from "./client";
 export * from "./client";
 export * from "./storage";
 import { WebContainer } from "./container";
 export * from "./container";
+export * from "./types";
 
 /**
  * Default container.
@@ -13,6 +13,6 @@ export * from "./container";
  *
  * @public
  */
-const defaultContainer: WebContainer<WebAPIClient> = new WebContainer();
+const defaultContainer: WebContainer = new WebContainer();
 
 export default defaultContainer;

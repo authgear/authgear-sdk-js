@@ -6,7 +6,6 @@ import {
   ContainerOptions,
   ContainerStorage,
   _APIClientDelegate,
-  ContainerDelegate,
   _OIDCTokenRequest,
   _OIDCTokenResponse,
   SessionStateChangeReason,
@@ -31,11 +30,25 @@ import { BaseAPIClient } from "./client";
 const EXPIRE_IN_PERCENTAGE = 0.9;
 
 /**
+ * @internal
+ */
+export interface _BaseContainerDelegate {
+  storage: ContainerStorage;
+  refreshTokenStorage: ContainerStorage;
+  _setupCodeVerifier(): Promise<{
+    verifier: string;
+    challenge: string;
+  }>;
+  refreshAccessToken(): Promise<void>;
+  onSessionStateChange: (reason: SessionStateChangeReason) => void;
+}
+
+/**
  * Base Container
  *
- * @public
+ * @internal
  */
-export abstract class BaseContainer<T extends BaseAPIClient> {
+export class _BaseContainer<T extends BaseAPIClient> {
   /**
    *
    * Unique ID for this container.
@@ -60,22 +73,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   /**
    * @public
    */
-  delegate?: ContainerDelegate;
-
-  /**
-   * @public
-   */
   sessionState: SessionState;
-
-  /**
-   * @internal
-   */
-  storage: ContainerStorage;
-
-  /**
-   * @internal
-   */
-  abstract refreshTokenStorage: ContainerStorage;
 
   /**
    * @public
@@ -95,26 +93,17 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   /**
    * @internal
    */
-  abstract _setupCodeVerifier(): Promise<{
-    verifier: string;
-    challenge: string;
-  }>;
+  _delegate: _BaseContainerDelegate;
 
-  abstract refreshAccessToken(): Promise<void>;
-
-  constructor(options: ContainerOptions<T>) {
+  constructor(options: ContainerOptions<T>, _delegate: _BaseContainerDelegate) {
     if (!options.apiClient) {
       throw Error("missing apiClient");
     }
 
-    if (!options.storage) {
-      throw Error("missing storage");
-    }
-
     this.name = options.name ?? "default";
     this.apiClient = options.apiClient;
-    this.storage = options.storage;
     this.sessionState = "UNKNOWN";
+    this._delegate = _delegate;
   }
 
   /**
@@ -140,7 +129,10 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     this._updateSessionState("AUTHENTICATED", reason);
 
     if (refresh_token) {
-      await this.refreshTokenStorage.setRefreshToken(this.name, refresh_token);
+      await this._delegate.refreshTokenStorage.setRefreshToken(
+        this.name,
+        refresh_token
+      );
     }
   }
 
@@ -148,7 +140,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
    * @internal
    */
   async _clearSession(reason: SessionStateChangeReason): Promise<void> {
-    await this.refreshTokenStorage.delRefreshToken(this.name);
+    await this._delegate.refreshTokenStorage.delRefreshToken(this.name);
     this.accessToken = undefined;
     this.refreshToken = undefined;
     this.expireAt = undefined;
@@ -156,18 +148,11 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
   }
 
   /**
-   * @internal
-   */
-  getAccessToken(): string | undefined {
-    return this.accessToken;
-  }
-
-  /**
    * @public
    */
   async refreshAccessTokenIfNeeded(): Promise<void> {
     if (this.shouldRefreshAccessToken()) {
-      await this.refreshAccessToken();
+      await this._delegate.refreshAccessToken();
     }
   }
 
@@ -227,7 +212,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
       throw new Error("missing client ID");
     }
 
-    const refreshToken = await this.refreshTokenStorage.getRefreshToken(
+    const refreshToken = await this._delegate.refreshTokenStorage.getRefreshToken(
       this.name
     );
     if (refreshToken == null) {
@@ -276,8 +261,11 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     query.append("response_type", responseType);
     if (responseType === "code") {
       // Authorization code need PKCE.
-      const codeVerifier = await this._setupCodeVerifier();
-      await this.storage.setOIDCCodeVerifier(this.name, codeVerifier.verifier);
+      const codeVerifier = await this._delegate._setupCodeVerifier();
+      await this._delegate.storage.setOIDCCodeVerifier(
+        this.name,
+        codeVerifier.verifier
+      );
 
       query.append("code_challenge_method", "S256");
       query.append("code_challenge", codeVerifier.challenge);
@@ -358,7 +346,9 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
           error_description: "Missing parameter: code",
         });
       }
-      const codeVerifier = await this.storage.getOIDCCodeVerifier(this.name);
+      const codeVerifier = await this._delegate.storage.getOIDCCodeVerifier(
+        this.name
+      );
       tokenResponse = await this.apiClient._oidcTokenRequest({
         ...tokenRequest,
         grant_type: "authorization_code",
@@ -392,6 +382,6 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     reason: SessionStateChangeReason
   ): void {
     this.sessionState = state;
-    this.delegate?.onSessionStateChange(this, reason);
+    this._delegate.onSessionStateChange(reason);
   }
 }
