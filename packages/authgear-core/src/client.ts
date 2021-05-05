@@ -21,9 +21,9 @@ export function _removeTrailingSlash(s: string): string {
 }
 
 /**
- * @public
+ * @internal
  */
-export abstract class BaseAPIClient {
+export abstract class _BaseAPIClient {
   userAgent?: string;
 
   /**

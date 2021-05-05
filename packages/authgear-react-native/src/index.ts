@@ -1,10 +1,10 @@
 /* global fetch, Request */
 import URL from "core-js-pure/features/url";
 import {
-  BaseAPIClient,
+  _BaseAPIClient,
   ContainerOptions,
-  GlobalJSONContainerStorage,
-  MemoryStorageDriver,
+  _GlobalJSONContainerStorage,
+  _MemoryStorageDriver,
   StorageDriver,
   _BaseContainer,
   AuthorizeOptions,
@@ -49,8 +49,8 @@ export {
 } from "./error";
 import EventEmitter from "./eventEmitter";
 
-const globalMemoryStore = new GlobalJSONContainerStorage(
-  new MemoryStorageDriver()
+const globalMemoryStore = new _GlobalJSONContainerStorage(
+  new _MemoryStorageDriver()
 );
 
 /**
@@ -82,17 +82,17 @@ export interface ConfigureOptions {
 }
 
 /**
- * @public
+ * @internal
  */
-export class ReactNativeAPIClient extends BaseAPIClient {
+export class _ReactNativeAPIClient extends _BaseAPIClient {
   _fetchFunction = fetch;
   _requestClass = Request;
 }
 
 /**
- * @public
+ * @internal
  */
-export class PlatformStorageDriver implements StorageDriver {
+export class _PlatformStorageDriver implements StorageDriver {
   // eslint-disable-next-line class-methods-use-this
   async get(key: string): Promise<string | null> {
     return storageGetItem(key);
@@ -125,7 +125,7 @@ export class ReactNativeContainer {
   /**
    * @internal
    */
-  baseContainer: _BaseContainer<ReactNativeAPIClient>;
+  baseContainer: _BaseContainer<_ReactNativeAPIClient>;
 
   /**
    * implements _BaseContainerDelegate
@@ -206,15 +206,15 @@ export class ReactNativeContainer {
   constructor(options?: ContainerOptions) {
     const _storage =
       options?.storage ??
-      new GlobalJSONContainerStorage(new PlatformStorageDriver());
+      new _GlobalJSONContainerStorage(new _PlatformStorageDriver());
     const o = {
       ...options,
       storage: _storage,
     } as ContainerOptions;
 
-    const apiClient = new ReactNativeAPIClient();
+    const apiClient = new _ReactNativeAPIClient();
 
-    this.baseContainer = new _BaseContainer<ReactNativeAPIClient>(
+    this.baseContainer = new _BaseContainer<_ReactNativeAPIClient>(
       o,
       apiClient,
       this

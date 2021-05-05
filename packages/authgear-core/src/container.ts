@@ -12,7 +12,7 @@ import {
   SessionState,
 } from "./types";
 import { OAuthError } from "./error";
-import { BaseAPIClient } from "./client";
+import { _BaseAPIClient } from "./client";
 
 /**
  * To prevent user from using expired access token, we have to check in advance
@@ -48,7 +48,7 @@ export interface _BaseContainerDelegate {
  *
  * @internal
  */
-export class _BaseContainer<T extends BaseAPIClient> {
+export class _BaseContainer<T extends _BaseAPIClient> {
   /**
    *
    * Unique ID for this container.

@@ -1,11 +1,11 @@
 /* global window, Request */
 
-import { BaseAPIClient } from "@authgear/core";
+import { _BaseAPIClient } from "@authgear/core";
 
 /**
- * @public
+ * @internal
  */
-export class WebAPIClient extends BaseAPIClient {
+export class _WebAPIClient extends _BaseAPIClient {
   // Fetch function expect the context is window, if it doesn't we will get the
   // following error
   // TypeError: Failed to execute 'fetch' on 'Window': Illegal invocation

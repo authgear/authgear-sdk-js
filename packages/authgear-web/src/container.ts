@@ -3,7 +3,7 @@ import URLSearchParams from "core-js-pure/features/url-search-params";
 import {
   UserInfo,
   ContainerOptions,
-  GlobalJSONContainerStorage,
+  _GlobalJSONContainerStorage,
   _BaseContainer,
   AuthorizeOptions,
   AuthorizeResult,
@@ -11,7 +11,7 @@ import {
   SessionState,
   SessionStateChangeReason,
 } from "@authgear/core";
-import { WebAPIClient } from "./client";
+import { _WebAPIClient } from "./client";
 import {
   localStorageStorageDriver,
   sessionStorageStorageDriver,
@@ -62,7 +62,7 @@ export class WebContainer {
   /**
    * @internal
    */
-  baseContainer: _BaseContainer<WebAPIClient>;
+  baseContainer: _BaseContainer<_WebAPIClient>;
 
   /**
    * implements _BaseContainerDelegate
@@ -143,15 +143,15 @@ export class WebContainer {
   constructor(options?: ContainerOptions) {
     const _storage =
       options?.storage ??
-      new GlobalJSONContainerStorage(localStorageStorageDriver);
+      new _GlobalJSONContainerStorage(localStorageStorageDriver);
     const o = {
       ...options,
       storage: _storage,
     } as ContainerOptions;
 
-    const apiClient = new WebAPIClient();
+    const apiClient = new _WebAPIClient();
 
-    this.baseContainer = new _BaseContainer<WebAPIClient>(o, apiClient, this);
+    this.baseContainer = new _BaseContainer<_WebAPIClient>(o, apiClient, this);
     this.baseContainer.apiClient._delegate = this;
 
     this.storage = _storage;
@@ -202,7 +202,7 @@ export class WebContainer {
    */
   async configure(options: ConfigureOptions): Promise<void> {
     if (options.transientSession) {
-      this.refreshTokenStorage = new GlobalJSONContainerStorage(
+      this.refreshTokenStorage = new _GlobalJSONContainerStorage(
         sessionStorageStorageDriver
       );
     } else {

@@ -76,9 +76,9 @@ export class _GlobalJSONStorage {
 }
 
 /**
- * @public
+ * @internal
  */
-export class GlobalJSONContainerStorage implements ContainerStorage {
+export class _GlobalJSONContainerStorage implements ContainerStorage {
   private storage: _GlobalJSONStorage;
 
   constructor(driver: StorageDriver) {
@@ -138,9 +138,9 @@ export class GlobalJSONContainerStorage implements ContainerStorage {
 }
 
 /**
- * @public
+ * @internal
  */
-export class MemoryStorageDriver implements StorageDriver {
+export class _MemoryStorageDriver implements StorageDriver {
   backingStore: { [key: string]: string | undefined };
 
   constructor() {
