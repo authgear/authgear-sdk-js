@@ -95,13 +95,13 @@ export class _BaseContainer<T extends BaseAPIClient> {
    */
   _delegate: _BaseContainerDelegate;
 
-  constructor(options: ContainerOptions<T>, _delegate: _BaseContainerDelegate) {
-    if (!options.apiClient) {
-      throw Error("missing apiClient");
-    }
-
+  constructor(
+    options: ContainerOptions,
+    apiClient: T,
+    _delegate: _BaseContainerDelegate
+  ) {
     this.name = options.name ?? "default";
-    this.apiClient = options.apiClient;
+    this.apiClient = apiClient;
     this.sessionState = "UNKNOWN";
     this._delegate = _delegate;
   }

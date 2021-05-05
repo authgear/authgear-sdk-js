@@ -203,17 +203,22 @@ export class ReactNativeContainer {
     this.baseContainer.accessToken = accessToken;
   }
 
-  constructor(options?: ContainerOptions<ReactNativeAPIClient>) {
+  constructor(options?: ContainerOptions) {
     const _storage =
       options?.storage ??
       new GlobalJSONContainerStorage(new PlatformStorageDriver());
     const o = {
       ...options,
-      apiClient: options?.apiClient ?? new ReactNativeAPIClient(),
       storage: _storage,
-    } as ContainerOptions<ReactNativeAPIClient>;
+    } as ContainerOptions;
 
-    this.baseContainer = new _BaseContainer<ReactNativeAPIClient>(o, this);
+    const apiClient = new ReactNativeAPIClient();
+
+    this.baseContainer = new _BaseContainer<ReactNativeAPIClient>(
+      o,
+      apiClient,
+      this
+    );
     this.baseContainer.apiClient._delegate = this;
 
     this.storage = _storage;

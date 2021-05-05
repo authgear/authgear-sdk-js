@@ -202,9 +202,8 @@ export interface StorageDriver {
 /**
  * @public
  */
-export interface ContainerOptions<T> {
+export interface ContainerOptions {
   name?: string;
-  apiClient?: T;
   storage?: ContainerStorage;
 }
 

@@ -140,17 +140,18 @@ export class WebContainer {
     this.baseContainer.accessToken = accessToken;
   }
 
-  constructor(options?: ContainerOptions<WebAPIClient>) {
+  constructor(options?: ContainerOptions) {
     const _storage =
       options?.storage ??
       new GlobalJSONContainerStorage(localStorageStorageDriver);
     const o = {
       ...options,
-      apiClient: options?.apiClient ?? new WebAPIClient(),
       storage: _storage,
-    } as ContainerOptions<WebAPIClient>;
+    } as ContainerOptions;
 
-    this.baseContainer = new _BaseContainer<WebAPIClient>(o, this);
+    const apiClient = new WebAPIClient();
+
+    this.baseContainer = new _BaseContainer<WebAPIClient>(o, apiClient, this);
     this.baseContainer.apiClient._delegate = this;
 
     this.storage = _storage;
