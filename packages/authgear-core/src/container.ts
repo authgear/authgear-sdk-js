@@ -49,50 +49,20 @@ export interface _BaseContainerDelegate {
  * @internal
  */
 export class _BaseContainer<T extends _BaseAPIClient> {
-  /**
-   *
-   * Unique ID for this container.
-   * @defaultValue "default"
-   *
-   * @public
-   */
   name: string;
 
-  /**
-   * OIDC client ID
-   *
-   * @public
-   */
   clientID?: string;
 
-  /**
-   * @internal
-   */
   apiClient: T;
 
-  /**
-   * @public
-   */
   sessionState: SessionState;
 
-  /**
-   * @public
-   */
   accessToken?: string;
 
-  /**
-   * @internal
-   */
   refreshToken?: string;
 
-  /**
-   * @internal
-   */
   expireAt?: Date;
 
-  /**
-   * @internal
-   */
   _delegate: _BaseContainerDelegate;
 
   constructor(
@@ -106,9 +76,6 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     this._delegate = _delegate;
   }
 
-  /**
-   * @internal
-   */
   async _persistTokenResponse(
     response: _OIDCTokenResponse,
     reason: SessionStateChangeReason
@@ -136,9 +103,6 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     }
   }
 
-  /**
-   * @internal
-   */
   async _clearSession(reason: SessionStateChangeReason): Promise<void> {
     await this._delegate.refreshTokenStorage.delRefreshToken(this.name);
     this.accessToken = undefined;
@@ -147,25 +111,16 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     this._updateSessionState("NO_SESSION", reason);
   }
 
-  /**
-   * @public
-   */
   async refreshAccessTokenIfNeeded(): Promise<void> {
     if (this.shouldRefreshAccessToken()) {
       await this._delegate.refreshAccessToken();
     }
   }
 
-  /**
-   * @public
-   */
   async clearSessionState(): Promise<void> {
     await this._clearSession("CLEAR");
   }
 
-  /**
-   * @internal
-   */
   shouldRefreshAccessToken(): boolean {
     // No need to refresh if we do not even have a refresh token.
     if (this.refreshToken == null) {
@@ -192,16 +147,10 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     return false;
   }
 
-  /**
-   * @public
-   */
   async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
     return this.apiClient.fetch(input, init);
   }
 
-  /**
-   * @internal
-   */
   async _refreshAccessToken(
     tokenRequest?: Partial<_OIDCTokenRequest>
   ): Promise<void> {
@@ -244,9 +193,6 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     await this._persistTokenResponse(tokenResponse, "FOUND_TOKEN");
   }
 
-  /**
-   * @internal
-   */
   // eslint-disable-next-line complexity
   async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
     const clientID = this.clientID;
@@ -307,9 +253,6 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     return `${config.authorization_endpoint}?${query.toString()}`;
   }
 
-  /**
-   * @internal
-   */
   async _finishAuthorization(
     url: string,
     tokenRequest?: Partial<_OIDCTokenRequest>
@@ -374,8 +317,6 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
   /**
    * Update session state.
-   *
-   * @internal
    */
   _updateSessionState(
     state: SessionState,

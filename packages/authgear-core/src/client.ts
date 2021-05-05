@@ -26,14 +26,8 @@ export function _removeTrailingSlash(s: string): string {
 export abstract class _BaseAPIClient {
   userAgent?: string;
 
-  /**
-   * @internal
-   */
   _delegate?: _APIClientDelegate;
 
-  /**
-   * @internal
-   */
   _endpoint?: string;
   get endpoint(): string | undefined {
     return this._endpoint;
@@ -46,26 +40,14 @@ export abstract class _BaseAPIClient {
     }
   }
 
-  /**
-   * @internal
-   */
   // eslint-disable-next-line no-undef
   abstract _fetchFunction?: typeof fetch;
 
-  /**
-   * @internal
-   */
   // eslint-disable-next-line no-undef
   abstract _requestClass?: typeof Request;
 
-  /**
-   * @internal
-   */
   _config?: _OIDCConfiguration;
 
-  /**
-   * @internal
-   */
   protected async _prepareHeaders(): Promise<{ [name: string]: string }> {
     const headers: { [name: string]: string } = {};
     const accessToken = this._delegate?.getAccessToken();
@@ -78,9 +60,6 @@ export abstract class _BaseAPIClient {
     return headers;
   }
 
-  /**
-   * @internal
-   */
   async _fetchWithoutRefresh(
     url: string,
     init?: RequestInit
@@ -124,9 +103,6 @@ export abstract class _BaseAPIClient {
     return this._fetchFunction(request);
   }
 
-  /**
-   * @internal
-   */
   protected async _requestJSON(
     method: "GET" | "POST" | "DELETE",
     path: string,
@@ -151,9 +127,6 @@ export abstract class _BaseAPIClient {
     });
   }
 
-  /**
-   * @internal
-   */
   // eslint-disable-next-line complexity
   protected async _request(
     method: "GET" | "POST" | "DELETE",
@@ -219,9 +192,6 @@ export abstract class _BaseAPIClient {
     throw _decodeError();
   }
 
-  /**
-   * @internal
-   */
   protected async _post(
     path: string,
     options?: {
@@ -232,9 +202,6 @@ export abstract class _BaseAPIClient {
     return this._requestJSON("POST", path, options);
   }
 
-  /**
-   * @internal
-   */
   async _fetchOIDCRequest(url: string, init?: RequestInit): Promise<Response> {
     const resp = await this._fetchWithoutRefresh(url, init);
     if (resp.status === 200) {
@@ -259,9 +226,6 @@ export abstract class _BaseAPIClient {
     });
   }
 
-  /**
-   * @internal
-   */
   async _fetchOIDCJSON(url: string, init?: RequestInit): Promise<any> {
     const resp = await this._fetchOIDCRequest(url, init);
     let jsonBody;
@@ -277,9 +241,6 @@ export abstract class _BaseAPIClient {
     return jsonBody;
   }
 
-  /**
-   * @internal
-   */
   async _fetchOIDCConfiguration(): Promise<_OIDCConfiguration> {
     if (this.endpoint == null) {
       throw new Error("missing endpoint in api client");
@@ -295,9 +256,6 @@ export abstract class _BaseAPIClient {
     return this._config;
   }
 
-  /**
-   * @internal
-   */
   async _oidcTokenRequest(req: _OIDCTokenRequest): Promise<_OIDCTokenResponse> {
     const config = await this._fetchOIDCConfiguration();
     const query = new URLSearchParams();
@@ -332,9 +290,6 @@ export abstract class _BaseAPIClient {
     });
   }
 
-  /**
-   * @internal
-   */
   async _setupBiometricRequest(req: _SetupBiometricRequest): Promise<void> {
     const config = await this._fetchOIDCConfiguration();
     const headers: { [name: string]: string } = {
@@ -355,9 +310,6 @@ export abstract class _BaseAPIClient {
     });
   }
 
-  /**
-   * @internal
-   */
   async _oidcUserInfoRequest(accessToken?: string): Promise<UserInfo> {
     const headers: { [name: string]: string } = {};
     if (accessToken) {
@@ -373,9 +325,6 @@ export abstract class _BaseAPIClient {
     return _decodeUserInfo(response);
   }
 
-  /**
-   * @internal
-   */
   async _oidcRevocationRequest(refreshToken: string): Promise<void> {
     const config = await this._fetchOIDCConfiguration();
     const query = new URLSearchParams({
@@ -390,9 +339,6 @@ export abstract class _BaseAPIClient {
     });
   }
 
-  /**
-   * @internal
-   */
   async _weChatAuthCallbackRequest(
     code: string,
     state: string,

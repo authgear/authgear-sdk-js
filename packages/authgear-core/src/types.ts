@@ -122,23 +122,17 @@ export interface AuthorizeResult {
 export interface _APIClientDelegate {
   /**
    * Called by the API client to retrieve the access token to construct HTTP request.
-   *
-   * @internal
    */
   getAccessToken(): string | undefined;
 
   /**
    * Called by the API Client before sending HTTP request.
    * If true is returned, refreshAccessToken() is then called.
-   *
-   * @internal
    */
   shouldRefreshAccessToken(): boolean;
 
   /**
    * Called by the API client to refresh the access token.
-   *
-   * @internal
    */
   refreshAccessToken(): Promise<void>;
 }
