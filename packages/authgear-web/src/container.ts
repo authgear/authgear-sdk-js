@@ -3,18 +3,21 @@ import URLSearchParams from "core-js-pure/features/url-search-params";
 import {
   UserInfo,
   ContainerOptions,
-  GlobalJSONContainerStorage,
-  BaseContainer,
+  _GlobalJSONContainerStorage,
+  _BaseContainer,
   AuthorizeOptions,
   AuthorizeResult,
-  ContainerStorage,
+  _ContainerStorage,
+  SessionState,
+  SessionStateChangeReason,
 } from "@authgear/core";
-import { WebAPIClient } from "./client";
+import { _WebAPIClient } from "./client";
 import {
-  localStorageStorageDriver,
-  sessionStorageStorageDriver,
+  _localStorageStorageDriver,
+  _sessionStorageStorageDriver,
 } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
+import { WebContainerDelegate } from "./types";
 
 /**
  * @public
@@ -55,28 +58,132 @@ export interface ConfigureOptions {
  *
  * @public
  */
-export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
+export class WebContainer {
+  /**
+   * @internal
+   */
+  baseContainer: _BaseContainer<_WebAPIClient>;
+
+  /**
+   * implements _BaseContainerDelegate
+   *
+   * @internal
+   */
+  storage: _ContainerStorage;
+
+  /**
+   * implements _BaseContainerDelegate
+   *
+   * @internal
+   */
+  refreshTokenStorage: _ContainerStorage;
+
   /**
    * @public
    */
   sessionType: "cookie" | "refresh_token";
 
-  refreshTokenStorage: ContainerStorage;
+  /**
+   * @public
+   */
+  delegate?: WebContainerDelegate;
 
-  constructor(options?: ContainerOptions<T>) {
+  /**
+   *
+   * Unique ID for this container.
+   * @defaultValue "default"
+   *
+   * @public
+   */
+  public get name(): string {
+    return this.baseContainer.name;
+  }
+
+  public set name(name: string) {
+    this.baseContainer.name = name;
+  }
+
+  /**
+   * OIDC client ID
+   *
+   * @public
+   */
+  public get clientID(): string | undefined {
+    return this.baseContainer.clientID;
+  }
+
+  public set clientID(clientID: string | undefined) {
+    this.baseContainer.clientID = clientID;
+  }
+
+  /**
+   *
+   * @public
+   */
+  public get sessionState(): SessionState {
+    return this.baseContainer.sessionState;
+  }
+
+  public set sessionState(sessionState: SessionState) {
+    this.baseContainer.sessionState = sessionState;
+  }
+
+  /**
+   *
+   * @public
+   */
+  public get accessToken(): string | undefined {
+    return this.baseContainer.accessToken;
+  }
+
+  public set accessToken(accessToken: string | undefined) {
+    this.baseContainer.accessToken = accessToken;
+  }
+
+  constructor(options?: ContainerOptions) {
+    const _storage = new _GlobalJSONContainerStorage(
+      _localStorageStorageDriver
+    );
     const o = {
       ...options,
-      apiClient: options?.apiClient ?? new WebAPIClient(),
-      storage:
-        options?.storage ??
-        new GlobalJSONContainerStorage(localStorageStorageDriver),
-    } as ContainerOptions<T>;
+    } as ContainerOptions;
 
-    super(o);
+    const apiClient = new _WebAPIClient();
 
+    this.baseContainer = new _BaseContainer<_WebAPIClient>(o, apiClient, this);
+    this.baseContainer.apiClient._delegate = this;
+
+    this.storage = _storage;
     this.refreshTokenStorage = this.storage;
+
     this.sessionType = "refresh_token";
-    this.apiClient._delegate = this;
+  }
+
+  /**
+   * implements _APIClientDelegate
+   *
+   * @internal
+   */
+  getAccessToken(): string | undefined {
+    return this.baseContainer.accessToken;
+  }
+
+  /**
+   * implements _APIClientDelegate
+   *
+   * @internal
+   */
+  shouldRefreshAccessToken(): boolean {
+    return this.baseContainer.shouldRefreshAccessToken();
+  }
+
+  /**
+   * implements _BaseContainerDelegate
+   *
+   * @internal
+   */
+  onSessionStateChange(reason: SessionStateChangeReason): void {
+    this.delegate?.onSessionStateChange(this, reason);
   }
 
   /**
@@ -94,8 +201,8 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
    */
   async configure(options: ConfigureOptions): Promise<void> {
     if (options.transientSession) {
-      this.refreshTokenStorage = new GlobalJSONContainerStorage(
-        sessionStorageStorageDriver
+      this.refreshTokenStorage = new _GlobalJSONContainerStorage(
+        _sessionStorageStorageDriver
       );
     } else {
       this.refreshTokenStorage = this.storage;
@@ -107,23 +214,26 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
     );
 
     this.clientID = options.clientID;
-    this.apiClient.endpoint = options.endpoint;
+    this.baseContainer.apiClient.endpoint = options.endpoint;
     if (options.sessionType != null) {
       this.sessionType = options.sessionType;
     }
 
-    this.refreshToken = refreshToken ?? undefined;
+    this.baseContainer.refreshToken = refreshToken ?? undefined;
 
     switch (this.sessionType) {
       case "cookie":
-        this._updateSessionState("UNKNOWN", "NO_TOKEN");
+        this.baseContainer._updateSessionState("UNKNOWN", "NO_TOKEN");
         break;
       case "refresh_token":
-        if (this.refreshToken != null) {
+        if (this.baseContainer.refreshToken != null) {
           // consider user as logged in if refresh token is available
-          this._updateSessionState("AUTHENTICATED", "FOUND_TOKEN");
+          this.baseContainer._updateSessionState(
+            "AUTHENTICATED",
+            "FOUND_TOKEN"
+          );
         } else {
-          this._updateSessionState("NO_SESSION", "NO_TOKEN");
+          this.baseContainer._updateSessionState("NO_SESSION", "NO_TOKEN");
         }
         break;
     }
@@ -165,7 +275,7 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
    * Otherwise assume code is present, make a token request.
    */
   async finishAuthorization(): Promise<AuthorizeResult> {
-    return this._finishAuthorization(window.location.href);
+    return this.baseContainer._finishAuthorization(window.location.href);
   }
 
   /**
@@ -202,13 +312,13 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
       (await this.refreshTokenStorage.getRefreshToken(this.name)) ?? "";
     if (refreshToken !== "") {
       try {
-        await this.apiClient._oidcRevocationRequest(refreshToken);
+        await this.baseContainer.apiClient._oidcRevocationRequest(refreshToken);
       } catch (error) {
         if (!options.force) {
           throw error;
         }
       }
-      await this._clearSession("LOGOUT");
+      await this.baseContainer._clearSession("LOGOUT");
     }
   }
 
@@ -219,9 +329,9 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
     if (clientID == null) {
       throw new Error("missing client ID");
     }
-    const config = await this.apiClient._fetchOIDCConfiguration();
+    const config = await this.baseContainer.apiClient._fetchOIDCConfiguration();
 
-    const { id_token } = await this.apiClient._oidcTokenRequest({
+    const { id_token } = await this.baseContainer.apiClient._oidcTokenRequest({
       grant_type: "urn:authgear:params:oauth:grant-type:id-token",
       client_id: clientID,
     });
@@ -238,17 +348,33 @@ export class WebContainer<T extends WebAPIClient> extends BaseContainer<T> {
   }
 
   /**
+   * @public
+   */
+  async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
+    return this.baseContainer.authorizeEndpoint(options);
+  }
+
+  /**
    * Fetch user info.
    */
   async fetchUserInfo(): Promise<UserInfo> {
     await this.refreshAccessTokenIfNeeded();
-    return this.apiClient._oidcUserInfoRequest(this.accessToken);
+    return this.baseContainer.apiClient._oidcUserInfoRequest(this.accessToken);
+  }
+
+  /**
+   * implements _BaseContainerDelegate
+   *
+   * @internal
+   */
+  async refreshAccessToken(): Promise<void> {
+    await this.baseContainer._refreshAccessToken();
   }
 
   /**
    * @public
    */
-  async refreshAccessToken(): Promise<void> {
-    await this._refreshAccessToken();
+  async refreshAccessTokenIfNeeded(): Promise<void> {
+    return this.baseContainer.refreshAccessTokenIfNeeded();
   }
 }

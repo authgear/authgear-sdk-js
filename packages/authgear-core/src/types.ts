@@ -1,6 +1,3 @@
-import { BaseContainer } from "./container";
-import { BaseAPIClient } from "./client";
-
 /**
  * @internal
  */
@@ -125,31 +122,25 @@ export interface AuthorizeResult {
 export interface _APIClientDelegate {
   /**
    * Called by the API client to retrieve the access token to construct HTTP request.
-   *
-   * @internal
    */
   getAccessToken(): string | undefined;
 
   /**
    * Called by the API Client before sending HTTP request.
    * If true is returned, refreshAccessToken() is then called.
-   *
-   * @internal
    */
   shouldRefreshAccessToken(): boolean;
 
   /**
    * Called by the API client to refresh the access token.
-   *
-   * @internal
    */
   refreshAccessToken(): Promise<void>;
 }
 
 /**
- * @public
+ * @internal
  */
-export function decodeUserInfo(r: any): UserInfo {
+export function _decodeUserInfo(r: any): UserInfo {
   return {
     sub: r["sub"],
     isVerified: r["https://authgear.com/claims/user/is_verified"] ?? false,
@@ -158,25 +149,25 @@ export function decodeUserInfo(r: any): UserInfo {
 }
 
 /**
- * @public
+ * @internal
  */
-export interface ChallengeResponse {
+export interface _ChallengeResponse {
   token: string;
   expire_at: string;
 }
 
 /**
- * @public
+ * @internal
  */
-export interface AppSessionTokenResponse {
+export interface _AppSessionTokenResponse {
   app_session_token: string;
   expire_at: string;
 }
 
 /**
- * @public
+ * @internal
  */
-export interface ContainerStorage {
+export interface _ContainerStorage {
   setRefreshToken(namespace: string, refreshToken: string): Promise<void>;
   setOIDCCodeVerifier(namespace: string, code: string): Promise<void>;
   setAnonymousKeyID(namespace: string, kid: string): Promise<void>;
@@ -194,9 +185,9 @@ export interface ContainerStorage {
 }
 
 /**
- * @public
+ * @internal
  */
-export interface StorageDriver {
+export interface _StorageDriver {
   get(key: string): Promise<string | null>;
   set(key: string, value: string): Promise<void>;
   del(key: string): Promise<void>;
@@ -205,10 +196,8 @@ export interface StorageDriver {
 /**
  * @public
  */
-export interface ContainerOptions<T> {
+export interface ContainerOptions {
   name?: string;
-  apiClient?: T;
-  storage?: ContainerStorage;
 }
 
 /**
@@ -296,34 +285,3 @@ export type SessionStateChangeReason =
   | "LOGOUT"
   | "INVALID"
   | "CLEAR";
-
-/**
- * @public
- */
-export interface ContainerDelegate {
-  /**
-   * This callback will be called when the session state is changed.
-   *
-   * For example, when the user logs out, the new state is "NO_SESSION"
-   * and the reason is "LOGOUT".
-   *
-   * @public
-   */
-  onSessionStateChange: <T extends BaseAPIClient>(
-    container: BaseContainer<T>,
-    reason: SessionStateChangeReason
-  ) => void;
-
-  /**
-   * This callback will be called when user click login with WeChat in
-   * react-native.
-   *
-   * Developer should implement this function to use WeChat SDK to
-   * obtain WeChat authentication code. After obtaining the code, developer
-   * should call weChatAuthCallback with code and state to complete the
-   * WeChat login.
-   *
-   * @public
-   */
-  sendWeChatAuthRequest(state: string): void;
-}

@@ -1,13 +1,13 @@
 import {
-  GlobalJSONContainerStorage,
-  MemoryStorageDriver,
+  _GlobalJSONContainerStorage,
+  _MemoryStorageDriver,
   _GlobalJSONStorage,
 } from "./storage";
 
 describe("ContainerStorage", () => {
   it("should set, get and delete refresh token", async () => {
-    const driver = new MemoryStorageDriver();
-    const storage = new GlobalJSONContainerStorage(driver);
+    const driver = new _MemoryStorageDriver();
+    const storage = new _GlobalJSONContainerStorage(driver);
     const token = "test_token";
     const ns = "test";
 
@@ -23,7 +23,7 @@ describe("ContainerStorage", () => {
 
 describe("GlobalJSONStorage", () => {
   it("should scope the key", async () => {
-    const driver = new MemoryStorageDriver();
+    const driver = new _MemoryStorageDriver();
     const storage = new _GlobalJSONStorage(driver);
 
     await storage.safeSet("a", "b");
@@ -43,7 +43,7 @@ describe("GlobalJSONStorage", () => {
     ).toEqual(true);
   });
   it("should safeSet and safeGet", async () => {
-    const driver = new MemoryStorageDriver();
+    const driver = new _MemoryStorageDriver();
     const storage = new _GlobalJSONStorage(driver);
 
     await storage.safeSet("a", "b");
@@ -51,7 +51,7 @@ describe("GlobalJSONStorage", () => {
   });
 
   it("should safeDel", async () => {
-    const driver = new MemoryStorageDriver();
+    const driver = new _MemoryStorageDriver();
     const storage = new _GlobalJSONStorage(driver);
 
     await storage.safeSet("a", "b");
@@ -61,7 +61,7 @@ describe("GlobalJSONStorage", () => {
   });
 
   it("should safeSetJSON and safeGetJSON", async () => {
-    const driver = new MemoryStorageDriver();
+    const driver = new _MemoryStorageDriver();
     const storage = new _GlobalJSONStorage(driver);
 
     const json = {

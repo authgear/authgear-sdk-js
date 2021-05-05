@@ -1,21 +1,23 @@
 /* global fetch, Request */
 import URL from "core-js-pure/features/url";
 import {
-  BaseAPIClient,
+  _BaseAPIClient,
   ContainerOptions,
-  GlobalJSONContainerStorage,
-  MemoryStorageDriver,
-  StorageDriver,
-  BaseContainer,
+  _GlobalJSONContainerStorage,
+  _MemoryStorageDriver,
+  _StorageDriver,
+  _BaseContainer,
   AuthorizeOptions,
   AuthorizeResult,
   PromoteOptions,
   UserInfo,
   SettingOptions,
   OAuthError,
-  ContainerStorage,
+  _ContainerStorage,
   _encodeUTF8,
   _encodeBase64URLFromByteArray,
+  SessionState,
+  SessionStateChangeReason,
 } from "@authgear/core";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
@@ -31,7 +33,7 @@ import {
   storageSetItem,
   storageDeleteItem,
 } from "./nativemodule";
-import { BiometricOptions } from "./types";
+import { BiometricOptions, ReactNativeContainerDelegate } from "./types";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 import { isBiometricPrivateKeyNotFoundError } from "./error";
 import { Platform } from "react-native";
@@ -47,8 +49,8 @@ export {
 } from "./error";
 import EventEmitter from "./eventEmitter";
 
-const globalMemoryStore = new GlobalJSONContainerStorage(
-  new MemoryStorageDriver()
+const globalMemoryStore = new _GlobalJSONContainerStorage(
+  new _MemoryStorageDriver()
 );
 
 /**
@@ -80,17 +82,17 @@ export interface ConfigureOptions {
 }
 
 /**
- * @public
+ * @internal
  */
-export class ReactNativeAPIClient extends BaseAPIClient {
+export class _ReactNativeAPIClient extends _BaseAPIClient {
   _fetchFunction = fetch;
   _requestClass = Request;
 }
 
 /**
- * @public
+ * @internal
  */
-export class PlatformStorageDriver implements StorageDriver {
+export class _PlatformStorageDriver implements _StorageDriver {
   // eslint-disable-next-line class-methods-use-this
   async get(key: string): Promise<string | null> {
     return storageGetItem(key);
@@ -119,26 +121,107 @@ async function getXDeviceInfo(): Promise<string> {
  *
  * @public
  */
-export class ReactNativeContainer<
-  T extends ReactNativeAPIClient
-> extends BaseContainer<T> {
+export class ReactNativeContainer {
+  /**
+   * @internal
+   */
+  baseContainer: _BaseContainer<_ReactNativeAPIClient>;
+
+  /**
+   * implements _BaseContainerDelegate
+   *
+   * @internal
+   */
+  storage: _ContainerStorage;
+
+  /**
+   * implements _BaseContainerDelegate
+   *
+   * @internal
+   */
+  refreshTokenStorage: _ContainerStorage;
+
+  /**
+   * @internal
+   */
   weChatRedirectDeepLinkListener: (url: string) => void;
 
-  refreshTokenStorage: ContainerStorage;
+  /**
+   * @public
+   */
+  delegate?: ReactNativeContainerDelegate;
 
-  constructor(options?: ContainerOptions<T>) {
+  /**
+   *
+   * Unique ID for this container.
+   * @defaultValue "default"
+   *
+   * @public
+   */
+  public get name(): string {
+    return this.baseContainer.name;
+  }
+
+  public set name(name: string) {
+    this.baseContainer.name = name;
+  }
+
+  /**
+   * OIDC client ID
+   *
+   * @public
+   */
+  public get clientID(): string | undefined {
+    return this.baseContainer.clientID;
+  }
+
+  public set clientID(clientID: string | undefined) {
+    this.baseContainer.clientID = clientID;
+  }
+
+  /**
+   *
+   * @public
+   */
+  public get sessionState(): SessionState {
+    return this.baseContainer.sessionState;
+  }
+
+  public set sessionState(sessionState: SessionState) {
+    this.baseContainer.sessionState = sessionState;
+  }
+
+  /**
+   *
+   * @public
+   */
+  public get accessToken(): string | undefined {
+    return this.baseContainer.accessToken;
+  }
+
+  public set accessToken(accessToken: string | undefined) {
+    this.baseContainer.accessToken = accessToken;
+  }
+
+  constructor(options?: ContainerOptions) {
+    const _storage = new _GlobalJSONContainerStorage(
+      new _PlatformStorageDriver()
+    );
     const o = {
       ...options,
-      apiClient: options?.apiClient ?? new ReactNativeAPIClient(),
-      storage:
-        options?.storage ??
-        new GlobalJSONContainerStorage(new PlatformStorageDriver()),
-    } as ContainerOptions<T>;
+    } as ContainerOptions;
 
-    super(o);
+    const apiClient = new _ReactNativeAPIClient();
 
+    this.baseContainer = new _BaseContainer<_ReactNativeAPIClient>(
+      o,
+      apiClient,
+      this
+    );
+    this.baseContainer.apiClient._delegate = this;
+
+    this.storage = _storage;
     this.refreshTokenStorage = this.storage;
-    this.apiClient._delegate = this;
 
     this.weChatRedirectDeepLinkListener = (url: string) => {
       this._sendWeChatRedirectURIToDelegate(url);
@@ -147,6 +230,33 @@ export class ReactNativeContainer<
       "onAuthgearOpenWeChatRedirectURI",
       this.weChatRedirectDeepLinkListener
     );
+  }
+
+  /**
+   * implements _APIClientDelegate
+   *
+   * @internal
+   */
+  getAccessToken(): string | undefined {
+    return this.baseContainer.accessToken;
+  }
+
+  /**
+   * implements _APIClientDelegate
+   *
+   * @internal
+   */
+  shouldRefreshAccessToken(): boolean {
+    return this.baseContainer.shouldRefreshAccessToken();
+  }
+
+  /**
+   * implements _BaseContainerDelegate
+   *
+   * @internal
+   */
+  onSessionStateChange(reason: SessionStateChangeReason): void {
+    this.delegate?.onSessionStateChange(this, reason);
   }
 
   /**
@@ -175,18 +285,20 @@ export class ReactNativeContainer<
     );
 
     this.clientID = options.clientID;
-    this.apiClient.endpoint = options.endpoint;
-    this.refreshToken = refreshToken ?? undefined;
+    this.baseContainer.apiClient.endpoint = options.endpoint;
+    this.baseContainer.refreshToken = refreshToken ?? undefined;
 
-    if (this.refreshToken != null) {
+    if (this.baseContainer.refreshToken != null) {
       // consider user as logged in if refresh token is available
-      this._updateSessionState("AUTHENTICATED", "FOUND_TOKEN");
+      this.baseContainer._updateSessionState("AUTHENTICATED", "FOUND_TOKEN");
     } else {
-      this._updateSessionState("NO_SESSION", "NO_TOKEN");
+      this.baseContainer._updateSessionState("NO_SESSION", "NO_TOKEN");
     }
   }
 
   /**
+   * implements _BaseContainerDelegate
+   *
    * @internal
    */
   // eslint-disable-next-line class-methods-use-this
@@ -218,7 +330,7 @@ export class ReactNativeContainer<
       options.weChatRedirectURI
     );
     const xDeviceInfo = await getXDeviceInfo();
-    const result = await this._finishAuthorization(redirectURL, {
+    const result = await this.baseContainer._finishAuthorization(redirectURL, {
       x_device_info: xDeviceInfo,
     });
     await this.disableBiometric();
@@ -241,9 +353,9 @@ export class ReactNativeContainer<
     }
 
     // Use app session token to copy session into webview.
-    const { app_session_token } = await this.apiClient.appSessionToken(
-      refreshToken
-    );
+    const {
+      app_session_token,
+    } = await this.baseContainer.apiClient.appSessionToken(refreshToken);
 
     const loginHint = `https://authgear.com/login_hint?type=app_session_token&app_session_token=${encodeURIComponent(
       app_session_token
@@ -265,7 +377,7 @@ export class ReactNativeContainer<
   }
 
   async open(page: Page, options?: SettingOptions): Promise<void> {
-    const { endpoint } = this.apiClient;
+    const { endpoint } = this.baseContainer.apiClient;
     if (endpoint == null) {
       throw new Error(
         "Endpoint cannot be undefined, please double check whether you have run configure()"
@@ -293,13 +405,13 @@ export class ReactNativeContainer<
       (await this.refreshTokenStorage.getRefreshToken(this.name)) ?? "";
     if (refreshToken !== "") {
       try {
-        await this.apiClient._oidcRevocationRequest(refreshToken);
+        await this.baseContainer.apiClient._oidcRevocationRequest(refreshToken);
       } catch (error) {
         if (!options.force) {
           throw error;
         }
       }
-      await this._clearSession("LOGOUT");
+      await this.baseContainer._clearSession("LOGOUT");
     }
   }
 
@@ -312,7 +424,9 @@ export class ReactNativeContainer<
       throw new Error("missing client ID");
     }
 
-    const { token } = await this.apiClient.oauthChallenge("anonymous_request");
+    const { token } = await this.baseContainer.apiClient.oauthChallenge(
+      "anonymous_request"
+    );
 
     const keyID = await this.storage.getAnonymousKeyID(this.name);
     const key = await getAnonymousJWK(keyID);
@@ -327,17 +441,20 @@ export class ReactNativeContainer<
     };
     const jwt = await signAnonymousJWT(key.kid, header, payload);
 
-    const tokenResponse = await this.apiClient._oidcTokenRequest({
+    const tokenResponse = await this.baseContainer.apiClient._oidcTokenRequest({
       grant_type: "urn:authgear:params:oauth:grant-type:anonymous-request",
       client_id: clientID,
       jwt,
     });
 
-    const userInfo = await this.apiClient._oidcUserInfoRequest(
+    const userInfo = await this.baseContainer.apiClient._oidcUserInfoRequest(
       tokenResponse.access_token
     );
 
-    await this._persistTokenResponse(tokenResponse, "AUTHENTICATED");
+    await this.baseContainer._persistTokenResponse(
+      tokenResponse,
+      "AUTHENTICATED"
+    );
     await this.storage.setAnonymousKeyID(this.name, key.kid);
     await this.disableBiometric();
     return { userInfo };
@@ -357,7 +474,9 @@ export class ReactNativeContainer<
     }
     const key = await getAnonymousJWK(keyID);
 
-    const { token } = await this.apiClient.oauthChallenge("anonymous_request");
+    const { token } = await this.baseContainer.apiClient.oauthChallenge(
+      "anonymous_request"
+    );
 
     const now = Math.floor(+new Date() / 1000);
     const header = { typ: "vnd.authgear.anonymous-request", ...key };
@@ -384,10 +503,17 @@ export class ReactNativeContainer<
       options.redirectURI,
       options.weChatRedirectURI
     );
-    const result = await this._finishAuthorization(redirectURL);
+    const result = await this.baseContainer._finishAuthorization(redirectURL);
     await this.storage.delAnonymousKeyID(this.name);
     await this.disableBiometric();
     return result;
+  }
+
+  /**
+   * @public
+   */
+  async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
+    return this.baseContainer.authorizeEndpoint(options);
   }
 
   /**
@@ -395,14 +521,26 @@ export class ReactNativeContainer<
    */
   async fetchUserInfo(): Promise<UserInfo> {
     await this.refreshAccessTokenIfNeeded();
-    return this.apiClient._oidcUserInfoRequest(this.accessToken);
+    return this.baseContainer.apiClient._oidcUserInfoRequest(this.accessToken);
   }
 
+  /**
+   * implements _BaseContainerDelegate
+   *
+   * @internal
+   */
   async refreshAccessToken(): Promise<void> {
     const xDeviceInfo = await getXDeviceInfo();
-    await this._refreshAccessToken({
+    await this.baseContainer._refreshAccessToken({
       x_device_info: xDeviceInfo,
     });
+  }
+
+  /**
+   * @public
+   */
+  async refreshAccessTokenIfNeeded(): Promise<void> {
+    return this.baseContainer.refreshAccessTokenIfNeeded();
   }
 
   /**
@@ -413,7 +551,11 @@ export class ReactNativeContainer<
    * @param state - WeChat Authorization state.
    */
   async weChatAuthCallback(code: string, state: string): Promise<void> {
-    return this.apiClient._weChatAuthCallbackRequest(code, state, Platform.OS);
+    return this.baseContainer.apiClient._weChatAuthCallbackRequest(
+      code,
+      state,
+      Platform.OS
+    );
   }
 
   /**
@@ -466,7 +608,9 @@ export class ReactNativeContainer<
 
     const kid = await generateUUID();
     const deviceInfo = await getDeviceInfo();
-    const { token } = await this.apiClient.oauthChallenge("biometric_request");
+    const { token } = await this.baseContainer.apiClient.oauthChallenge(
+      "biometric_request"
+    );
     const now = Math.floor(+new Date() / 1000);
     const payload = {
       iat: now,
@@ -480,7 +624,7 @@ export class ReactNativeContainer<
       kid,
       payload,
     });
-    await this.apiClient._setupBiometricRequest({
+    await this.baseContainer.apiClient._setupBiometricRequest({
       access_token: accessToken,
       client_id: clientID,
       jwt,
@@ -500,7 +644,9 @@ export class ReactNativeContainer<
       throw new Error("missing client ID");
     }
     const deviceInfo = await getDeviceInfo();
-    const { token } = await this.apiClient.oauthChallenge("biometric_request");
+    const { token } = await this.baseContainer.apiClient.oauthChallenge(
+      "biometric_request"
+    );
     const now = Math.floor(+new Date() / 1000);
     const payload = {
       iat: now,
@@ -516,16 +662,21 @@ export class ReactNativeContainer<
         kid,
         payload,
       });
-      const tokenResponse = await this.apiClient._oidcTokenRequest({
-        grant_type: "urn:authgear:params:oauth:grant-type:biometric-request",
-        client_id: clientID,
-        jwt,
-      });
+      const tokenResponse = await this.baseContainer.apiClient._oidcTokenRequest(
+        {
+          grant_type: "urn:authgear:params:oauth:grant-type:biometric-request",
+          client_id: clientID,
+          jwt,
+        }
+      );
 
-      const userInfo = await this.apiClient._oidcUserInfoRequest(
+      const userInfo = await this.baseContainer.apiClient._oidcUserInfoRequest(
         tokenResponse.access_token
       );
-      await this._persistTokenResponse(tokenResponse, "AUTHENTICATED");
+      await this.baseContainer._persistTokenResponse(
+        tokenResponse,
+        "AUTHENTICATED"
+      );
       return { userInfo };
     } catch (e) {
       if (isBiometricPrivateKeyNotFoundError(e)) {
@@ -551,6 +702,6 @@ export class ReactNativeContainer<
  *
  * @public
  */
-const defaultContainer: ReactNativeContainer<ReactNativeAPIClient> = new ReactNativeContainer();
+const defaultContainer: ReactNativeContainer = new ReactNativeContainer();
 
 export default defaultContainer;

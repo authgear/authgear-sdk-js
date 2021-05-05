@@ -4,16 +4,15 @@ import {
   AuthorizeOptions,
   AuthorizeResult,
   ContainerOptions,
-  ContainerStorage,
+  _ContainerStorage,
   _APIClientDelegate,
-  ContainerDelegate,
   _OIDCTokenRequest,
   _OIDCTokenResponse,
   SessionStateChangeReason,
   SessionState,
 } from "./types";
 import { OAuthError } from "./error";
-import { BaseAPIClient } from "./client";
+import { _BaseAPIClient } from "./client";
 
 /**
  * To prevent user from using expired access token, we have to check in advance
@@ -31,95 +30,52 @@ import { BaseAPIClient } from "./client";
 const EXPIRE_IN_PERCENTAGE = 0.9;
 
 /**
- * Base Container
- *
- * @public
+ * @internal
  */
-export abstract class BaseContainer<T extends BaseAPIClient> {
-  /**
-   *
-   * Unique ID for this container.
-   * @defaultValue "default"
-   *
-   * @public
-   */
-  name: string;
-
-  /**
-   * OIDC client ID
-   *
-   * @public
-   */
-  clientID?: string;
-
-  /**
-   * @internal
-   */
-  apiClient: T;
-
-  /**
-   * @public
-   */
-  delegate?: ContainerDelegate;
-
-  /**
-   * @public
-   */
-  sessionState: SessionState;
-
-  /**
-   * @internal
-   */
-  storage: ContainerStorage;
-
-  /**
-   * @internal
-   */
-  abstract refreshTokenStorage: ContainerStorage;
-
-  /**
-   * @public
-   */
-  accessToken?: string;
-
-  /**
-   * @internal
-   */
-  refreshToken?: string;
-
-  /**
-   * @internal
-   */
-  expireAt?: Date;
-
-  /**
-   * @internal
-   */
-  abstract _setupCodeVerifier(): Promise<{
+export interface _BaseContainerDelegate {
+  storage: _ContainerStorage;
+  refreshTokenStorage: _ContainerStorage;
+  _setupCodeVerifier(): Promise<{
     verifier: string;
     challenge: string;
   }>;
+  refreshAccessToken(): Promise<void>;
+  onSessionStateChange: (reason: SessionStateChangeReason) => void;
+}
 
-  abstract refreshAccessToken(): Promise<void>;
+/**
+ * Base Container
+ *
+ * @internal
+ */
+export class _BaseContainer<T extends _BaseAPIClient> {
+  name: string;
 
-  constructor(options: ContainerOptions<T>) {
-    if (!options.apiClient) {
-      throw Error("missing apiClient");
-    }
+  clientID?: string;
 
-    if (!options.storage) {
-      throw Error("missing storage");
-    }
+  apiClient: T;
 
+  sessionState: SessionState;
+
+  accessToken?: string;
+
+  refreshToken?: string;
+
+  expireAt?: Date;
+
+  _delegate: _BaseContainerDelegate;
+
+  constructor(
+    options: ContainerOptions,
+    apiClient: T,
+    _delegate: _BaseContainerDelegate
+  ) {
     this.name = options.name ?? "default";
-    this.apiClient = options.apiClient;
-    this.storage = options.storage;
+    this.apiClient = apiClient;
     this.sessionState = "UNKNOWN";
+    this._delegate = _delegate;
   }
 
-  /**
-   * @internal
-   */
   async _persistTokenResponse(
     response: _OIDCTokenResponse,
     reason: SessionStateChangeReason
@@ -140,47 +96,31 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     this._updateSessionState("AUTHENTICATED", reason);
 
     if (refresh_token) {
-      await this.refreshTokenStorage.setRefreshToken(this.name, refresh_token);
+      await this._delegate.refreshTokenStorage.setRefreshToken(
+        this.name,
+        refresh_token
+      );
     }
   }
 
-  /**
-   * @internal
-   */
   async _clearSession(reason: SessionStateChangeReason): Promise<void> {
-    await this.refreshTokenStorage.delRefreshToken(this.name);
+    await this._delegate.refreshTokenStorage.delRefreshToken(this.name);
     this.accessToken = undefined;
     this.refreshToken = undefined;
     this.expireAt = undefined;
     this._updateSessionState("NO_SESSION", reason);
   }
 
-  /**
-   * @internal
-   */
-  getAccessToken(): string | undefined {
-    return this.accessToken;
-  }
-
-  /**
-   * @public
-   */
   async refreshAccessTokenIfNeeded(): Promise<void> {
     if (this.shouldRefreshAccessToken()) {
-      await this.refreshAccessToken();
+      await this._delegate.refreshAccessToken();
     }
   }
 
-  /**
-   * @public
-   */
   async clearSessionState(): Promise<void> {
     await this._clearSession("CLEAR");
   }
 
-  /**
-   * @internal
-   */
   shouldRefreshAccessToken(): boolean {
     // No need to refresh if we do not even have a refresh token.
     if (this.refreshToken == null) {
@@ -207,16 +147,10 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     return false;
   }
 
-  /**
-   * @public
-   */
   async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
     return this.apiClient.fetch(input, init);
   }
 
-  /**
-   * @internal
-   */
   async _refreshAccessToken(
     tokenRequest?: Partial<_OIDCTokenRequest>
   ): Promise<void> {
@@ -227,7 +161,7 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
       throw new Error("missing client ID");
     }
 
-    const refreshToken = await this.refreshTokenStorage.getRefreshToken(
+    const refreshToken = await this._delegate.refreshTokenStorage.getRefreshToken(
       this.name
     );
     if (refreshToken == null) {
@@ -259,9 +193,6 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     await this._persistTokenResponse(tokenResponse, "FOUND_TOKEN");
   }
 
-  /**
-   * @internal
-   */
   // eslint-disable-next-line complexity
   async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
     const clientID = this.clientID;
@@ -276,8 +207,11 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     query.append("response_type", responseType);
     if (responseType === "code") {
       // Authorization code need PKCE.
-      const codeVerifier = await this._setupCodeVerifier();
-      await this.storage.setOIDCCodeVerifier(this.name, codeVerifier.verifier);
+      const codeVerifier = await this._delegate._setupCodeVerifier();
+      await this._delegate.storage.setOIDCCodeVerifier(
+        this.name,
+        codeVerifier.verifier
+      );
 
       query.append("code_challenge_method", "S256");
       query.append("code_challenge", codeVerifier.challenge);
@@ -319,9 +253,6 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
     return `${config.authorization_endpoint}?${query.toString()}`;
   }
 
-  /**
-   * @internal
-   */
   async _finishAuthorization(
     url: string,
     tokenRequest?: Partial<_OIDCTokenRequest>
@@ -358,7 +289,9 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
           error_description: "Missing parameter: code",
         });
       }
-      const codeVerifier = await this.storage.getOIDCCodeVerifier(this.name);
+      const codeVerifier = await this._delegate.storage.getOIDCCodeVerifier(
+        this.name
+      );
       tokenResponse = await this.apiClient._oidcTokenRequest({
         ...tokenRequest,
         grant_type: "authorization_code",
@@ -384,14 +317,12 @@ export abstract class BaseContainer<T extends BaseAPIClient> {
 
   /**
    * Update session state.
-   *
-   * @internal
    */
   _updateSessionState(
     state: SessionState,
     reason: SessionStateChangeReason
   ): void {
     this.sessionState = state;
-    this.delegate?.onSessionStateChange(this, reason);
+    this._delegate.onSessionStateChange(reason);
   }
 }

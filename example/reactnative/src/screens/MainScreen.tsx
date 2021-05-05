@@ -13,9 +13,8 @@ import {
 } from 'react-native';
 import authgear, {
   Page,
-  ContainerDelegate,
-  BaseContainer,
-  BaseAPIClient,
+  ReactNativeContainer,
+  ReactNativeContainerDelegate,
   SessionStateChangeReason,
   UserInfo,
   isBiometricCancel,
@@ -227,10 +226,10 @@ const HomeScreen: React.FC = () => {
       });
   }, []);
 
-  const delegate: ContainerDelegate = useMemo(() => {
-    const d: ContainerDelegate = {
+  const delegate: ReactNativeContainerDelegate = useMemo(() => {
+    const d: ReactNativeContainerDelegate = {
       onSessionStateChange: (
-        container: BaseContainer<BaseAPIClient>,
+        container: ReactNativeContainer,
         _reason: SessionStateChangeReason,
       ) => {
         if (container.sessionState !== 'AUTHENTICATED') {

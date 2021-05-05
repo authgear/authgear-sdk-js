@@ -1,4 +1,4 @@
-import { ContainerStorage, StorageDriver } from "./types";
+import { _ContainerStorage, _StorageDriver } from "./types";
 
 function scopedKey(key: string): string {
   return `authgear_${key}`;
@@ -24,9 +24,9 @@ function keyBiometricKeyID(name: string): string {
  * @internal
  */
 export class _GlobalJSONStorage {
-  driver: StorageDriver;
+  driver: _StorageDriver;
 
-  constructor(driver: StorageDriver) {
+  constructor(driver: _StorageDriver) {
     this.driver = driver;
   }
 
@@ -76,12 +76,12 @@ export class _GlobalJSONStorage {
 }
 
 /**
- * @public
+ * @internal
  */
-export class GlobalJSONContainerStorage implements ContainerStorage {
+export class _GlobalJSONContainerStorage implements _ContainerStorage {
   private storage: _GlobalJSONStorage;
 
-  constructor(driver: StorageDriver) {
+  constructor(driver: _StorageDriver) {
     this.storage = new _GlobalJSONStorage(driver);
   }
 
@@ -138,9 +138,9 @@ export class GlobalJSONContainerStorage implements ContainerStorage {
 }
 
 /**
- * @public
+ * @internal
  */
-export class MemoryStorageDriver implements StorageDriver {
+export class _MemoryStorageDriver implements _StorageDriver {
   backingStore: { [key: string]: string | undefined };
 
   constructor() {

@@ -104,10 +104,10 @@ export class OAuthError extends Error {
 }
 
 /**
- * @public
+ * @internal
  */
 // eslint-disable-next-line complexity
-export function decodeError(err?: any): Error {
+export function _decodeError(err?: any): Error {
   // Construct ServerError if it looks like one.
   if (
     err != null &&
