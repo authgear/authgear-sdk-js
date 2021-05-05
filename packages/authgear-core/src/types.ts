@@ -144,9 +144,9 @@ export interface _APIClientDelegate {
 }
 
 /**
- * @public
+ * @internal
  */
-export function decodeUserInfo(r: any): UserInfo {
+export function _decodeUserInfo(r: any): UserInfo {
   return {
     sub: r["sub"],
     isVerified: r["https://authgear.com/claims/user/is_verified"] ?? false,
@@ -155,25 +155,25 @@ export function decodeUserInfo(r: any): UserInfo {
 }
 
 /**
- * @public
+ * @internal
  */
-export interface ChallengeResponse {
+export interface _ChallengeResponse {
   token: string;
   expire_at: string;
 }
 
 /**
- * @public
+ * @internal
  */
-export interface AppSessionTokenResponse {
+export interface _AppSessionTokenResponse {
   app_session_token: string;
   expire_at: string;
 }
 
 /**
- * @public
+ * @internal
  */
-export interface ContainerStorage {
+export interface _ContainerStorage {
   setRefreshToken(namespace: string, refreshToken: string): Promise<void>;
   setOIDCCodeVerifier(namespace: string, code: string): Promise<void>;
   setAnonymousKeyID(namespace: string, kid: string): Promise<void>;
@@ -191,9 +191,9 @@ export interface ContainerStorage {
 }
 
 /**
- * @public
+ * @internal
  */
-export interface StorageDriver {
+export interface _StorageDriver {
   get(key: string): Promise<string | null>;
   set(key: string, value: string): Promise<void>;
   del(key: string): Promise<void>;
@@ -204,7 +204,6 @@ export interface StorageDriver {
  */
 export interface ContainerOptions {
   name?: string;
-  storage?: ContainerStorage;
 }
 
 /**

@@ -7,14 +7,14 @@ import {
   _BaseContainer,
   AuthorizeOptions,
   AuthorizeResult,
-  ContainerStorage,
+  _ContainerStorage,
   SessionState,
   SessionStateChangeReason,
 } from "@authgear/core";
 import { _WebAPIClient } from "./client";
 import {
-  localStorageStorageDriver,
-  sessionStorageStorageDriver,
+  _localStorageStorageDriver,
+  _sessionStorageStorageDriver,
 } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import { WebContainerDelegate } from "./types";
@@ -69,14 +69,14 @@ export class WebContainer {
    *
    * @internal
    */
-  storage: ContainerStorage;
+  storage: _ContainerStorage;
 
   /**
    * implements _BaseContainerDelegate
    *
    * @internal
    */
-  refreshTokenStorage: ContainerStorage;
+  refreshTokenStorage: _ContainerStorage;
 
   /**
    * @public
@@ -141,12 +141,11 @@ export class WebContainer {
   }
 
   constructor(options?: ContainerOptions) {
-    const _storage =
-      options?.storage ??
-      new _GlobalJSONContainerStorage(localStorageStorageDriver);
+    const _storage = new _GlobalJSONContainerStorage(
+      _localStorageStorageDriver
+    );
     const o = {
       ...options,
-      storage: _storage,
     } as ContainerOptions;
 
     const apiClient = new _WebAPIClient();
@@ -203,7 +202,7 @@ export class WebContainer {
   async configure(options: ConfigureOptions): Promise<void> {
     if (options.transientSession) {
       this.refreshTokenStorage = new _GlobalJSONContainerStorage(
-        sessionStorageStorageDriver
+        _sessionStorageStorageDriver
       );
     } else {
       this.refreshTokenStorage = this.storage;

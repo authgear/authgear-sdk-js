@@ -5,7 +5,7 @@ import {
   ContainerOptions,
   _GlobalJSONContainerStorage,
   _MemoryStorageDriver,
-  StorageDriver,
+  _StorageDriver,
   _BaseContainer,
   AuthorizeOptions,
   AuthorizeResult,
@@ -13,7 +13,7 @@ import {
   UserInfo,
   SettingOptions,
   OAuthError,
-  ContainerStorage,
+  _ContainerStorage,
   _encodeUTF8,
   _encodeBase64URLFromByteArray,
   SessionState,
@@ -92,7 +92,7 @@ export class _ReactNativeAPIClient extends _BaseAPIClient {
 /**
  * @internal
  */
-export class _PlatformStorageDriver implements StorageDriver {
+export class _PlatformStorageDriver implements _StorageDriver {
   // eslint-disable-next-line class-methods-use-this
   async get(key: string): Promise<string | null> {
     return storageGetItem(key);
@@ -132,14 +132,14 @@ export class ReactNativeContainer {
    *
    * @internal
    */
-  storage: ContainerStorage;
+  storage: _ContainerStorage;
 
   /**
    * implements _BaseContainerDelegate
    *
    * @internal
    */
-  refreshTokenStorage: ContainerStorage;
+  refreshTokenStorage: _ContainerStorage;
 
   /**
    * @internal
@@ -204,12 +204,11 @@ export class ReactNativeContainer {
   }
 
   constructor(options?: ContainerOptions) {
-    const _storage =
-      options?.storage ??
-      new _GlobalJSONContainerStorage(new _PlatformStorageDriver());
+    const _storage = new _GlobalJSONContainerStorage(
+      new _PlatformStorageDriver()
+    );
     const o = {
       ...options,
-      storage: _storage,
     } as ContainerOptions;
 
     const apiClient = new _ReactNativeAPIClient();

@@ -1,14 +1,14 @@
 /* global localStorage, sessionStorage */
 
-import { StorageDriver } from "@authgear/core";
+import { _StorageDriver } from "@authgear/core";
 
 const globalLocalStorage = localStorage;
 const globalSessionStorage = sessionStorage;
 
 /**
- * @public
+ * @internal
  */
-export const localStorageStorageDriver: StorageDriver = {
+export const _localStorageStorageDriver: _StorageDriver = {
   async get(key: string): Promise<string | null> {
     return globalLocalStorage.getItem(key);
   },
@@ -21,9 +21,9 @@ export const localStorageStorageDriver: StorageDriver = {
 };
 
 /**
- * @public
+ * @internal
  */
-export const sessionStorageStorageDriver: StorageDriver = {
+export const _sessionStorageStorageDriver: _StorageDriver = {
   async get(key: string): Promise<string | null> {
     return globalSessionStorage.getItem(key);
   },

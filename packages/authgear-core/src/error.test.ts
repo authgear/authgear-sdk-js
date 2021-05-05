@@ -1,8 +1,8 @@
-import { ServerError, decodeError } from "./error";
+import { ServerError, _decodeError } from "./error";
 
 describe("decodeError", () => {
   it("decodes server error", () => {
-    const actual = decodeError({
+    const actual = _decodeError({
       name: "name",
       reason: "reason",
       message: "message",
@@ -23,11 +23,11 @@ describe("decodeError", () => {
 
   it("returns Error", () => {
     const e = new Error("test");
-    expect(decodeError(e)).toBe(e);
+    expect(_decodeError(e)).toBe(e);
   });
 
   it("decodes object with message", () => {
-    const actual = decodeError({
+    const actual = _decodeError({
       message: "error message",
     });
     expect(actual).toBeInstanceOf(Error);
@@ -35,7 +35,7 @@ describe("decodeError", () => {
   });
 
   it("decodes object with toString", () => {
-    const actual = decodeError({
+    const actual = _decodeError({
       toString: () => "error message",
     });
     expect(actual).toBeInstanceOf(Error);
@@ -43,11 +43,11 @@ describe("decodeError", () => {
   });
 
   it("decodes by casting to string", () => {
-    const nullError = decodeError(null);
+    const nullError = _decodeError(null);
     expect(nullError).toBeInstanceOf(Error);
     expect(nullError.message).toEqual("null");
 
-    const undefinedError = decodeError();
+    const undefinedError = _decodeError();
     expect(undefinedError).toBeInstanceOf(Error);
     expect(undefinedError.message).toEqual("undefined");
   });

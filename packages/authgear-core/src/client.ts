@@ -6,12 +6,12 @@ import {
   _OIDCTokenResponse,
   _OIDCTokenRequest,
   _SetupBiometricRequest,
-  ChallengeResponse,
+  _ChallengeResponse,
   _APIClientDelegate,
-  decodeUserInfo,
-  AppSessionTokenResponse,
+  _decodeUserInfo,
+  _AppSessionTokenResponse,
 } from "./types";
-import { decodeError, ServerError, OAuthError } from "./error";
+import { _decodeError, ServerError, OAuthError } from "./error";
 
 /**
  * @internal
@@ -213,10 +213,10 @@ export abstract class _BaseAPIClient {
     if (jsonBody["result"]) {
       return jsonBody["result"];
     } else if (jsonBody["error"]) {
-      throw decodeError(jsonBody["error"]);
+      throw _decodeError(jsonBody["error"]);
     }
 
-    throw decodeError();
+    throw _decodeError();
   }
 
   /**
@@ -370,7 +370,7 @@ export abstract class _BaseAPIClient {
       mode: "cors",
       credentials: "include",
     });
-    return decodeUserInfo(response);
+    return _decodeUserInfo(response);
   }
 
   /**
@@ -413,13 +413,13 @@ export abstract class _BaseAPIClient {
 
   async appSessionToken(
     refreshToken: string
-  ): Promise<AppSessionTokenResponse> {
+  ): Promise<_AppSessionTokenResponse> {
     return this._post("/oauth2/app_session_token", {
       json: { refresh_token: refreshToken },
     });
   }
 
-  async oauthChallenge(purpose: string): Promise<ChallengeResponse> {
+  async oauthChallenge(purpose: string): Promise<_ChallengeResponse> {
     return this._post("/oauth2/challenge", { json: { purpose } });
   }
 }

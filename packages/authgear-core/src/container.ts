@@ -4,7 +4,7 @@ import {
   AuthorizeOptions,
   AuthorizeResult,
   ContainerOptions,
-  ContainerStorage,
+  _ContainerStorage,
   _APIClientDelegate,
   _OIDCTokenRequest,
   _OIDCTokenResponse,
@@ -33,8 +33,8 @@ const EXPIRE_IN_PERCENTAGE = 0.9;
  * @internal
  */
 export interface _BaseContainerDelegate {
-  storage: ContainerStorage;
-  refreshTokenStorage: ContainerStorage;
+  storage: _ContainerStorage;
+  refreshTokenStorage: _ContainerStorage;
   _setupCodeVerifier(): Promise<{
     verifier: string;
     challenge: string;
