@@ -1,4 +1,8 @@
 
+<a name="v0.10.0"></a>
+## [v0.10.0](https://github.com/authgear/authgear-sdk-js/compare/v0.9.0...v0.10.0) (2021-05-05)
+
+
 <a name="v0.9.0"></a>
 ## [v0.9.0](https://github.com/authgear/authgear-sdk-js/compare/v0.8.0...v0.9.0) (2021-04-29)
 
