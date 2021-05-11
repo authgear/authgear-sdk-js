@@ -11,7 +11,7 @@ import {
   _decodeUserInfo,
   _AppSessionTokenResponse,
 } from "./types";
-import { _decodeError, ServerError, OAuthError } from "./error";
+import { _decodeError, AuthgearError, ServerError, OAuthError } from "./error";
 
 /**
  * @internal
@@ -65,11 +65,11 @@ export abstract class _BaseAPIClient {
     init?: RequestInit
   ): Promise<Response> {
     if (!this._fetchFunction) {
-      throw new Error("missing fetchFunction in api client");
+      throw new AuthgearError("missing fetchFunction in api client");
     }
 
     if (!this._requestClass) {
-      throw new Error("missing requestClass in api client");
+      throw new AuthgearError("missing requestClass in api client");
     }
     const request = new this._requestClass(url, init);
     return this._fetchFunction(request);
@@ -77,15 +77,15 @@ export abstract class _BaseAPIClient {
 
   async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
     if (this._fetchFunction == null) {
-      throw new Error("missing fetchFunction in api client");
+      throw new AuthgearError("missing fetchFunction in api client");
     }
 
     if (this._requestClass == null) {
-      throw new Error("missing requestClass in api client");
+      throw new AuthgearError("missing requestClass in api client");
     }
 
     if (this._delegate == null) {
-      throw new Error("missing delegate in api client");
+      throw new AuthgearError("missing delegate in api client");
     }
 
     const shouldRefresh = this._delegate.shouldRefreshAccessToken();
@@ -138,7 +138,7 @@ export abstract class _BaseAPIClient {
     } = {}
   ): Promise<any> {
     if (this.endpoint == null) {
-      throw new Error("missing endpoint in api client");
+      throw new AuthgearError("missing endpoint in api client");
     }
     const endpoint: string = this.endpoint;
 
@@ -243,7 +243,7 @@ export abstract class _BaseAPIClient {
 
   async _fetchOIDCConfiguration(): Promise<_OIDCConfiguration> {
     if (this.endpoint == null) {
-      throw new Error("missing endpoint in api client");
+      throw new AuthgearError("missing endpoint in api client");
     }
     const endpoint: string = this.endpoint;
 

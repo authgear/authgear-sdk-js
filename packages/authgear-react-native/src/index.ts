@@ -18,6 +18,7 @@ import {
   _encodeBase64URLFromByteArray,
   SessionState,
   SessionStateChangeReason,
+  AuthgearError,
 } from "@authgear/core";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
@@ -348,7 +349,7 @@ export class ReactNativeContainer {
       this.name
     );
     if (!refreshToken) {
-      throw new Error("refresh token not found");
+      throw new AuthgearError("refresh token not found");
     }
 
     // Use app session token to copy session into webview.
@@ -378,7 +379,7 @@ export class ReactNativeContainer {
   async open(page: Page, options?: SettingOptions): Promise<void> {
     const { endpoint } = this.baseContainer.apiClient;
     if (endpoint == null) {
-      throw new Error(
+      throw new AuthgearError(
         "Endpoint cannot be undefined, please double check whether you have run configure()"
       );
     }
@@ -420,7 +421,7 @@ export class ReactNativeContainer {
   async authenticateAnonymously(): Promise<AuthorizeResult> {
     const clientID = this.clientID;
     if (clientID == null) {
-      throw new Error("missing client ID");
+      throw new AuthgearError("missing client ID");
     }
 
     const { token } = await this.baseContainer.apiClient.oauthChallenge(
@@ -469,7 +470,7 @@ export class ReactNativeContainer {
   ): Promise<AuthorizeResult> {
     const keyID = await this.storage.getAnonymousKeyID(this.name);
     if (!keyID) {
-      throw new Error("anonymous user credentials not found");
+      throw new AuthgearError("anonymous user credentials not found");
     }
     const key = await getAnonymousJWK(keyID);
 
@@ -608,12 +609,12 @@ export class ReactNativeContainer {
   async enableBiometric(options: BiometricOptions): Promise<void> {
     const clientID = this.clientID;
     if (clientID == null) {
-      throw new Error("missing client ID");
+      throw new AuthgearError("missing client ID");
     }
     await this.refreshAccessTokenIfNeeded();
     const accessToken = this.accessToken;
     if (accessToken == null) {
-      throw new Error("enableBiometric requires authenticated user");
+      throw new AuthgearError("enableBiometric requires authenticated user");
     }
 
     const kid = await generateUUID();
@@ -647,11 +648,11 @@ export class ReactNativeContainer {
   ): Promise<AuthorizeResult> {
     const kid = await this.storage.getBiometricKeyID(this.name);
     if (kid == null) {
-      throw new Error("biometric key ID not found");
+      throw new AuthgearError("biometric key ID not found");
     }
     const clientID = this.clientID;
     if (clientID == null) {
-      throw new Error("missing client ID");
+      throw new AuthgearError("missing client ID");
     }
     const deviceInfo = await getDeviceInfo();
     const { token } = await this.baseContainer.apiClient.oauthChallenge(

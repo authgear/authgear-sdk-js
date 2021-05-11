@@ -11,7 +11,7 @@ import {
   SessionStateChangeReason,
   SessionState,
 } from "./types";
-import { OAuthError } from "./error";
+import { AuthgearError, OAuthError } from "./error";
 import { _BaseAPIClient } from "./client";
 
 /**
@@ -83,7 +83,9 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     const { access_token, refresh_token, expires_in } = response;
 
     if (access_token == null || expires_in == null) {
-      throw new Error("access_token or expires_in missing in Token Response");
+      throw new AuthgearError(
+        "access_token or expires_in missing in Token Response"
+      );
     }
 
     this.accessToken = access_token;
@@ -158,7 +160,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     // the whole process can be retried.
     const clientID = this.clientID;
     if (clientID == null) {
-      throw new Error("missing client ID");
+      throw new AuthgearError("missing client ID");
     }
 
     const refreshToken = await this._delegate.refreshTokenStorage.getRefreshToken(
@@ -197,7 +199,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
     const clientID = this.clientID;
     if (clientID == null) {
-      throw new Error("missing client ID");
+      throw new AuthgearError("missing client ID");
     }
 
     const config = await this.apiClient._fetchOIDCConfiguration();
@@ -259,7 +261,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   ): Promise<AuthorizeResult> {
     const clientID = this.clientID;
     if (clientID == null) {
-      throw new Error("missing client ID");
+      throw new AuthgearError("missing client ID");
     }
 
     const u = new URL(url);

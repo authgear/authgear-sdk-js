@@ -10,6 +10,7 @@ import {
   _ContainerStorage,
   SessionState,
   SessionStateChangeReason,
+  AuthgearError,
 } from "@authgear/core";
 import { _WebAPIClient } from "./client";
 import {
@@ -327,7 +328,7 @@ export class WebContainer {
   }): Promise<void> {
     const clientID = this.clientID;
     if (clientID == null) {
-      throw new Error("missing client ID");
+      throw new AuthgearError("missing client ID");
     }
     const config = await this.baseContainer.apiClient._fetchOIDCConfiguration();
 
