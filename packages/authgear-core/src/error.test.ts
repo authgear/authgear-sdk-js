@@ -47,7 +47,7 @@ describe("decodeError", () => {
     expect(nullError).toBeInstanceOf(Error);
     expect(nullError.message).toEqual("null");
 
-    const undefinedError = _decodeError();
+    const undefinedError = _decodeError(undefined);
     expect(undefinedError).toBeInstanceOf(Error);
     expect(undefinedError.message).toEqual("undefined");
   });

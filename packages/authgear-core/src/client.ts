@@ -189,7 +189,7 @@ export abstract class _BaseAPIClient {
       throw _decodeError(jsonBody["error"]);
     }
 
-    throw _decodeError();
+    throw _decodeError(undefined);
   }
 
   protected async _post(

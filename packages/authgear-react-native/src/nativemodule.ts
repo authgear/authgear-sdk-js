@@ -1,5 +1,5 @@
 import { NativeModules } from "react-native";
-import { CANCEL } from "@authgear/core";
+import { CancelError } from "@authgear/core";
 import { BiometricPrivateKeyOptions, BiometricOptions } from "./types";
 
 const { AuthgearReactNative } = NativeModules;
@@ -57,7 +57,7 @@ export async function openAuthorizeURL(
     return redirectURI;
   } catch (e) {
     if (e.message === "CANCEL") {
-      throw CANCEL;
+      throw new CancelError();
     }
     throw e;
   }

@@ -1,4 +1,22 @@
 /**
+ * AuthgearError is the root class of error produced by the SDK.
+ *
+ * @public
+ */
+export class AuthgearError extends Error {
+  /**
+   * underlyingError is the underlying error.
+   * The type is unknown because it is possible to throw anything in JavaScript.
+   * Use ordinary approaches, such as instanceof operator, to identify what it is.
+   *
+   * @public
+   */
+  underlyingError?: unknown;
+}
+
+/**
+ * ErrorNames contains all possible name in {@link ServerError}
+ *
  * @public
  */
 export const ErrorNames = {
@@ -14,30 +32,27 @@ export const ErrorNames = {
 } as const;
 
 /**
+ * ErrorName is the union of the keys of {@link ErrorNames}.
+ *
  * @public
  */
 export type ErrorName = typeof ErrorNames[keyof typeof ErrorNames];
 
 /**
- * CancelError is an error to represent cancel.
+ * CancelError means cancel.
+ * If you catch an error and it is instanceof CancelError,
+ * then the operation was cancelled.
  *
  * @public
  */
-export class CancelError extends Error {}
+export class CancelError extends AuthgearError {}
 
 /**
- * CANCEL is sentinel value for cancel.
+ * ServerError represents error received from the server.
  *
  * @public
  */
-export const CANCEL = new CancelError();
-
-/**
- * ServerError
- *
- * @public
- */
-export class ServerError extends Error {
+export class ServerError extends AuthgearError {
   /**
    * Error name.
    *
@@ -78,7 +93,7 @@ export class ServerError extends Error {
  *
  * @public
  */
-export class OAuthError extends Error {
+export class OAuthError extends AuthgearError {
   state?: string;
   error: string;
   error_description?: string;
@@ -107,7 +122,7 @@ export class OAuthError extends Error {
  * @internal
  */
 // eslint-disable-next-line complexity
-export function _decodeError(err?: any): Error {
+export function _decodeError(err: any): Error {
   // Construct ServerError if it looks like one.
   if (
     err != null &&
