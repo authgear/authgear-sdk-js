@@ -35,17 +35,16 @@ import {
 } from "./nativemodule";
 import { BiometricOptions, ReactNativeContainerDelegate } from "./types";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
-import { isBiometricPrivateKeyNotFoundError } from "./error";
+import { BiometricPrivateKeyNotFoundError } from "./error";
 import { Platform } from "react-native";
 export * from "@authgear/core";
 export * from "./types";
 export {
-  isBiometricCancel,
-  isBiometricPrivateKeyNotFoundError,
-  isBiometricNotSupportedOrPermissionDenied,
-  isBiometricNoEnrollment,
-  isBiometricNoPasscode,
-  isBiometricLockout,
+  BiometricPrivateKeyNotFoundError,
+  BiometricNotSupportedOrPermissionDeniedError,
+  BiometricNoPasscodeError,
+  BiometricNoEnrollmentError,
+  BiometricLockoutError,
 } from "./error";
 import EventEmitter from "./eventEmitter";
 
@@ -690,7 +689,7 @@ export class ReactNativeContainer {
       );
       return { userInfo };
     } catch (e) {
-      if (isBiometricPrivateKeyNotFoundError(e)) {
+      if (e instanceof BiometricPrivateKeyNotFoundError) {
         await this.disableBiometric();
       }
       if (
