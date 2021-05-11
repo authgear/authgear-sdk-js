@@ -17,12 +17,12 @@ import authgear, {
   ReactNativeContainerDelegate,
   SessionStateChangeReason,
   UserInfo,
-  isBiometricCancel,
-  isBiometricPrivateKeyNotFoundError,
-  isBiometricNotSupportedOrPermissionDenied,
-  isBiometricNoEnrollment,
-  isBiometricNoPasscode,
-  isBiometricLockout,
+  CancelError,
+  BiometricPrivateKeyNotFoundError,
+  BiometricNotSupportedOrPermissionDeniedError,
+  BiometricNoEnrollmentError,
+  BiometricNoPasscodeError,
+  BiometricLockoutError,
 } from '@authgear/react-native';
 
 const styles = StyleSheet.create({
@@ -155,12 +155,12 @@ const HomeScreen: React.FC = () => {
     const title = 'Error';
     let message = JSON.stringify(json);
 
-    if (isBiometricCancel(e)) {
+    if (e instanceof CancelError) {
       // Cancel is not an error actually.
       return;
     }
 
-    if (isBiometricPrivateKeyNotFoundError(e)) {
+    if (e instanceof BiometricPrivateKeyNotFoundError) {
       message = Platform.select({
         android:
           'Your biometric info has changed. For security reason, you have to set up biometric authentication again.',
@@ -170,7 +170,7 @@ const HomeScreen: React.FC = () => {
       });
     }
 
-    if (isBiometricNoEnrollment(e)) {
+    if (e instanceof BiometricNoEnrollmentError) {
       message = Platform.select({
         android:
           'You have not set up biometric yet. Please set up your fingerprint or face',
@@ -180,7 +180,7 @@ const HomeScreen: React.FC = () => {
       });
     }
 
-    if (isBiometricNotSupportedOrPermissionDenied(e)) {
+    if (e instanceof BiometricNotSupportedOrPermissionDeniedError) {
       message = Platform.select({
         android:
           'Your device does not support biometric. The developer should have checked this and not letting you to see feature that requires biometric',
@@ -190,7 +190,7 @@ const HomeScreen: React.FC = () => {
       });
     }
 
-    if (isBiometricNoPasscode(e)) {
+    if (e instanceof BiometricNoPasscodeError) {
       message = Platform.select({
         android:
           'You device does not have credential set up. Please set up either a PIN, a pattern or a password',
@@ -200,7 +200,7 @@ const HomeScreen: React.FC = () => {
       });
     }
 
-    if (isBiometricLockout(e)) {
+    if (e instanceof BiometricLockoutError) {
       message =
         'The biometric is locked out due to too many failed attempts. The developer should handle this error by using normal authentication as a fallback. So normally you should not see this error';
     }
