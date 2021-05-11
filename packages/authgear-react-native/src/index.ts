@@ -544,6 +544,17 @@ export class ReactNativeContainer {
   }
 
   /**
+   * Fetch function for you to call your application server.
+   * The fetch function will include Authorization header in your application
+   * request, and handle refresh access token automatically.
+   *
+   * @public
+   */
+  async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
+    return this.baseContainer.fetch(input, init);
+  }
+
+  /**
    * WeChat auth callback function. In WeChat login flow, after returning from the WeChat SDK,
    * this function should be called to complete the authorization.
    *

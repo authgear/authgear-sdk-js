@@ -377,4 +377,15 @@ export class WebContainer {
   async refreshAccessTokenIfNeeded(): Promise<void> {
     return this.baseContainer.refreshAccessTokenIfNeeded();
   }
+
+  /**
+   * Fetch function for you to call your application server.
+   * The fetch function will include Authorization header in your application
+   * request, and handle refresh access token automatically.
+   *
+   * @public
+   */
+  async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
+    return this.baseContainer.fetch(input, init);
+  }
 }
