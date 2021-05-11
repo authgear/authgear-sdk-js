@@ -126,6 +126,7 @@ const _errorMappings: [_ErrorIdentificationFunction, typeof AuthgearError][] = [
   [_isBiometricNoEnrollmentError, BiometricNoEnrollmentError],
   [_isBiometricNoPasscodeError, BiometricNoPasscodeError],
   [_isBiometricLockoutError, BiometricLockoutError],
+  [_isCancel, CancelError],
 ];
 
 /**
@@ -142,6 +143,16 @@ export function _wrapError(e: unknown): unknown {
   const err = new AuthgearError();
   err.underlyingError = e;
   return err;
+}
+
+export function _isCancel(e: unknown): boolean {
+  if (isPlatformErrorIOS(e)) {
+    return e.code === "CANCEL";
+  }
+  if (isPlatformErrorAndroid(e)) {
+    return e.code === "CANCEL";
+  }
+  return false;
 }
 
 /**
