@@ -262,10 +262,10 @@ export class ReactNativeContainer {
   /**
    * configure() configures the container with the client ID and the endpoint.
    * It also does local IO to retrieve the refresh token.
-   * It finally does network IO to refresh the access token.
-   *
-   * Therefore, it is possible that configure() could fail for many reasons.
-   * If your application is offline first, be prepared for handling errors.
+   * It only obtains the refresh token locally and no network call will
+   * be triggered. So the session state maybe outdated for some reason, e.g.
+   * user session is revoked. fetchUserInfo should be called to obtain the
+   * latest user session state.
    *
    * configure() can be called more than once if it failed.
    * Otherwise, it is NOT recommended to call it more than once.
