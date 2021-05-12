@@ -339,7 +339,7 @@ export abstract class _BaseAPIClient {
     });
   }
 
-  async _weChatAuthCallbackRequest(
+  async _wechatAuthCallbackRequest(
     code: string,
     state: string,
     platform: string

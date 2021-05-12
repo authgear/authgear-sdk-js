@@ -13,41 +13,41 @@ import com.tencent.mm.opensdk.modelmsg.SendAuth;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
-public class WeChatAuthModule extends ReactContextBaseJavaModule {
-    private static final String TAG = WeChatAuthModule.class.getSimpleName();
+public class WechatAuthModule extends ReactContextBaseJavaModule {
+    private static final String TAG = WechatAuthModule.class.getSimpleName();
 
 
-    private IWXAPI weChatAPI;
+    private IWXAPI wechatAPI;
 
-    WeChatAuthModule(ReactApplicationContext context) {
+    WechatAuthModule(ReactApplicationContext context) {
         super(context);
 
-        weChatAPI = WXAPIFactory.createWXAPI(context, WXEntryActivity.WECHAT_APP_ID, true);
-        weChatAPI.registerApp(WXEntryActivity.WECHAT_APP_ID);
+        wechatAPI = WXAPIFactory.createWXAPI(context, WXEntryActivity.WECHAT_APP_ID, true);
+        wechatAPI.registerApp(WXEntryActivity.WECHAT_APP_ID);
     }
 
     @Override
     public String getName() {
-        return "WeChatAuth";
+        return "WechatAuth";
     }
 
     @ReactMethod
-    public void sendWeChatAuthRequest(String state, Promise promise) {
+    public void sendWechatAuthRequest(String state, Promise promise) {
         Log.d(TAG, "Open wechat sdk state=" + state);
 
-        if (!weChatAPI.isWXAppInstalled()) {
+        if (!wechatAPI.isWXAppInstalled()) {
             promise.reject(new Exception("You have not installed the WeChat client app"));
             return;
         }
-        if (weChatAPI == null) {
+        if (wechatAPI == null) {
             promise.reject(new Exception("Failed to configure WeChat api"));
             return;
         }
 
-        WXEntryActivity.setOnWeChatSendAuthResultListener(new WXEntryActivity.OnWeChatSendAuthResultListener() {
+        WXEntryActivity.setOnWechatSendAuthResultListener(new WXEntryActivity.OnWechatSendAuthResultListener() {
             @Override
             public void OnResult(String c, String s) {
-                WXEntryActivity.setOnWeChatSendAuthResultListener(null);
+                WXEntryActivity.setOnWechatSendAuthResultListener(null);
                 WritableMap result = new WritableNativeMap();
                 result.putString("code", c);
                 result.putString("state", s);
@@ -56,7 +56,7 @@ public class WeChatAuthModule extends ReactContextBaseJavaModule {
 
             @Override
             public void OnError(Throwable err) {
-                WXEntryActivity.setOnWeChatSendAuthResultListener(null);
+                WXEntryActivity.setOnWechatSendAuthResultListener(null);
                 promise.reject(err);
             }
         });
@@ -64,6 +64,6 @@ public class WeChatAuthModule extends ReactContextBaseJavaModule {
         SendAuth.Req req = new SendAuth.Req();
         req.scope = "snsapi_userinfo";
         req.state = state;
-        weChatAPI.sendReq(req);
+        wechatAPI.sendReq(req);
     }
 }

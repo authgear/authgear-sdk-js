@@ -1,6 +1,6 @@
 #import <React/RCTBridgeModule.h>
 
-static NSString *const kWeChatAuthResultNotification = @"ReactNativeExampleWeChatAuthNotification";
+static NSString *const kWechatAuthResultNotification = @"ReactNativeExampleWechatAuthNotification";
 
-@interface RCTWeChatAuthModule : NSObject <RCTBridgeModule>
+@interface RCTWechatAuthModule : NSObject <RCTBridgeModule>
 @end

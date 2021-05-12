@@ -1,23 +1,23 @@
-#import "RCTWeChatAuthModule.h"
+#import "RCTWechatAuthModule.h"
 
 #import <React/RCTUtils.h>
 #import "WXApi.h"
 
-@interface RCTWeChatAuthModule()
-@property (nonatomic, strong) RCTPromiseResolveBlock sendWeChatAuthResolve;
-@property (nonatomic, strong) RCTPromiseRejectBlock sendWeChatAuthReject;
+@interface RCTWechatAuthModule()
+@property (nonatomic, strong) RCTPromiseResolveBlock sendWechatAuthResolve;
+@property (nonatomic, strong) RCTPromiseRejectBlock sendWechatAuthReject;
 @end
 
-@implementation RCTWeChatAuthModule
+@implementation RCTWechatAuthModule
 
-RCT_EXPORT_MODULE(WeChatAuth);
+RCT_EXPORT_MODULE(WechatAuth);
 
 - (instancetype)init
 {
   if ((self = [super init])) {
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(handleWeChatAuthResult:)
-                                                 name:kWeChatAuthResultNotification
+                                             selector:@selector(handleWechatAuthResult:)
+                                                 name:kWechatAuthResultNotification
                                                object:nil];
   }
   return self;
@@ -28,12 +28,12 @@ RCT_EXPORT_MODULE(WeChatAuth);
   return YES;
 }
 
-RCT_EXPORT_METHOD(sendWeChatAuthRequest:(NSString *)state
+RCT_EXPORT_METHOD(sendWechatAuthRequest:(NSString *)state
                                 resolve:(RCTPromiseResolveBlock)resolve
                                  reject:(RCTPromiseRejectBlock)reject)
 {
-  self.sendWeChatAuthResolve = resolve;
-  self.sendWeChatAuthReject = reject;
+  self.sendWechatAuthResolve = resolve;
+  self.sendWechatAuthReject = reject;
 
   SendAuthReq* req = [[SendAuthReq alloc] init];
   req.scope = @"snsapi_userinfo";
@@ -41,22 +41,22 @@ RCT_EXPORT_METHOD(sendWeChatAuthRequest:(NSString *)state
   [WXApi sendReq:req completion:nil];
 }
 
-- (void)handleWeChatAuthResult:(NSNotification *)notification
+- (void)handleWechatAuthResult:(NSNotification *)notification
 {
   if (notification.userInfo[@"code"]) {
-    self.sendWeChatAuthResolve(notification.userInfo);
+    self.sendWechatAuthResolve(notification.userInfo);
   } else {
     NSError * err = notification.userInfo[@"error"];
     NSString * errMessage = notification.userInfo[@"error_message"];
-    self.sendWeChatAuthReject(RCTErrorUnspecified, errMessage, err);
+    self.sendWechatAuthReject(RCTErrorUnspecified, errMessage, err);
   }
   [self cleanup];
 }
 
 - (void)cleanup
 {
-    self.sendWeChatAuthResolve = nil;
-    self.sendWeChatAuthReject = nil;
+    self.sendWechatAuthResolve = nil;
+    self.sendWechatAuthReject = nil;
 }
 
 

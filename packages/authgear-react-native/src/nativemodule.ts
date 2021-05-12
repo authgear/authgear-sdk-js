@@ -37,21 +37,21 @@ export async function generateUUID(): Promise<string> {
 
 export async function openURL(
   url: string,
-  weChatRedirectURI?: string
+  wechatRedirectURI?: string
 ): Promise<void> {
-  return AuthgearReactNative.openURL(url, weChatRedirectURI);
+  return AuthgearReactNative.openURL(url, wechatRedirectURI);
 }
 
 export async function openAuthorizeURL(
   url: string,
   callbackURL: string,
-  weChatRedirectURI?: string
+  wechatRedirectURI?: string
 ): Promise<string> {
   try {
     const redirectURI = await AuthgearReactNative.openAuthorizeURL(
       url,
       callbackURL,
-      weChatRedirectURI
+      wechatRedirectURI
     );
     await dismiss();
     return redirectURI;

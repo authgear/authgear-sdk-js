@@ -69,30 +69,30 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     /**
      * Check and handle wehchat redirect uri and trigger delegate function if needed
      */
-    private static String currentWeChatRedirectURI;
-    private static OnOpenWeChatRedirectURIListener onOpenWeChatRedirectURIListener;
+    private static String currentWechatRedirectURI;
+    private static OnOpenWechatRedirectURIListener onOpenWechatRedirectURIListener;
 
-    public static void registerWeChatRedirectURI(String uri, OnOpenWeChatRedirectURIListener listener) {
+    public static void registerWechatRedirectURI(String uri, OnOpenWechatRedirectURIListener listener) {
         if (uri != null) {
-            currentWeChatRedirectURI = uri;
-            onOpenWeChatRedirectURIListener = listener;
+            currentWechatRedirectURI = uri;
+            onOpenWechatRedirectURIListener = listener;
         } else {
-            unregisterWeChatRedirectURI();
+            unregisterWechatRedirectURI();
         }
     }
 
-    public static void unregisterWeChatRedirectURI() {
-        currentWeChatRedirectURI = null;
-        onOpenWeChatRedirectURIListener = null;
+    public static void unregisterWechatRedirectURI() {
+        currentWechatRedirectURI = null;
+        onOpenWechatRedirectURIListener = null;
     }
 
-    public static Boolean handleWeChatRedirectDeepLink(Uri deepLink) {
-        if (currentWeChatRedirectURI == null) {
+    public static Boolean handleWechatRedirectDeepLink(Uri deepLink) {
+        if (currentWechatRedirectURI == null) {
             return false;
         }
         String deepLinkWithoutQuery = getURLWithoutQuery(deepLink);
-        if (currentWeChatRedirectURI.equals(deepLinkWithoutQuery)) {
-            onOpenWeChatRedirectURIListener.OnURI(deepLink);
+        if (currentWechatRedirectURI.equals(deepLinkWithoutQuery)) {
+            onOpenWechatRedirectURIListener.OnURI(deepLink);
             return true;
         }
         return false;
@@ -595,7 +595,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     }
 
     @ReactMethod
-    public void openURL(String urlString, String weChatRedirectURI, Promise promise) {
+    public void openURL(String urlString, String wechatRedirectURI, Promise promise) {
         try {
             Activity currentActivity = getCurrentActivity();
             if (currentActivity == null) {
@@ -604,10 +604,10 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             }
 
             Context context = currentActivity;
-            registerWeChatRedirectURI(weChatRedirectURI, new OnOpenWeChatRedirectURIListener() {
+            registerWechatRedirectURI(wechatRedirectURI, new OnOpenWechatRedirectURIListener() {
                 @Override
                 public void OnURI(Uri uri) {
-                    sendOpenWeChatRedirectURI(uri);
+                    sendOpenWechatRedirectURI(uri);
                 }
             });
             Intent intent = WebViewActivity.createIntent(context, urlString);
@@ -622,7 +622,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     }
 
     @ReactMethod
-    public void openAuthorizeURL(String urlString, String callbackURL, String weChatRedirectURI, Promise promise) {
+    public void openAuthorizeURL(String urlString, String callbackURL, String wechatRedirectURI, Promise promise) {
         this.openURLPromise = promise;
 
         try {
@@ -634,10 +634,10 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
             Context context = currentActivity;
             Uri uri = Uri.parse(urlString).normalizeScheme();
-            registerWeChatRedirectURI(weChatRedirectURI, new OnOpenWeChatRedirectURIListener() {
+            registerWechatRedirectURI(wechatRedirectURI, new OnOpenWechatRedirectURIListener() {
                 @Override
                 public void OnURI(Uri uri) {
-                    sendOpenWeChatRedirectURI(uri);
+                    sendOpenWechatRedirectURI(uri);
                 }
             });
             OAuthRedirectActivity.registerCallbackURL(callbackURL);
@@ -777,12 +777,12 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         return builder.build().toString();
     }
 
-    private void sendOpenWeChatRedirectURI(Uri uri) {
+    private void sendOpenWechatRedirectURI(Uri uri) {
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                .emit("onAuthgearOpenWeChatRedirectURI", uri.toString());
+                .emit("onAuthgearOpenWechatRedirectURI", uri.toString());
     }
 
-    public interface OnOpenWeChatRedirectURIListener {
+    public interface OnOpenWechatRedirectURIListener {
         void OnURI(Uri uri);
     }
 }

@@ -18,10 +18,10 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler{
 
     private static final String TAG = WXEntryActivity.class.getSimpleName();
     private IWXAPI api;
-    private static OnWeChatSendAuthResultListener onWeChatSendAuthResultListener;
+    private static OnWechatSendAuthResultListener onWechatSendAuthResultListener;
 
-    public static void setOnWeChatSendAuthResultListener(OnWeChatSendAuthResultListener listener) {
-        onWeChatSendAuthResultListener = listener;
+    public static void setOnWechatSendAuthResultListener(OnWechatSendAuthResultListener listener) {
+        onWechatSendAuthResultListener = listener;
     }
 
     @Override
@@ -76,18 +76,18 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler{
 
         if (resp.getType() == ConstantsAPI.COMMAND_SENDAUTH) {
             SendAuth.Resp authResp = (SendAuth.Resp)resp;
-            if (onWeChatSendAuthResultListener != null) {
+            if (onWechatSendAuthResultListener != null) {
                 if (error != null) {
-                    onWeChatSendAuthResultListener.OnError(new Exception(error));
+                    onWechatSendAuthResultListener.OnError(new Exception(error));
                 } else {
-                    onWeChatSendAuthResultListener.OnResult(authResp.code, authResp.state);
+                    onWechatSendAuthResultListener.OnResult(authResp.code, authResp.state);
                 }
             }
         }
         finish();
     }
 
-    public interface OnWeChatSendAuthResultListener{
+    public interface OnWechatSendAuthResultListener{
         void OnResult(String code, String state);
         void OnError(Throwable err);
     }

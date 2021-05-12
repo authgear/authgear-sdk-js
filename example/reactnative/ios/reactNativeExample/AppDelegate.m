@@ -4,7 +4,7 @@
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
 #import <AGAuthgearReactNative.h>
-#import "RCTWeChatAuthModule.h"
+#import "RCTWechatAuthModule.h"
 
 #ifdef FB_SONARKIT_ENABLED
 #import <FlipperKit/FlipperClient.h>
@@ -26,11 +26,11 @@ static void InitializeFlipper(UIApplication *application) {
 #endif
 
 // config
-NSString* const WeChatAppID = @"wxe64ed6a7605b5021";
-NSString* const WeChatUniversalLink = @"https://authgear-demo-rn.pandawork.com/wechat/";
+NSString* const WechatAppID = @"wxe64ed6a7605b5021";
+NSString* const WechatUniversalLink = @"https://authgear-demo-rn.pandawork.com/wechat/";
 
 // Error domain
-NSString* const WeChatAuthErrorDomain = @"com.authgear.example.reactnative.wechatauth_error";
+NSString* const WechatAuthErrorDomain = @"com.authgear.example.reactnative.wechatauth_error";
 
 @implementation AppDelegate
 
@@ -53,8 +53,8 @@ NSString* const WeChatAuthErrorDomain = @"com.authgear.example.reactnative.wecha
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
 
-  // Setup WeChat SDK
-  [WXApi registerApp:WeChatAppID universalLink:WeChatUniversalLink];
+  // Setup Wechat SDK
+  [WXApi registerApp:WechatAppID universalLink:WechatUniversalLink];
 
   return YES;
 }
@@ -110,11 +110,11 @@ NSString* const WeChatAuthErrorDomain = @"com.authgear.example.reactnative.wecha
           break;
       }
       payload = @{
-        @"error": [NSError errorWithDomain:WeChatAuthErrorDomain code:resp.errCode userInfo:nil],
+        @"error": [NSError errorWithDomain:WechatAuthErrorDomain code:resp.errCode userInfo:nil],
         @"error_message": message,
       };
     }
-    [[NSNotificationCenter defaultCenter] postNotificationName:kWeChatAuthResultNotification
+    [[NSNotificationCenter defaultCenter] postNotificationName:kWechatAuthResultNotification
                                                         object:nil
                                                       userInfo:payload];
   }

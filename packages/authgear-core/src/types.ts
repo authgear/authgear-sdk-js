@@ -35,9 +35,9 @@ export interface PromoteOptions {
   uiLocales?: string[];
   /**
    * WeChat Redirect URI is needed when integrating WeChat login in react-native
-   * The weChatRedirectURI will be called when user click the login with WeChat button
+   * The wechatRedirectURI will be called when user click the login with WeChat button
    */
-  weChatRedirectURI?: string;
+  wechatRedirectURI?: string;
 }
 
 /**
@@ -72,9 +72,9 @@ export interface AuthorizeOptions {
   responseType?: string;
   /**
    * WeChat Redirect URI is needed when integrating WeChat login in react-native
-   * The weChatRedirectURI will be called when user click the login with WeChat button
+   * The wechatRedirectURI will be called when user click the login with WeChat button
    */
-  weChatRedirectURI?: string;
+  wechatRedirectURI?: string;
   /**
    * @internal
    * Platform is provided by the sdk
@@ -95,9 +95,9 @@ export interface AuthorizeOptions {
 export interface SettingOptions {
   /**
    * WeChat Redirect URI is needed when integrating WeChat login in react-native
-   * The weChatRedirectURI will be called when user click the login with WeChat button
+   * The wechatRedirectURI will be called when user click the login with WeChat button
    */
-  weChatRedirectURI?: string;
+  wechatRedirectURI?: string;
 }
 
 /**

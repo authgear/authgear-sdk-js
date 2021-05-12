@@ -144,7 +144,7 @@ export class ReactNativeContainer {
   /**
    * @internal
    */
-  weChatRedirectDeepLinkListener: (url: string) => void;
+  wechatRedirectDeepLinkListener: (url: string) => void;
 
   /**
    * @public
@@ -223,12 +223,12 @@ export class ReactNativeContainer {
     this.storage = _storage;
     this.refreshTokenStorage = this.storage;
 
-    this.weChatRedirectDeepLinkListener = (url: string) => {
-      this._sendWeChatRedirectURIToDelegate(url);
+    this.wechatRedirectDeepLinkListener = (url: string) => {
+      this._sendWechatRedirectURIToDelegate(url);
     };
     EventEmitter.addListener(
-      "onAuthgearOpenWeChatRedirectURI",
-      this.weChatRedirectDeepLinkListener
+      "onAuthgearOpenWechatRedirectURI",
+      this.wechatRedirectDeepLinkListener
     );
   }
 
@@ -262,10 +262,10 @@ export class ReactNativeContainer {
   /**
    * configure() configures the container with the client ID and the endpoint.
    * It also does local IO to retrieve the refresh token.
-   * It finally does network IO to refresh the access token.
-   *
-   * Therefore, it is possible that configure() could fail for many reasons.
-   * If your application is offline first, be prepared for handling errors.
+   * It only obtains the refresh token locally and no network call will
+   * be triggered. So the session state maybe outdated for some reason, e.g.
+   * user session is revoked. fetchUserInfo should be called to obtain the
+   * latest user session state.
    *
    * configure() can be called more than once if it failed.
    * Otherwise, it is NOT recommended to call it more than once.
@@ -327,7 +327,7 @@ export class ReactNativeContainer {
     const redirectURL = await openAuthorizeURL(
       authorizeURL,
       options.redirectURI,
-      options.weChatRedirectURI
+      options.wechatRedirectURI
     );
     const xDeviceInfo = await getXDeviceInfo();
     const result = await this.baseContainer._finishAuthorization(redirectURL, {
@@ -368,12 +368,12 @@ export class ReactNativeContainer {
       responseType: "none",
       loginHint,
       platform,
-      ...(options?.weChatRedirectURI
-        ? { weChatRedirectURI: options.weChatRedirectURI }
+      ...(options?.wechatRedirectURI
+        ? { wechatRedirectURI: options.wechatRedirectURI }
         : {}),
     });
 
-    await openURL(targetURL, options?.weChatRedirectURI);
+    await openURL(targetURL, options?.wechatRedirectURI);
   }
 
   async open(page: Page, options?: SettingOptions): Promise<void> {
@@ -501,7 +501,7 @@ export class ReactNativeContainer {
     const redirectURL = await openAuthorizeURL(
       authorizeURL,
       options.redirectURI,
-      options.weChatRedirectURI
+      options.wechatRedirectURI
     );
     const result = await this.baseContainer._finishAuthorization(redirectURL);
     await this.storage.delAnonymousKeyID(this.name);
@@ -510,7 +510,7 @@ export class ReactNativeContainer {
   }
 
   /**
-   * @public
+   * @internal
    */
   async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
     return this.baseContainer.authorizeEndpoint(options);
@@ -544,14 +544,25 @@ export class ReactNativeContainer {
   }
 
   /**
+   * Fetch function for you to call your application server.
+   * The fetch function will include Authorization header in your application
+   * request, and handle refresh access token automatically.
+   *
+   * @public
+   */
+  async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
+    return this.baseContainer.fetch(input, init);
+  }
+
+  /**
    * WeChat auth callback function. In WeChat login flow, after returning from the WeChat SDK,
    * this function should be called to complete the authorization.
    *
    * @param code - WeChat Authorization code.
    * @param state - WeChat Authorization state.
    */
-  async weChatAuthCallback(code: string, state: string): Promise<void> {
-    return this.baseContainer.apiClient._weChatAuthCallbackRequest(
+  async wechatAuthCallback(code: string, state: string): Promise<void> {
+    return this.baseContainer.apiClient._wechatAuthCallbackRequest(
       code,
       state,
       Platform.OS
@@ -561,12 +572,12 @@ export class ReactNativeContainer {
   /**
    * @internal
    */
-  _sendWeChatRedirectURIToDelegate(deepLink: string): void {
+  _sendWechatRedirectURIToDelegate(deepLink: string): void {
     const u = new URL(deepLink);
     const params = u.searchParams;
     const state = params.get("state");
     if (state) {
-      this.delegate?.sendWeChatAuthRequest(state);
+      this.delegate?.sendWechatAuthRequest(state);
     }
   }
 
