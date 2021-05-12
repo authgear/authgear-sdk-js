@@ -32,7 +32,7 @@ public class WeChatAuthModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void sendWeChatAuthRequest(String state, Promise promise) {
+    public void sendWechatAuthRequest(String state, Promise promise) {
         Log.d(TAG, "Open wechat sdk state=" + state);
 
         if (!weChatAPI.isWXAppInstalled()) {

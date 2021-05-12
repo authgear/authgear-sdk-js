@@ -15,9 +15,9 @@ public class OAuthRedirectActivity extends Activity {
             this.startActivity(OAuthCoordinatorActivity.createRedirectIntent(this, this.getIntent().getData()));
             // callbackURL is handled, clear it
             callbackURL = null;
-            AuthgearReactNativeModule.unregisterWeChatRedirectURI();
+            AuthgearReactNativeModule.unregisterWechatRedirectURI();
         }
-        AuthgearReactNativeModule.handleWeChatRedirectDeepLink(this.getIntent().getData());
+        AuthgearReactNativeModule.handleWechatRedirectDeepLink(this.getIntent().getData());
         this.finish();
     }
 

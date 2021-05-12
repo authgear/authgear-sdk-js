@@ -240,8 +240,8 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (options.uiLocales) {
       query.append("ui_locales", options.uiLocales.join(" "));
     }
-    if (options.weChatRedirectURI) {
-      query.append("x_wechat_redirect_uri", options.weChatRedirectURI);
+    if (options.wechatRedirectURI) {
+      query.append("x_wechat_redirect_uri", options.wechatRedirectURI);
     }
     if (options.platform) {
       query.append("x_platform", options.platform);

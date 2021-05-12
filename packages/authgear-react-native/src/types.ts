@@ -24,12 +24,12 @@ export interface ReactNativeContainerDelegate {
    *
    * Developer should implement this function to use WeChat SDK to
    * obtain WeChat authentication code. After obtaining the code, developer
-   * should call weChatAuthCallback with code and state to complete the
+   * should call wechatAuthCallback with code and state to complete the
    * WeChat login.
    *
    * @public
    */
-  sendWeChatAuthRequest(state: string): void;
+  sendWechatAuthRequest(state: string): void;
 }
 
 /**

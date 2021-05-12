@@ -144,7 +144,7 @@ export class ReactNativeContainer {
   /**
    * @internal
    */
-  weChatRedirectDeepLinkListener: (url: string) => void;
+  wechatRedirectDeepLinkListener: (url: string) => void;
 
   /**
    * @public
@@ -223,12 +223,12 @@ export class ReactNativeContainer {
     this.storage = _storage;
     this.refreshTokenStorage = this.storage;
 
-    this.weChatRedirectDeepLinkListener = (url: string) => {
-      this._sendWeChatRedirectURIToDelegate(url);
+    this.wechatRedirectDeepLinkListener = (url: string) => {
+      this._sendWechatRedirectURIToDelegate(url);
     };
     EventEmitter.addListener(
-      "onAuthgearOpenWeChatRedirectURI",
-      this.weChatRedirectDeepLinkListener
+      "onAuthgearOpenWechatRedirectURI",
+      this.wechatRedirectDeepLinkListener
     );
   }
 
@@ -327,7 +327,7 @@ export class ReactNativeContainer {
     const redirectURL = await openAuthorizeURL(
       authorizeURL,
       options.redirectURI,
-      options.weChatRedirectURI
+      options.wechatRedirectURI
     );
     const xDeviceInfo = await getXDeviceInfo();
     const result = await this.baseContainer._finishAuthorization(redirectURL, {
@@ -368,12 +368,12 @@ export class ReactNativeContainer {
       responseType: "none",
       loginHint,
       platform,
-      ...(options?.weChatRedirectURI
-        ? { weChatRedirectURI: options.weChatRedirectURI }
+      ...(options?.wechatRedirectURI
+        ? { wechatRedirectURI: options.wechatRedirectURI }
         : {}),
     });
 
-    await openURL(targetURL, options?.weChatRedirectURI);
+    await openURL(targetURL, options?.wechatRedirectURI);
   }
 
   async open(page: Page, options?: SettingOptions): Promise<void> {
@@ -501,7 +501,7 @@ export class ReactNativeContainer {
     const redirectURL = await openAuthorizeURL(
       authorizeURL,
       options.redirectURI,
-      options.weChatRedirectURI
+      options.wechatRedirectURI
     );
     const result = await this.baseContainer._finishAuthorization(redirectURL);
     await this.storage.delAnonymousKeyID(this.name);
@@ -561,8 +561,8 @@ export class ReactNativeContainer {
    * @param code - WeChat Authorization code.
    * @param state - WeChat Authorization state.
    */
-  async weChatAuthCallback(code: string, state: string): Promise<void> {
-    return this.baseContainer.apiClient._weChatAuthCallbackRequest(
+  async wechatAuthCallback(code: string, state: string): Promise<void> {
+    return this.baseContainer.apiClient._wechatAuthCallbackRequest(
       code,
       state,
       Platform.OS
@@ -572,12 +572,12 @@ export class ReactNativeContainer {
   /**
    * @internal
    */
-  _sendWeChatRedirectURIToDelegate(deepLink: string): void {
+  _sendWechatRedirectURIToDelegate(deepLink: string): void {
     const u = new URL(deepLink);
     const params = u.searchParams;
     const state = params.get("state");
     if (state) {
-      this.delegate?.sendWeChatAuthRequest(state);
+      this.delegate?.sendWechatAuthRequest(state);
     }
   }
 

@@ -9,11 +9,11 @@
 #import <sys/utsname.h>
 #import "AGAuthgearReactNative.h"
 
-static NSString *currentWeChatRedirectURI = nil;
-static void postOpenWeChatRedirectURINotification(NSURL *URL, id sender)
+static NSString *currentWechatRedirectURI = nil;
+static void postOpenWechatRedirectURINotification(NSURL *URL, id sender)
 {
   NSDictionary<NSString *, id> *payload = @{@"url": URL.absoluteString};
-  [[NSNotificationCenter defaultCenter] postNotificationName:kOpenWeChatRedirectURINotification
+  [[NSNotificationCenter defaultCenter] postNotificationName:kOpenWechatRedirectURINotification
                                                       object:sender
                                                     userInfo:payload];
 }
@@ -64,7 +64,7 @@ RCT_EXPORT_MODULE(AuthgearReactNative)
             openURL:(NSURL *)URL
             options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
-  [self handleWeChatRedirectURI:URL];
+  [self handleWechatRedirectURI:URL];
   return YES;
 }
 
@@ -73,7 +73,7 @@ RCT_EXPORT_MODULE(AuthgearReactNative)
   sourceApplication:(NSString *)sourceApplication
          annotation:(id)annotation
 {
-  [self handleWeChatRedirectURI:URL];
+  [self handleWechatRedirectURI:URL];
   return YES;
 }
 
@@ -86,7 +86,7 @@ continueUserActivity:(NSUserActivity *)userActivity
         (nonnull void (^)(NSArray *_Nullable))restorationHandler {
     #endif
   if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb]) {
-    return [self handleWeChatRedirectURI:userActivity.webpageURL];
+    return [self handleWechatRedirectURI:userActivity.webpageURL];
   }
   return YES;
 }
@@ -242,7 +242,7 @@ RCT_EXPORT_METHOD(dismiss:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseReje
 }
 
 RCT_EXPORT_METHOD(openURL:(NSURL *)url
-        weChatRedirectURI:(NSString *)weChatRedirectURI
+        wechatRedirectURI:(NSString *)wechatRedirectURI
                   resolve:(RCTPromiseResolveBlock)resolve
                    reject:(RCTPromiseRejectBlock)reject)
 {
@@ -251,9 +251,9 @@ RCT_EXPORT_METHOD(openURL:(NSURL *)url
     // So we cannot unregister the wechat uri in this case
     // It is fine to not unresgister it, as everytime we open a
     // new authorize section (authorize or setting page)
-    // registerCurrentWeChatRedirectURI will be called and overwrite
+    // registerCurrentWechatRedirectURI will be called and overwrite
     // previous registered wechatRedirectURI
-    [AGAuthgearReactNative registerCurrentWeChatRedirectURI:weChatRedirectURI];
+    [AGAuthgearReactNative registerCurrentWechatRedirectURI:wechatRedirectURI];
     UIViewController *vc = [[UIViewController alloc] init];
     WKWebView *wv = [[WKWebView alloc] initWithFrame:vc.view.bounds];
     wv.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -273,7 +273,7 @@ RCT_EXPORT_METHOD(openURL:(NSURL *)url
 
 RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
                        callbackURL:(NSString *)callbackURL
-                 weChatRedirectURI:(NSString *)weChatRedirectURI
+                 wechatRedirectURI:(NSString *)wechatRedirectURI
                            resolve:(RCTPromiseResolveBlock)resolve
                             reject:(RCTPromiseRejectBlock)reject)
 {
@@ -281,12 +281,12 @@ RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
     self.openURLReject = reject;
 
     NSString *scheme = [self getCallbackURLScheme:callbackURL];
-    [AGAuthgearReactNative registerCurrentWeChatRedirectURI:weChatRedirectURI];
+    [AGAuthgearReactNative registerCurrentWechatRedirectURI:wechatRedirectURI];
     if (@available(iOS 12.0, *)) {
         self.asSession = [[ASWebAuthenticationSession alloc] initWithURL:url
                                                                             callbackURLScheme:scheme
                                                                             completionHandler:^(NSURL *url, NSError *error) {
-            [AGAuthgearReactNative unregisterCurrentWeChatRedirectURI];
+            [AGAuthgearReactNative unregisterCurrentWechatRedirectURI];
             if (error) {
                 BOOL isUserCancelled = ([[error domain] isEqualToString:ASWebAuthenticationSessionErrorDomain] &&
                 [error code] == ASWebAuthenticationSessionErrorCodeCanceledLogin);
@@ -312,7 +312,7 @@ RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
         self.sfSession = [[SFAuthenticationSession alloc] initWithURL:url
                                                                       callbackURLScheme:scheme
                                                                       completionHandler:^(NSURL *url, NSError *error) {
-            [AGAuthgearReactNative unregisterCurrentWeChatRedirectURI];
+            [AGAuthgearReactNative unregisterCurrentWechatRedirectURI];
             if (error) {
                 BOOL isUserCancelled = ([[error domain] isEqualToString:SFAuthenticationErrorDomain] &&
                 [error code] == SFAuthenticationErrorCanceledLogin);
@@ -816,22 +816,22 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
   return nil;
 }
 
-#pragma mark - Handle WeChat Redirect uri functions
+#pragma mark - Handle Wechat Redirect uri functions
 
-+(void)registerCurrentWeChatRedirectURI:(NSString*)uri {
-    currentWeChatRedirectURI = uri;
++(void)registerCurrentWechatRedirectURI:(NSString*)uri {
+    currentWechatRedirectURI = uri;
 }
 
 
-+(void)unregisterCurrentWeChatRedirectURI{
-    currentWeChatRedirectURI = nil;
++(void)unregisterCurrentWechatRedirectURI{
+    currentWechatRedirectURI = nil;
 }
 
-+(BOOL)handleWeChatRedirectURI:(NSURL*)url {
-    if(currentWeChatRedirectURI == nil) return NO;
++(BOOL)handleWechatRedirectURI:(NSURL*)url {
+    if(currentWechatRedirectURI == nil) return NO;
     NSString *urlWithoutQuery = [self getURLWithoutQuery:url];
-    if (urlWithoutQuery != nil && [urlWithoutQuery isEqualToString:currentWeChatRedirectURI]) {
-        postOpenWeChatRedirectURINotification(url, self);
+    if (urlWithoutQuery != nil && [urlWithoutQuery isEqualToString:currentWechatRedirectURI]) {
+        postOpenWechatRedirectURINotification(url, self);
         return YES;
     }
     return NO;
@@ -841,7 +841,7 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
 decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction
 decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
     NSURL *url = navigationAction.request.URL;
-    if (url != nil && [self.class handleWeChatRedirectURI:url]) {
+    if (url != nil && [self.class handleWechatRedirectURI:url]) {
         decisionHandler(WKNavigationActionPolicyCancel);
         return;
     }

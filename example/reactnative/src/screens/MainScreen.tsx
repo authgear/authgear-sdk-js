@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
 });
 
 const redirectURI = 'com.authgear.example.rn://host/path';
-const weChatRedirectURI = Platform.select<string>({
+const wechatRedirectURI = Platform.select<string>({
   android: 'com.authgear.example.rn://host/open_wechat_app',
   ios: 'https://authgear-demo-rn.pandawork.com/authgear/open_wechat_app',
 });
@@ -236,13 +236,13 @@ const HomeScreen: React.FC = () => {
           setUserInfo(null);
         }
       },
-      sendWeChatAuthRequest: (state) => {
+      sendWechatAuthRequest: (state) => {
         console.log('user click login with wechat, open wechat sdk');
         const {WeChatAuth} = NativeModules;
-        WeChatAuth.sendWeChatAuthRequest(state)
+        WeChatAuth.sendWechatAuthRequest(state)
           .then((result: {code: string; state: string}) => {
             console.log('sending wechat auth callback');
-            return authgear.weChatAuthCallback(result.code, result.state);
+            return authgear.wechatAuthCallback(result.code, result.state);
           })
           .then(() => {
             console.log('send wechat auth callback successfully');
@@ -311,7 +311,7 @@ const HomeScreen: React.FC = () => {
     authgear
       .authorize({
         redirectURI,
-        weChatRedirectURI,
+        wechatRedirectURI,
         page,
         prompt: 'login',
       })
@@ -350,7 +350,7 @@ const HomeScreen: React.FC = () => {
     authgear
       .promoteAnonymousUser({
         redirectURI,
-        weChatRedirectURI,
+        wechatRedirectURI,
       })
       .then(({userInfo}) => {
         setUserInfo(userInfo);
@@ -407,7 +407,7 @@ const HomeScreen: React.FC = () => {
   const openSettings = useCallback(() => {
     authgear
       .open(Page.Settings, {
-        weChatRedirectURI,
+        wechatRedirectURI,
       })
       .catch((err) => showError(err));
   }, [showError]);

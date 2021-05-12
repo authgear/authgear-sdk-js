@@ -28,7 +28,7 @@ RCT_EXPORT_MODULE(WeChatAuth);
   return YES;
 }
 
-RCT_EXPORT_METHOD(sendWeChatAuthRequest:(NSString *)state
+RCT_EXPORT_METHOD(sendWechatAuthRequest:(NSString *)state
                                 resolve:(RCTPromiseResolveBlock)resolve
                                  reject:(RCTPromiseRejectBlock)reject)
 {
