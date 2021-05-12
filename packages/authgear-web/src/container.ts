@@ -348,10 +348,20 @@ export class WebContainer {
   }
 
   /**
-   * @public
+   * @internal
    */
   async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
     return this.baseContainer.authorizeEndpoint(options);
+  }
+
+  /**
+   * Make authorize URL makes authorize URL based on options.
+   *
+   * This function will be used if developer wants to redirection in their own
+   * code.
+   */
+  async makeAuthorizeURL(options: AuthorizeOptions): Promise<string> {
+    return this.authorizeEndpoint(options);
   }
 
   /**

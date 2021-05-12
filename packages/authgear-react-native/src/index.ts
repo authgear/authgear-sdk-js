@@ -510,7 +510,7 @@ export class ReactNativeContainer {
   }
 
   /**
-   * @public
+   * @internal
    */
   async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
     return this.baseContainer.authorizeEndpoint(options);
