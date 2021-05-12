@@ -238,8 +238,8 @@ const HomeScreen: React.FC = () => {
       },
       sendWechatAuthRequest: (state) => {
         console.log('user click login with wechat, open wechat sdk');
-        const {WeChatAuth} = NativeModules;
-        WeChatAuth.sendWechatAuthRequest(state)
+        const {WechatAuth} = NativeModules;
+        WechatAuth.sendWechatAuthRequest(state)
           .then((result: {code: string; state: string}) => {
             console.log('sending wechat auth callback');
             return authgear.wechatAuthCallback(result.code, result.state);
