@@ -160,6 +160,39 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
     @ReactMethod
     public void getDeviceInfo(Promise promise) {
+        String baseOS = "";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Build.VERSION.BASE_OS != null) {
+                baseOS = Build.VERSION.BASE_OS;
+            }
+        }
+        String previewSDKInt = "";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            previewSDKInt = String.valueOf(Build.VERSION.PREVIEW_SDK_INT);
+        }
+        String releaseOrCodename = "";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (Build.VERSION.RELEASE_OR_CODENAME != null) {
+                releaseOrCodename = Build.VERSION.RELEASE_OR_CODENAME;
+            }
+        }
+        String securityPatch = "";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Build.VERSION.SECURITY_PATCH != null) {
+                securityPatch = Build.VERSION.SECURITY_PATCH;
+            }
+        }
+        WritableMap buildVersionMap = Arguments.createMap();
+        buildVersionMap.putString("BASE_OS", baseOS);
+        buildVersionMap.putString("CODENAME", Build.VERSION.CODENAME);
+        buildVersionMap.putString("INCREMENTAL", Build.VERSION.INCREMENTAL);
+        buildVersionMap.putString("PREVIEW_SDK_INT", previewSDKInt);
+        buildVersionMap.putString("RELEASE", Build.VERSION.RELEASE);
+        buildVersionMap.putString("RELEASE_OR_CODENAME", releaseOrCodename);
+        buildVersionMap.putString("SDK", Build.VERSION.SDK);
+        buildVersionMap.putString("SDK_INT", String.valueOf(Build.VERSION.SDK_INT));
+        buildVersionMap.putString("SECURITY_PATCH", securityPatch);
+
         WritableMap build = Arguments.createMap();
         build.putString("BOARD", Build.BOARD);
         build.putString("BRAND", Build.BRAND);
@@ -169,6 +202,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         build.putString("HARDWARE", Build.HARDWARE);
         build.putString("MANUFACTURER", Build.MANUFACTURER);
         build.putString("PRODUCT", Build.PRODUCT);
+        build.putMap("VERSION", buildVersionMap);
 
         Context context = this.getReactApplicationContext();
 
@@ -204,18 +238,29 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
                 deviceName = "";
             }
         }
+        String androidID = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID);
+        if (androidID == null) {
+            androidID = "";
+        }
         WritableMap settingsMap = Arguments.createMap();
         WritableMap settingsGlobalMap = Arguments.createMap();
         settingsGlobalMap.putString("DEVICE_NAME", deviceName);
         WritableMap settingsSecureMap = Arguments.createMap();
         settingsSecureMap.putString("bluetooth_name", bluetoothName);
+        settingsSecureMap.putString("ANDROID_ID", androidID);
         settingsMap.putMap("Secure", settingsSecureMap);
         settingsMap.putMap("Global", settingsGlobalMap);
+
+        CharSequence applicationInfoLabel = context.getApplicationInfo().loadLabel(context.getPackageManager());
+        if (applicationInfoLabel == null) {
+            applicationInfoLabel = "";
+        }
 
         WritableMap android = Arguments.createMap();
         android.putMap("Build", build);
         android.putMap("PackageInfo", packageInfoMap);
         android.putMap("Settings", settingsMap);
+        android.putString("ApplicationInfoLabel", applicationInfoLabel.toString());
 
         WritableMap root = Arguments.createMap();
         root.putMap("android", android);
