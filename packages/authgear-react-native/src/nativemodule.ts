@@ -1,45 +1,54 @@
 import { NativeModules } from "react-native";
-import { CANCEL } from "@authgear/core";
 import { BiometricPrivateKeyOptions, BiometricOptions } from "./types";
+import { _wrapError } from "./error";
 
 const { AuthgearReactNative } = NativeModules;
 
+async function _wrapPromise<T>(p: Promise<T>): Promise<T> {
+  try {
+    const val = await p;
+    return val;
+  } catch (e) {
+    throw _wrapError(e);
+  }
+}
+
 export async function storageGetItem(key: string): Promise<string | null> {
-  return AuthgearReactNative.storageGetItem(key);
+  return _wrapPromise(AuthgearReactNative.storageGetItem(key));
 }
 
 export async function storageSetItem(
   key: string,
   value: string
 ): Promise<void> {
-  return AuthgearReactNative.storageSetItem(key, value);
+  return _wrapPromise(AuthgearReactNative.storageSetItem(key, value));
 }
 
 export async function storageDeleteItem(key: string): Promise<void> {
-  return AuthgearReactNative.storageDeleteItem(key);
+  return _wrapPromise(AuthgearReactNative.storageDeleteItem(key));
 }
 
 export async function getDeviceInfo(): Promise<unknown> {
-  return AuthgearReactNative.getDeviceInfo();
+  return _wrapPromise(AuthgearReactNative.getDeviceInfo());
 }
 
 export async function randomBytes(length: number): Promise<number[]> {
-  return AuthgearReactNative.randomBytes(length);
+  return _wrapPromise(AuthgearReactNative.randomBytes(length));
 }
 
 export async function sha256String(input: string): Promise<number[]> {
-  return AuthgearReactNative.sha256String(input);
+  return _wrapPromise(AuthgearReactNative.sha256String(input));
 }
 
 export async function generateUUID(): Promise<string> {
-  return AuthgearReactNative.generateUUID();
+  return _wrapPromise(AuthgearReactNative.generateUUID());
 }
 
 export async function openURL(
   url: string,
   wechatRedirectURI?: string
 ): Promise<void> {
-  return AuthgearReactNative.openURL(url, wechatRedirectURI);
+  return _wrapPromise(AuthgearReactNative.openURL(url, wechatRedirectURI));
 }
 
 export async function openAuthorizeURL(
@@ -47,57 +56,48 @@ export async function openAuthorizeURL(
   callbackURL: string,
   wechatRedirectURI?: string
 ): Promise<string> {
-  try {
-    const redirectURI = await AuthgearReactNative.openAuthorizeURL(
-      url,
-      callbackURL,
-      wechatRedirectURI
-    );
-    await dismiss();
-    return redirectURI;
-  } catch (e) {
-    if (e.message === "CANCEL") {
-      throw CANCEL;
-    }
-    throw e;
-  }
+  const redirectURI: string = await _wrapPromise(
+    AuthgearReactNative.openAuthorizeURL(url, callbackURL, wechatRedirectURI)
+  );
+  await dismiss();
+  return redirectURI;
 }
 
 export async function dismiss(): Promise<void> {
-  return AuthgearReactNative.dismiss();
+  return _wrapPromise(AuthgearReactNative.dismiss());
 }
 
 export async function getAnonymousKey(
   kid: string | null
 ): Promise<{ kid: string; alg: string; jwk?: any }> {
-  return AuthgearReactNative.getAnonymousKey(kid);
+  return _wrapPromise(AuthgearReactNative.getAnonymousKey(kid));
 }
 
 export async function signAnonymousToken(
   kid: string,
   tokenData: string
 ): Promise<string> {
-  return AuthgearReactNative.signAnonymousToken(kid, tokenData);
+  return _wrapPromise(AuthgearReactNative.signAnonymousToken(kid, tokenData));
 }
 
 export async function createBiometricPrivateKey(
   options: BiometricPrivateKeyOptions
 ): Promise<string> {
-  return AuthgearReactNative.createBiometricPrivateKey(options);
+  return _wrapPromise(AuthgearReactNative.createBiometricPrivateKey(options));
 }
 
 export async function signWithBiometricPrivateKey(
   options: BiometricPrivateKeyOptions
 ): Promise<string> {
-  return AuthgearReactNative.signWithBiometricPrivateKey(options);
+  return _wrapPromise(AuthgearReactNative.signWithBiometricPrivateKey(options));
 }
 
 export async function removeBiometricPrivateKey(kid: string): Promise<void> {
-  return AuthgearReactNative.removeBiometricPrivateKey(kid);
+  return _wrapPromise(AuthgearReactNative.removeBiometricPrivateKey(kid));
 }
 
 export async function checkBiometricSupported(
   options: BiometricOptions
 ): Promise<void> {
-  return AuthgearReactNative.checkBiometricSupported(options);
+  return _wrapPromise(AuthgearReactNative.checkBiometricSupported(options));
 }

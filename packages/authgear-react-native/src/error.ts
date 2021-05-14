@@ -1,3 +1,5 @@
+import { AuthgearError, CancelError } from "@authgear/core";
+
 // On iOS, the arguments passed to RCTPromiseRejectBlock
 // will be processed by RCTJSErrorFromCodeMessageAndNSError.
 //
@@ -74,12 +76,89 @@ export function isPlatformErrorAndroid(e: unknown): e is PlatformErrorAndroid {
 }
 
 /**
- * If it returns true, then it is likely that the biometric has changed
- * so that the private key has been invalidated.
+ * BiometricPrivateKeyNotFoundError means the biometric has changed so that
+ * the private key has been invalidated.
  *
  * @public
  */
-export function isBiometricPrivateKeyNotFoundError(e: unknown): boolean {
+export class BiometricPrivateKeyNotFoundError extends AuthgearError {}
+
+/**
+ * BiometricNotSupportedOrPermissionDeniedError means this device does not support biometric,
+ * or the user has denied the usage of biometric.
+ *
+ * @public
+ */
+export class BiometricNotSupportedOrPermissionDeniedError extends AuthgearError {}
+
+/**
+ * BiometricNoPasscodeError means the device does not have a passcode.
+ * You should prompt the user to setup a password for their device.
+ *
+ * @public
+ */
+export class BiometricNoPasscodeError extends AuthgearError {}
+
+/**
+ * BiometricNoEnrollmentError means the user has not setup biometric.
+ * You should prompt the user to do so.
+ *
+ * @public
+ */
+export class BiometricNoEnrollmentError extends AuthgearError {}
+
+/**
+ * BiometricLockoutError means the biometric is locked due to too many failed attempts.
+ *
+ * @public
+ */
+export class BiometricLockoutError extends AuthgearError {}
+
+type _ErrorIdentificationFunction = (e: unknown) => boolean;
+
+const _errorMappings: [_ErrorIdentificationFunction, typeof AuthgearError][] = [
+  [_isBiometricPrivateKeyNotFoundError, BiometricPrivateKeyNotFoundError],
+  [_isBiometricCancel, CancelError],
+  [
+    _isBiometricNotSupportedOrPermissionDeniedError,
+    BiometricNotSupportedOrPermissionDeniedError,
+  ],
+  [_isBiometricNoEnrollmentError, BiometricNoEnrollmentError],
+  [_isBiometricNoPasscodeError, BiometricNoPasscodeError],
+  [_isBiometricLockoutError, BiometricLockoutError],
+  [_isCancel, CancelError],
+];
+
+/**
+ * @internal
+ */
+export function _wrapError(e: unknown): unknown {
+  for (const [f, cls] of _errorMappings) {
+    if (f(e)) {
+      const err = new cls();
+      err.underlyingError = e;
+      return err;
+    }
+  }
+  const err = new AuthgearError();
+  err.underlyingError = e;
+  return err;
+}
+
+export function _isCancel(e: unknown): boolean {
+  if (isPlatformErrorIOS(e)) {
+    return e.code === "CANCEL";
+  }
+  if (isPlatformErrorAndroid(e)) {
+    return e.code === "CANCEL";
+  }
+  return false;
+}
+
+/**
+ * @internal
+ */
+export function _isBiometricPrivateKeyNotFoundError(e: unknown): boolean {
   if (isPlatformErrorIOS(e)) {
     return e.domain === NSOSStatusErrorDomain && e.code === errSecItemNotFound;
   }
@@ -92,11 +171,9 @@ export function isBiometricPrivateKeyNotFoundError(e: unknown): boolean {
 }
 
 /**
- * If it returns true, then it is likely that the user has canceled.
- *
- * @public
+ * @internal
  */
-export function isBiometricCancel(e: unknown): boolean {
+export function _isBiometricCancel(e: unknown): boolean {
   if (isPlatformErrorIOS(e)) {
     return (
       (e.domain === kLAErrorDomain && e.code === kLAErrorUserCancel) ||
@@ -114,12 +191,11 @@ export function isBiometricCancel(e: unknown): boolean {
 }
 
 /**
- * If it returns ture, then it is likely that this device does not support biometric,
- * or the user has denied the usage of biometric.
- *
- * @public
+ * @internal
  */
-export function isBiometricNotSupportedOrPermissionDenied(e: unknown): boolean {
+export function _isBiometricNotSupportedOrPermissionDeniedError(
+  e: unknown
+): boolean {
   if (isPlatformErrorIOS(e)) {
     return (
       e.domain === kLAErrorDomain && e.code === kLAErrorBiometryNotAvailable
@@ -140,12 +216,9 @@ export function isBiometricNotSupportedOrPermissionDenied(e: unknown): boolean {
 }
 
 /**
- * If it returns true, then the user has not setup biometric.
- * You should prompt the user to do so.
- *
- * @public
+ * @internal
  */
-export function isBiometricNoEnrollment(e: unknown): boolean {
+export function _isBiometricNoEnrollmentError(e: unknown): boolean {
   if (isPlatformErrorIOS(e)) {
     return (
       e.domain === kLAErrorDomain && e.code === kLAErrorBiometryNotEnrolled
@@ -160,12 +233,9 @@ export function isBiometricNoEnrollment(e: unknown): boolean {
 }
 
 /**
- * If it returns true, then the device does not have a passcode.
- * You should prompt the user to setup a passcode for their device.
- *
- * @public
+ * @internal
  */
-export function isBiometricNoPasscode(e: unknown): boolean {
+export function _isBiometricNoPasscodeError(e: unknown): boolean {
   if (isPlatformErrorIOS(e)) {
     return e.domain === kLAErrorDomain && e.code === kLAErrorPasscodeNotSet;
   }
@@ -176,11 +246,9 @@ export function isBiometricNoPasscode(e: unknown): boolean {
 }
 
 /**
- * If it returns true, then biometric is locked due to too many failed attempts.
- *
- * @public
+ * @internal
  */
-export function isBiometricLockout(e: unknown): boolean {
+export function _isBiometricLockoutError(e: unknown): boolean {
   if (isPlatformErrorIOS(e)) {
     return e.domain === kLAErrorDomain && e.code === kLAErrorBiometryLockout;
   }
