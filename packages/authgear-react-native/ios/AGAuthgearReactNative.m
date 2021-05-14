@@ -219,6 +219,7 @@ RCT_EXPORT_METHOD(getDeviceInfo:(RCTPromiseResolveBlock)resolve reject:(RCTPromi
     NSDictionary *mainInfoDict = [NSBundle mainBundle].infoDictionary;
     NSDictionary *bundleInfo = @{
       @"CFBundleIdentifier": mainInfoDict[@"CFBundleIdentifier"],
+      @"CFBundleName": mainInfoDict[@"CFBundleName"],
       @"CFBundleDisplayName": mainInfoDict[@"CFBundleDisplayName"],
       @"CFBundleExecutable": mainInfoDict[@"CFBundleExecutable"],
       @"CFBundleShortVersionString": mainInfoDict[@"CFBundleShortVersionString"],
