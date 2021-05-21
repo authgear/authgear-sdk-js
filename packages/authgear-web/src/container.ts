@@ -331,14 +331,7 @@ export class WebContainer {
       throw new AuthgearError("missing client ID");
     }
     const config = await this.baseContainer.apiClient._fetchOIDCConfiguration();
-
-    const { id_token } = await this.baseContainer.apiClient._oidcTokenRequest({
-      grant_type: "urn:authgear:params:oauth:grant-type:id-token",
-      client_id: clientID,
-    });
-
     const query = new URLSearchParams();
-    query.append("id_token_hint", id_token);
     if (options.redirectURI) {
       query.append("post_logout_redirect_uri", options.redirectURI);
     }
