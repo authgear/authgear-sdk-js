@@ -1,6 +1,6 @@
 {
   "name": "@authgear/react-native",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "license": "Apache-2.0",
   "main": "dist/authgear-react-native.js",
   "files": [
@@ -11,7 +11,7 @@
     "android"
   ],
   "devDependencies": {
-    "@authgear/core": "0.11.0",
+    "@authgear/core": "0.12.0",
     "@types/react-native": "0.60.25",
     "core-js-pure": "3.6.5"
   },
