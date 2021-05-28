@@ -234,7 +234,11 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       query.append("state", options.state);
     }
     if (options.prompt) {
-      query.append("prompt", options.prompt);
+      if (typeof options.prompt === "string") {
+        query.append("prompt", options.prompt);
+      } else if (options.prompt.length > 0) {
+        query.append("prompt", options.prompt.join(" "));
+      }
     }
     if (options.loginHint) {
       query.append("login_hint", options.loginHint);

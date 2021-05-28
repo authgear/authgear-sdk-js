@@ -41,6 +41,13 @@ export interface PromoteOptions {
 }
 
 /**
+ * Prompt parameter options.
+ *
+ * @public
+ */
+export type PromptOption = "none" | "login" | "consent" | "select_account";
+
+/**
  * Auth UI authorization options
  *
  * @public
@@ -56,8 +63,17 @@ export interface AuthorizeOptions {
   state?: string;
   /**
    * OIDC prompt parameter.
+   *
+   * Prompt parameter will be used for Authgear authorization, it will also be forwarded to the underlying SSO providers.
+   *
+   * For Authgear, currently, only login is supported. Other unsupported values will be ignored.
+   *
+   * For the underlying SSO providers, some providers only support a single value rather than a list.
+   * The first supported value will be used for that case.
+   * e.g. Azure Active Directory
+   *
    */
-  prompt?: string;
+  prompt?: PromptOption[] | PromptOption;
   /**
    * OIDC login hint parameter
    */
