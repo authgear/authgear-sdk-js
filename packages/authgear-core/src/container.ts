@@ -1,3 +1,4 @@
+/* global Uint8Array */
 import URL from "core-js-pure/features/url";
 import URLSearchParams from "core-js-pure/features/url-search-params";
 import {
@@ -11,6 +12,8 @@ import {
   SessionStateChangeReason,
   SessionState,
 } from "./types";
+import { _base64URLDecode } from "./base64";
+import { _decodeUTF8 } from "./utf8";
 import { AuthgearError, OAuthError } from "./error";
 import { _BaseAPIClient } from "./client";
 
@@ -41,6 +44,31 @@ export interface _BaseContainerDelegate {
   }>;
   refreshAccessToken(): Promise<void>;
   onSessionStateChange: (reason: SessionStateChangeReason) => void;
+}
+
+/**
+ * @internal
+ */
+export function _canReauthenticate(idToken: string | undefined): boolean {
+  // idToken is the format
+  // base64URLEncode(header) "." base64URLEncode(payload) "." signature
+  if (idToken == null) {
+    return false;
+  }
+  const parts = idToken.split(".");
+  if (parts.length !== 3) {
+    return false;
+  }
+  const payload = parts[1];
+  const utf8Bytes = _base64URLDecode(payload);
+  const utf8Str = _decodeUTF8(new Uint8Array(utf8Bytes));
+  const idTokenPayload = JSON.parse(utf8Str);
+  const can =
+    idTokenPayload["https://authgear.com/claims/user/can_reauthenticate"];
+  if (typeof can === "boolean") {
+    return can;
+  }
+  return false;
 }
 
 /**
@@ -80,6 +108,10 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
   getIDTokenHint(): string | undefined {
     return this.idToken;
+  }
+
+  canReauthenticate(): boolean {
+    return _canReauthenticate(this.idToken);
   }
 
   async _persistTokenResponse(

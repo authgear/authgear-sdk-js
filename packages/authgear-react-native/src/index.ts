@@ -266,6 +266,14 @@ export class ReactNativeContainer {
   }
 
   /**
+   * canReauthenticate() reports whether the current user can reauthenticate.
+   * @public
+   */
+  canReauthenticate(): boolean {
+    return this.baseContainer.canReauthenticate();
+  }
+
+  /**
    * configure() configures the container with the client ID and the endpoint.
    * It also does local IO to retrieve the refresh token.
    * It only obtains the refresh token locally and no network call will
