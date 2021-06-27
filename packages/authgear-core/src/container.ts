@@ -2,7 +2,7 @@
 import URL from "core-js-pure/features/url";
 import URLSearchParams from "core-js-pure/features/url-search-params";
 import {
-  AuthorizeOptions,
+  _OIDCAuthenticationRequest,
   AuthorizeResult,
   ContainerOptions,
   _ContainerStorage,
@@ -254,7 +254,9 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   }
 
   // eslint-disable-next-line complexity
-  async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
+  async authorizeEndpoint(
+    options: _OIDCAuthenticationRequest
+  ): Promise<string> {
     const clientID = this.clientID;
     if (clientID == null) {
       throw new AuthgearError("missing client ID");
@@ -263,7 +265,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     const config = await this.apiClient._fetchOIDCConfiguration();
     const query = new URLSearchParams();
 
-    const responseType = options.responseType ?? "code";
+    const responseType = options.responseType;
     query.append("response_type", responseType);
     if (responseType === "code") {
       // Authorization code need PKCE.
@@ -277,14 +279,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       query.append("code_challenge", codeVerifier.challenge);
     }
 
-    if (responseType === "code") {
-      query.append(
-        "scope",
-        "openid offline_access https://authgear.com/scopes/full-access"
-      );
-    } else {
-      query.append("scope", "openid https://authgear.com/scopes/full-access");
-    }
+    query.append("scope", options.scope.join(" "));
 
     query.append("client_id", clientID);
     query.append("redirect_uri", options.redirectURI);

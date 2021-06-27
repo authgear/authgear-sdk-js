@@ -275,11 +275,6 @@ export class WebContainer {
    * @param options - authorize options
    */
   async startAuthorization(options: AuthorizeOptions): Promise<void> {
-    if (this.sessionType === "cookie") {
-      // Use shared session cookie by default for first-party web apps.
-      options.responseType = options.responseType ?? "none";
-    }
-
     const authorizeEndpoint = await this.authorizeEndpoint(options);
     window.location.href = authorizeEndpoint;
   }
@@ -361,7 +356,23 @@ export class WebContainer {
    * @internal
    */
   async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
-    return this.baseContainer.authorizeEndpoint(options);
+    // Use shared session cookie by default for first-party web apps.
+    const responseType =
+      options.responseType ?? this.sessionType === "cookie" ? "none" : "code";
+    const scope =
+      this.sessionType === "cookie"
+        ? ["openid", "https://authgear.com/scopes/full-access"]
+        : [
+            "openid",
+            "offline_access",
+            "https://authgear.com/scopes/full-access",
+          ];
+
+    return this.baseContainer.authorizeEndpoint({
+      ...options,
+      responseType,
+      scope,
+    });
   }
 
   /**

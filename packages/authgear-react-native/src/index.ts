@@ -527,7 +527,15 @@ export class ReactNativeContainer {
    * @internal
    */
   async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
-    return this.baseContainer.authorizeEndpoint(options);
+    return this.baseContainer.authorizeEndpoint({
+      ...options,
+      responseType: "code",
+      scope: [
+        "openid",
+        "offline_access",
+        "https://authgear.com/scopes/full-access",
+      ],
+    });
   }
 
   /**
