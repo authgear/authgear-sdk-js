@@ -235,6 +235,24 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     await this._persistTokenResponse(tokenResponse, "FOUND_TOKEN");
   }
 
+  async _refreshIDToken(): Promise<void> {
+    const clientID = this.clientID;
+    if (clientID == null) {
+      throw new AuthgearError("missing client ID");
+    }
+    await this.refreshAccessTokenIfNeeded();
+    const accessToken = this.accessToken;
+    const tokenRequest: _OIDCTokenRequest = {
+      grant_type: "urn:authgear:params:oauth:grant-type:id-token",
+      client_id: clientID,
+      access_token: accessToken,
+    };
+    const { id_token } = await this.apiClient._oidcTokenRequest(tokenRequest);
+    if (id_token != null) {
+      this.idToken = id_token;
+    }
+  }
+
   // eslint-disable-next-line complexity
   async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
     const clientID = this.clientID;

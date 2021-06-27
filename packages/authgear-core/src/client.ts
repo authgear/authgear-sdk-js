@@ -52,7 +52,7 @@ export abstract class _BaseAPIClient {
     const headers: { [name: string]: string } = {};
     const accessToken = this._delegate?.getAccessToken();
     if (accessToken != null) {
-      headers["authorization"] = `bearer ${accessToken}`;
+      headers["authorization"] = `Bearer ${accessToken}`;
     }
     if (this.userAgent != null) {
       headers["user-agent"] = this.userAgent;
@@ -279,11 +279,16 @@ export abstract class _BaseAPIClient {
     if (req.x_device_info) {
       query.append("x_device_info", req.x_device_info);
     }
+    const headers: { [name: string]: string } = {
+      "content-type": "application/x-www-form-urlencoded",
+    };
+    if (req.access_token != null) {
+      headers.authorization = `Bearer ${req.access_token}`;
+    }
+
     return this._fetchOIDCJSON(config.token_endpoint, {
       method: "POST",
-      headers: {
-        "content-type": "application/x-www-form-urlencoded",
-      },
+      headers,
       body: query.toString(),
       mode: "cors",
       credentials: "include",
@@ -293,7 +298,7 @@ export abstract class _BaseAPIClient {
   async _setupBiometricRequest(req: _SetupBiometricRequest): Promise<void> {
     const config = await this._fetchOIDCConfiguration();
     const headers: { [name: string]: string } = {
-      authorization: `bearer ${req.access_token}`,
+      authorization: `Bearer ${req.access_token}`,
       "content-type": "application/x-www-form-urlencoded",
     };
     const query = new URLSearchParams();
@@ -313,7 +318,7 @@ export abstract class _BaseAPIClient {
   async _oidcUserInfoRequest(accessToken?: string): Promise<UserInfo> {
     const headers: { [name: string]: string } = {};
     if (accessToken) {
-      headers["authorization"] = `bearer ${accessToken}`;
+      headers["authorization"] = `Bearer ${accessToken}`;
     }
     const config = await this._fetchOIDCConfiguration();
     const response = await this._fetchOIDCJSON(config.userinfo_endpoint, {

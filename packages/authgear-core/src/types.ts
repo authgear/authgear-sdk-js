@@ -236,6 +236,7 @@ export interface _OIDCTokenRequest {
   refresh_token?: string;
   jwt?: string;
   x_device_info?: string;
+  access_token?: string;
 }
 
 /**
