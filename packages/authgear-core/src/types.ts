@@ -259,7 +259,7 @@ export interface _SetupBiometricRequest {
  * @internal
  */
 export interface _OIDCTokenResponse {
-  id_token: string;
+  id_token?: string;
   token_type?: string;
   access_token?: string;
   expires_in?: number;

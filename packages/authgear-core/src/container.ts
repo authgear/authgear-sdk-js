@@ -57,6 +57,8 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
   sessionState: SessionState;
 
+  idToken?: string;
+
   accessToken?: string;
 
   refreshToken?: string;
@@ -80,14 +82,15 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     response: _OIDCTokenResponse,
     reason: SessionStateChangeReason
   ): Promise<void> {
-    const { access_token, refresh_token, expires_in } = response;
+    const { id_token, access_token, refresh_token, expires_in } = response;
 
-    if (access_token == null || expires_in == null) {
+    if (id_token == null || access_token == null || expires_in == null) {
       throw new AuthgearError(
-        "access_token or expires_in missing in Token Response"
+        "id_token, access_token or expires_in missing in Token Response"
       );
     }
 
+    this.idToken = id_token;
     this.accessToken = access_token;
     if (refresh_token) {
       this.refreshToken = refresh_token;
@@ -107,6 +110,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
   async _clearSession(reason: SessionStateChangeReason): Promise<void> {
     await this._delegate.refreshTokenStorage.delRefreshToken(this.name);
+    this.idToken = undefined;
     this.accessToken = undefined;
     this.refreshToken = undefined;
     this.expireAt = undefined;
