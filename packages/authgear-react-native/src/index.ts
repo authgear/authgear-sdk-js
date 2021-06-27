@@ -15,7 +15,7 @@ import {
   OAuthError,
   _ContainerStorage,
   _encodeUTF8,
-  _encodeBase64URLFromByteArray,
+  _base64URLEncode,
   SessionState,
   SessionStateChangeReason,
   AuthgearError,
@@ -110,9 +110,7 @@ export class _PlatformStorageDriver implements _StorageDriver {
 async function getXDeviceInfo(): Promise<string> {
   const deviceInfo = await getDeviceInfo();
   const deviceInfoJSON = JSON.stringify(deviceInfo);
-  const xDeviceInfo = _encodeBase64URLFromByteArray(
-    _encodeUTF8(deviceInfoJSON)
-  );
+  const xDeviceInfo = _base64URLEncode(_encodeUTF8(deviceInfoJSON));
   return xDeviceInfo;
 }
 

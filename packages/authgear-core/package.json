@@ -4,6 +4,7 @@
   "license": "Apache-2.0",
   "main": "src/index.ts",
   "devDependencies": {
+    "base64-arraybuffer": "0.2.0",
     "core-js-pure": "3.6.5",
     "text-encoding-shim": "1.0.5"
   }

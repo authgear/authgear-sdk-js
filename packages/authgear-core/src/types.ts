@@ -1,12 +1,4 @@
 /**
- * @internal
- */
-export interface _ByteArray {
-  [index: number]: number;
-  length: number;
-}
-
-/**
  * @public
  */
 export interface UserInfo {
