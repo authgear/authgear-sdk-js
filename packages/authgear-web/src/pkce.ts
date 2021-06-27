@@ -6,15 +6,6 @@ function byteToHex(byte: number): string {
   return ("0" + byte.toString(16)).substr(-2);
 }
 
-// uint8ArrayFrom is Uint8Array.from that works everywhere.
-function uint8ArrayFrom(arr: number[]): Uint8Array {
-  const output = new Uint8Array(arr.length);
-  for (let i = 0; i < arr.length; ++i) {
-    output[i] = arr[i];
-  }
-  return output;
-}
-
 // windowCryptoSubtleDigest is window.crypto.subtle.digest with IE 11 support.
 async function windowCryptoSubtleDigest(
   algorithm: string,
@@ -38,7 +29,7 @@ async function windowCryptoSubtleDigest(
 }
 
 async function sha256(s: string): Promise<Uint8Array> {
-  const bytes = uint8ArrayFrom(_encodeUTF8(s));
+  const bytes = _encodeUTF8(s);
   return windowCryptoSubtleDigest("SHA-256", bytes);
 }
 
