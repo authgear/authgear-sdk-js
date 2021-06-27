@@ -113,7 +113,6 @@ function Root() {
     authgear
       .startAuthorization({
         redirectURI,
-        prompt: "login",
       })
       .then(
         () => {},
