@@ -78,6 +78,10 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     this._delegate = _delegate;
   }
 
+  getIDTokenHint(): string | undefined {
+    return this.idToken;
+  }
+
   async _persistTokenResponse(
     response: _OIDCTokenResponse,
     reason: SessionStateChangeReason

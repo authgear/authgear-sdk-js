@@ -188,6 +188,14 @@ export class WebContainer {
   }
 
   /**
+   * getIDTokenHint() returns the ID token for the OIDC id_token_hint parameter.
+   * @public
+   */
+  getIDTokenHint(): string | undefined {
+    return this.baseContainer.getIDTokenHint();
+  }
+
+  /**
    * configure() configures the container with the client ID and the endpoint.
    * It also does local IO to retrieve the refresh token.
    * It only obtains the refresh token locally and no network call will
