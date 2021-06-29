@@ -150,6 +150,23 @@ function Root() {
     [clientID, endpoint, transientSession, configure]
   );
 
+  const onClickReauthenticate = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const redirectURI = window.location.origin + "/reauth-redirect";
+      authgear
+        .startReauthentication({
+          redirectURI,
+        })
+        .then(
+          () => {},
+          (err) => setError(err)
+        );
+    },
+    []
+  );
+
   return (
     <div>
       <p>
@@ -202,6 +219,13 @@ function Root() {
           >
             Open Settings
           </a>
+          <button
+            className="button"
+            type="button"
+            onClick={onClickReauthenticate}
+          >
+            Reauthenticate
+          </button>
           <button className="button" type="button" onClick={onClickSignOut}>
             Sign out
           </button>
@@ -253,12 +277,49 @@ function AuthRedirect() {
   );
 }
 
+function ReauthRedirect() {
+  const navigate = useNavigate();
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const clientID = readClientID();
+    const endpoint = readEndpoint();
+    const transientSession = readTransientSession();
+    authgear
+      .configure({
+        clientID,
+        endpoint,
+        sessionType: SESSION_TYPE,
+        transientSession: transientSession,
+      })
+      .then(
+        () => {
+          authgear.finishReauthentication().then(
+            (_) => {
+              navigate("/");
+            },
+            (err) => setError(err)
+          );
+        },
+        (err) => setError(err)
+      );
+  }, [navigate]);
+
+  return (
+    <div>
+      <p>Redirecting</p>
+      <ShowError error={error} />
+    </div>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Root />} />
         <Route path="/auth-redirect" element={<AuthRedirect />} />
+        <Route path="/reauth-redirect" element={<ReauthRedirect />} />
       </Routes>
     </BrowserRouter>
   );
