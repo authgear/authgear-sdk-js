@@ -4,6 +4,7 @@ import URLSearchParams from "core-js-pure/features/url-search-params";
 import {
   _OIDCAuthenticationRequest,
   AuthorizeResult,
+  ReauthenticateResult,
   ContainerOptions,
   _ContainerStorage,
   _APIClientDelegate,
@@ -283,29 +284,35 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
     query.append("client_id", clientID);
     query.append("redirect_uri", options.redirectURI);
-    if (options.state) {
+    if (options.state != null) {
       query.append("state", options.state);
     }
-    if (options.prompt) {
+    if (options.prompt != null) {
       if (typeof options.prompt === "string") {
         query.append("prompt", options.prompt);
       } else if (options.prompt.length > 0) {
         query.append("prompt", options.prompt.join(" "));
       }
     }
-    if (options.loginHint) {
+    if (options.loginHint != null) {
       query.append("login_hint", options.loginHint);
     }
-    if (options.uiLocales) {
+    if (options.uiLocales != null) {
       query.append("ui_locales", options.uiLocales.join(" "));
     }
-    if (options.wechatRedirectURI) {
+    if (options.idTokenHint != null) {
+      query.append("id_token_hint", options.idTokenHint);
+    }
+    if (options.maxAge != null) {
+      query.append("max_age", String(options.maxAge));
+    }
+    if (options.wechatRedirectURI != null) {
       query.append("x_wechat_redirect_uri", options.wechatRedirectURI);
     }
-    if (options.platform) {
+    if (options.platform != null) {
       query.append("x_platform", options.platform);
     }
-    if (options.page) {
+    if (options.page != null) {
       query.append("x_page", options.page);
     }
 
@@ -366,6 +373,62 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
     if (tokenResponse) {
       await this._persistTokenResponse(tokenResponse, "AUTHENTICATED");
+    }
+
+    return {
+      userInfo,
+      state: params.get("state") ?? undefined,
+    };
+  }
+
+  async _finishReauthentication(
+    url: string,
+    tokenRequest?: Partial<_OIDCTokenRequest>
+  ): Promise<ReauthenticateResult> {
+    const clientID = this.clientID;
+    if (clientID == null) {
+      throw new AuthgearError("missing client ID");
+    }
+
+    const u = new URL(url);
+    const params = u.searchParams;
+    const uu = new URL(url);
+    uu.hash = "";
+    uu.search = "";
+
+    const redirectURI: string = uu.toString();
+    if (params.get("error")) {
+      throw new OAuthError({
+        error: params.get("error")!,
+        error_description: params.get("error_description") ?? undefined,
+      });
+    }
+
+    const code = params.get("code");
+    if (!code) {
+      throw new OAuthError({
+        error: "invalid_request",
+        error_description: "Missing parameter: code",
+      });
+    }
+
+    const codeVerifier = await this._delegate.storage.getOIDCCodeVerifier(
+      this.name
+    );
+
+    const { id_token, access_token } = await this.apiClient._oidcTokenRequest({
+      ...tokenRequest,
+      grant_type: "authorization_code",
+      code: code,
+      redirect_uri: redirectURI,
+      client_id: clientID,
+      code_verifier: codeVerifier ?? "",
+    });
+
+    const userInfo = await this.apiClient._oidcUserInfoRequest(access_token);
+
+    if (id_token != null) {
+      this.idToken = id_token;
     }
 
     return {

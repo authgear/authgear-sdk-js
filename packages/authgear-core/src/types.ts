@@ -51,6 +51,7 @@ export interface _OIDCAuthenticationRequest {
   maxAge?: number;
   loginHint?: string;
   uiLocales?: string[];
+  idTokenHint?: string;
   wechatRedirectURI?: string;
   platform?: string;
   page?: string;
@@ -167,6 +168,22 @@ export interface SettingOptions {
  * @public
  */
 export interface AuthorizeResult {
+  /**
+   * OAuth 2.0 state value.
+   */
+  state?: string;
+  /**
+   * UserInfo.
+   */
+  userInfo: UserInfo;
+}
+
+/**
+ * Result of reauthentication
+ *
+ * @public
+ */
+export interface ReauthenticateResult {
   /**
    * OAuth 2.0 state value.
    */

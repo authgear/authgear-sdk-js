@@ -7,6 +7,8 @@ import {
   _BaseContainer,
   AuthorizeOptions,
   AuthorizeResult,
+  ReauthenticateOptions,
+  ReauthenticateResult,
   _ContainerStorage,
   SessionState,
   SessionStateChangeReason,
@@ -270,9 +272,7 @@ export class WebContainer {
   }
 
   /**
-   * Start authorization by opening authorize page
-   *
-   * @param options - authorize options
+   * Start authorization by redirecting to the authorization endpoint.
    */
   async startAuthorization(options: AuthorizeOptions): Promise<void> {
     const authorizeEndpoint = await this.authorizeEndpoint(options);
@@ -280,14 +280,45 @@ export class WebContainer {
   }
 
   /**
-   * Finish authorization
+   * Start reauthentication by redirecting to the authorization endpoint.
+   */
+  async startReauthentication(options: ReauthenticateOptions): Promise<void> {
+    await this.baseContainer._refreshIDToken();
+
+    const idToken = this.getIDTokenHint();
+    if (idToken == null || !this.canReauthenticate()) {
+      throw new Error(
+        "You can only trigger reauthentication when canReauthenticate() returns true"
+      );
+    }
+
+    const maxAge = options.maxAge ?? 0;
+    const endpoint = await this.baseContainer.authorizeEndpoint({
+      ...options,
+      maxAge,
+      idTokenHint: idToken,
+      responseType: "code",
+      scope: ["openid", "https://authgear.com/scopes/full-access"],
+    });
+    window.location.href = endpoint;
+  }
+
+  /**
+   * Finish authorization.
    *
-   * exchangeToken read window.location.
-   * It checks if error is present and rejects with OAuthError.
-   * Otherwise assume code is present, make a token request.
+   * It may reject with OAuthError.
    */
   async finishAuthorization(): Promise<AuthorizeResult> {
     return this.baseContainer._finishAuthorization(window.location.href);
+  }
+
+  /**
+   * Finish reauthentication.
+   *
+   * It may reject with OAuthError.
+   */
+  async finishReauthentication(): Promise<ReauthenticateResult> {
+    return this.baseContainer._finishReauthentication(window.location.href);
   }
 
   /**
