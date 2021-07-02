@@ -9,6 +9,8 @@ import {
   _BaseContainer,
   AuthorizeOptions,
   AuthorizeResult,
+  ReauthenticateOptions,
+  ReauthenticateResult,
   PromoteOptions,
   UserInfo,
   SettingOptions,
@@ -326,11 +328,9 @@ export class ReactNativeContainer {
   }
 
   /**
-   * Open authorize page.
+   * Authenticate the end user via the web.
    *
-   * To allow re-authentication of different user smoothly, default value for `options.prompt` is `login`.
-   *
-   * @param options - authorize options
+   * @public
    */
   async authorize(options: AuthorizeOptions): Promise<AuthorizeResult> {
     const platform = Platform.OS;
@@ -348,6 +348,50 @@ export class ReactNativeContainer {
       x_device_info: xDeviceInfo,
     });
     await this.disableBiometric();
+    return result;
+  }
+
+  /**
+   * Reauthenticate the end user via biometric or the web.
+   *
+   * @public
+   */
+  async reauthenticate(
+    options: ReauthenticateOptions
+  ): Promise<ReauthenticateResult> {
+    // TODO: trigger biometric if possible.
+    const platform = Platform.OS;
+    await this.baseContainer._refreshIDToken();
+
+    const idToken = this.getIDTokenHint();
+    if (idToken == null || !this.canReauthenticate()) {
+      throw new Error(
+        "You can only trigger reauthentication when canReauthenticate() returns true"
+      );
+    }
+
+    const maxAge = options.maxAge ?? 0;
+    const endpoint = await this.baseContainer.authorizeEndpoint({
+      ...options,
+      platform,
+      maxAge,
+      idTokenHint: idToken,
+      responseType: "code",
+      scope: ["openid", "https://authgear.com/scopes/full-access"],
+    });
+
+    const redirectURL = await openAuthorizeURL(
+      endpoint,
+      options.redirectURI,
+      options.wechatRedirectURI
+    );
+    const xDeviceInfo = await getXDeviceInfo();
+    const result = await this.baseContainer._finishReauthentication(
+      redirectURL,
+      {
+        x_device_info: xDeviceInfo,
+      }
+    );
     return result;
   }
 

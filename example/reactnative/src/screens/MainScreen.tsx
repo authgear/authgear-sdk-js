@@ -313,7 +313,6 @@ const HomeScreen: React.FC = () => {
         redirectURI,
         wechatRedirectURI,
         page,
-        prompt: 'login',
       })
       .then(({userInfo}) => {
         setUserInfo(userInfo);
@@ -362,6 +361,25 @@ const HomeScreen: React.FC = () => {
         setLoading(false);
       });
   }, [showError, showUser, updateBiometricState]);
+
+  const reauthenticate = useCallback(() => {
+    setLoading(true);
+    authgear
+      .reauthenticate({
+        redirectURI,
+        wechatRedirectURI,
+      })
+      .then(({userInfo}) => {
+        setUserInfo(userInfo);
+        showUser(userInfo);
+      })
+      .catch((e) => {
+        showError(e);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [showError, showUser]);
 
   const enableBiometric = useCallback(() => {
     setLoading(true);
@@ -529,6 +547,13 @@ const HomeScreen: React.FC = () => {
               !(userInfo?.isAnonymous ?? false) ||
               !loggedIn
             }
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Reauthenticate"
+            onPress={reauthenticate}
+            disabled={!initialized || loading || !loggedIn}
           />
         </View>
         <View style={styles.button}>
