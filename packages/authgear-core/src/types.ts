@@ -144,9 +144,6 @@ export interface ReauthenticateOptions {
    * OIDC max_age
    */
   maxAge?: number;
-
-  // If this is true, then biometric is not used for reauthentication.
-  skipUsingBiometric?: boolean;
 }
 
 /**

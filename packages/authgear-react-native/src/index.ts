@@ -354,12 +354,20 @@ export class ReactNativeContainer {
   /**
    * Reauthenticate the end user via biometric or the web.
    *
+   * If biometricOptions is given, biometric is used when possible.
+   *
    * @public
    */
   async reauthenticate(
-    options: ReauthenticateOptions
+    options: ReauthenticateOptions,
+    biometricOptions?: BiometricOptions
   ): Promise<ReauthenticateResult> {
-    // TODO: trigger biometric if possible.
+    // Use biometric to reauthenticate if the developer instructs us to do so.
+    const biometricEnabled = await this.isBiometricEnabled();
+    if (biometricEnabled && biometricOptions != null) {
+      return this.authenticateBiometric(biometricOptions);
+    }
+
     const platform = Platform.OS;
     await this.baseContainer._refreshIDToken();
 
