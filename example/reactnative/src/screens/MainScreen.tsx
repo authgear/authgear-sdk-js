@@ -363,19 +363,28 @@ const HomeScreen: React.FC = () => {
   }, [showError, showUser, updateBiometricState]);
 
   const reauthenticate = useCallback(() => {
-    setLoading(true);
-    authgear
-      .reauthenticate(
+    async function task() {
+      await authgear.refreshIDToken();
+      if (!authgear.canReauthenticate()) {
+        throw new Error(
+          'canReauthenticate() returns false for the current user',
+        );
+      }
+
+      const {userInfo} = await authgear.reauthenticate(
         {
           redirectURI,
           wechatRedirectURI,
         },
         biometricOptions,
-      )
-      .then(({userInfo}) => {
-        setUserInfo(userInfo);
-        showUser(userInfo);
-      })
+      );
+
+      setUserInfo(userInfo);
+      showUser(userInfo);
+    }
+
+    setLoading(true);
+    task()
       .catch(e => {
         showError(e);
       })
@@ -385,16 +394,25 @@ const HomeScreen: React.FC = () => {
   }, [showError, showUser]);
 
   const reauthenticateWebOnly = useCallback(() => {
-    setLoading(true);
-    authgear
-      .reauthenticate({
+    async function task() {
+      await authgear.refreshIDToken();
+      if (!authgear.canReauthenticate()) {
+        throw new Error(
+          'canReauthenticate() returns false for the current user',
+        );
+      }
+
+      const {userInfo} = await authgear.reauthenticate({
         redirectURI,
         wechatRedirectURI,
-      })
-      .then(({userInfo}) => {
-        setUserInfo(userInfo);
-        showUser(userInfo);
-      })
+      });
+
+      setUserInfo(userInfo);
+      showUser(userInfo);
+    }
+
+    setLoading(true);
+    task()
       .catch(e => {
         showError(e);
       })
