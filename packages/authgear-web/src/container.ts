@@ -206,6 +206,16 @@ export class WebContainer {
   }
 
   /**
+   * refreshIDToken() asks the server to issue an ID token with latest claims.
+   * After refreshing, getIDTokenHint() and canReauthenticate() may return up-to-date value.
+   *
+   * @public
+   */
+  async refreshIDToken(): Promise<void> {
+    return this.baseContainer.refreshIDToken();
+  }
+
+  /**
    * configure() configures the container with the client ID and the endpoint.
    * It also does local IO to retrieve the refresh token.
    * It only obtains the refresh token locally and no network call will
@@ -283,8 +293,6 @@ export class WebContainer {
    * Start reauthentication by redirecting to the authorization endpoint.
    */
   async startReauthentication(options: ReauthenticateOptions): Promise<void> {
-    await this.baseContainer._refreshIDToken();
-
     const idToken = this.getIDTokenHint();
     if (idToken == null || !this.canReauthenticate()) {
       throw new Error(

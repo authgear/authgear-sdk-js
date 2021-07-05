@@ -236,7 +236,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     await this._persistTokenResponse(tokenResponse, "FOUND_TOKEN");
   }
 
-  async _refreshIDToken(): Promise<void> {
+  async refreshIDToken(): Promise<void> {
     const clientID = this.clientID;
     if (clientID == null) {
       throw new AuthgearError("missing client ID");
