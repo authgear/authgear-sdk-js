@@ -50,26 +50,51 @@ export interface _BaseContainerDelegate {
 /**
  * @internal
  */
-export function _canReauthenticate(idToken: string | undefined): boolean {
+export function _decodeIDToken(
+  idToken: string | undefined
+): Record<string, unknown> | undefined {
   // idToken is the format
   // base64URLEncode(header) "." base64URLEncode(payload) "." signature
   if (idToken == null) {
-    return false;
+    return undefined;
   }
   const parts = idToken.split(".");
   if (parts.length !== 3) {
-    return false;
+    return undefined;
   }
   const payload = parts[1];
   const utf8Bytes = _base64URLDecode(payload);
   const utf8Str = _decodeUTF8(new Uint8Array(utf8Bytes));
   const idTokenPayload = JSON.parse(utf8Str);
+  return idTokenPayload;
+}
+
+/**
+ * @internal
+ */
+export function _canReauthenticate(
+  idTokenPayload: Record<string, unknown>
+): boolean {
   const can =
     idTokenPayload["https://authgear.com/claims/user/can_reauthenticate"];
   if (typeof can === "boolean") {
     return can;
   }
   return false;
+}
+
+/**
+ * @internal
+ */
+export function _getAuthTime(
+  idTokenPayload: Record<string, unknown>
+): Date | undefined {
+  const authTimeValue = idTokenPayload["auth_time"];
+  if (typeof authTimeValue === "number") {
+    // authTimeValue is Unix epoch while JavaScript Date constructor accepts milliseconds.
+    return new Date(authTimeValue * 1000);
+  }
+  return undefined;
 }
 
 /**
@@ -112,7 +137,19 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   }
 
   canReauthenticate(): boolean {
-    return _canReauthenticate(this.idToken);
+    const payload = _decodeIDToken(this.idToken);
+    if (payload == null) {
+      return false;
+    }
+    return _canReauthenticate(payload);
+  }
+
+  getAuthTime(): Date | undefined {
+    const payload = _decodeIDToken(this.idToken);
+    if (payload == null) {
+      return undefined;
+    }
+    return _getAuthTime(payload);
   }
 
   async _persistTokenResponse(

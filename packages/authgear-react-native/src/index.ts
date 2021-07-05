@@ -261,6 +261,7 @@ export class ReactNativeContainer {
 
   /**
    * getIDTokenHint() returns the ID token for the OIDC id_token_hint parameter.
+   *
    * @public
    */
   getIDTokenHint(): string | undefined {
@@ -269,10 +270,22 @@ export class ReactNativeContainer {
 
   /**
    * canReauthenticate() reports whether the current user can reauthenticate.
+   * The information comes from the ID token and the ID token is NOT verified.
+   *
    * @public
    */
   canReauthenticate(): boolean {
     return this.baseContainer.canReauthenticate();
+  }
+
+  /**
+   * getAuthTime() reports the last time the user was authenticated.
+   * The information comes from the ID token and the ID token is NOT verified.
+   *
+   * @public
+   */
+  getAuthTime(): Date | undefined {
+    return this.baseContainer.getAuthTime();
   }
 
   /**
