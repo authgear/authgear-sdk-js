@@ -179,6 +179,15 @@ function Root() {
     []
   );
 
+  const onClickShowAuthTime = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      window.alert(`auth_time: ${authgear.getAuthTime()}`);
+    },
+    []
+  );
+
   return (
     <div>
       <p>
@@ -237,6 +246,13 @@ function Root() {
             onClick={onClickReauthenticate}
           >
             Reauthenticate
+          </button>
+          <button
+            className="button"
+            type="button"
+            onClick={onClickShowAuthTime}
+          >
+            Show auth_time
           </button>
           <button className="button" type="button" onClick={onClickSignOut}>
             Sign out
