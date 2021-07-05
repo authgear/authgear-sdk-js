@@ -10,3 +10,11 @@
 .input {
   margin: 0 10px;
 }
+
+.button {
+  display: block;
+}
+
+.button-group > * {
+  margin: 8px 0;
+}

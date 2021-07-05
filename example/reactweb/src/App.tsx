@@ -29,10 +29,8 @@ function ShowError(props: { error: unknown }) {
 
   const data: Record<string, any> = {};
   if (error instanceof Error) {
-    for (const key in error) {
-      if (Object.prototype.hasOwnProperty.call(error, key)) {
-        data[key] = (error as any)[key];
-      }
+    for (const key of Object.getOwnPropertyNames(error)) {
+      data[key] = (error as any)[key];
     }
   } else {
     data["repr"] = String(error);
@@ -50,7 +48,7 @@ function Root() {
   const [transientSession, setTransientSession] = useState(
     initialTransientSession
   );
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<unknown>(null);
   const [userInfo, setUserInfo] = useState<unknown>(null);
 
   const configure = useCallback(
@@ -155,14 +153,28 @@ function Root() {
       e.preventDefault();
       e.stopPropagation();
       const redirectURI = window.location.origin + "/reauth-redirect";
-      authgear
-        .startReauthentication({
-          redirectURI,
-        })
-        .then(
-          () => {},
-          (err) => setError(err)
-        );
+
+      authgear.refreshIDToken().then(
+        () => {
+          if (authgear.canReauthenticate()) {
+            authgear
+              .startReauthentication({
+                redirectURI,
+              })
+              .then(
+                () => {},
+                (err) => setError(err)
+              );
+          } else {
+            setError(
+              new Error(
+                "canReauthenticate() returns false for the current user"
+              )
+            );
+          }
+        },
+        (err) => setError(err)
+      );
     },
     []
   );
@@ -210,9 +222,9 @@ function Root() {
         features.
       </p>
       {userInfo != null ? (
-        <div>
+        <div className="button-group">
           <a
-            style={{ display: "block" }}
+            className="button"
             href={endpoint + "/settings"}
             target="_blank"
             rel="noopener noreferrer"
