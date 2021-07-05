@@ -484,6 +484,10 @@ const HomeScreen: React.FC = () => {
       });
   }, [showError, showUser]);
 
+  const showAuthTime = useCallback(() => {
+    Alert.alert('auth_time', `${authgear.getAuthTime()}`);
+  }, []);
+
   const logout = useCallback(() => {
     setLoading(true);
     authgear
@@ -635,6 +639,13 @@ const HomeScreen: React.FC = () => {
           <Button
             title="Fetch User Info"
             onPress={fetchUserInfo}
+            disabled={!initialized || loading || !loggedIn}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Show auth_time"
+            onPress={showAuthTime}
             disabled={!initialized || loading || !loggedIn}
           />
         </View>
