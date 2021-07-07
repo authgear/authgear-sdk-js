@@ -10,6 +10,9 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "typecheck": "tsc --noEmit"
   },
+  "resolutions": {
+    "react-native/react-native-codegen": "^0.0.7"
+  },
   "dependencies": {
     "@authgear/react-native": "../../packages/authgear-react-native",
     "react": "17.0.1",
