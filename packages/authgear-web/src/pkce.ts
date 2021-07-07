@@ -1,18 +1,9 @@
 /* global Uint8Array, window */
 
-import { _encodeUTF8, _encodeBase64URLFromByteArray } from "@authgear/core";
+import { _encodeUTF8, _base64URLEncode } from "@authgear/core";
 
 function byteToHex(byte: number): string {
   return ("0" + byte.toString(16)).substr(-2);
-}
-
-// uint8ArrayFrom is Uint8Array.from that works everywhere.
-function uint8ArrayFrom(arr: number[]): Uint8Array {
-  const output = new Uint8Array(arr.length);
-  for (let i = 0; i < arr.length; ++i) {
-    output[i] = arr[i];
-  }
-  return output;
 }
 
 // windowCryptoSubtleDigest is window.crypto.subtle.digest with IE 11 support.
@@ -38,7 +29,7 @@ async function windowCryptoSubtleDigest(
 }
 
 async function sha256(s: string): Promise<Uint8Array> {
-  const bytes = uint8ArrayFrom(_encodeUTF8(s));
+  const bytes = _encodeUTF8(s);
   return windowCryptoSubtleDigest("SHA-256", bytes);
 }
 
@@ -46,7 +37,7 @@ export async function computeCodeChallenge(
   codeVerifier: string
 ): Promise<string> {
   const hash = await sha256(codeVerifier);
-  const base64 = _encodeBase64URLFromByteArray(hash);
+  const base64 = _base64URLEncode(hash);
   return base64;
 }
 

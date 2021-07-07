@@ -1,11 +1,13 @@
-import { TextEncoder } from "util";
-import { _encodeBase64URLFromByteArray } from "./base64";
+import { TextEncoder, TextDecoder } from "util";
+import { _base64URLEncode, _base64URLDecode } from "./base64";
 
-describe("_encodeBase64URLFromByteArray", () => {
+describe("_base64URLEncode and _base64URLDecode", () => {
   const encoder = new TextEncoder();
-  const f = _encodeBase64URLFromByteArray;
+  const decoder = new TextDecoder();
+  const fixtureStr = "test";
 
   it("encode ASCII strings without padding", () => {
-    expect(f(encoder.encode("test"))).toEqual("dGVzdA");
+    expect(_base64URLEncode(encoder.encode(fixtureStr))).toEqual("dGVzdA");
+    expect(decoder.decode(_base64URLDecode("dGVzdA"))).toEqual(fixtureStr);
   });
 });

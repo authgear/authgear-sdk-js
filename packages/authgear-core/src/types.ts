@@ -1,12 +1,4 @@
 /**
- * @internal
- */
-export interface _ByteArray {
-  [index: number]: number;
-  length: number;
-}
-
-/**
  * @public
  */
 export interface UserInfo {
@@ -48,6 +40,24 @@ export interface PromoteOptions {
 export type PromptOption = "none" | "login" | "consent" | "select_account";
 
 /**
+ * @internal
+ */
+export interface _OIDCAuthenticationRequest {
+  redirectURI: string;
+  responseType: "code" | "none";
+  scope: string[];
+  state?: string;
+  prompt?: PromptOption[] | PromptOption;
+  maxAge?: number;
+  loginHint?: string;
+  uiLocales?: string[];
+  idTokenHint?: string;
+  wechatRedirectURI?: string;
+  platform?: string;
+  page?: string;
+}
+
+/**
  * Auth UI authorization options
  *
  * @public
@@ -85,7 +95,7 @@ export interface AuthorizeOptions {
   /**
    * OAuth response type
    */
-  responseType?: string;
+  responseType?: "code" | "none";
   /**
    * WeChat Redirect URI is needed when integrating WeChat login in react-native
    * The wechatRedirectURI will be called when user click the login with WeChat button
@@ -101,6 +111,39 @@ export interface AuthorizeOptions {
    * Initial page to open. Valid values are 'login' and 'signup'.
    */
   page?: string;
+}
+
+/**
+ * Options for reauthentication
+ * @public
+ */
+export interface ReauthenticateOptions {
+  /**
+   * Redirect uri. Redirection URI to which the response will be sent after authorization.
+   */
+  redirectURI: string;
+  /**
+   * OAuth 2.0 state value.
+   */
+  state?: string;
+  /**
+   * UI locale tags
+   */
+  uiLocales?: string[];
+  /**
+   * WeChat Redirect URI is needed when integrating WeChat login in react-native
+   * The wechatRedirectURI will be called when user click the login with WeChat button
+   */
+  wechatRedirectURI?: string;
+  /**
+   * @internal
+   * Platform is provided by the sdk
+   */
+  platform?: string;
+  /**
+   * OIDC max_age
+   */
+  maxAge?: number;
 }
 
 /**
@@ -122,6 +165,22 @@ export interface SettingOptions {
  * @public
  */
 export interface AuthorizeResult {
+  /**
+   * OAuth 2.0 state value.
+   */
+  state?: string;
+  /**
+   * UserInfo.
+   */
+  userInfo: UserInfo;
+}
+
+/**
+ * Result of reauthentication
+ *
+ * @public
+ */
+export interface ReauthenticateResult {
   /**
    * OAuth 2.0 state value.
    */
@@ -244,6 +303,7 @@ export interface _OIDCTokenRequest {
   refresh_token?: string;
   jwt?: string;
   x_device_info?: string;
+  access_token?: string;
 }
 
 /**
@@ -259,7 +319,7 @@ export interface _SetupBiometricRequest {
  * @internal
  */
 export interface _OIDCTokenResponse {
-  id_token: string;
+  id_token?: string;
   token_type?: string;
   access_token?: string;
   expires_in?: number;

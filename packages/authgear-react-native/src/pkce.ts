@@ -1,4 +1,5 @@
-import { _encodeBase64URLFromByteArray } from "@authgear/core";
+/* global Uint8Array */
+import { _base64URLEncode } from "@authgear/core";
 
 import { randomBytes, sha256String } from "./nativemodule";
 
@@ -19,6 +20,6 @@ export async function computeCodeChallenge(
   codeVerifier: string
 ): Promise<string> {
   const hash = await sha256String(codeVerifier);
-  const base64 = _encodeBase64URLFromByteArray(hash);
+  const base64 = _base64URLEncode(new Uint8Array(hash));
   return base64;
 }

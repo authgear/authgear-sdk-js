@@ -1,8 +1,10 @@
+/* global Uint8Array */
 import URL from "core-js-pure/features/url";
 import URLSearchParams from "core-js-pure/features/url-search-params";
 import {
-  AuthorizeOptions,
+  _OIDCAuthenticationRequest,
   AuthorizeResult,
+  ReauthenticateResult,
   ContainerOptions,
   _ContainerStorage,
   _APIClientDelegate,
@@ -11,6 +13,8 @@ import {
   SessionStateChangeReason,
   SessionState,
 } from "./types";
+import { _base64URLDecode } from "./base64";
+import { _decodeUTF8 } from "./utf8";
 import { AuthgearError, OAuthError } from "./error";
 import { _BaseAPIClient } from "./client";
 
@@ -44,6 +48,56 @@ export interface _BaseContainerDelegate {
 }
 
 /**
+ * @internal
+ */
+export function _decodeIDToken(
+  idToken: string | undefined
+): Record<string, unknown> | undefined {
+  // idToken is the format
+  // base64URLEncode(header) "." base64URLEncode(payload) "." signature
+  if (idToken == null) {
+    return undefined;
+  }
+  const parts = idToken.split(".");
+  if (parts.length !== 3) {
+    return undefined;
+  }
+  const payload = parts[1];
+  const utf8Bytes = _base64URLDecode(payload);
+  const utf8Str = _decodeUTF8(new Uint8Array(utf8Bytes));
+  const idTokenPayload = JSON.parse(utf8Str);
+  return idTokenPayload;
+}
+
+/**
+ * @internal
+ */
+export function _canReauthenticate(
+  idTokenPayload: Record<string, unknown>
+): boolean {
+  const can =
+    idTokenPayload["https://authgear.com/claims/user/can_reauthenticate"];
+  if (typeof can === "boolean") {
+    return can;
+  }
+  return false;
+}
+
+/**
+ * @internal
+ */
+export function _getAuthTime(
+  idTokenPayload: Record<string, unknown>
+): Date | undefined {
+  const authTimeValue = idTokenPayload["auth_time"];
+  if (typeof authTimeValue === "number") {
+    // authTimeValue is Unix epoch while JavaScript Date constructor accepts milliseconds.
+    return new Date(authTimeValue * 1000);
+  }
+  return undefined;
+}
+
+/**
  * Base Container
  *
  * @internal
@@ -56,6 +110,8 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   apiClient: T;
 
   sessionState: SessionState;
+
+  idToken?: string;
 
   accessToken?: string;
 
@@ -76,18 +132,39 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     this._delegate = _delegate;
   }
 
+  getIDTokenHint(): string | undefined {
+    return this.idToken;
+  }
+
+  canReauthenticate(): boolean {
+    const payload = _decodeIDToken(this.idToken);
+    if (payload == null) {
+      return false;
+    }
+    return _canReauthenticate(payload);
+  }
+
+  getAuthTime(): Date | undefined {
+    const payload = _decodeIDToken(this.idToken);
+    if (payload == null) {
+      return undefined;
+    }
+    return _getAuthTime(payload);
+  }
+
   async _persistTokenResponse(
     response: _OIDCTokenResponse,
     reason: SessionStateChangeReason
   ): Promise<void> {
-    const { access_token, refresh_token, expires_in } = response;
+    const { id_token, access_token, refresh_token, expires_in } = response;
 
-    if (access_token == null || expires_in == null) {
+    if (id_token == null || access_token == null || expires_in == null) {
       throw new AuthgearError(
-        "access_token or expires_in missing in Token Response"
+        "id_token, access_token or expires_in missing in Token Response"
       );
     }
 
+    this.idToken = id_token;
     this.accessToken = access_token;
     if (refresh_token) {
       this.refreshToken = refresh_token;
@@ -107,6 +184,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
   async _clearSession(reason: SessionStateChangeReason): Promise<void> {
     await this._delegate.refreshTokenStorage.delRefreshToken(this.name);
+    this.idToken = undefined;
     this.accessToken = undefined;
     this.refreshToken = undefined;
     this.expireAt = undefined;
@@ -195,8 +273,28 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     await this._persistTokenResponse(tokenResponse, "FOUND_TOKEN");
   }
 
+  async refreshIDToken(): Promise<void> {
+    const clientID = this.clientID;
+    if (clientID == null) {
+      throw new AuthgearError("missing client ID");
+    }
+    await this.refreshAccessTokenIfNeeded();
+    const accessToken = this.accessToken;
+    const tokenRequest: _OIDCTokenRequest = {
+      grant_type: "urn:authgear:params:oauth:grant-type:id-token",
+      client_id: clientID,
+      access_token: accessToken,
+    };
+    const { id_token } = await this.apiClient._oidcTokenRequest(tokenRequest);
+    if (id_token != null) {
+      this.idToken = id_token;
+    }
+  }
+
   // eslint-disable-next-line complexity
-  async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
+  async authorizeEndpoint(
+    options: _OIDCAuthenticationRequest
+  ): Promise<string> {
     const clientID = this.clientID;
     if (clientID == null) {
       throw new AuthgearError("missing client ID");
@@ -205,7 +303,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     const config = await this.apiClient._fetchOIDCConfiguration();
     const query = new URLSearchParams();
 
-    const responseType = options.responseType ?? "code";
+    const responseType = options.responseType;
     query.append("response_type", responseType);
     if (responseType === "code") {
       // Authorization code need PKCE.
@@ -219,40 +317,39 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       query.append("code_challenge", codeVerifier.challenge);
     }
 
-    if (responseType === "code") {
-      query.append(
-        "scope",
-        "openid offline_access https://authgear.com/scopes/full-access"
-      );
-    } else {
-      query.append("scope", "openid https://authgear.com/scopes/full-access");
-    }
+    query.append("scope", options.scope.join(" "));
 
     query.append("client_id", clientID);
     query.append("redirect_uri", options.redirectURI);
-    if (options.state) {
+    if (options.state != null) {
       query.append("state", options.state);
     }
-    if (options.prompt) {
+    if (options.prompt != null) {
       if (typeof options.prompt === "string") {
         query.append("prompt", options.prompt);
       } else if (options.prompt.length > 0) {
         query.append("prompt", options.prompt.join(" "));
       }
     }
-    if (options.loginHint) {
+    if (options.loginHint != null) {
       query.append("login_hint", options.loginHint);
     }
-    if (options.uiLocales) {
+    if (options.uiLocales != null) {
       query.append("ui_locales", options.uiLocales.join(" "));
     }
-    if (options.wechatRedirectURI) {
+    if (options.idTokenHint != null) {
+      query.append("id_token_hint", options.idTokenHint);
+    }
+    if (options.maxAge != null) {
+      query.append("max_age", String(options.maxAge));
+    }
+    if (options.wechatRedirectURI != null) {
       query.append("x_wechat_redirect_uri", options.wechatRedirectURI);
     }
-    if (options.platform) {
+    if (options.platform != null) {
       query.append("x_platform", options.platform);
     }
-    if (options.page) {
+    if (options.page != null) {
       query.append("x_page", options.page);
     }
 
@@ -313,6 +410,62 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
     if (tokenResponse) {
       await this._persistTokenResponse(tokenResponse, "AUTHENTICATED");
+    }
+
+    return {
+      userInfo,
+      state: params.get("state") ?? undefined,
+    };
+  }
+
+  async _finishReauthentication(
+    url: string,
+    tokenRequest?: Partial<_OIDCTokenRequest>
+  ): Promise<ReauthenticateResult> {
+    const clientID = this.clientID;
+    if (clientID == null) {
+      throw new AuthgearError("missing client ID");
+    }
+
+    const u = new URL(url);
+    const params = u.searchParams;
+    const uu = new URL(url);
+    uu.hash = "";
+    uu.search = "";
+
+    const redirectURI: string = uu.toString();
+    if (params.get("error")) {
+      throw new OAuthError({
+        error: params.get("error")!,
+        error_description: params.get("error_description") ?? undefined,
+      });
+    }
+
+    const code = params.get("code");
+    if (!code) {
+      throw new OAuthError({
+        error: "invalid_request",
+        error_description: "Missing parameter: code",
+      });
+    }
+
+    const codeVerifier = await this._delegate.storage.getOIDCCodeVerifier(
+      this.name
+    );
+
+    const { id_token, access_token } = await this.apiClient._oidcTokenRequest({
+      ...tokenRequest,
+      grant_type: "authorization_code",
+      code: code,
+      redirect_uri: redirectURI,
+      client_id: clientID,
+      code_verifier: codeVerifier ?? "",
+    });
+
+    const userInfo = await this.apiClient._oidcUserInfoRequest(access_token);
+
+    if (id_token != null) {
+      this.idToken = id_token;
     }
 
     return {

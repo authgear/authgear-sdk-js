@@ -7,6 +7,8 @@ import {
   _BaseContainer,
   AuthorizeOptions,
   AuthorizeResult,
+  ReauthenticateOptions,
+  ReauthenticateResult,
   _ContainerStorage,
   SessionState,
   SessionStateChangeReason,
@@ -188,6 +190,46 @@ export class WebContainer {
   }
 
   /**
+   * getIDTokenHint() returns the ID token for the OIDC id_token_hint parameter.
+   *
+   * @public
+   */
+  getIDTokenHint(): string | undefined {
+    return this.baseContainer.getIDTokenHint();
+  }
+
+  /**
+   * canReauthenticate() reports whether the current user can reauthenticate.
+   * The information comes from the ID token and the ID token is NOT verified.
+   *
+   * @public
+   */
+  canReauthenticate(): boolean {
+    return this.baseContainer.canReauthenticate();
+  }
+
+  /**
+   * getAuthTime() reports the last time the user was authenticated.
+   * The information comes from the ID token and the ID token is NOT verified.
+   *
+   * @public
+   */
+  getAuthTime(): Date | undefined {
+    return this.baseContainer.getAuthTime();
+  }
+
+  /**
+   * refreshIDToken() asks the server to issue an ID token with latest claims.
+   * After refreshing, getIDTokenHint() and canReauthenticate() may return up-to-date value.
+   *
+   * @public
+   */
+  async refreshIDToken(): Promise<void> {
+    await this.refreshAccessTokenIfNeeded();
+    return this.baseContainer.refreshIDToken();
+  }
+
+  /**
    * configure() configures the container with the client ID and the endpoint.
    * It also does local IO to retrieve the refresh token.
    * It only obtains the refresh token locally and no network call will
@@ -254,29 +296,51 @@ export class WebContainer {
   }
 
   /**
-   * Start authorization by opening authorize page
-   *
-   * @param options - authorize options
+   * Start authorization by redirecting to the authorization endpoint.
    */
   async startAuthorization(options: AuthorizeOptions): Promise<void> {
-    if (this.sessionType === "cookie") {
-      // Use shared session cookie by default for first-party web apps.
-      options.responseType = options.responseType ?? "none";
-    }
-
     const authorizeEndpoint = await this.authorizeEndpoint(options);
     window.location.href = authorizeEndpoint;
   }
 
   /**
-   * Finish authorization
+   * Start reauthentication by redirecting to the authorization endpoint.
+   */
+  async startReauthentication(options: ReauthenticateOptions): Promise<void> {
+    const idToken = this.getIDTokenHint();
+    if (idToken == null || !this.canReauthenticate()) {
+      throw new Error(
+        "You can only trigger reauthentication when canReauthenticate() returns true"
+      );
+    }
+
+    const maxAge = options.maxAge ?? 0;
+    const endpoint = await this.baseContainer.authorizeEndpoint({
+      ...options,
+      maxAge,
+      idTokenHint: idToken,
+      responseType: "code",
+      scope: ["openid", "https://authgear.com/scopes/full-access"],
+    });
+    window.location.href = endpoint;
+  }
+
+  /**
+   * Finish authorization.
    *
-   * exchangeToken read window.location.
-   * It checks if error is present and rejects with OAuthError.
-   * Otherwise assume code is present, make a token request.
+   * It may reject with OAuthError.
    */
   async finishAuthorization(): Promise<AuthorizeResult> {
     return this.baseContainer._finishAuthorization(window.location.href);
+  }
+
+  /**
+   * Finish reauthentication.
+   *
+   * It may reject with OAuthError.
+   */
+  async finishReauthentication(): Promise<ReauthenticateResult> {
+    return this.baseContainer._finishReauthentication(window.location.href);
   }
 
   /**
@@ -345,7 +409,23 @@ export class WebContainer {
    * @internal
    */
   async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
-    return this.baseContainer.authorizeEndpoint(options);
+    // Use shared session cookie by default for first-party web apps.
+    const responseType =
+      options.responseType ?? this.sessionType === "cookie" ? "none" : "code";
+    const scope =
+      this.sessionType === "cookie"
+        ? ["openid", "https://authgear.com/scopes/full-access"]
+        : [
+            "openid",
+            "offline_access",
+            "https://authgear.com/scopes/full-access",
+          ];
+
+    return this.baseContainer.authorizeEndpoint({
+      ...options,
+      responseType,
+      scope,
+    });
   }
 
   /**

@@ -9,13 +9,15 @@ import {
   _BaseContainer,
   AuthorizeOptions,
   AuthorizeResult,
+  ReauthenticateOptions,
+  ReauthenticateResult,
   PromoteOptions,
   UserInfo,
   SettingOptions,
   OAuthError,
   _ContainerStorage,
   _encodeUTF8,
-  _encodeBase64URLFromByteArray,
+  _base64URLEncode,
   SessionState,
   SessionStateChangeReason,
   AuthgearError,
@@ -110,9 +112,7 @@ export class _PlatformStorageDriver implements _StorageDriver {
 async function getXDeviceInfo(): Promise<string> {
   const deviceInfo = await getDeviceInfo();
   const deviceInfoJSON = JSON.stringify(deviceInfo);
-  const xDeviceInfo = _encodeBase64URLFromByteArray(
-    _encodeUTF8(deviceInfoJSON)
-  );
+  const xDeviceInfo = _base64URLEncode(_encodeUTF8(deviceInfoJSON));
   return xDeviceInfo;
 }
 
@@ -260,6 +260,46 @@ export class ReactNativeContainer {
   }
 
   /**
+   * getIDTokenHint() returns the ID token for the OIDC id_token_hint parameter.
+   *
+   * @public
+   */
+  getIDTokenHint(): string | undefined {
+    return this.baseContainer.getIDTokenHint();
+  }
+
+  /**
+   * canReauthenticate() reports whether the current user can reauthenticate.
+   * The information comes from the ID token and the ID token is NOT verified.
+   *
+   * @public
+   */
+  canReauthenticate(): boolean {
+    return this.baseContainer.canReauthenticate();
+  }
+
+  /**
+   * getAuthTime() reports the last time the user was authenticated.
+   * The information comes from the ID token and the ID token is NOT verified.
+   *
+   * @public
+   */
+  getAuthTime(): Date | undefined {
+    return this.baseContainer.getAuthTime();
+  }
+
+  /**
+   * refreshIDToken() asks the server to issue an ID token with latest claims.
+   * After refreshing, getIDTokenHint() and canReauthenticate() may return up-to-date value.
+   *
+   * @public
+   */
+  async refreshIDToken(): Promise<void> {
+    await this.refreshAccessTokenIfNeeded();
+    return this.baseContainer.refreshIDToken();
+  }
+
+  /**
    * configure() configures the container with the client ID and the endpoint.
    * It also does local IO to retrieve the refresh token.
    * It only obtains the refresh token locally and no network call will
@@ -312,11 +352,9 @@ export class ReactNativeContainer {
   }
 
   /**
-   * Open authorize page.
+   * Authenticate the end user via the web.
    *
-   * To allow re-authentication of different user smoothly, default value for `options.prompt` is `login`.
-   *
-   * @param options - authorize options
+   * @public
    */
   async authorize(options: AuthorizeOptions): Promise<AuthorizeResult> {
     const platform = Platform.OS;
@@ -334,6 +372,57 @@ export class ReactNativeContainer {
       x_device_info: xDeviceInfo,
     });
     await this.disableBiometric();
+    return result;
+  }
+
+  /**
+   * Reauthenticate the end user via biometric or the web.
+   *
+   * If biometricOptions is given, biometric is used when possible.
+   *
+   * @public
+   */
+  async reauthenticate(
+    options: ReauthenticateOptions,
+    biometricOptions?: BiometricOptions
+  ): Promise<ReauthenticateResult> {
+    // Use biometric to reauthenticate if the developer instructs us to do so.
+    const biometricEnabled = await this.isBiometricEnabled();
+    if (biometricEnabled && biometricOptions != null) {
+      return this.authenticateBiometric(biometricOptions);
+    }
+
+    const platform = Platform.OS;
+
+    const idToken = this.getIDTokenHint();
+    if (idToken == null || !this.canReauthenticate()) {
+      throw new Error(
+        "You can only trigger reauthentication when canReauthenticate() returns true"
+      );
+    }
+
+    const maxAge = options.maxAge ?? 0;
+    const endpoint = await this.baseContainer.authorizeEndpoint({
+      ...options,
+      platform,
+      maxAge,
+      idTokenHint: idToken,
+      responseType: "code",
+      scope: ["openid", "https://authgear.com/scopes/full-access"],
+    });
+
+    const redirectURL = await openAuthorizeURL(
+      endpoint,
+      options.redirectURI,
+      options.wechatRedirectURI
+    );
+    const xDeviceInfo = await getXDeviceInfo();
+    const result = await this.baseContainer._finishReauthentication(
+      redirectURL,
+      {
+        x_device_info: xDeviceInfo,
+      }
+    );
     return result;
   }
 
@@ -513,7 +602,15 @@ export class ReactNativeContainer {
    * @internal
    */
   async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
-    return this.baseContainer.authorizeEndpoint(options);
+    return this.baseContainer.authorizeEndpoint({
+      ...options,
+      responseType: "code",
+      scope: [
+        "openid",
+        "offline_access",
+        "https://authgear.com/scopes/full-access",
+      ],
+    });
   }
 
   /**

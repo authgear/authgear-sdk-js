@@ -214,7 +214,7 @@ const HomeScreen: React.FC = () => {
       .then(() => {
         authgear
           .isBiometricEnabled()
-          .then((enabled) => {
+          .then(enabled => {
             setBiometricEnabled(enabled);
           })
           .catch(() => {
@@ -236,7 +236,7 @@ const HomeScreen: React.FC = () => {
           setUserInfo(null);
         }
       },
-      sendWechatAuthRequest: (state) => {
+      sendWechatAuthRequest: state => {
         console.log('user click login with wechat, open wechat sdk');
         const {WechatAuth} = NativeModules;
         WechatAuth.sendWechatAuthRequest(state)
@@ -271,10 +271,10 @@ const HomeScreen: React.FC = () => {
     }
     authgear
       .fetchUserInfo()
-      .then((userInfo) => {
+      .then(userInfo => {
         setUserInfo(userInfo);
       })
-      .catch((e) => {
+      .catch(e => {
         showError(e);
       })
       .finally(() => {
@@ -298,7 +298,7 @@ const HomeScreen: React.FC = () => {
         postConfigure();
         Alert.alert('Success', 'Configured Authgear container successfully');
       })
-      .catch((e) => {
+      .catch(e => {
         showError(e);
       })
       .finally(() => {
@@ -313,13 +313,12 @@ const HomeScreen: React.FC = () => {
         redirectURI,
         wechatRedirectURI,
         page,
-        prompt: 'login',
       })
       .then(({userInfo}) => {
         setUserInfo(userInfo);
         showUser(userInfo);
       })
-      .catch((e) => {
+      .catch(e => {
         showError(e);
       })
       .finally(() => {
@@ -336,7 +335,7 @@ const HomeScreen: React.FC = () => {
         setUserInfo(userInfo);
         showUser(userInfo);
       })
-      .catch((err) => {
+      .catch(err => {
         showError(err);
       })
       .finally(() => {
@@ -356,18 +355,77 @@ const HomeScreen: React.FC = () => {
         setUserInfo(userInfo);
         showUser(userInfo);
       })
-      .catch((e) => showError(e))
+      .catch(e => showError(e))
       .finally(() => {
         updateBiometricState();
         setLoading(false);
       });
   }, [showError, showUser, updateBiometricState]);
 
+  const reauthenticate = useCallback(() => {
+    async function task() {
+      await authgear.refreshIDToken();
+      if (!authgear.canReauthenticate()) {
+        throw new Error(
+          'canReauthenticate() returns false for the current user',
+        );
+      }
+
+      const {userInfo} = await authgear.reauthenticate(
+        {
+          redirectURI,
+          wechatRedirectURI,
+        },
+        biometricOptions,
+      );
+
+      setUserInfo(userInfo);
+      showUser(userInfo);
+    }
+
+    setLoading(true);
+    task()
+      .catch(e => {
+        showError(e);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [showError, showUser]);
+
+  const reauthenticateWebOnly = useCallback(() => {
+    async function task() {
+      await authgear.refreshIDToken();
+      if (!authgear.canReauthenticate()) {
+        throw new Error(
+          'canReauthenticate() returns false for the current user',
+        );
+      }
+
+      const {userInfo} = await authgear.reauthenticate({
+        redirectURI,
+        wechatRedirectURI,
+      });
+
+      setUserInfo(userInfo);
+      showUser(userInfo);
+    }
+
+    setLoading(true);
+    task()
+      .catch(e => {
+        showError(e);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [showError, showUser]);
+
   const enableBiometric = useCallback(() => {
     setLoading(true);
     authgear
       .enableBiometric(biometricOptions)
-      .catch((err) => {
+      .catch(err => {
         showError(err);
       })
       .finally(() => {
@@ -384,7 +442,7 @@ const HomeScreen: React.FC = () => {
         setUserInfo(userInfo);
         showUser(userInfo);
       })
-      .catch((e) => showError(e))
+      .catch(e => showError(e))
       .finally(() => {
         updateBiometricState();
         setLoading(false);
@@ -395,7 +453,7 @@ const HomeScreen: React.FC = () => {
     setLoading(true);
     authgear
       .disableBiometric()
-      .catch((err) => {
+      .catch(err => {
         showError(err);
       })
       .finally(() => {
@@ -409,22 +467,26 @@ const HomeScreen: React.FC = () => {
       .open(Page.Settings, {
         wechatRedirectURI,
       })
-      .catch((err) => showError(err));
+      .catch(err => showError(err));
   }, [showError]);
 
   const fetchUserInfo = useCallback(() => {
     setLoading(true);
     authgear
       .fetchUserInfo()
-      .then((userInfo) => {
+      .then(userInfo => {
         setUserInfo(userInfo);
         showUser(userInfo);
       })
-      .catch((e) => showError(e))
+      .catch(e => showError(e))
       .finally(() => {
         setLoading(false);
       });
   }, [showError, showUser]);
+
+  const showAuthTime = useCallback(() => {
+    Alert.alert('auth_time', `${authgear.getAuthTime()}`);
+  }, []);
 
   const logout = useCallback(() => {
     setLoading(true);
@@ -433,7 +495,7 @@ const HomeScreen: React.FC = () => {
       .then(() => {
         setUserInfo(null);
       })
-      .catch((e) => {
+      .catch(e => {
         showError(e);
       })
       .finally(() => {
@@ -533,6 +595,20 @@ const HomeScreen: React.FC = () => {
         </View>
         <View style={styles.button}>
           <Button
+            title="Reauthenticate (web only)"
+            onPress={reauthenticateWebOnly}
+            disabled={!initialized || loading || !loggedIn}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Reauthenticate (biometric or web)"
+            onPress={reauthenticate}
+            disabled={!initialized || loading || !loggedIn}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
             title="Enable Biometric"
             onPress={enableBiometric}
             disabled={!initialized || loading || !loggedIn || biometricEnabled}
@@ -563,6 +639,13 @@ const HomeScreen: React.FC = () => {
           <Button
             title="Fetch User Info"
             onPress={fetchUserInfo}
+            disabled={!initialized || loading || !loggedIn}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Show auth_time"
+            onPress={showAuthTime}
             disabled={!initialized || loading || !loggedIn}
           />
         </View>
