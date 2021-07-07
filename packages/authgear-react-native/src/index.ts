@@ -295,6 +295,7 @@ export class ReactNativeContainer {
    * @public
    */
   async refreshIDToken(): Promise<void> {
+    await this.refreshAccessTokenIfNeeded();
     return this.baseContainer.refreshIDToken();
   }
 
