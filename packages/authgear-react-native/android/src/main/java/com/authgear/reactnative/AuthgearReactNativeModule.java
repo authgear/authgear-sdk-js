@@ -677,6 +677,12 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
                 return;
             }
 
+            boolean useWebView = false;
+            ReadableMap android = webOptions.getMap("android");
+            if (android != null) {
+                useWebView = android.getBoolean("useWebView");
+            }
+
             Context context = currentActivity;
             Uri uri = Uri.parse(urlString).normalizeScheme();
             registerWechatRedirectURI(wechatRedirectURI, new OnOpenWechatRedirectURIListener() {
@@ -686,7 +692,13 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
                 }
             });
             OAuthRedirectActivity.registerCallbackURL(callbackURL);
-            Intent intent = OAuthCoordinatorActivity.createAuthorizationIntent(context, uri);
+
+            Intent intent;
+            if (useWebView) {
+                intent = OAuthWebViewActivity.createIntent(context, uri.toString(), callbackURL);
+            } else {
+                intent = OAuthCoordinatorActivity.createAuthorizationIntent(context, uri);
+            }
             currentActivity.startActivityForResult(intent, REQUEST_CODE_AUTHORIZATION);
         } catch (Exception e) {
             if (this.openURLPromise != null) {
