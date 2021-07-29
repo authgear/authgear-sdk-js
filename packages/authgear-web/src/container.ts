@@ -5,9 +5,7 @@ import {
   ContainerOptions,
   _GlobalJSONContainerStorage,
   _BaseContainer,
-  AuthorizeOptions,
   AuthorizeResult,
-  ReauthenticateOptions,
   ReauthenticateResult,
   _ContainerStorage,
   SessionState,
@@ -20,7 +18,11 @@ import {
   _sessionStorageStorageDriver,
 } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
-import { WebContainerDelegate } from "./types";
+import {
+  WebContainerDelegate,
+  AuthorizeOptions,
+  ReauthenticateOptions,
+} from "./types";
 
 /**
  * @public
