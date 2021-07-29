@@ -667,7 +667,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     }
 
     @ReactMethod
-    public void openAuthorizeURL(String urlString, String callbackURL, String wechatRedirectURI, Promise promise) {
+    public void openAuthorizeURL(String urlString, String callbackURL, ReadableMap webOptions, String wechatRedirectURI, Promise promise) {
         this.openURLPromise = promise;
 
         try {
