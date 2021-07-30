@@ -1,18 +1,23 @@
 package com.authgear.reactnative;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebSettings;
 
-public class WebViewActivity extends Activity {
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class WebViewActivity extends AppCompatActivity {
+    private static final int MENU_ID_CANCEL = 1;
     private static final String KEY_URL = "KEY_URL";
 
     private WebView webView;
@@ -63,6 +68,23 @@ public class WebViewActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         AuthgearReactNativeModule.unregisterWechatRedirectURI();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.NONE, MENU_ID_CANCEL, Menu.NONE, android.R.string.cancel)
+                .setIcon(android.R.drawable.ic_menu_close_clear_cancel)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == MENU_ID_CANCEL) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public static Intent createIntent(Context context, String url) {

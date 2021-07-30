@@ -8,12 +8,17 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebSettings;
 
-public class OAuthWebViewActivity extends Activity {
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class OAuthWebViewActivity extends AppCompatActivity {
+    private static final int MENU_ID_CANCEL = 1;
     private static final String KEY_AUTHORIZATION_URL = "AUTHORIZATION_URL";
     private static final String KEY_REDIRECT_URI = "REDIRECT_URI";
 
@@ -79,6 +84,24 @@ public class OAuthWebViewActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         AuthgearReactNativeModule.unregisterWechatRedirectURI();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.NONE, MENU_ID_CANCEL, Menu.NONE, android.R.string.cancel)
+                .setIcon(android.R.drawable.ic_menu_close_clear_cancel)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == MENU_ID_CANCEL) {
+            handleCancel();
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void handleRedirect(Uri uri) {
