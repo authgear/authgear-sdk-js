@@ -54,10 +54,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#707070',
     fontSize: 15,
-    width: 80,
+    width: 120,
   },
   inputField: {
-    width: 200,
+    flex: 1,
     paddingBottom: 5,
     paddingTop: 0,
     borderBottomWidth: 1,
@@ -131,6 +131,10 @@ const HomeScreen: React.FC = () => {
   const [page, setPage] = useState('');
   const [transientSession, setTransientSession] = useState(false);
   const [useWebView, setUseWebView] = useState(false);
+  const [
+    prefersEphemeralWebBrowserSession,
+    setpPrefersEphemeralWebBrowserSession,
+  ] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const loggedIn = userInfo != null;
@@ -317,6 +321,9 @@ const HomeScreen: React.FC = () => {
         android: {
           useWebView: useWebView,
         },
+        ios: {
+          prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession,
+        },
       })
       .then(({userInfo}) => {
         setUserInfo(userInfo);
@@ -329,7 +336,14 @@ const HomeScreen: React.FC = () => {
         setLoading(false);
         updateBiometricState();
       });
-  }, [page, updateBiometricState, showError, showUser, useWebView]);
+  }, [
+    page,
+    updateBiometricState,
+    showError,
+    showUser,
+    useWebView,
+    prefersEphemeralWebBrowserSession,
+  ]);
 
   const loginAnonymously = useCallback(() => {
     setLoading(true);
@@ -357,6 +371,9 @@ const HomeScreen: React.FC = () => {
         android: {
           useWebView: useWebView,
         },
+        ios: {
+          prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession,
+        },
       })
       .then(({userInfo}) => {
         setUserInfo(userInfo);
@@ -367,7 +384,13 @@ const HomeScreen: React.FC = () => {
         updateBiometricState();
         setLoading(false);
       });
-  }, [showError, showUser, updateBiometricState, useWebView]);
+  }, [
+    showError,
+    showUser,
+    updateBiometricState,
+    useWebView,
+    prefersEphemeralWebBrowserSession,
+  ]);
 
   const reauthenticate = useCallback(() => {
     async function task() {
@@ -385,6 +408,9 @@ const HomeScreen: React.FC = () => {
           android: {
             useWebView: useWebView,
           },
+          ios: {
+            prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession,
+          },
         },
         biometricOptions,
       );
@@ -401,7 +427,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [showError, showUser, useWebView]);
+  }, [showError, showUser, useWebView, prefersEphemeralWebBrowserSession]);
 
   const reauthenticateWebOnly = useCallback(() => {
     async function task() {
@@ -418,6 +444,9 @@ const HomeScreen: React.FC = () => {
         android: {
           useWebView: useWebView,
         },
+        ios: {
+          prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession,
+        },
       });
 
       setUserInfo(userInfo);
@@ -432,7 +461,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [showError, showUser, useWebView]);
+  }, [showError, showUser, useWebView, prefersEphemeralWebBrowserSession]);
 
   const enableBiometric = useCallback(() => {
     setLoading(true);
@@ -574,6 +603,16 @@ const HomeScreen: React.FC = () => {
             style={styles.checkbox}
             value={useWebView}
             onValueChange={setUseWebView}
+          />
+        </View>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>
+            Prefers Ephemeral Web Browser Session (iOS)
+          </Text>
+          <Switch
+            style={styles.checkbox}
+            value={prefersEphemeralWebBrowserSession}
+            onValueChange={setpPrefersEphemeralWebBrowserSession}
           />
         </View>
         <View style={styles.configureAction}>
