@@ -13,7 +13,14 @@
             android:launchMode="singleTask" />
         <activity android:name=".WebViewActivity"
             android:exported="false"
-            android:launchMode="singleTask" />
+            android:launchMode="singleTask"
+            android:theme="@style/AuthgearTheme"
+            android:configChanges="orientation|screenSize"/>
+        <activity android:name=".OAuthWebViewActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:theme="@style/AuthgearTheme"
+            android:configChanges="orientation|screenSize"/>
     </application>
 
 </manifest>

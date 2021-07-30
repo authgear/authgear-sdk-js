@@ -7,11 +7,8 @@ import {
   _MemoryStorageDriver,
   _StorageDriver,
   _BaseContainer,
-  AuthorizeOptions,
   AuthorizeResult,
-  ReauthenticateOptions,
   ReauthenticateResult,
-  PromoteOptions,
   UserInfo,
   SettingOptions,
   OAuthError,
@@ -36,7 +33,13 @@ import {
   storageSetItem,
   storageDeleteItem,
 } from "./nativemodule";
-import { BiometricOptions, ReactNativeContainerDelegate } from "./types";
+import {
+  BiometricOptions,
+  ReactNativeContainerDelegate,
+  AuthorizeOptions,
+  ReauthenticateOptions,
+  PromoteOptions,
+} from "./types";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 import { BiometricPrivateKeyNotFoundError } from "./error";
 import { Platform } from "react-native";
@@ -365,6 +368,7 @@ export class ReactNativeContainer {
     const redirectURL = await openAuthorizeURL(
       authorizeURL,
       options.redirectURI,
+      options,
       options.wechatRedirectURI
     );
     const xDeviceInfo = await getXDeviceInfo();
@@ -414,6 +418,7 @@ export class ReactNativeContainer {
     const redirectURL = await openAuthorizeURL(
       endpoint,
       options.redirectURI,
+      options,
       options.wechatRedirectURI
     );
     const xDeviceInfo = await getXDeviceInfo();
@@ -590,6 +595,7 @@ export class ReactNativeContainer {
     const redirectURL = await openAuthorizeURL(
       authorizeURL,
       options.redirectURI,
+      options,
       options.wechatRedirectURI
     );
     const result = await this.baseContainer._finishAuthorization(redirectURL);

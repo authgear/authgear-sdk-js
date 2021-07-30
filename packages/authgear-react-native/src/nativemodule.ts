@@ -1,5 +1,9 @@
 import { NativeModules } from "react-native";
-import { BiometricPrivateKeyOptions, BiometricOptions } from "./types";
+import {
+  BiometricPrivateKeyOptions,
+  BiometricOptions,
+  WebOptions,
+} from "./types";
 import { _wrapError } from "./error";
 
 const { AuthgearReactNative } = NativeModules;
@@ -54,10 +58,16 @@ export async function openURL(
 export async function openAuthorizeURL(
   url: string,
   callbackURL: string,
+  webOptions: WebOptions,
   wechatRedirectURI?: string
 ): Promise<string> {
   const redirectURI: string = await _wrapPromise(
-    AuthgearReactNative.openAuthorizeURL(url, callbackURL, wechatRedirectURI)
+    AuthgearReactNative.openAuthorizeURL(
+      url,
+      callbackURL,
+      webOptions,
+      wechatRedirectURI
+    )
   );
   await dismiss();
   return redirectURI;
