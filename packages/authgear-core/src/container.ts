@@ -158,13 +158,15 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   ): Promise<void> {
     const { id_token, access_token, refresh_token, expires_in } = response;
 
-    if (id_token == null || access_token == null || expires_in == null) {
+    if (access_token == null || expires_in == null) {
       throw new AuthgearError(
-        "id_token, access_token or expires_in missing in Token Response"
+        "access_token or expires_in missing in Token Response"
       );
     }
 
-    this.idToken = id_token;
+    if (id_token != null) {
+      this.idToken = id_token;
+    }
     this.accessToken = access_token;
     if (refresh_token) {
       this.refreshToken = refresh_token;
