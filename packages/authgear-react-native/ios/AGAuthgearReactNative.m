@@ -282,6 +282,16 @@ RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
     self.openURLResolve = resolve;
     self.openURLReject = reject;
 
+
+    NSDictionary *iosDict = options[@"ios"];
+    BOOL prefersEphemeralWebBrowserSession = NO;
+    if (iosDict != nil) {
+        NSNumber *ephemeral = iosDict[@"prefersEphemeralWebBrowserSession"];
+        if (ephemeral != nil) {
+            prefersEphemeralWebBrowserSession = [ephemeral boolValue];
+        }
+    }
+
     NSString *scheme = [self getCallbackURLScheme:callbackURL];
     [AGAuthgearReactNative registerCurrentWechatRedirectURI:wechatRedirectURI];
     if (@available(iOS 12.0, *)) {
@@ -307,6 +317,7 @@ RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
             [self cleanup];
         }];
         if (@available(iOS 13.0, *)) {
+            self.asSession.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession;
             self.asSession.presentationContextProvider = self;
         }
         [self.asSession start];
