@@ -130,11 +130,6 @@ const HomeScreen: React.FC = () => {
   const [endpoint, setEndpoint] = useState('');
   const [page, setPage] = useState('');
   const [transientSession, setTransientSession] = useState(false);
-  const [useWebView, setUseWebView] = useState(false);
-  const [
-    prefersEphemeralWebBrowserSession,
-    setpPrefersEphemeralWebBrowserSession,
-  ] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const loggedIn = userInfo != null;
@@ -169,8 +164,7 @@ const HomeScreen: React.FC = () => {
       message = Platform.select({
         android:
           'Your biometric info has changed. For security reason, you have to set up biometric authentication again.',
-        ios:
-          'Your Touch ID or Face ID has changed. For security reason, you have to set up biometric authentication again.',
+        ios: 'Your Touch ID or Face ID has changed. For security reason, you have to set up biometric authentication again.',
         default: message,
       });
     }
@@ -179,8 +173,7 @@ const HomeScreen: React.FC = () => {
       message = Platform.select({
         android:
           'You have not set up biometric yet. Please set up your fingerprint or face',
-        ios:
-          'You do not have Face ID or Touch ID set up yet. Please set it up first',
+        ios: 'You do not have Face ID or Touch ID set up yet. Please set it up first',
         default: message,
       });
     }
@@ -189,8 +182,7 @@ const HomeScreen: React.FC = () => {
       message = Platform.select({
         android:
           'Your device does not support biometric. The developer should have checked this and not letting you to see feature that requires biometric',
-        ios:
-          'If the developer should performed checking, then it is likely that you have denied the permission of Face ID. Please enable it in Settings',
+        ios: 'If the developer should performed checking, then it is likely that you have denied the permission of Face ID. Please enable it in Settings',
         default: message,
       });
     }
@@ -199,8 +191,7 @@ const HomeScreen: React.FC = () => {
       message = Platform.select({
         android:
           'You device does not have credential set up. Please set up either a PIN, a pattern or a password',
-        ios:
-          'You device does not have passcode set up. Please set up a passcode',
+        ios: 'You device does not have passcode set up. Please set up a passcode',
         default: message,
       });
     }
@@ -318,12 +309,6 @@ const HomeScreen: React.FC = () => {
         redirectURI,
         wechatRedirectURI,
         page,
-        android: {
-          useWebView: useWebView,
-        },
-        ios: {
-          prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession,
-        },
       })
       .then(({userInfo}) => {
         setUserInfo(userInfo);
@@ -336,14 +321,7 @@ const HomeScreen: React.FC = () => {
         setLoading(false);
         updateBiometricState();
       });
-  }, [
-    page,
-    updateBiometricState,
-    showError,
-    showUser,
-    useWebView,
-    prefersEphemeralWebBrowserSession,
-  ]);
+  }, [page, updateBiometricState, showError, showUser]);
 
   const loginAnonymously = useCallback(() => {
     setLoading(true);
@@ -368,12 +346,6 @@ const HomeScreen: React.FC = () => {
       .promoteAnonymousUser({
         redirectURI,
         wechatRedirectURI,
-        android: {
-          useWebView: useWebView,
-        },
-        ios: {
-          prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession,
-        },
       })
       .then(({userInfo}) => {
         setUserInfo(userInfo);
@@ -384,13 +356,7 @@ const HomeScreen: React.FC = () => {
         updateBiometricState();
         setLoading(false);
       });
-  }, [
-    showError,
-    showUser,
-    updateBiometricState,
-    useWebView,
-    prefersEphemeralWebBrowserSession,
-  ]);
+  }, [showError, showUser, updateBiometricState]);
 
   const reauthenticate = useCallback(() => {
     async function task() {
@@ -405,12 +371,6 @@ const HomeScreen: React.FC = () => {
         {
           redirectURI,
           wechatRedirectURI,
-          android: {
-            useWebView: useWebView,
-          },
-          ios: {
-            prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession,
-          },
         },
         biometricOptions,
       );
@@ -427,7 +387,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [showError, showUser, useWebView, prefersEphemeralWebBrowserSession]);
+  }, [showError, showUser]);
 
   const reauthenticateWebOnly = useCallback(() => {
     async function task() {
@@ -441,12 +401,6 @@ const HomeScreen: React.FC = () => {
       const {userInfo} = await authgear.reauthenticate({
         redirectURI,
         wechatRedirectURI,
-        android: {
-          useWebView: useWebView,
-        },
-        ios: {
-          prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession,
-        },
       });
 
       setUserInfo(userInfo);
@@ -461,7 +415,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [showError, showUser, useWebView, prefersEphemeralWebBrowserSession]);
+  }, [showError, showUser]);
 
   const enableBiometric = useCallback(() => {
     setLoading(true);
@@ -595,24 +549,6 @@ const HomeScreen: React.FC = () => {
             style={styles.checkbox}
             value={transientSession}
             onValueChange={setTransientSession}
-          />
-        </View>
-        <View style={styles.input}>
-          <Text style={styles.inputLabel}>Use WebView (Android)</Text>
-          <Switch
-            style={styles.checkbox}
-            value={useWebView}
-            onValueChange={setUseWebView}
-          />
-        </View>
-        <View style={styles.input}>
-          <Text style={styles.inputLabel}>
-            Prefers Ephemeral Web Browser Session (iOS)
-          </Text>
-          <Switch
-            style={styles.checkbox}
-            value={prefersEphemeralWebBrowserSession}
-            onValueChange={setpPrefersEphemeralWebBrowserSession}
           />
         </View>
         <View style={styles.configureAction}>

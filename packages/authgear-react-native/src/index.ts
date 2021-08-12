@@ -368,7 +368,6 @@ export class ReactNativeContainer {
     const redirectURL = await openAuthorizeURL(
       authorizeURL,
       options.redirectURI,
-      options,
       options.wechatRedirectURI
     );
     const xDeviceInfo = await getXDeviceInfo();
@@ -418,7 +417,6 @@ export class ReactNativeContainer {
     const redirectURL = await openAuthorizeURL(
       endpoint,
       options.redirectURI,
-      options,
       options.wechatRedirectURI
     );
     const xDeviceInfo = await getXDeviceInfo();
@@ -594,7 +592,6 @@ export class ReactNativeContainer {
     const redirectURL = await openAuthorizeURL(
       authorizeURL,
       options.redirectURI,
-      options,
       options.wechatRedirectURI
     );
     const result = await this.baseContainer._finishAuthorization(redirectURL);
