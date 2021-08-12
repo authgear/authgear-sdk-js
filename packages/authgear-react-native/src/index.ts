@@ -447,9 +447,8 @@ export class ReactNativeContainer {
     }
 
     // Use app session token to copy session into webview.
-    const {
-      app_session_token,
-    } = await this.baseContainer.apiClient.appSessionToken(refreshToken);
+    const { app_session_token } =
+      await this.baseContainer.apiClient.appSessionToken(refreshToken);
 
     const loginHint = `https://authgear.com/login_hint?type=app_session_token&app_session_token=${encodeURIComponent(
       app_session_token
@@ -776,13 +775,12 @@ export class ReactNativeContainer {
         kid,
         payload,
       });
-      const tokenResponse = await this.baseContainer.apiClient._oidcTokenRequest(
-        {
+      const tokenResponse =
+        await this.baseContainer.apiClient._oidcTokenRequest({
           grant_type: "urn:authgear:params:oauth:grant-type:biometric-request",
           client_id: clientID,
           jwt,
-        }
-      );
+        });
 
       const userInfo = await this.baseContainer.apiClient._oidcUserInfoRequest(
         tokenResponse.access_token
