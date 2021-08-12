@@ -1,12 +1,5 @@
 var plugins = [
   "@babel/plugin-transform-typescript",
-  "@babel/plugin-proposal-class-properties",
-  [
-    "@babel/plugin-transform-for-of",
-    {
-      assumeArray: true,
-    },
-  ],
   "@babel/plugin-transform-runtime",
 ];
 
@@ -20,10 +13,8 @@ const presetEnvOptions = {
   // During build, rollup handles module for us.
   // During testing, we use plugin-transform-modules-commonjs.
   modules: false,
-  loose: true,
   debug: false,
   useBuiltIns: false,
-  exclude: ["@babel/plugin-transform-for-of"],
 };
 
 if (process.env.NODE_ENV === "test") {
@@ -34,6 +25,28 @@ if (process.env.NODE_ENV === "test") {
 }
 
 module.exports = {
+  assumptions: {
+    arrayLikeIsIterable: false,
+    constantReexports: true,
+    constantSuper: true,
+    enumerableModuleMeta: true,
+    ignoreFunctionLength: true,
+    ignoreToPrimitiveHint: false,
+    iterableIsArray: true,
+    mutableTemplateObject: true,
+    noClassCalls: true,
+    noDocumentAll: true,
+    noIncompleteNsImportDetection: false,
+    noNewArrows: true,
+    objectRestNoSymbols: true,
+    pureGetters: true,
+    setClassMethods: true,
+    setComputedProperties: true,
+    setPublicClassFields: true,
+    setSpreadProperties: true,
+    skipForOfIteratorClosing: false,
+    superIsCallableConstructor: false,
+  },
   plugins,
   presets: [["@babel/preset-env", presetEnvOptions]],
 };

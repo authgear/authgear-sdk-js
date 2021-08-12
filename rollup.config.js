@@ -11,6 +11,7 @@ const extensions = [".mjs", ".js", ".jsx", ".ts", ".tsx"];
 
 const plugins = [
   replace({
+    preventAssignment: true,
     values: {
       "process.env.VERSION": JSON.stringify(process.env.VERSION || "VERSION"),
     },
