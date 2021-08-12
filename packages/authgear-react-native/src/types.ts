@@ -33,34 +33,6 @@ export interface ReactNativeContainerDelegate {
 }
 
 /**
- * @internal
- */
-export interface WebOptions {
-  /**
-   * IOS Web options for authentication window.
-   */
-  ios?: WebOptionsIOS;
-  /**
-   * Android Web options for authentication window.
-   */
-  android?: WebOptionsAndroid;
-}
-
-/**
- * @public
- */
-export interface WebOptionsIOS {
-  prefersEphemeralWebBrowserSession?: boolean;
-}
-
-/**
- * @public
- */
-export interface WebOptionsAndroid {
-  useWebView?: boolean;
-}
-
-/**
  * Auth UI authorization options
  *
  * @public
@@ -113,14 +85,6 @@ export interface AuthorizeOptions {
    * Initial page to open. Valid values are 'login' and 'signup'.
    */
   page?: string;
-  /**
-   * IOS Web options for authentication window.
-   */
-  ios?: WebOptionsIOS;
-  /**
-   * Android Web options for authentication window.
-   */
-  android?: WebOptionsAndroid;
 }
 
 /**
@@ -154,14 +118,6 @@ export interface ReauthenticateOptions {
    * OIDC max_age
    */
   maxAge?: number;
-  /**
-   * IOS Web options for authentication window.
-   */
-  ios?: WebOptionsIOS;
-  /**
-   * Android Web options for authentication window.
-   */
-  android?: WebOptionsAndroid;
 }
 
 /**
@@ -187,14 +143,6 @@ export interface PromoteOptions {
    * The wechatRedirectURI will be called when user click the login with WeChat button
    */
   wechatRedirectURI?: string;
-  /**
-   * IOS Web options for authentication window.
-   */
-  ios?: WebOptionsIOS;
-  /**
-   * Android Web options for authentication window.
-   */
-  android?: WebOptionsAndroid;
 }
 
 /**
