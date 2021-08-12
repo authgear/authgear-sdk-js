@@ -243,9 +243,8 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       throw new AuthgearError("missing client ID");
     }
 
-    const refreshToken = await this._delegate.refreshTokenStorage.getRefreshToken(
-      this.name
-    );
+    const refreshToken =
+      await this._delegate.refreshTokenStorage.getRefreshToken(this.name);
     if (refreshToken == null) {
       // The API client has access token but we do not have the refresh token.
       await this._clearSession("NO_TOKEN");
