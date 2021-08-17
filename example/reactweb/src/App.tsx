@@ -15,12 +15,6 @@ function readEndpoint(): string {
   return window.sessionStorage.getItem("authgear.demo.endpoint") ?? "";
 }
 
-function readTransientSession(): boolean {
-  return (
-    window.sessionStorage.getItem("authgear.demo.transientSession") === "true"
-  );
-}
-
 function ShowError(props: { error: unknown }) {
   const { error } = props;
   if (error == null) {
@@ -42,52 +36,41 @@ function ShowError(props: { error: unknown }) {
 function Root() {
   const initialClientID = readClientID();
   const initialEndpoint = readEndpoint();
-  const initialTransientSession = readTransientSession();
   const [clientID, setClientID] = useState(initialClientID);
   const [endpoint, setEndpoint] = useState(initialEndpoint);
-  const [transientSession, setTransientSession] = useState(
-    initialTransientSession
-  );
+
   const [error, setError] = useState<unknown>(null);
   const [userInfo, setUserInfo] = useState<unknown>(null);
 
-  const configure = useCallback(
-    (clientID: string, endpoint: string, transientSession: boolean) => {
-      window.sessionStorage.setItem("authgear.demo.clientID", clientID);
-      window.sessionStorage.setItem("authgear.demo.endpoint", endpoint);
-      window.sessionStorage.setItem(
-        "authgear.demo.transientSession",
-        transientSession ? "true" : "false"
+  const configure = useCallback((clientID: string, endpoint: string) => {
+    window.sessionStorage.setItem("authgear.demo.clientID", clientID);
+    window.sessionStorage.setItem("authgear.demo.endpoint", endpoint);
+    authgear
+      .configure({
+        endpoint,
+        clientID,
+        sessionType: SESSION_TYPE,
+      })
+      .then(
+        () => {
+          authgear.fetchUserInfo().then(
+            (userInfo) => {
+              setUserInfo(userInfo);
+            },
+            (err) => {
+              setUserInfo(null);
+            }
+          );
+        },
+        (err) => setError(err)
       );
-      authgear
-        .configure({
-          endpoint,
-          clientID,
-          sessionType: SESSION_TYPE,
-          transientSession: transientSession,
-        })
-        .then(
-          () => {
-            authgear.fetchUserInfo().then(
-              (userInfo) => {
-                setUserInfo(userInfo);
-              },
-              (err) => {
-                setUserInfo(null);
-              }
-            );
-          },
-          (err) => setError(err)
-        );
-    },
-    []
-  );
+  }, []);
 
   useEffect(() => {
     if (initialClientID !== "" && initialEndpoint !== "") {
-      configure(initialClientID, initialEndpoint, initialTransientSession);
+      configure(initialClientID, initialEndpoint);
     }
-  }, [initialClientID, initialEndpoint, initialTransientSession, configure]);
+  }, [initialClientID, initialEndpoint, configure]);
 
   const onClickSignOut = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
@@ -132,20 +115,13 @@ function Root() {
     []
   );
 
-  const onChangeTransientSession = useCallback(
-    (e: React.FormEvent<HTMLInputElement>) => {
-      setTransientSession(e.currentTarget.checked);
-    },
-    []
-  );
-
   const onClickConfigure = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
       e.preventDefault();
       e.stopPropagation();
-      configure(clientID, endpoint, transientSession);
+      configure(clientID, endpoint);
     },
-    [clientID, endpoint, transientSession, configure]
+    [clientID, endpoint, configure]
   );
 
   const onClickReauthenticate = useCallback(
@@ -214,15 +190,6 @@ function Root() {
           onChange={onChangeEndpoint}
         />
       </label>
-      <label className="label">
-        Transient Session
-        <input
-          className="input"
-          type="checkbox"
-          onChange={onChangeTransientSession}
-          checked={transientSession}
-        />
-      </label>
       <button className="button" type="button" onClick={onClickConfigure}>
         Configure
       </button>
@@ -276,13 +243,11 @@ function AuthRedirect() {
   useEffect(() => {
     const clientID = readClientID();
     const endpoint = readEndpoint();
-    const transientSession = readTransientSession();
     authgear
       .configure({
         clientID,
         endpoint,
         sessionType: SESSION_TYPE,
-        transientSession: transientSession,
       })
       .then(
         () => {
@@ -312,13 +277,11 @@ function ReauthRedirect() {
   useEffect(() => {
     const clientID = readClientID();
     const endpoint = readEndpoint();
-    const transientSession = readTransientSession();
     authgear
       .configure({
         clientID,
         endpoint,
         sessionType: SESSION_TYPE,
-        transientSession: transientSession,
       })
       .then(
         () => {
