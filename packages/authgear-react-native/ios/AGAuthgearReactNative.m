@@ -274,6 +274,7 @@ RCT_EXPORT_METHOD(openURL:(NSURL *)url
 
 RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
                        callbackURL:(NSString *)callbackURL
+                       sessionType:(NSString *)sessionType
                  wechatRedirectURI:(NSString *)wechatRedirectURI
                            resolve:(RCTPromiseResolveBlock)resolve
                             reject:(RCTPromiseRejectBlock)reject)
