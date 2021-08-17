@@ -67,6 +67,17 @@ export enum Page {
 }
 
 /**
+ * @internal
+ *
+ * Use for checking SessionType validity.
+ */
+const SessionTypes = ["transient", "app", "device"] as const;
+/**
+ * @public
+ */
+export type SessionType = "transient" | "app" | "device";
+
+/**
  * @public
  */
 export interface ConfigureOptions {
@@ -79,11 +90,9 @@ export interface ConfigureOptions {
    */
   endpoint: string;
   /**
-   * transientSession indicate if the session in SDK is short-lived session.
-   * If transientSession is true means the session is short-lived session and won't be persist.
-   * In react-native app, the session will be gone when calling authgear.configure.
+   * sessionType indicate how the session is supposed to be stored.
    */
-  transientSession?: boolean;
+  sessionType?: SessionType;
 }
 
 /**
@@ -147,6 +156,11 @@ export class ReactNativeContainer {
   /**
    * @internal
    */
+  _sessionType: SessionType;
+
+  /**
+   * @internal
+   */
   wechatRedirectDeepLinkListener: (url: string) => void;
 
   /**
@@ -180,6 +194,14 @@ export class ReactNativeContainer {
 
   public set clientID(clientID: string | undefined) {
     this.baseContainer.clientID = clientID;
+  }
+
+  /**
+   *
+   * @public
+   */
+  public get sessionType(): SessionType {
+    return this._sessionType;
   }
 
   /**
@@ -225,6 +247,8 @@ export class ReactNativeContainer {
 
     this.storage = _storage;
     this.refreshTokenStorage = this.storage;
+
+    this._sessionType = "app";
 
     this.wechatRedirectDeepLinkListener = (url: string) => {
       this._sendWechatRedirectURIToDelegate(url);
@@ -316,7 +340,11 @@ export class ReactNativeContainer {
    * @public
    */
   async configure(options: ConfigureOptions): Promise<void> {
-    if (options.transientSession) {
+    this._sessionType =
+      options.sessionType && SessionTypes.indexOf(options.sessionType) !== -1
+        ? options.sessionType
+        : "app";
+    if (this._sessionType === "transient") {
       this.refreshTokenStorage = globalMemoryStore;
     } else {
       this.refreshTokenStorage = this.storage;
