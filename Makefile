@@ -16,23 +16,17 @@ docs:
 		--options typedoc/typedoc.json \
 		--tsconfig typedoc/tsconfig.web.json \
 		--name @authgear/web \
-		--inputFiles packages/authgear-web/index.d.ts \
+		--entryPoints packages/authgear-web/index.d.ts \
 		--out ./temp/docs/web \
-		--theme docusaurus2 \
-		--skipSidebar \
-		--namedAnchors \
-		--hideSources
+		--namedAnchors
 	npx typedoc \
 		--options typedoc/typedoc.json \
 		--tsconfig typedoc/tsconfig.react-native.json \
 		--name @authgear/react-native \
-		--inputFiles packages/authgear-react-native/index.d.ts \
+		--entryPoints packages/authgear-react-native/index.d.ts \
 		--out ./temp/docs/react-native \
-		--theme docusaurus2 \
-		--namedAnchors \
-		--hideSources
+		--namedAnchors
 	cp ./typedoc/index.md ./temp/docs/index.md
-	node ./scripts/rewrite_document_id.js ./temp/docs
 	node ./scripts/generate_sidebars_js.js ./temp/docs >./temp/sidebars.js
 	rm -rf ./website/docs
 	cp -R ./temp/docs/. ./website/docs

@@ -1,7 +1,2 @@
----
-id: "index"
-title: "index"
----
-
-- [@authgear/web](web/index.md)
-- [@authgear/react-native](react-native/index.md)
+- [@authgear/web](web/modules.md)
+- [@authgear/react-native](react-native/modules.md)

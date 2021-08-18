@@ -15,7 +15,7 @@ const sidebar = {
       items: [
         {
           type: "doc",
-          id: "web/index",
+          id: "web/modules",
         },
         {
           type: "category",
@@ -40,7 +40,7 @@ const sidebar = {
       items: [
         {
           type: "doc",
-          id: "react-native/index",
+          id: "react-native/modules",
         },
         {
           type: "category",
