@@ -441,6 +441,7 @@ export class ReactNativeContainer {
       idTokenHint: idToken,
       responseType: "code",
       scope: ["openid", "https://authgear.com/scopes/full-access"],
+      suppressIDPSessionCookie: this._shouldSuppressIDPSessionCookie(),
     });
 
     const redirectURL = await openAuthorizeURL(
@@ -634,6 +635,13 @@ export class ReactNativeContainer {
   /**
    * @internal
    */
+  _shouldSuppressIDPSessionCookie(): boolean {
+    return this.sessionType === "transient";
+  }
+
+  /**
+   * @internal
+   */
   async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
     return this.baseContainer.authorizeEndpoint({
       ...options,
@@ -643,6 +651,7 @@ export class ReactNativeContainer {
         "offline_access",
         "https://authgear.com/scopes/full-access",
       ],
+      suppressIDPSessionCookie: this._shouldSuppressIDPSessionCookie(),
     });
   }
 
