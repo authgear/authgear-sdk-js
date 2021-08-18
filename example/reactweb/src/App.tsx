@@ -8,11 +8,11 @@ const SESSION_TYPE = "refresh_token";
 // const SESSION_TYPE = "cookie";
 
 function readClientID(): string {
-  return window.sessionStorage.getItem("authgear.demo.clientID") ?? "";
+  return window.localStorage.getItem("authgear.demo.clientID") ?? "";
 }
 
 function readEndpoint(): string {
-  return window.sessionStorage.getItem("authgear.demo.endpoint") ?? "";
+  return window.localStorage.getItem("authgear.demo.endpoint") ?? "";
 }
 
 function ShowError(props: { error: unknown }) {
@@ -43,8 +43,8 @@ function Root() {
   const [userInfo, setUserInfo] = useState<unknown>(null);
 
   const configure = useCallback((clientID: string, endpoint: string) => {
-    window.sessionStorage.setItem("authgear.demo.clientID", clientID);
-    window.sessionStorage.setItem("authgear.demo.endpoint", endpoint);
+    window.localStorage.setItem("authgear.demo.clientID", clientID);
+    window.localStorage.setItem("authgear.demo.endpoint", endpoint);
     authgear
       .configure({
         endpoint,
