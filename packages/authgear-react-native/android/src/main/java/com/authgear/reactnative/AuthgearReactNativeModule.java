@@ -667,7 +667,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     }
 
     @ReactMethod
-    public void openAuthorizeURL(String urlString, String callbackURL, String wechatRedirectURI, Promise promise) {
+    public void openAuthorizeURL(String urlString, String callbackURL, String sessionType, String wechatRedirectURI, Promise promise) {
         this.openURLPromise = promise;
 
         try {
@@ -687,7 +687,14 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             });
             OAuthRedirectActivity.registerCallbackURL(callbackURL);
 
-            Intent intent = OAuthCoordinatorActivity.createAuthorizationIntent(context, uri);
+            Intent intent;
+            boolean useWebView = sessionType.equals("app") || sessionType.equals("transient");
+            if (useWebView) {
+                intent = OAuthWebViewActivity.createIntent(context, uri.toString(), callbackURL);
+            } else {
+                intent = OAuthCoordinatorActivity.createAuthorizationIntent(context, uri);
+            }
+
             currentActivity.startActivityForResult(intent, REQUEST_CODE_AUTHORIZATION);
         } catch (Exception e) {
             if (this.openURLPromise != null) {

@@ -54,10 +54,16 @@ export async function openURL(
 export async function openAuthorizeURL(
   url: string,
   callbackURL: string,
+  sessionType: string,
   wechatRedirectURI?: string
 ): Promise<string> {
   const redirectURI: string = await _wrapPromise(
-    AuthgearReactNative.openAuthorizeURL(url, callbackURL, wechatRedirectURI)
+    AuthgearReactNative.openAuthorizeURL(
+      url,
+      callbackURL,
+      sessionType,
+      wechatRedirectURI
+    )
   );
   await dismiss();
   return redirectURI;

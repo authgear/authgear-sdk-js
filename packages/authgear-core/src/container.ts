@@ -353,6 +353,9 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (options.page != null) {
       query.append("x_page", options.page);
     }
+    if (options.suppressIDPSessionCookie === true) {
+      query.append("x_suppress_idp_session_cookie", "true");
+    }
 
     return `${config.authorization_endpoint}?${query.toString()}`;
   }

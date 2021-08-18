@@ -30,6 +30,7 @@ export interface _OIDCAuthenticationRequest {
   wechatRedirectURI?: string;
   platform?: string;
   page?: string;
+  suppressIDPSessionCookie?: boolean;
 }
 
 /**
