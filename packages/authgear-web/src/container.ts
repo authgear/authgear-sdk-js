@@ -13,10 +13,7 @@ import {
   AuthgearError,
 } from "@authgear/core";
 import { _WebAPIClient } from "./client";
-import {
-  _localStorageStorageDriver,
-  _sessionStorageStorageDriver,
-} from "./storage";
+import { _localStorageStorageDriver } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
   WebContainerDelegate,
@@ -50,12 +47,6 @@ export interface ConfigureOptions {
    * If not specified, default to "refresh_token".
    */
   sessionType?: "cookie" | "refresh_token";
-  /**
-   * transientSession indicate if the session in SDK is short-lived session.
-   * If transientSession is true means the session is short-lived session.
-   * In web, the session will be stored in sessionStorage, that means it only persists within the same browser tab.
-   */
-  transientSession?: boolean;
 }
 
 /**
@@ -245,13 +236,6 @@ export class WebContainer {
    * @public
    */
   async configure(options: ConfigureOptions): Promise<void> {
-    if (options.transientSession) {
-      this.refreshTokenStorage = new _GlobalJSONContainerStorage(
-        _sessionStorageStorageDriver
-      );
-    } else {
-      this.refreshTokenStorage = this.storage;
-    }
     // TODO: verify if we need to support configure for second time
     // and guard if initialized
     const refreshToken = await this.refreshTokenStorage.getRefreshToken(
