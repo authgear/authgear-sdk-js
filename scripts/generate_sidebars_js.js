@@ -8,7 +8,6 @@ const sidebar = {
     {
       type: "doc",
       id: "index",
-      label: "Introduction",
     },
     {
       type: "category",
@@ -17,7 +16,6 @@ const sidebar = {
         {
           type: "doc",
           id: "web/index",
-          label: "Introduction",
         },
         {
           type: "doc",
@@ -48,7 +46,6 @@ const sidebar = {
         {
           type: "doc",
           id: "react-native/index",
-          label: "Introduction",
         },
         {
           type: "doc",
@@ -87,14 +84,14 @@ function splitext(p) {
 }
 
 function indexForPackage(packageName) {
-  return sidebar.root.findIndex(a => a.label === packageName);
+  return sidebar.root.findIndex(a => a.label != null && a.label === packageName);
 }
 
 const WEB_PACKAGE_INDEX = indexForPackage("@authgear/web");
 const REACT_NATIVE_PACKAGE_INDEX = indexForPackage("@authgear/react-native");
 
 function indexForCategory(package, categoryLabel) {
-  return package.items.findIndex(a => a.label.toLowerCase() === categoryLabel.toLowerCase());
+  return package.items.findIndex(a => a.label != null && a.label.toLowerCase() === categoryLabel.toLowerCase());
 }
 
 function recur(dir) {
