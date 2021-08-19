@@ -18,15 +18,19 @@ docs:
 		--name @authgear/web \
 		--entryPoints packages/authgear-web/index.d.ts \
 		--out ./temp/docs/web \
-		--namedAnchors
+		--namedAnchors \
+		--entryDocument index.md
 	npx typedoc \
 		--options typedoc/typedoc.json \
 		--tsconfig typedoc/tsconfig.react-native.json \
 		--name @authgear/react-native \
 		--entryPoints packages/authgear-react-native/index.d.ts \
 		--out ./temp/docs/react-native \
-		--namedAnchors
+		--namedAnchors \
+		--entryDocument index.md
 	cp ./typedoc/index.md ./temp/docs/index.md
+	cp ./typedoc/web_index.md ./temp/docs/web/index.md
+	cp ./typedoc/react_native_index.md ./temp/docs/react-native/index.md
 	node ./scripts/generate_sidebars_js.js ./temp/docs >./temp/sidebars.js
 	rm -rf ./website/docs
 	cp -R ./temp/docs/. ./website/docs

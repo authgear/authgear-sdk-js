@@ -1,5 +1,5 @@
 ---
 slug: /
 ---
-- [@authgear/web](web/modules.md)
-- [@authgear/react-native](react-native/modules.md)
+- [@authgear/web](web/index.md)
+- [@authgear/react-native](react-native/index.md)
