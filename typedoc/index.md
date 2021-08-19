@@ -1,2 +1,5 @@
+---
+slug: /
+---
 - [@authgear/web](web/modules.md)
 - [@authgear/react-native](react-native/modules.md)

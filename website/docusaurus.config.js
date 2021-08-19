@@ -41,7 +41,7 @@ module.exports = {
           items: [
             {
               label: "API References",
-              to: "docs/index",
+              to: "docs/",
             },
           ],
         },
