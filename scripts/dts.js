@@ -59,4 +59,3 @@ for (const p of publishedPackages) {
     fs.readFileSync(coreDtsPath, { encoding: "utf8" }) + lines.join("\n");
   fs.writeFileSync(dtsPath, content);
 }
-fs.unlinkSync(coreDtsPath);

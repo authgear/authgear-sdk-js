@@ -18,6 +18,11 @@ const sidebar = {
           id: "web/index",
         },
         {
+          type: "doc",
+          id: "web/modules",
+          label: "Module Overview",
+        },
+        {
           type: "category",
           label: "Interfaces",
           items: [],
@@ -41,6 +46,11 @@ const sidebar = {
         {
           type: "doc",
           id: "react-native/index",
+        },
+        {
+          type: "doc",
+          id: "react-native/modules",
+          label: "Module Overview",
         },
         {
           type: "category",
@@ -73,6 +83,17 @@ function splitext(p) {
   };
 }
 
+function indexForPackage(packageName) {
+  return sidebar.root.findIndex(a => a.label != null && a.label === packageName);
+}
+
+const WEB_PACKAGE_INDEX = indexForPackage("@authgear/web");
+const REACT_NATIVE_PACKAGE_INDEX = indexForPackage("@authgear/react-native");
+
+function indexForCategory(package, categoryLabel) {
+  return package.items.findIndex(a => a.label != null && a.label.toLowerCase() === categoryLabel.toLowerCase());
+}
+
 function recur(dir) {
   const entries = fs.readdirSync(dir, {
     encoding: "utf8",
@@ -100,25 +121,19 @@ function recur(dir) {
 
       let i;
       if (package === "web") {
-        i = 1;
+        i = WEB_PACKAGE_INDEX;
       } else if (package == "react-native") {
-        i = 2;
+        i = REACT_NATIVE_PACKAGE_INDEX;
       } else {
         throw new Error("unexpected package " + package);
       }
 
-      let j;
-      if (kind === "interfaces") {
-        j = 1;
-      } else if (kind == "classes") {
-        j = 2;
-      } else if (kind == "enums") {
-        j = 3;
-      } else {
+      const j = indexForCategory(sidebar.root[i], kind);
+      if (j < 0) {
         throw new Error("unexpected kind " + kind);
       }
 
-      sidebar["root"][i]["items"][j]["items"].push(noext);
+      sidebar.root[i].items[j].items.push(noext);
     }
   }
 }

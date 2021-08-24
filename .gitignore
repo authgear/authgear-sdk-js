@@ -5,7 +5,7 @@ node_modules/
 new-release
 
 dist/
-/packages/authgear-node-client/index.d.ts
+/packages/authgear-core/index.d.ts
 /packages/authgear-web/index.d.ts
 /packages/authgear-react-native/index.d.ts
 /packages/authgear-react-native/android/build/

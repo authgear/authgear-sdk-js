@@ -1,8 +1,14 @@
+const lightCodeTheme = require("prism-react-renderer/themes/github");
+const darkCodeTheme = require("prism-react-renderer/themes/dracula");
+
+/** @type {import("@docusaurus/types").DocusaurusConfig} */
 module.exports = {
   title: "Authgear SDK JS",
   tagline: "Documentation of Authgear SDK JS",
-  url: "https://authgear.github.io/authgear-sdk-js",
+  url: "https://authgear.github.io",
   baseUrl: "/authgear-sdk-js/",
+  onBrokenLinks: "throw",
+  onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
   organizationName: "authgear",
   projectName: "authgear-sdk-js",
@@ -13,12 +19,12 @@ module.exports = {
         alt: "Authgear SDK JS",
         src: "img/logo.png",
       },
-      links: [
+      items: [
         {
-          to: "docs/",
-          activeBasePath: "docs",
-          label: "Docs",
+          type: "doc",
+          docId: "index",
           position: "left",
+          label: "Docs",
         },
         {
           href: "https://github.com/authgear/authgear-sdk-js",
@@ -42,15 +48,18 @@ module.exports = {
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Oursky, Ltd.`,
     },
+    prism: {
+      theme: lightCodeTheme,
+      darkTheme: darkCodeTheme,
+    },
   },
   presets: [
     [
       "@docusaurus/preset-classic",
       {
         docs: {
-          // It is recommended to set document id as docs home page (`docs/` path).
-          homePageId: "index",
           sidebarPath: require.resolve("./sidebars.js"),
+          // Please change this to your repo.
           editUrl:
             "https://github.com/authgear/authgear-sdk-js/edit/master/website/",
         },
