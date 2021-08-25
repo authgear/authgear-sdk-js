@@ -130,6 +130,8 @@ const HomeScreen: React.FC = () => {
   const [endpoint, setEndpoint] = useState('');
   const [page, setPage] = useState('');
   const [storageType, setStorageType] = useState('');
+  const [shareSessionWithDeviceBrowser, setShareSessionWithDeviceBrowser] =
+    useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const loggedIn = userInfo != null;
@@ -289,6 +291,7 @@ const HomeScreen: React.FC = () => {
         clientID,
         endpoint,
         storageType,
+        shareSessionWithDeviceBrowser,
       })
       .then(() => {
         postConfigure();
@@ -300,7 +303,14 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [clientID, endpoint, storageType, postConfigure, showError]);
+  }, [
+    clientID,
+    endpoint,
+    storageType,
+    shareSessionWithDeviceBrowser,
+    postConfigure,
+    showError,
+  ]);
 
   const login = useCallback(() => {
     setLoading(true);
@@ -544,14 +554,24 @@ const HomeScreen: React.FC = () => {
           />
         </View>
         <View style={styles.input}>
-          <Text style={styles.inputLabel}>Session Type</Text>
+          <Text style={styles.inputLabel}>Storage Type</Text>
           <TextInput
             style={styles.inputField}
             onChangeText={setStorageType}
             autoCapitalize="none"
             autoCompleteType="off"
             autoCorrect={false}
-            placeholder="'transient' / 'app' / 'device'"
+            placeholder="'transient' / 'app'"
+          />
+        </View>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>
+            Share Session With Device Browser
+          </Text>
+          <Switch
+            style={styles.checkbox}
+            value={shareSessionWithDeviceBrowser}
+            onValueChange={setShareSessionWithDeviceBrowser}
           />
         </View>
         <View style={styles.configureAction}>
