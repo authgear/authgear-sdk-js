@@ -19,7 +19,6 @@ static void postOpenWechatRedirectURINotification(NSURL *URL, id sender)
 }
 
 @interface AGAuthgearReactNative() <WKNavigationDelegate>
-@property (nonatomic, strong) NSString *currentRedirectURI;
 @property (nonatomic, strong) RCTPromiseResolveBlock openURLResolve;
 @property (nonatomic, strong) RCTPromiseRejectBlock openURLReject;
 @property (nonatomic, strong) UIViewController *webViewViewController;
@@ -275,41 +274,17 @@ RCT_EXPORT_METHOD(openURL:(NSURL *)url
 
 RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
                        callbackURL:(NSString *)callbackURL
-                       sessionType:(NSString *)sessionType
+ prefersEphemeralWebBrowserSession:(BOOL)prefersEphemeralWebBrowserSession
                  wechatRedirectURI:(NSString *)wechatRedirectURI
                            resolve:(RCTPromiseResolveBlock)resolve
                             reject:(RCTPromiseRejectBlock)reject)
 {
-    self.currentRedirectURI = callbackURL;
     self.openURLResolve = resolve;
     self.openURLReject = reject;
 
     NSString *scheme = [self getCallbackURLScheme:callbackURL];
     [AGAuthgearReactNative registerCurrentWechatRedirectURI:wechatRedirectURI];
 
-    BOOL useWebView = [sessionType isEqualToString:@"app"];
-    // use WebView
-    if (useWebView) {
-        UIViewController *vc = [[UIViewController alloc] init];
-        WKWebView *wv = [[WKWebView alloc] initWithFrame:vc.view.bounds];
-        wv.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        wv.navigationDelegate = self;
-        [wv loadRequest:[NSURLRequest requestWithURL:url]];
-        [vc.view addSubview:wv];
-        vc.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissWebView)];
-        self.webViewViewController = vc;
-
-        UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
-        nav.modalPresentationStyle = UIModalPresentationPageSheet;
-
-        UIViewController *rootViewController = RCTPresentedViewController();
-        [rootViewController presentViewController:nav animated:YES completion:nil];
-        return;
-    }
-
-
-    // use ASWebAuthenticationSession
-    BOOL prefersEphemeralWebBrowserSession = [sessionType isEqualToString:@"transient"];
     if (@available(iOS 12.0, *)) {
         self.asSession = [[ASWebAuthenticationSession alloc] initWithURL:url
                                                                             callbackURLScheme:scheme
@@ -633,7 +608,6 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
         self.webViewViewController = nil;
       }];
     }
-    self.currentRedirectURI = nil;
     self.openURLResolve = nil;
     self.openURLReject = nil;
 }
@@ -867,28 +841,11 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
     return NO;
 }
 
--(BOOL)handleWebViewRedirectURI:(NSURL*)url {
-    if(self.currentRedirectURI == nil) return NO;
-    NSString *urlWithoutQuery = [self.class getURLWithoutQuery:url];
-    if (urlWithoutQuery != nil && [urlWithoutQuery isEqualToString:self.currentRedirectURI]) {
-        if (self.openURLResolve) {
-            self.openURLResolve(url.absoluteString);
-            [self cleanup];
-        }
-        return YES;
-    }
-    return NO;
-}
-
 - (void)webView:(WKWebView *)webView
 decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction
 decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
     NSURL *url = navigationAction.request.URL;
     if (url != nil && [self.class handleWechatRedirectURI:url]) {
-        decisionHandler(WKNavigationActionPolicyCancel);
-        return;
-    }
-    if (url != nil && [self handleWebViewRedirectURI:url]) {
         decisionHandler(WKNavigationActionPolicyCancel);
         return;
     }

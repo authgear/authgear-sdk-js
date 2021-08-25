@@ -129,7 +129,7 @@ const HomeScreen: React.FC = () => {
   const [clientID, setClientID] = useState('');
   const [endpoint, setEndpoint] = useState('');
   const [page, setPage] = useState('');
-  const [sessionType, setSessionType] = useState('');
+  const [storageType, setStorageType] = useState('');
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const loggedIn = userInfo != null;
@@ -288,7 +288,7 @@ const HomeScreen: React.FC = () => {
       .configure({
         clientID,
         endpoint,
-        sessionType,
+        storageType,
       })
       .then(() => {
         postConfigure();
@@ -300,7 +300,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [clientID, endpoint, sessionType, postConfigure, showError]);
+  }, [clientID, endpoint, storageType, postConfigure, showError]);
 
   const login = useCallback(() => {
     setLoading(true);
@@ -547,7 +547,7 @@ const HomeScreen: React.FC = () => {
           <Text style={styles.inputLabel}>Session Type</Text>
           <TextInput
             style={styles.inputField}
-            onChangeText={setSessionType}
+            onChangeText={setStorageType}
             autoCapitalize="none"
             autoCompleteType="off"
             autoCorrect={false}
