@@ -1,3 +1,4 @@
+export * from "@authgear/core";
 import { WebContainer } from "./container";
 export * from "./container";
 export * from "./types";

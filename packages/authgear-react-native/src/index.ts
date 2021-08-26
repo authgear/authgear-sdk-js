@@ -43,6 +43,7 @@ import {
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 import { BiometricPrivateKeyNotFoundError } from "./error";
 import { Platform } from "react-native";
+export * from "@authgear/core";
 export * from "./types";
 export {
   BiometricPrivateKeyNotFoundError,
