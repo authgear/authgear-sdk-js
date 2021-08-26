@@ -54,14 +54,14 @@ export async function openURL(
 export async function openAuthorizeURL(
   url: string,
   callbackURL: string,
-  sessionType: string,
+  prefersEphemeralWebBrowserSession: boolean,
   wechatRedirectURI?: string
 ): Promise<string> {
   const redirectURI: string = await _wrapPromise(
     AuthgearReactNative.openAuthorizeURL(
       url,
       callbackURL,
-      sessionType,
+      prefersEphemeralWebBrowserSession,
       wechatRedirectURI
     )
   );

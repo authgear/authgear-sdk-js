@@ -69,13 +69,13 @@ export enum Page {
 /**
  * @internal
  *
- * Use for checking SessionType validity.
+ * Use for checking StorageType validity.
  */
-const SessionTypes = ["transient", "app", "device"] as const;
+const StorageTypes = ["transient", "app"] as const;
 /**
  * @public
  */
-export type SessionType = "transient" | "app" | "device";
+export type StorageType = "transient" | "app";
 
 /**
  * @public
@@ -90,9 +90,14 @@ export interface ConfigureOptions {
    */
   endpoint: string;
   /**
-   * sessionType indicate how the session is supposed to be stored.
+   * storageType indicates how the session is supposed to be stored.
    */
-  sessionType?: SessionType;
+  storageType?: StorageType;
+  /**
+   * shareSessionWithDeviceBrowser indicates whether the Authgear session is
+   * shared with the device browser.
+   */
+  shareSessionWithDeviceBrowser?: boolean;
 }
 
 /**
@@ -156,7 +161,12 @@ export class ReactNativeContainer {
   /**
    * @internal
    */
-  _sessionType: SessionType;
+  _storageType: StorageType;
+
+  /**
+   * @internal
+   */
+  _shareSessionWithDeviceBrowser: boolean;
 
   /**
    * @internal
@@ -200,8 +210,16 @@ export class ReactNativeContainer {
    *
    * @public
    */
-  public get sessionType(): SessionType {
-    return this._sessionType;
+  public get storageType(): StorageType {
+    return this._storageType;
+  }
+
+  /**
+   *
+   * @public
+   */
+  public get shareSessionWithDeviceBrowser(): boolean {
+    return this._shareSessionWithDeviceBrowser;
   }
 
   /**
@@ -248,7 +266,8 @@ export class ReactNativeContainer {
     this.storage = _storage;
     this.refreshTokenStorage = this.storage;
 
-    this._sessionType = "app";
+    this._storageType = "app";
+    this._shareSessionWithDeviceBrowser = false;
 
     this.wechatRedirectDeepLinkListener = (url: string) => {
       this._sendWechatRedirectURIToDelegate(url);
@@ -340,11 +359,13 @@ export class ReactNativeContainer {
    * @public
    */
   async configure(options: ConfigureOptions): Promise<void> {
-    this._sessionType =
-      options.sessionType && SessionTypes.indexOf(options.sessionType) !== -1
-        ? options.sessionType
+    this._storageType =
+      options.storageType && StorageTypes.indexOf(options.storageType) !== -1
+        ? options.storageType
         : "app";
-    if (this._sessionType === "transient") {
+    this._shareSessionWithDeviceBrowser =
+      options.shareSessionWithDeviceBrowser ?? false;
+    if (this._storageType === "transient") {
       this.refreshTokenStorage = globalMemoryStore;
     } else {
       this.refreshTokenStorage = this.storage;
@@ -396,7 +417,7 @@ export class ReactNativeContainer {
     const redirectURL = await openAuthorizeURL(
       authorizeURL,
       options.redirectURI,
-      this._sessionType,
+      this._shouldPrefersEphemeralWebBrowserSession(),
       options.wechatRedirectURI
     );
     const xDeviceInfo = await getXDeviceInfo();
@@ -447,7 +468,7 @@ export class ReactNativeContainer {
     const redirectURL = await openAuthorizeURL(
       endpoint,
       options.redirectURI,
-      this._sessionType,
+      this._shouldPrefersEphemeralWebBrowserSession(),
       options.wechatRedirectURI
     );
     const xDeviceInfo = await getXDeviceInfo();
@@ -623,7 +644,7 @@ export class ReactNativeContainer {
     const redirectURL = await openAuthorizeURL(
       authorizeURL,
       options.redirectURI,
-      this._sessionType,
+      this._shouldPrefersEphemeralWebBrowserSession(),
       options.wechatRedirectURI
     );
     const result = await this.baseContainer._finishAuthorization(redirectURL);
@@ -636,7 +657,14 @@ export class ReactNativeContainer {
    * @internal
    */
   _shouldSuppressIDPSessionCookie(): boolean {
-    return this.sessionType === "transient";
+    return !this.shareSessionWithDeviceBrowser;
+  }
+
+  /**
+   * @internal
+   */
+  _shouldPrefersEphemeralWebBrowserSession(): boolean {
+    return !this.shareSessionWithDeviceBrowser;
   }
 
   /**
