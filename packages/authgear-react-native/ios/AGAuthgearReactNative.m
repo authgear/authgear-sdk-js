@@ -249,7 +249,7 @@ RCT_EXPORT_METHOD(openURL:(NSURL *)url
                 BOOL isUserCancelled = ([[error domain] isEqualToString:ASWebAuthenticationSessionErrorDomain] &&
                 [error code] == ASWebAuthenticationSessionErrorCodeCanceledLogin);
                 if (isUserCancelled) {
-                    reject(@"CANCEL", @"CANCEL", error);
+                    resolve(nil);
                 } else {
                     reject(RCTErrorUnspecified, [NSString stringWithFormat:@"Unable to open URL: %@", url], error);
                 }
