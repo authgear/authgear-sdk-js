@@ -1,6 +1,7 @@
 package com.authgear.reactnative;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -60,6 +61,7 @@ public class WebViewActivity extends AppCompatActivity {
         if (this.webView.canGoBack()) {
             this.webView.goBack();
         } else {
+            this.setResult(Activity.RESULT_CANCELED);
             super.onBackPressed();
         }
     }
@@ -81,7 +83,8 @@ public class WebViewActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == MENU_ID_CANCEL) {
-            finish();
+            this.setResult(Activity.RESULT_CANCELED);
+            this.finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
