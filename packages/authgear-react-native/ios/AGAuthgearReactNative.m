@@ -1,8 +1,6 @@
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 12000)
 #import <AuthenticationServices/AuthenticationServices.h>
 #endif
-#import <WebKit/WebKit.h>
-#import <SafariServices/SafariServices.h>
 #import <CommonCrypto/CommonDigest.h>
 #import <React/RCTUtils.h>
 #import <LocalAuthentication/LocalAuthentication.h>
@@ -17,20 +15,6 @@ static void postOpenWechatRedirectURINotification(NSURL *URL, id sender)
                                                       object:sender
                                                     userInfo:payload];
 }
-
-@interface AGAuthgearReactNative() <WKNavigationDelegate>
-@property (nonatomic, strong) RCTPromiseResolveBlock openURLResolve;
-@property (nonatomic, strong) RCTPromiseRejectBlock openURLReject;
-@property (nonatomic, strong) UIViewController *webViewViewController;
-@end
-
-#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 11000)
-@interface AGAuthgearReactNative()
-// We must have strong reference to the session otherwise it is closed immediately when
-// it goes out of scope.
-@property (nonatomic, strong) SFAuthenticationSession *sfSession API_AVAILABLE(ios(11));
-@end
-#endif
 
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 12000)
 @interface AGAuthgearReactNative() <ASWebAuthenticationPresentationContextProviding>
@@ -254,22 +238,34 @@ RCT_EXPORT_METHOD(openURL:(NSURL *)url
     // new authorize section (authorize or setting page)
     // registerCurrentWechatRedirectURI will be called and overwrite
     // previous registered wechatRedirectURI
+    NSString *scheme = @"nocallback";
     [AGAuthgearReactNative registerCurrentWechatRedirectURI:wechatRedirectURI];
-    UIViewController *vc = [[UIViewController alloc] init];
-    WKWebView *wv = [[WKWebView alloc] initWithFrame:vc.view.bounds];
-    wv.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    wv.navigationDelegate = self;
-    [wv loadRequest:[NSURLRequest requestWithURL:url]];
-    [vc.view addSubview:wv];
-    vc.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissWebView)];
-    self.webViewViewController = vc;
-
-    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
-    nav.modalPresentationStyle = UIModalPresentationPageSheet;
-
-    UIViewController *rootViewController = RCTPresentedViewController();
-    [rootViewController presentViewController:nav animated:YES completion:nil];
-    resolve(nil);
+    if (@available(iOS 12.0, *)) {
+        self.asSession = [[ASWebAuthenticationSession alloc] initWithURL:url
+                                                                            callbackURLScheme:scheme
+                                                                            completionHandler:^(NSURL *url, NSError *error) {
+            [AGAuthgearReactNative unregisterCurrentWechatRedirectURI];
+            if (error) {
+                BOOL isUserCancelled = ([[error domain] isEqualToString:ASWebAuthenticationSessionErrorDomain] &&
+                [error code] == ASWebAuthenticationSessionErrorCodeCanceledLogin);
+                if (isUserCancelled) {
+                    resolve(nil);
+                } else {
+                    reject(RCTErrorUnspecified, [NSString stringWithFormat:@"Unable to open URL: %@", url], error);
+                }
+            } else {
+                resolve(nil);
+            }
+            [self cleanup];
+        }];
+        if (@available(iOS 13.0, *)) {
+            self.asSession.presentationContextProvider = self;
+            self.asSession.prefersEphemeralWebBrowserSession = @YES;
+        }
+        [self.asSession start];
+    } else {
+        reject(RCTErrorUnspecified, @"SDK supports only iOS 12.0 or newer", nil);
+    }
 }
 
 RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
@@ -279,9 +275,6 @@ RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
                            resolve:(RCTPromiseResolveBlock)resolve
                             reject:(RCTPromiseRejectBlock)reject)
 {
-    self.openURLResolve = resolve;
-    self.openURLReject = reject;
-
     NSString *scheme = [self getCallbackURLScheme:callbackURL];
     [AGAuthgearReactNative registerCurrentWechatRedirectURI:wechatRedirectURI];
 
@@ -293,17 +286,13 @@ RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
             if (error) {
                 BOOL isUserCancelled = ([[error domain] isEqualToString:ASWebAuthenticationSessionErrorDomain] &&
                 [error code] == ASWebAuthenticationSessionErrorCodeCanceledLogin);
-                if (self.openURLReject) {
-                    if (isUserCancelled) {
-                        self.openURLReject(@"CANCEL", @"CANCEL", error);
-                    } else {
-                        self.openURLReject(RCTErrorUnspecified, [NSString stringWithFormat:@"Unable to open URL: %@", url], error);
-                    }
+                if (isUserCancelled) {
+                    reject(@"CANCEL", @"CANCEL", error);
+                } else {
+                    reject(RCTErrorUnspecified, [NSString stringWithFormat:@"Unable to open URL: %@", url], error);
                 }
             } else {
-                if (self.openURLResolve) {
-                    self.openURLResolve([url absoluteString]);
-                }
+                resolve([url absoluteString]);
             }
             [self cleanup];
         }];
@@ -312,29 +301,8 @@ RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
             self.asSession.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession;
         }
         [self.asSession start];
-    } else if (@available(iOS 11.0, *)) {
-        self.sfSession = [[SFAuthenticationSession alloc] initWithURL:url
-                                                                      callbackURLScheme:scheme
-                                                                      completionHandler:^(NSURL *url, NSError *error) {
-            [AGAuthgearReactNative unregisterCurrentWechatRedirectURI];
-            if (error) {
-                BOOL isUserCancelled = ([[error domain] isEqualToString:SFAuthenticationErrorDomain] &&
-                [error code] == SFAuthenticationErrorCanceledLogin);
-                if (self.openURLReject) {
-                    if (isUserCancelled) {
-                        self.openURLReject(@"CANCEL", @"CANCEL", error);
-                    } else {
-                        self.openURLReject(RCTErrorUnspecified, [NSString stringWithFormat:@"Unable to open URL: %@", url], error);
-                    }
-                }
-            } else {
-                if (self.openURLResolve) {
-                    self.openURLResolve([url absoluteString]);
-                }
-            }
-            [self cleanup];
-        }];
-        [self.sfSession start];
+    } else {
+        reject(RCTErrorUnspecified, @"SDK supports only iOS 12.0 or newer", nil);
     }
 }
 
@@ -600,24 +568,6 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
     if (@available(iOS 12.0, *)) {
         self.asSession = nil;
     }
-    if (@available(iOS 11.0, *)) {
-        self.sfSession = nil;
-    }
-    if (self.webViewViewController != nil) {
-      [self.webViewViewController.presentingViewController dismissViewControllerAnimated:true completion:^ {
-        self.webViewViewController = nil;
-      }];
-    }
-    self.openURLResolve = nil;
-    self.openURLReject = nil;
-}
-
-- (void)dismissWebView
-{
-    if (self.openURLReject) {
-        self.openURLReject(@"CANCEL", @"CANCEL", nil);
-    }
-    [self cleanup];
 }
 
 - (ASPresentationAnchor)presentationAnchorForWebAuthenticationSession:(ASWebAuthenticationSession *)session API_AVAILABLE(ios(12))
@@ -839,17 +789,6 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
         return YES;
     }
     return NO;
-}
-
-- (void)webView:(WKWebView *)webView
-decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction
-decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
-    NSURL *url = navigationAction.request.URL;
-    if (url != nil && [self.class handleWechatRedirectURI:url]) {
-        decisionHandler(WKNavigationActionPolicyCancel);
-        return;
-    }
-    decisionHandler(WKNavigationActionPolicyAllow);
 }
 
 #pragma mark - URL functions

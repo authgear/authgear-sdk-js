@@ -54,15 +54,16 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
-    private static final int REQUEST_CODE_AUTHORIZATION = 1;
+    private static final int ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION = 1;
+    private static final int ACTIVITY_PROMISE_TAG_OPEN_URL = 2;
+    private ActivityPromises mPromises;
 
     private final ReactApplicationContext reactContext;
-
-    private Promise openURLPromise;
 
     public AuthgearReactNativeModule(ReactApplicationContext context) {
         super(context);
         this.reactContext = context;
+        this.mPromises = new ActivityPromises();
         reactContext.addActivityEventListener(this);
     }
 
@@ -641,6 +642,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
     @ReactMethod
     public void openURL(String urlString, String wechatRedirectURI, Promise promise) {
+        final int requestCode = this.mPromises.push(new ActivityPromises.ActivityPromise(ACTIVITY_PROMISE_TAG_OPEN_URL, promise));
         try {
             Activity currentActivity = getCurrentActivity();
             if (currentActivity == null) {
@@ -656,20 +658,18 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
                 }
             });
             Intent intent = WebViewActivity.createIntent(context, urlString);
-            currentActivity.startActivity(intent);
-
-            promise.resolve(null);
+            currentActivity.startActivityForResult(intent, requestCode);
         } catch (Exception e) {
-            if (promise != null) {
-                promise.reject(e);
+            ActivityPromises.ActivityPromise activityPromise = this.mPromises.pop(requestCode);
+            if (activityPromise != null) {
+                activityPromise.promise.reject(e);
             }
         }
     }
 
     @ReactMethod
     public void openAuthorizeURL(String urlString, String callbackURL, boolean shareSessionWithDeviceBrowser, String wechatRedirectURI, Promise promise) {
-        this.openURLPromise = promise;
-
+        final int requestCode = this.mPromises.push(new ActivityPromises.ActivityPromise(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, promise));
         try {
             Activity currentActivity = getCurrentActivity();
             if (currentActivity == null) {
@@ -688,11 +688,11 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             OAuthRedirectActivity.registerCallbackURL(callbackURL);
 
             Intent intent = OAuthCoordinatorActivity.createAuthorizationIntent(context, uri);
-            currentActivity.startActivityForResult(intent, REQUEST_CODE_AUTHORIZATION);
+            currentActivity.startActivityForResult(intent, requestCode);
         } catch (Exception e) {
-            if (this.openURLPromise != null) {
-                this.openURLPromise.reject(e);
-                this.cleanup();
+            ActivityPromises.ActivityPromise activityPromise = this.mPromises.pop(requestCode);
+            if (activityPromise != null) {
+                activityPromise.promise.reject(e);
             }
         }
     }
@@ -753,18 +753,28 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
     @Override
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
-        if (this.openURLPromise == null) {
-            return;
-        }
-
-        if (requestCode == REQUEST_CODE_AUTHORIZATION) {
-            if (resultCode == Activity.RESULT_CANCELED) {
-                this.openURLPromise.reject("CANCEL", "CANCEL");
+        final ActivityPromises.ActivityPromise activityPromise = this.mPromises.pop(requestCode);
+        if (activityPromise != null) {
+            final int tag = activityPromise.tag;
+            final Promise promise = activityPromise.promise;
+            switch (tag) {
+                case ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION:
+                    if (resultCode == Activity.RESULT_CANCELED) {
+                        promise.reject("CANCEL", "CANCEL");
+                    }
+                    if (resultCode == Activity.RESULT_OK) {
+                        promise.resolve(data.getData().toString());
+                    }
+                    break;
+                case ACTIVITY_PROMISE_TAG_OPEN_URL:
+                    if (resultCode == Activity.RESULT_CANCELED) {
+                        promise.resolve(null);
+                    }
+                    if (resultCode == Activity.RESULT_OK) {
+                        promise.resolve(null);
+                    }
+                    break;
             }
-            if (resultCode == Activity.RESULT_OK) {
-                this.openURLPromise.resolve(data.getData().toString());
-            }
-            this.cleanup();
         }
     }
 
@@ -776,10 +786,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     @Override
     public void onCatalystInstanceDestroy() {
         super.onCatalystInstanceDestroy();
-    }
-
-    private void cleanup() {
-        this.openURLPromise = null;
     }
 
     private WritableArray bytesToArray(byte[] bytes) {
