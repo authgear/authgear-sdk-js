@@ -78,10 +78,10 @@ export interface ConfigureOptions {
   tokenStorage?: TokenStorage;
 
   /**
-   * shareSessionWithDeviceBrowser indicates whether the Authgear session is
-   * shared with the device browser.
+   * shareSessionWithSystemBrowser indicates whether the Authgear session is
+   * shared with the system browser.
    */
-  shareSessionWithDeviceBrowser?: boolean;
+  shareSessionWithSystemBrowser?: boolean;
 }
 
 /**
@@ -125,7 +125,7 @@ export class ReactNativeContainer {
   /**
    * @internal
    */
-  _shareSessionWithDeviceBrowser: boolean;
+  _shareSessionWithSystemBrowser: boolean;
 
   /**
    * @internal
@@ -169,8 +169,8 @@ export class ReactNativeContainer {
    *
    * @public
    */
-  public get shareSessionWithDeviceBrowser(): boolean {
-    return this._shareSessionWithDeviceBrowser;
+  public get shareSessionWithSystemBrowser(): boolean {
+    return this._shareSessionWithSystemBrowser;
   }
 
   /**
@@ -214,7 +214,7 @@ export class ReactNativeContainer {
     this.storage = new PersistentContainerStorage();
     this.tokenStorage = new PersistentTokenStorage();
 
-    this._shareSessionWithDeviceBrowser = false;
+    this._shareSessionWithSystemBrowser = false;
 
     this.wechatRedirectDeepLinkListener = (url: string) => {
       this._sendWechatRedirectURIToDelegate(url);
@@ -306,8 +306,8 @@ export class ReactNativeContainer {
    * @public
    */
   async configure(options: ConfigureOptions): Promise<void> {
-    this._shareSessionWithDeviceBrowser =
-      options.shareSessionWithDeviceBrowser ?? false;
+    this._shareSessionWithSystemBrowser =
+      options.shareSessionWithSystemBrowser ?? false;
     if (options.tokenStorage != null) {
       this.tokenStorage = options.tokenStorage;
     } else {
@@ -596,14 +596,14 @@ export class ReactNativeContainer {
    * @internal
    */
   _shouldSuppressIDPSessionCookie(): boolean {
-    return !this.shareSessionWithDeviceBrowser;
+    return !this.shareSessionWithSystemBrowser;
   }
 
   /**
    * @internal
    */
   _shouldPrefersEphemeralWebBrowserSession(): boolean {
-    return !this.shareSessionWithDeviceBrowser;
+    return !this.shareSessionWithSystemBrowser;
   }
 
   /**

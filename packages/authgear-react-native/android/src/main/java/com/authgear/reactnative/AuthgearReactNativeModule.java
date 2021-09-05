@@ -668,7 +668,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     }
 
     @ReactMethod
-    public void openAuthorizeURL(String urlString, String callbackURL, boolean shareSessionWithDeviceBrowser, String wechatRedirectURI, Promise promise) {
+    public void openAuthorizeURL(String urlString, String callbackURL, boolean shareSessionWithSystemBrowser, String wechatRedirectURI, Promise promise) {
         final int requestCode = this.mPromises.push(new ActivityPromises.ActivityPromise(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, promise));
         try {
             Activity currentActivity = getCurrentActivity();
