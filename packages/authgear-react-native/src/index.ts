@@ -3,9 +3,7 @@ import URL from "core-js-pure/features/url";
 import {
   _BaseAPIClient,
   ContainerOptions,
-  _GlobalJSONContainerStorage,
-  _MemoryStorageDriver,
-  _StorageDriver,
+  TokenStorage,
   _BaseContainer,
   AuthorizeResult,
   ReauthenticateResult,
@@ -19,6 +17,7 @@ import {
   SessionStateChangeReason,
   AuthgearError,
 } from "@authgear/core";
+import { PersistentContainerStorage, PersistentTokenStorage } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
   openURL,
@@ -29,9 +28,6 @@ import {
   signWithBiometricPrivateKey,
   generateUUID,
   getDeviceInfo,
-  storageGetItem,
-  storageSetItem,
-  storageDeleteItem,
 } from "./nativemodule";
 import {
   BiometricOptions,
@@ -45,6 +41,7 @@ import { BiometricPrivateKeyNotFoundError } from "./error";
 import { Platform } from "react-native";
 export * from "@authgear/core";
 export * from "./types";
+export * from "./storage";
 export {
   BiometricPrivateKeyNotFoundError,
   BiometricNotSupportedOrPermissionDeniedError,
@@ -54,10 +51,6 @@ export {
 } from "./error";
 import EventEmitter from "./eventEmitter";
 
-const globalMemoryStore = new _GlobalJSONContainerStorage(
-  new _MemoryStorageDriver()
-);
-
 /**
  * @public
  */
@@ -65,17 +58,6 @@ export enum Page {
   Settings = "/settings",
   Identities = "/settings/identities",
 }
-
-/**
- * @internal
- *
- * Use for checking StorageType validity.
- */
-const StorageTypes = ["transient", "app"] as const;
-/**
- * @public
- */
-export type StorageType = "transient" | "app";
 
 /**
  * @public
@@ -89,10 +71,12 @@ export interface ConfigureOptions {
    * The endpoint.
    */
   endpoint: string;
+
   /**
-   * storageType indicates how the session is supposed to be stored.
+   * An implementation of TokenStorage.
    */
-  storageType?: StorageType;
+  tokenStorage?: TokenStorage;
+
   /**
    * shareSessionWithDeviceBrowser indicates whether the Authgear session is
    * shared with the device browser.
@@ -106,24 +90,6 @@ export interface ConfigureOptions {
 export class _ReactNativeAPIClient extends _BaseAPIClient {
   _fetchFunction = fetch;
   _requestClass = Request;
-}
-
-/**
- * @internal
- */
-export class _PlatformStorageDriver implements _StorageDriver {
-  // eslint-disable-next-line class-methods-use-this
-  async get(key: string): Promise<string | null> {
-    return storageGetItem(key);
-  }
-  // eslint-disable-next-line class-methods-use-this
-  async set(key: string, value: string): Promise<void> {
-    return storageSetItem(key, value);
-  }
-  // eslint-disable-next-line class-methods-use-this
-  async del(key: string): Promise<void> {
-    return storageDeleteItem(key);
-  }
 }
 
 async function getXDeviceInfo(): Promise<string> {
@@ -145,8 +111,6 @@ export class ReactNativeContainer {
   baseContainer: _BaseContainer<_ReactNativeAPIClient>;
 
   /**
-   * implements _BaseContainerDelegate
-   *
    * @internal
    */
   storage: _ContainerStorage;
@@ -156,12 +120,7 @@ export class ReactNativeContainer {
    *
    * @internal
    */
-  refreshTokenStorage: _ContainerStorage;
-
-  /**
-   * @internal
-   */
-  _storageType: StorageType;
+  tokenStorage: TokenStorage;
 
   /**
    * @internal
@@ -210,14 +169,6 @@ export class ReactNativeContainer {
    *
    * @public
    */
-  public get storageType(): StorageType {
-    return this._storageType;
-  }
-
-  /**
-   *
-   * @public
-   */
   public get shareSessionWithDeviceBrowser(): boolean {
     return this._shareSessionWithDeviceBrowser;
   }
@@ -247,9 +198,6 @@ export class ReactNativeContainer {
   }
 
   constructor(options?: ContainerOptions) {
-    const _storage = new _GlobalJSONContainerStorage(
-      new _PlatformStorageDriver()
-    );
     const o = {
       ...options,
     } as ContainerOptions;
@@ -263,10 +211,9 @@ export class ReactNativeContainer {
     );
     this.baseContainer.apiClient._delegate = this;
 
-    this.storage = _storage;
-    this.refreshTokenStorage = this.storage;
+    this.storage = new PersistentContainerStorage();
+    this.tokenStorage = new PersistentTokenStorage();
 
-    this._storageType = "app";
     this._shareSessionWithDeviceBrowser = false;
 
     this.wechatRedirectDeepLinkListener = (url: string) => {
@@ -359,22 +306,16 @@ export class ReactNativeContainer {
    * @public
    */
   async configure(options: ConfigureOptions): Promise<void> {
-    this._storageType =
-      options.storageType && StorageTypes.indexOf(options.storageType) !== -1
-        ? options.storageType
-        : "app";
     this._shareSessionWithDeviceBrowser =
       options.shareSessionWithDeviceBrowser ?? false;
-    if (this._storageType === "transient") {
-      this.refreshTokenStorage = globalMemoryStore;
+    if (options.tokenStorage != null) {
+      this.tokenStorage = options.tokenStorage;
     } else {
-      this.refreshTokenStorage = this.storage;
+      this.tokenStorage = new PersistentTokenStorage();
     }
     // TODO: verify if we need to support configure for second time
     // and guard if initialized
-    const refreshToken = await this.refreshTokenStorage.getRefreshToken(
-      this.name
-    );
+    const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
 
     this.clientID = options.clientID;
     this.baseContainer.apiClient.endpoint = options.endpoint;
@@ -489,9 +430,7 @@ export class ReactNativeContainer {
   async openURL(url: string, options?: SettingOptions): Promise<void> {
     let targetURL = url;
 
-    const refreshToken = await this.refreshTokenStorage.getRefreshToken(
-      this.name
-    );
+    const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
     if (!refreshToken) {
       throw new AuthgearError("refresh token not found");
     }
@@ -545,7 +484,7 @@ export class ReactNativeContainer {
     } = {}
   ): Promise<void> {
     const refreshToken =
-      (await this.refreshTokenStorage.getRefreshToken(this.name)) ?? "";
+      (await this.tokenStorage.getRefreshToken(this.name)) ?? "";
     if (refreshToken !== "") {
       try {
         await this.baseContainer.apiClient._oidcRevocationRequest(refreshToken);

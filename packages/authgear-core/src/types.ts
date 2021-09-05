@@ -127,20 +127,26 @@ export interface _AppSessionTokenResponse {
 }
 
 /**
+ * @public
+ */
+export interface TokenStorage {
+  setRefreshToken(namespace: string, refreshToken: string): Promise<void>;
+  getRefreshToken(namespace: string): Promise<string | null>;
+  delRefreshToken(namespace: string): Promise<void>;
+}
+
+/**
  * @internal
  */
 export interface _ContainerStorage {
-  setRefreshToken(namespace: string, refreshToken: string): Promise<void>;
   setOIDCCodeVerifier(namespace: string, code: string): Promise<void>;
   setAnonymousKeyID(namespace: string, kid: string): Promise<void>;
   setBiometricKeyID(namespace: string, kid: string): Promise<void>;
 
-  getRefreshToken(namespace: string): Promise<string | null>;
   getOIDCCodeVerifier(namespace: string): Promise<string | null>;
   getAnonymousKeyID(namespace: string): Promise<string | null>;
   getBiometricKeyID(namespace: string): Promise<string | null>;
 
-  delRefreshToken(namespace: string): Promise<void>;
   delOIDCCodeVerifier(namespace: string): Promise<void>;
   delAnonymousKeyID(namespace: string): Promise<void>;
   delBiometricKeyID(namespace: string): Promise<void>;

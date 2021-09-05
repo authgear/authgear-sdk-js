@@ -1,44 +1,48 @@
-import { _ContainerStorage, _StorageDriver } from "./types";
+import { TokenStorage, _StorageDriver } from "./types";
 
-function scopedKey(key: string): string {
-  return `authgear_${key}`;
-}
+/**
+ * @internal
+ */
+export class _KeyMaker {
+  // eslint-disable-next-line class-methods-use-this
+  private scopedKey(key: string): string {
+    return `authgear_${key}`;
+  }
 
-function keyRefreshToken(name: string): string {
-  return `${name}_refreshToken`;
-}
+  keyRefreshToken(name: string): string {
+    return `${this.scopedKey(name)}_refreshToken`;
+  }
 
-function keyOIDCCodeVerifier(name: string): string {
-  return `${name}_oidcCodeVerifier`;
-}
+  keyOIDCCodeVerifier(name: string): string {
+    return `${this.scopedKey(name)}_oidcCodeVerifier`;
+  }
 
-function keyAnonymousKeyID(name: string): string {
-  return `${name}_anonymousKeyID`;
-}
+  keyAnonymousKeyID(name: string): string {
+    return `${this.scopedKey(name)}_anonymousKeyID`;
+  }
 
-function keyBiometricKeyID(name: string): string {
-  return `${name}_biometricKeyID`;
+  keyBiometricKeyID(name: string): string {
+    return `${this.scopedKey(name)}_biometricKeyID`;
+  }
 }
 
 /**
  * @internal
  */
-export class _GlobalJSONStorage {
+export class _SafeStorageDriver implements _StorageDriver {
   driver: _StorageDriver;
 
   constructor(driver: _StorageDriver) {
     this.driver = driver;
   }
 
-  async safeDel(key: string): Promise<void> {
-    key = scopedKey(key);
+  async del(key: string): Promise<void> {
     try {
       await this.driver.del(key);
     } catch {}
   }
 
-  async safeGet(key: string): Promise<string | null> {
-    key = scopedKey(key);
+  async get(key: string): Promise<string | null> {
     try {
       return await this.driver.get(key);
     } catch {
@@ -46,94 +50,10 @@ export class _GlobalJSONStorage {
     }
   }
 
-  async safeGetJSON(key: string): Promise<unknown | undefined> {
-    // No need to scope the key because safeGet does that.
-    const jsonString = await this.safeGet(key);
-    if (jsonString == null) {
-      return undefined;
-    }
-    try {
-      return JSON.parse(jsonString);
-    } catch {
-      return undefined;
-    }
-  }
-
-  async safeSet(key: string, value: string): Promise<void> {
-    key = scopedKey(key);
+  async set(key: string, value: string): Promise<void> {
     try {
       await this.driver.set(key, value);
     } catch {}
-  }
-
-  async safeSetJSON(key: string, value: unknown): Promise<void> {
-    // No need to scope the key because safeSet does that.
-    try {
-      const jsonString = JSON.stringify(value);
-      await this.safeSet(key, jsonString);
-    } catch {}
-  }
-}
-
-/**
- * @internal
- */
-export class _GlobalJSONContainerStorage implements _ContainerStorage {
-  private storage: _GlobalJSONStorage;
-
-  constructor(driver: _StorageDriver) {
-    this.storage = new _GlobalJSONStorage(driver);
-  }
-
-  async setRefreshToken(
-    namespace: string,
-    refreshToken: string
-  ): Promise<void> {
-    await this.storage.safeSet(keyRefreshToken(namespace), refreshToken);
-  }
-
-  async setOIDCCodeVerifier(namespace: string, code: string): Promise<void> {
-    await this.storage.safeSet(keyOIDCCodeVerifier(namespace), code);
-  }
-
-  async setAnonymousKeyID(namespace: string, kid: string): Promise<void> {
-    await this.storage.safeSet(keyAnonymousKeyID(namespace), kid);
-  }
-
-  async setBiometricKeyID(namespace: string, kid: string): Promise<void> {
-    await this.storage.safeSet(keyBiometricKeyID(namespace), kid);
-  }
-
-  async getRefreshToken(namespace: string): Promise<string | null> {
-    return this.storage.safeGet(keyRefreshToken(namespace));
-  }
-
-  async getOIDCCodeVerifier(namespace: string): Promise<string | null> {
-    return this.storage.safeGet(keyOIDCCodeVerifier(namespace));
-  }
-
-  async getAnonymousKeyID(namespace: string): Promise<string | null> {
-    return this.storage.safeGet(keyAnonymousKeyID(namespace));
-  }
-
-  async getBiometricKeyID(namespace: string): Promise<string | null> {
-    return this.storage.safeGet(keyBiometricKeyID(namespace));
-  }
-
-  async delRefreshToken(namespace: string): Promise<void> {
-    await this.storage.safeDel(keyRefreshToken(namespace));
-  }
-
-  async delOIDCCodeVerifier(namespace: string): Promise<void> {
-    await this.storage.safeDel(keyOIDCCodeVerifier(namespace));
-  }
-
-  async delAnonymousKeyID(namespace: string): Promise<void> {
-    await this.storage.safeDel(keyAnonymousKeyID(namespace));
-  }
-
-  async delBiometricKeyID(namespace: string): Promise<void> {
-    await this.storage.safeDel(keyBiometricKeyID(namespace));
   }
 }
 
@@ -159,5 +79,36 @@ export class _MemoryStorageDriver implements _StorageDriver {
   }
   async del(key: string): Promise<void> {
     delete this.backingStore[key];
+  }
+}
+
+/**
+ * @public
+ */
+export class TransientTokenStorage implements TokenStorage {
+  private keyMaker: _KeyMaker;
+  private storageDriver: _StorageDriver;
+
+  constructor() {
+    this.keyMaker = new _KeyMaker();
+    this.storageDriver = new _SafeStorageDriver(new _MemoryStorageDriver());
+  }
+
+  async setRefreshToken(
+    namespace: string,
+    refreshToken: string
+  ): Promise<void> {
+    await this.storageDriver.set(
+      this.keyMaker.keyRefreshToken(namespace),
+      refreshToken
+    );
+  }
+
+  async getRefreshToken(namespace: string): Promise<string | null> {
+    return this.storageDriver.get(this.keyMaker.keyRefreshToken(namespace));
+  }
+
+  async delRefreshToken(namespace: string): Promise<void> {
+    await this.storageDriver.del(this.keyMaker.keyRefreshToken(namespace));
   }
 }
