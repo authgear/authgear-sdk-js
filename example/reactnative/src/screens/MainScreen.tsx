@@ -23,6 +23,8 @@ import authgear, {
   BiometricNoEnrollmentError,
   BiometricNoPasscodeError,
   BiometricLockoutError,
+  TransientTokenStorage,
+  PersistentTokenStorage,
 } from '@authgear/react-native';
 
 const styles = StyleSheet.create({
@@ -129,8 +131,8 @@ const HomeScreen: React.FC = () => {
   const [clientID, setClientID] = useState('');
   const [endpoint, setEndpoint] = useState('');
   const [page, setPage] = useState('');
-  const [storageType, setStorageType] = useState('');
-  const [shareSessionWithDeviceBrowser, setShareSessionWithDeviceBrowser] =
+  const [useTransientTokenStorage, setUseTransientTokenStorage] = useState(false);
+  const [shareSessionWithSystemBrowser, setShareSessionWithSystemBrowser] =
     useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -290,8 +292,8 @@ const HomeScreen: React.FC = () => {
       .configure({
         clientID,
         endpoint,
-        storageType,
-        shareSessionWithDeviceBrowser,
+        tokenStorage: useTransientTokenStorage ? new TransientTokenStorage() : new PersistentTokenStorage(),
+        shareSessionWithSystemBrowser,
       })
       .then(() => {
         postConfigure();
@@ -306,8 +308,8 @@ const HomeScreen: React.FC = () => {
   }, [
     clientID,
     endpoint,
-    storageType,
-    shareSessionWithDeviceBrowser,
+    useTransientTokenStorage,
+    shareSessionWithSystemBrowser,
     postConfigure,
     showError,
   ]);
@@ -554,14 +556,10 @@ const HomeScreen: React.FC = () => {
           />
         </View>
         <View style={styles.input}>
-          <Text style={styles.inputLabel}>Storage Type</Text>
-          <TextInput
-            style={styles.inputField}
-            onChangeText={setStorageType}
-            autoCapitalize="none"
-            autoCompleteType="off"
-            autoCorrect={false}
-            placeholder="'transient' / 'app'"
+          <Text style={styles.inputLabel}>Use TransientTokenStorage</Text>
+          <Switch style={styles.checkbox}
+            value={useTransientTokenStorage}
+            onValueChange={setUseTransientTokenStorage}
           />
         </View>
         <View style={styles.input}>
@@ -570,8 +568,8 @@ const HomeScreen: React.FC = () => {
           </Text>
           <Switch
             style={styles.checkbox}
-            value={shareSessionWithDeviceBrowser}
-            onValueChange={setShareSessionWithDeviceBrowser}
+            value={shareSessionWithSystemBrowser}
+            onValueChange={setShareSessionWithSystemBrowser}
           />
         </View>
         <View style={styles.configureAction}>
