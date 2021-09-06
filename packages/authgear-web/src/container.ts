@@ -3,17 +3,17 @@ import URLSearchParams from "core-js-pure/features/url-search-params";
 import {
   UserInfo,
   ContainerOptions,
-  _GlobalJSONContainerStorage,
   _BaseContainer,
   AuthorizeResult,
   ReauthenticateResult,
   _ContainerStorage,
+  TokenStorage,
   SessionState,
   SessionStateChangeReason,
   AuthgearError,
 } from "@authgear/core";
 import { _WebAPIClient } from "./client";
-import { _localStorageStorageDriver } from "./storage";
+import { PersistentTokenStorage, PersistentContainerStorage } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
   WebContainerDelegate,
@@ -61,18 +61,14 @@ export class WebContainer {
   baseContainer: _BaseContainer<_WebAPIClient>;
 
   /**
-   * implements _BaseContainerDelegate
-   *
    * @internal
    */
   storage: _ContainerStorage;
 
   /**
-   * implements _BaseContainerDelegate
-   *
    * @internal
    */
-  refreshTokenStorage: _ContainerStorage;
+  tokenStorage: TokenStorage;
 
   /**
    * @public
@@ -137,9 +133,6 @@ export class WebContainer {
   }
 
   constructor(options?: ContainerOptions) {
-    const _storage = new _GlobalJSONContainerStorage(
-      _localStorageStorageDriver
-    );
     const o = {
       ...options,
     } as ContainerOptions;
@@ -149,8 +142,8 @@ export class WebContainer {
     this.baseContainer = new _BaseContainer<_WebAPIClient>(o, apiClient, this);
     this.baseContainer.apiClient._delegate = this;
 
-    this.storage = _storage;
-    this.refreshTokenStorage = this.storage;
+    this.storage = new PersistentContainerStorage();
+    this.tokenStorage = new PersistentTokenStorage();
 
     this.sessionType = "refresh_token";
   }
@@ -238,9 +231,7 @@ export class WebContainer {
   async configure(options: ConfigureOptions): Promise<void> {
     // TODO: verify if we need to support configure for second time
     // and guard if initialized
-    const refreshToken = await this.refreshTokenStorage.getRefreshToken(
-      this.name
-    );
+    const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
 
     this.clientID = options.clientID;
     this.baseContainer.apiClient.endpoint = options.endpoint;
@@ -360,7 +351,7 @@ export class WebContainer {
     force?: boolean;
   }): Promise<void> {
     const refreshToken =
-      (await this.refreshTokenStorage.getRefreshToken(this.name)) ?? "";
+      (await this.tokenStorage.getRefreshToken(this.name)) ?? "";
     if (refreshToken !== "") {
       try {
         await this.baseContainer.apiClient._oidcRevocationRequest(refreshToken);

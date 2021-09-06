@@ -7,6 +7,7 @@ import {
   ReauthenticateResult,
   ContainerOptions,
   _ContainerStorage,
+  TokenStorage,
   _APIClientDelegate,
   _OIDCTokenRequest,
   _OIDCTokenResponse,
@@ -38,7 +39,7 @@ const EXPIRE_IN_PERCENTAGE = 0.9;
  */
 export interface _BaseContainerDelegate {
   storage: _ContainerStorage;
-  refreshTokenStorage: _ContainerStorage;
+  tokenStorage: TokenStorage;
   _setupCodeVerifier(): Promise<{
     verifier: string;
     challenge: string;
@@ -177,7 +178,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     this._updateSessionState("AUTHENTICATED", reason);
 
     if (refresh_token) {
-      await this._delegate.refreshTokenStorage.setRefreshToken(
+      await this._delegate.tokenStorage.setRefreshToken(
         this.name,
         refresh_token
       );
@@ -185,7 +186,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   }
 
   async _clearSession(reason: SessionStateChangeReason): Promise<void> {
-    await this._delegate.refreshTokenStorage.delRefreshToken(this.name);
+    await this._delegate.tokenStorage.delRefreshToken(this.name);
     this.idToken = undefined;
     this.accessToken = undefined;
     this.refreshToken = undefined;
@@ -243,8 +244,9 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       throw new AuthgearError("missing client ID");
     }
 
-    const refreshToken =
-      await this._delegate.refreshTokenStorage.getRefreshToken(this.name);
+    const refreshToken = await this._delegate.tokenStorage.getRefreshToken(
+      this.name
+    );
     if (refreshToken == null) {
       // The API client has access token but we do not have the refresh token.
       await this._clearSession("NO_TOKEN");

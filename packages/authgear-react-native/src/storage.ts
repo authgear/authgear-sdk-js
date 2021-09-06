@@ -1,4 +1,3 @@
-/* global window */
 import {
   _StorageDriver,
   TokenStorage,
@@ -6,21 +5,29 @@ import {
   _KeyMaker,
   _SafeStorageDriver,
 } from "@authgear/core";
+import {
+  storageGetItem,
+  storageSetItem,
+  storageDeleteItem,
+} from "./nativemodule";
 
-const _localStorageStorageDriver: _StorageDriver = {
+class _PlatformStorageDriver implements _StorageDriver {
+  // eslint-disable-next-line class-methods-use-this
   async get(key: string): Promise<string | null> {
-    return window.localStorage.getItem(key);
-  },
+    return storageGetItem(key);
+  }
+  // eslint-disable-next-line class-methods-use-this
   async set(key: string, value: string): Promise<void> {
-    return window.localStorage.setItem(key, value);
-  },
+    return storageSetItem(key, value);
+  }
+  // eslint-disable-next-line class-methods-use-this
   async del(key: string): Promise<void> {
-    return window.localStorage.removeItem(key);
-  },
-};
+    return storageDeleteItem(key);
+  }
+}
 
 /**
- * @internal
+ * @public
  */
 export class PersistentTokenStorage implements TokenStorage {
   private keyMaker: _KeyMaker;
@@ -28,7 +35,7 @@ export class PersistentTokenStorage implements TokenStorage {
 
   constructor() {
     this.keyMaker = new _KeyMaker();
-    this.storageDriver = new _SafeStorageDriver(_localStorageStorageDriver);
+    this.storageDriver = new _SafeStorageDriver(new _PlatformStorageDriver());
   }
 
   async setRefreshToken(
@@ -59,7 +66,7 @@ export class PersistentContainerStorage implements _ContainerStorage {
 
   constructor() {
     this.keyMaker = new _KeyMaker();
-    this.storageDriver = new _SafeStorageDriver(_localStorageStorageDriver);
+    this.storageDriver = new _SafeStorageDriver(new _PlatformStorageDriver());
   }
 
   async setOIDCCodeVerifier(namespace: string, code: string): Promise<void> {
