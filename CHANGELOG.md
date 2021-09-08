@@ -1,6 +1,14 @@
 
+<a name="v0.14.0"></a>
+## [v0.14.0](https://github.com/authgear/authgear-sdk-js/compare/v0.13.0...v0.14.0) (2021-09-06)
+
+### Reverts
+
+* Avoid unnecessary export *
+
+
 <a name="v0.13.0"></a>
-## [v0.13.0](https://github.com/authgear/authgear-sdk-js/compare/v0.12.2...v0.13.0) (2021-07-09)
+## [v0.13.0](https://github.com/authgear/authgear-sdk-js/compare/v0.12.2...v0.13.0) (2021-07-13)
 
 
 <a name="v0.12.2"></a>
