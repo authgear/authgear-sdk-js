@@ -3,11 +3,14 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 
 /** @type {import("@docusaurus/types").DocusaurusConfig} */
 module.exports = {
+  // Always append trailing slash so that relative link is predictable.
+  // https://github.com/facebook/docusaurus/issues/5250
+  trailingSlash: true,
   title: "Authgear SDK JS",
   tagline: "Documentation of Authgear SDK JS",
   url: "https://authgear.github.io",
   baseUrl: "/authgear-sdk-js/",
-  onBrokenLinks: "throw",
+  onBrokenLinks: "warn",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
   organizationName: "authgear",
