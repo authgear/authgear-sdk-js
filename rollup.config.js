@@ -67,6 +67,17 @@ function makeReactNativeExternal() {
 export default function makeConfig(commandLineArgs) {
   const configBundleType = commandLineArgs.configBundleType;
   switch (configBundleType) {
+    case "iife":
+      return {
+        plugins,
+        input: "packages/authgear-web/src/index.ts",
+        output: {
+          file: "packages/authgear-web/dist/authgear-web.iife.js",
+          format: "iife",
+          name: "authgear",
+          exports: "named",
+        },
+      };
     case "web-cjs":
       return {
         plugins,
