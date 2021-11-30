@@ -7,7 +7,8 @@
   "files": [
     "index.d.ts",
     "dist/authgear-web.module.js",
-    "dist/authgear-web.cjs.js"
+    "dist/authgear-web.cjs.js",
+    "dist/authgear-web.iife.js"
   ],
   "devDependencies": {
     "@authgear/core": "0.17.0",
