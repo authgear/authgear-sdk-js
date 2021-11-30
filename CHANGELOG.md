@@ -1,6 +1,10 @@
 
+<a name="v0.15.0"></a>
+## [v0.15.0](https://github.com/authgear/authgear-sdk-js/compare/v0.14.0...v0.15.0) (2021-11-30)
+
+
 <a name="v0.14.0"></a>
-## [v0.14.0](https://github.com/authgear/authgear-sdk-js/compare/v0.13.0...v0.14.0) (2021-09-06)
+## [v0.14.0](https://github.com/authgear/authgear-sdk-js/compare/v0.13.0...v0.14.0) (2021-09-08)
 
 ### Reverts
 
