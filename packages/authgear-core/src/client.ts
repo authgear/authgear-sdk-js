@@ -373,4 +373,28 @@ export abstract class _BaseAPIClient {
   async oauthChallenge(purpose: string): Promise<_ChallengeResponse> {
     return this._post("/oauth2/challenge", { json: { purpose } });
   }
+
+  async signupAnonymousUserWithoutKey(
+    clientID: string,
+    sessionType: string,
+    refreshToken?: string
+  ): Promise<_OIDCTokenResponse | undefined> {
+    const payload: { [name: string]: string } = {
+      client_id: clientID,
+      session_type: sessionType,
+    };
+    if (refreshToken) {
+      payload["refresh_token"] = refreshToken;
+    }
+    const result = await this._post("/api/anonymous_user/signup", {
+      json: payload,
+    });
+
+    // api will return empty object if the session type is cookie
+    if (Object.keys(result).length === 0) {
+      return undefined;
+    }
+
+    return result;
+  }
 }

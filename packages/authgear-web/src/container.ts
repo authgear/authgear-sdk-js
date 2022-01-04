@@ -347,6 +347,61 @@ export class WebContainer {
     }
   }
 
+  /**
+   * Authenticate as an anonymous user.
+   */
+  async authenticateAnonymously(): Promise<AuthorizeResult> {
+    const clientID = this.clientID;
+    if (clientID == null) {
+      throw new AuthgearError("missing client ID");
+    }
+
+    const sessionType = this.sessionType;
+    switch (this.sessionType) {
+      case "cookie": {
+        // cookie
+        await this.baseContainer.apiClient.signupAnonymousUserWithoutKey(
+          clientID,
+          sessionType,
+          undefined
+        );
+
+        const userInfo =
+          await this.baseContainer.apiClient._oidcUserInfoRequest();
+
+        return { userInfo };
+      }
+      case "refresh_token": {
+        // refresh token
+        const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
+
+        const tokenResponse =
+          await this.baseContainer.apiClient.signupAnonymousUserWithoutKey(
+            clientID,
+            sessionType,
+            refreshToken ?? undefined
+          );
+
+        if (!tokenResponse) {
+          throw new AuthgearError("unexpected empty token response");
+        }
+
+        const userInfo =
+          await this.baseContainer.apiClient._oidcUserInfoRequest(
+            tokenResponse.access_token
+          );
+
+        await this.baseContainer._persistTokenResponse(
+          tokenResponse,
+          "AUTHENTICATED"
+        );
+        return { userInfo };
+      }
+      default:
+        throw new AuthgearError("unknown session type");
+    }
+  }
+
   private async _logoutRefreshToken(options: {
     force?: boolean;
   }): Promise<void> {
