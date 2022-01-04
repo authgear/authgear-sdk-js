@@ -101,6 +101,20 @@ function Root() {
       );
   }, []);
 
+  const onClickSignInAnonymously = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      authgear.authenticateAnonymously().then(
+        ({ userInfo }) => {
+          setUserInfo(userInfo);
+        },
+        (err) => setError(err)
+      );
+    },
+    []
+  );
+
   const onChangeClientID = useCallback(
     (e: React.FormEvent<HTMLInputElement>) => {
       setClientID(e.currentTarget.value);
@@ -221,14 +235,30 @@ function Root() {
           >
             Show auth_time
           </button>
+          <button
+            className="button"
+            type="button"
+            onClick={onClickSignInAnonymously}
+          >
+            Sign In Anonymously
+          </button>
           <button className="button" type="button" onClick={onClickSignOut}>
             Sign out
           </button>
         </div>
       ) : (
-        <button className="button" type="button" onClick={onClickSignIn}>
-          Sign In
-        </button>
+        <div className="button-group">
+          <button className="button" type="button" onClick={onClickSignIn}>
+            Sign In
+          </button>
+          <button
+            className="button"
+            type="button"
+            onClick={onClickSignInAnonymously}
+          >
+            Sign In Anonymously
+          </button>
+        </div>
       )}
       {userInfo != null ? <pre>{JSON.stringify(userInfo, null, 2)}</pre> : null}
       <ShowError error={error} />
