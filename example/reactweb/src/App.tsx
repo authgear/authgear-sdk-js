@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
-import authgear from "@authgear/web";
+import authgear, { UserInfo } from "@authgear/web";
 import "./App.css";
 
 // Switch the session type by uncommenting.
@@ -40,7 +40,7 @@ function Root() {
   const [endpoint, setEndpoint] = useState(initialEndpoint);
 
   const [error, setError] = useState<unknown>(null);
-  const [userInfo, setUserInfo] = useState<unknown>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   const configure = useCallback((clientID: string, endpoint: string) => {
     window.localStorage.setItem("authgear.demo.clientID", clientID);
@@ -169,6 +169,24 @@ function Root() {
     []
   );
 
+  const onClickPromoteAnonymousUser = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const redirectURI =
+        window.location.origin + "/promote-anonymous-user-redirect";
+      authgear
+        .startPromoteAnonymousUser({
+          redirectURI,
+        })
+        .then(
+          () => {},
+          (err) => setError(err)
+        );
+    },
+    []
+  );
+
   const onClickShowAuthTime = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
       e.preventDefault();
@@ -242,6 +260,15 @@ function Root() {
           >
             Sign In Anonymously
           </button>
+          {userInfo.isAnonymous ? (
+            <button
+              className="button"
+              type="button"
+              onClick={onClickPromoteAnonymousUser}
+            >
+              Promote Anonymous User
+            </button>
+          ) : null}
           <button className="button" type="button" onClick={onClickSignOut}>
             Sign out
           </button>
@@ -334,6 +361,40 @@ function ReauthRedirect() {
   );
 }
 
+function PromoteAnonymousUserRedirect() {
+  const navigate = useNavigate();
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const clientID = readClientID();
+    const endpoint = readEndpoint();
+    authgear
+      .configure({
+        clientID,
+        endpoint,
+        sessionType: SESSION_TYPE,
+      })
+      .then(
+        () => {
+          authgear.finishPromoteAnonymousUser().then(
+            (_) => {
+              navigate("/");
+            },
+            (err) => setError(err)
+          );
+        },
+        (err) => setError(err)
+      );
+  }, [navigate]);
+
+  return (
+    <div>
+      <p>Redirecting FIXME remove text</p>
+      <ShowError error={error} />
+    </div>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -341,6 +402,10 @@ function App() {
         <Route path="/" element={<Root />} />
         <Route path="/auth-redirect" element={<AuthRedirect />} />
         <Route path="/reauth-redirect" element={<ReauthRedirect />} />
+        <Route
+          path="/promote-anonymous-user-redirect"
+          element={<PromoteAnonymousUserRedirect />}
+        />
       </Routes>
     </BrowserRouter>
   );
