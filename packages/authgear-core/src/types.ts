@@ -127,6 +127,14 @@ export interface _AppSessionTokenResponse {
 }
 
 /**
+ * @internal
+ */
+export interface _AnonymousUserPromotionCodeResponse {
+  promotion_code: string;
+  expire_at: string;
+}
+
+/**
  * @public
  */
 export interface TokenStorage {

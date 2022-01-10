@@ -86,3 +86,28 @@ export interface AuthorizeOptions {
    */
   page?: string;
 }
+
+/**
+ * Auth UI anonymous user promotion options
+ *
+ * @public
+ */
+
+export interface PromoteOptions {
+  /**
+   * Redirect uri. Redirection URI to which the response will be sent after authorization.
+   */
+  redirectURI: string;
+  /**
+   * OAuth 2.0 state value.
+   */
+  state?: string;
+  /**
+   * UI locale tags
+   */
+  uiLocales?: string[];
+  /**
+   * OAuth response type
+   */
+  responseType?: "code" | "none";
+}

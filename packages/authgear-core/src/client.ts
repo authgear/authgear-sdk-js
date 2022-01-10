@@ -10,6 +10,7 @@ import {
   _APIClientDelegate,
   _decodeUserInfo,
   _AppSessionTokenResponse,
+  _AnonymousUserPromotionCodeResponse,
 } from "./types";
 import { _decodeError, AuthgearError, ServerError, OAuthError } from "./error";
 
@@ -396,5 +397,20 @@ export abstract class _BaseAPIClient {
     }
 
     return result;
+  }
+
+  async anonymousUserPromotionCode(
+    sessionType: string,
+    refreshToken?: string
+  ): Promise<_AnonymousUserPromotionCodeResponse> {
+    const payload: { [name: string]: string } = {
+      session_type: sessionType,
+    };
+    if (refreshToken) {
+      payload["refresh_token"] = refreshToken;
+    }
+    return this._post("/api/anonymous_user/promotion_code", {
+      json: payload,
+    });
   }
 }
