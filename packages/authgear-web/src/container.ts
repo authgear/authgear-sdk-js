@@ -423,15 +423,16 @@ export class WebContainer {
           throw new AuthgearError("unexpected empty token response");
         }
 
+        await this.baseContainer._persistTokenResponse(
+          tokenResponse,
+          "AUTHENTICATED"
+        );
+
         const userInfo =
           await this.baseContainer.apiClient._oidcUserInfoRequest(
             tokenResponse.access_token
           );
 
-        await this.baseContainer._persistTokenResponse(
-          tokenResponse,
-          "AUTHENTICATED"
-        );
         return { userInfo };
       }
       default:
