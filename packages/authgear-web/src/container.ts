@@ -19,6 +19,7 @@ import {
   WebContainerDelegate,
   AuthorizeOptions,
   ReauthenticateOptions,
+  PromoteOptions,
 } from "./types";
 
 /**
@@ -303,6 +304,33 @@ export class WebContainer {
   }
 
   /**
+   * Start promote anonymous user by redirecting to the authorization endpoint.
+   */
+  async startPromoteAnonymousUser(options: PromoteOptions): Promise<void> {
+    const refreshToken =
+      this.sessionType === "cookie"
+        ? undefined
+        : (await this.tokenStorage.getRefreshToken(this.name)) ?? undefined;
+
+    const { promotion_code } =
+      await this.baseContainer.apiClient.anonymousUserPromotionCode(
+        this.sessionType,
+        refreshToken
+      );
+
+    const loginHint = `https://authgear.com/login_hint?type=anonymous&promotion_code=${encodeURIComponent(
+      promotion_code
+    )}`;
+
+    const authorizeEndpoint = await this.authorizeEndpoint({
+      ...options,
+      prompt: "login",
+      loginHint,
+    });
+    window.location.href = authorizeEndpoint;
+  }
+
+  /**
    * Finish authorization.
    *
    * It may reject with OAuthError.
@@ -318,6 +346,15 @@ export class WebContainer {
    */
   async finishReauthentication(): Promise<ReauthenticateResult> {
     return this.baseContainer._finishReauthentication(window.location.href);
+  }
+
+  /**
+   * Finish promote anonymous user.
+   *
+   * It may reject with OAuthError.
+   */
+  async finishPromoteAnonymousUser(): Promise<ReauthenticateResult> {
+    return this.baseContainer._finishAuthorization(window.location.href);
   }
 
   /**
@@ -344,6 +381,62 @@ export class WebContainer {
       case "refresh_token":
         await this._logoutRefreshToken(options);
         break;
+    }
+  }
+
+  /**
+   * Authenticate as an anonymous user.
+   */
+  async authenticateAnonymously(): Promise<AuthorizeResult> {
+    const clientID = this.clientID;
+    if (clientID == null) {
+      throw new AuthgearError("missing client ID");
+    }
+
+    const sessionType = this.sessionType;
+    switch (this.sessionType) {
+      case "cookie": {
+        // cookie
+        await this.baseContainer.apiClient.signupAnonymousUserWithoutKey(
+          clientID,
+          sessionType,
+          undefined
+        );
+
+        const userInfo =
+          await this.baseContainer.apiClient._oidcUserInfoRequest();
+
+        return { userInfo };
+      }
+      case "refresh_token": {
+        // refresh token
+        const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
+
+        const tokenResponse =
+          await this.baseContainer.apiClient.signupAnonymousUserWithoutKey(
+            clientID,
+            sessionType,
+            refreshToken ?? undefined
+          );
+
+        if (!tokenResponse) {
+          throw new AuthgearError("unexpected empty token response");
+        }
+
+        await this.baseContainer._persistTokenResponse(
+          tokenResponse,
+          "AUTHENTICATED"
+        );
+
+        const userInfo =
+          await this.baseContainer.apiClient._oidcUserInfoRequest(
+            tokenResponse.access_token
+          );
+
+        return { userInfo };
+      }
+      default:
+        throw new AuthgearError("unknown session type");
     }
   }
 
