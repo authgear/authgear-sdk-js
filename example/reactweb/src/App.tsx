@@ -289,13 +289,6 @@ function Root() {
           >
             Show auth_time
           </button>
-          <button
-            className="button"
-            type="button"
-            onClick={onClickSignInAnonymously}
-          >
-            Sign In Anonymously
-          </button>
           {userInfo.isAnonymous ? (
             <button
               className="button"
