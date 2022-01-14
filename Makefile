@@ -1,4 +1,6 @@
 REF := $(shell git describe --all --exact-match | sed -e "s|^heads/||")
+GIT_HASH ?= git-$(shell git rev-parse --short=12 HEAD)
+IMAGE ?= quay.io/theauthgear/authgear-demo-webapp:$(GIT_HASH)
 
 # The documentation build pipeline works in the following way.
 #
@@ -40,3 +42,11 @@ docs:
 .PHONY: deploy-docs
 deploy-docs: docs
 	./scripts/deploy_docs.sh
+
+.PHONY: build-image
+build-image:
+	docker build --tag $(IMAGE) --file ./example/reactweb/Dockerfile .
+
+.PHONY: push-image
+push-image:
+	docker push $(IMAGE)
