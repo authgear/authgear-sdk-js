@@ -1,11 +1,21 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
-import authgear, { UserInfo } from "@authgear/web";
+import authgear, { UserInfo, ConfigureOptions } from "@authgear/web";
 import "./App.css";
 
-// Switch the session type by uncommenting.
-const SESSION_TYPE = "refresh_token";
-// const SESSION_TYPE = "cookie";
+type SessionType = NonNullable<ConfigureOptions["sessionType"]>;
+
+function isSessionType(v: unknown): v is SessionType {
+  return v === "refresh_token" || v === "cookie";
+}
+
+function readSessionType(): SessionType {
+  const v = window.localStorage.getItem("authgear.demo.sessionType") ?? "";
+  if (isSessionType(v)) {
+    return v;
+  }
+  return "refresh_token";
+}
 
 function readClientID(): string {
   return window.localStorage.getItem("authgear.demo.clientID") ?? "";
@@ -36,41 +46,47 @@ function ShowError(props: { error: unknown }) {
 function Root() {
   const initialClientID = readClientID();
   const initialEndpoint = readEndpoint();
+  const initialSessionType = readSessionType();
+  const [sessionType, setSessionType] = useState(initialSessionType);
   const [clientID, setClientID] = useState(initialClientID);
   const [endpoint, setEndpoint] = useState(initialEndpoint);
 
   const [error, setError] = useState<unknown>(null);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
-  const configure = useCallback((clientID: string, endpoint: string) => {
-    window.localStorage.setItem("authgear.demo.clientID", clientID);
-    window.localStorage.setItem("authgear.demo.endpoint", endpoint);
-    authgear
-      .configure({
-        endpoint,
-        clientID,
-        sessionType: SESSION_TYPE,
-      })
-      .then(
-        () => {
-          authgear.fetchUserInfo().then(
-            (userInfo) => {
-              setUserInfo(userInfo);
-            },
-            (err) => {
-              setUserInfo(null);
-            }
-          );
-        },
-        (err) => setError(err)
-      );
-  }, []);
+  const configure = useCallback(
+    (sessionType: SessionType, clientID: string, endpoint: string) => {
+      window.localStorage.setItem("authgear.demo.sessionType", sessionType);
+      window.localStorage.setItem("authgear.demo.clientID", clientID);
+      window.localStorage.setItem("authgear.demo.endpoint", endpoint);
+      authgear
+        .configure({
+          endpoint,
+          clientID,
+          sessionType,
+        })
+        .then(
+          () => {
+            authgear.fetchUserInfo().then(
+              (userInfo) => {
+                setUserInfo(userInfo);
+              },
+              (err) => {
+                setUserInfo(null);
+              }
+            );
+          },
+          (err) => setError(err)
+        );
+    },
+    []
+  );
 
   useEffect(() => {
     if (initialClientID !== "" && initialEndpoint !== "") {
-      configure(initialClientID, initialEndpoint);
+      configure(initialSessionType, initialClientID, initialEndpoint);
     }
-  }, [initialClientID, initialEndpoint, configure]);
+  }, [initialSessionType, initialClientID, initialEndpoint, configure]);
 
   const onClickSignOut = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
@@ -115,6 +131,15 @@ function Root() {
     []
   );
 
+  const onChangeSessionType = useCallback(
+    (e: React.FormEvent<HTMLSelectElement>) => {
+      if (isSessionType(e.currentTarget.value)) {
+        setSessionType(e.currentTarget.value);
+      }
+    },
+    []
+  );
+
   const onChangeClientID = useCallback(
     (e: React.FormEvent<HTMLInputElement>) => {
       setClientID(e.currentTarget.value);
@@ -133,9 +158,9 @@ function Root() {
     (e: React.MouseEvent<HTMLElement>) => {
       e.preventDefault();
       e.stopPropagation();
-      configure(clientID, endpoint);
+      configure(sessionType, clientID, endpoint);
     },
-    [clientID, endpoint, configure]
+    [sessionType, clientID, endpoint, configure]
   );
 
   const onClickReauthenticate = useCallback(
@@ -202,6 +227,17 @@ function Root() {
         Enter Client ID and Endpoint, and then click Configure to initialize the
         SDK.
       </p>
+      <label className="label">
+        Session Type
+        <select
+          className="input"
+          value={sessionType}
+          onChange={onChangeSessionType}
+        >
+          <option value="refresh_token">refresh_token</option>
+          <option value="cookie">cookie</option>
+        </select>
+      </label>
       <label className="label">
         Client ID
         <input
@@ -298,13 +334,14 @@ function AuthRedirect() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const sessionType = readSessionType();
     const clientID = readClientID();
     const endpoint = readEndpoint();
     authgear
       .configure({
         clientID,
         endpoint,
-        sessionType: SESSION_TYPE,
+        sessionType,
       })
       .then(
         () => {
@@ -332,13 +369,14 @@ function ReauthRedirect() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const sessionType = readSessionType();
     const clientID = readClientID();
     const endpoint = readEndpoint();
     authgear
       .configure({
         clientID,
         endpoint,
-        sessionType: SESSION_TYPE,
+        sessionType,
       })
       .then(
         () => {
@@ -366,13 +404,14 @@ function PromoteAnonymousUserRedirect() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const sessionType = readSessionType();
     const clientID = readClientID();
     const endpoint = readEndpoint();
     authgear
       .configure({
         clientID,
         endpoint,
-        sessionType: SESSION_TYPE,
+        sessionType,
       })
       .then(
         () => {

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "PORT=4000 parcel serve src/index.html",
+    "start": "PORT=4000 parcel serve --no-cache src/index.html",
     "build": "parcel build src/index.html",
     "typecheck": "tsc --noEmit"
   },
