@@ -1,0 +1,72 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: authgear-demo-webapp
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  tls:
+  - secretName: web-tls
+    hosts:
+    - authgear-demo-webapp.pandawork.com
+  rules:
+  - host: authgear-demo-webapp.pandawork.com
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: authgear-demo-webapp
+            port:
+              name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authgear-demo-webapp
+spec:
+  ports:
+  - port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app: authgear-demo-webapp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authgear-demo-webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authgear-demo-webapp
+  template:
+    metadata:
+      labels:
+        app: authgear-demo-webapp
+    spec:
+      containers:
+      - name: authgear-demo-webapp
+        image: quay.io/theauthgear/authgear-demo-webapp:git-f4f9f003abe0
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+        resources:
+          requests:
+            cpu: 100m
+            memory: 16Mi
+          limits:
+            cpu: 200m
+            memory: 32Mi
