@@ -110,9 +110,10 @@ export abstract class _BaseAPIClient {
     options: {
       json?: unknown;
       query?: [string, string][];
+      credentials?: RequestCredentials;
     } = {}
   ): Promise<any> {
-    const { json, query } = options;
+    const { json, query, credentials } = options;
 
     const headers: Record<string, string> = {};
     if (json != null) {
@@ -125,6 +126,7 @@ export abstract class _BaseAPIClient {
       headers,
       query,
       body: body,
+      credentials,
     });
   }
 
@@ -136,6 +138,7 @@ export abstract class _BaseAPIClient {
       headers?: Record<string, string>;
       query?: [string, string][];
       body?: string;
+      credentials?: RequestCredentials;
     } = {}
   ): Promise<any> {
     if (this.endpoint == null) {
@@ -143,7 +146,7 @@ export abstract class _BaseAPIClient {
     }
     const endpoint: string = this.endpoint;
 
-    const { headers, query, body } = options;
+    const { headers, query, body, credentials = "include" } = options;
     let p = path;
     if (query != null && query.length > 0) {
       const params = new URLSearchParams();
@@ -158,7 +161,7 @@ export abstract class _BaseAPIClient {
       method,
       headers: headers ?? {},
       mode: "cors",
-      credentials: "include",
+      credentials,
       body: body,
     });
 
@@ -198,6 +201,7 @@ export abstract class _BaseAPIClient {
     options?: {
       json?: unknown;
       query?: [string, string][];
+      credentials?: RequestCredentials;
     }
   ): Promise<any> {
     return this._requestJSON("POST", path, options);
@@ -283,8 +287,11 @@ export abstract class _BaseAPIClient {
     const headers: Record<string, string> = {
       "content-type": "application/x-www-form-urlencoded",
     };
+
+    let credentials: RequestCredentials = "include";
     if (req.access_token != null) {
       headers.authorization = `Bearer ${req.access_token}`;
+      credentials = "omit";
     }
 
     return this._fetchOIDCJSON(config.token_endpoint, {
@@ -292,7 +299,7 @@ export abstract class _BaseAPIClient {
       headers,
       body: query.toString(),
       mode: "cors",
-      credentials: "include",
+      credentials,
     });
   }
 
@@ -318,15 +325,17 @@ export abstract class _BaseAPIClient {
 
   async _oidcUserInfoRequest(accessToken?: string): Promise<UserInfo> {
     const headers: Record<string, string> = {};
-    if (accessToken) {
+    let credentials: RequestCredentials = "include";
+    if (accessToken !== undefined) {
       headers["authorization"] = `Bearer ${accessToken}`;
+      credentials = "omit";
     }
     const config = await this._fetchOIDCConfiguration();
     const response = await this._fetchOIDCJSON(config.userinfo_endpoint, {
       method: "GET",
       headers: headers,
       mode: "cors",
-      credentials: "include",
+      credentials,
     });
     return _decodeUserInfo(response);
   }
@@ -389,6 +398,7 @@ export abstract class _BaseAPIClient {
     }
     const result = await this._post("/api/anonymous_user/signup", {
       json: payload,
+      credentials: sessionType === "cookie" ? "include" : "omit",
     });
 
     // api will return empty object if the session type is cookie
@@ -411,6 +421,7 @@ export abstract class _BaseAPIClient {
     }
     return this._post("/api/anonymous_user/promotion_code", {
       json: payload,
+      credentials: sessionType === "cookie" ? "include" : "omit",
     });
   }
 }
