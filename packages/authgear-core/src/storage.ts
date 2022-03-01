@@ -61,7 +61,7 @@ export class _SafeStorageDriver implements _StorageDriver {
  * @internal
  */
 export class _MemoryStorageDriver implements _StorageDriver {
-  backingStore: { [key: string]: string | undefined };
+  backingStore: Record<string, string | undefined>;
 
   constructor() {
     this.backingStore = {};

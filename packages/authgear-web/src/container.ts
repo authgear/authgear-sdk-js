@@ -448,7 +448,7 @@ export class WebContainer {
     if (refreshToken !== "") {
       try {
         await this.baseContainer.apiClient._oidcRevocationRequest(refreshToken);
-      } catch (error) {
+      } catch (error: unknown) {
         if (!options.force) {
           throw error;
         }
