@@ -49,8 +49,8 @@ export abstract class _BaseAPIClient {
 
   _config?: _OIDCConfiguration;
 
-  protected async _prepareHeaders(): Promise<{ [name: string]: string }> {
-    const headers: { [name: string]: string } = {};
+  protected async _prepareHeaders(): Promise<Record<string, string>> {
+    const headers: Record<string, string> = {};
     const accessToken = this._delegate?.getAccessToken();
     if (accessToken != null) {
       headers["authorization"] = `Bearer ${accessToken}`;
@@ -114,7 +114,7 @@ export abstract class _BaseAPIClient {
   ): Promise<any> {
     const { json, query } = options;
 
-    const headers: { [name: string]: string } = {};
+    const headers: Record<string, string> = {};
     if (json != null) {
       headers["content-type"] = "application/json";
     }
@@ -133,7 +133,7 @@ export abstract class _BaseAPIClient {
     method: "GET" | "POST" | "DELETE",
     path: string,
     options: {
-      headers?: { [name: string]: string };
+      headers?: Record<string, string>;
       query?: [string, string][];
       body?: string;
     } = {}
@@ -280,7 +280,7 @@ export abstract class _BaseAPIClient {
     if (req.x_device_info) {
       query.append("x_device_info", req.x_device_info);
     }
-    const headers: { [name: string]: string } = {
+    const headers: Record<string, string> = {
       "content-type": "application/x-www-form-urlencoded",
     };
     if (req.access_token != null) {
@@ -298,7 +298,7 @@ export abstract class _BaseAPIClient {
 
   async _setupBiometricRequest(req: _SetupBiometricRequest): Promise<void> {
     const config = await this._fetchOIDCConfiguration();
-    const headers: { [name: string]: string } = {
+    const headers: Record<string, string> = {
       authorization: `Bearer ${req.access_token}`,
       "content-type": "application/x-www-form-urlencoded",
     };
@@ -317,7 +317,7 @@ export abstract class _BaseAPIClient {
   }
 
   async _oidcUserInfoRequest(accessToken?: string): Promise<UserInfo> {
-    const headers: { [name: string]: string } = {};
+    const headers: Record<string, string> = {};
     if (accessToken) {
       headers["authorization"] = `Bearer ${accessToken}`;
     }
@@ -380,7 +380,7 @@ export abstract class _BaseAPIClient {
     sessionType: string,
     refreshToken?: string
   ): Promise<_OIDCTokenResponse | undefined> {
-    const payload: { [name: string]: string } = {
+    const payload: Record<string, string> = {
       client_id: clientID,
       session_type: sessionType,
     };
@@ -403,7 +403,7 @@ export abstract class _BaseAPIClient {
     sessionType: string,
     refreshToken?: string
   ): Promise<_AnonymousUserPromotionCodeResponse> {
-    const payload: { [name: string]: string } = {
+    const payload: Record<string, string> = {
       session_type: sessionType,
     };
     if (refreshToken) {

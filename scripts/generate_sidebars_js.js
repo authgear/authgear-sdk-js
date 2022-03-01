@@ -18,11 +18,6 @@ const sidebar = {
           id: "web/index",
         },
         {
-          type: "doc",
-          id: "web/modules",
-          label: "Module Overview",
-        },
-        {
           type: "category",
           label: "Interfaces",
           items: [],
@@ -46,11 +41,6 @@ const sidebar = {
         {
           type: "doc",
           id: "react-native/index",
-        },
-        {
-          type: "doc",
-          id: "react-native/modules",
-          label: "Module Overview",
         },
         {
           type: "category",
@@ -84,14 +74,19 @@ function splitext(p) {
 }
 
 function indexForPackage(packageName) {
-  return sidebar.root.findIndex(a => a.label != null && a.label === packageName);
+  return sidebar.root.findIndex(
+    (a) => a.label != null && a.label === packageName
+  );
 }
 
 const WEB_PACKAGE_INDEX = indexForPackage("@authgear/web");
 const REACT_NATIVE_PACKAGE_INDEX = indexForPackage("@authgear/react-native");
 
 function indexForCategory(package, categoryLabel) {
-  return package.items.findIndex(a => a.label != null && a.label.toLowerCase() === categoryLabel.toLowerCase());
+  return package.items.findIndex(
+    (a) =>
+      a.label != null && a.label.toLowerCase() === categoryLabel.toLowerCase()
+  );
 }
 
 function recur(dir) {

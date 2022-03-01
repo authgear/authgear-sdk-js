@@ -12,10 +12,10 @@ const _localStorageStorageDriver: _StorageDriver = {
     return window.localStorage.getItem(key);
   },
   async set(key: string, value: string): Promise<void> {
-    return window.localStorage.setItem(key, value);
+    window.localStorage.setItem(key, value);
   },
   async del(key: string): Promise<void> {
-    return window.localStorage.removeItem(key);
+    window.localStorage.removeItem(key);
   },
 };
 

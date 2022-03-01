@@ -8,7 +8,7 @@ async function _wrapPromise<T>(p: Promise<T>): Promise<T> {
   try {
     const val = await p;
     return val;
-  } catch (e) {
+  } catch (e: unknown) {
     throw _wrapError(e);
   }
 }
