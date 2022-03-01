@@ -39,7 +39,7 @@
     "eslint-plugin-tsdoc": "0.2.14",
     "jest": "27.5.1",
     "lerna": "4.0.0",
-    "prettier": "2.3.2",
+    "prettier": "2.5.1",
     "rimraf": "3.0.2",
     "rollup": "2.68.0",
     "typedoc": "0.21.9",
