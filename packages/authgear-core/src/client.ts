@@ -108,10 +108,10 @@ export abstract class _BaseAPIClient {
     method: "GET" | "POST" | "DELETE",
     path: string,
     options: {
+      credentials: RequestCredentials;
       json?: unknown;
       query?: [string, string][];
-      credentials?: RequestCredentials;
-    } = {}
+    }
   ): Promise<any> {
     const { json, query, credentials } = options;
 
@@ -135,18 +135,18 @@ export abstract class _BaseAPIClient {
     method: "GET" | "POST" | "DELETE",
     path: string,
     options: {
+      credentials: RequestCredentials;
       headers?: Record<string, string>;
       query?: [string, string][];
       body?: string;
-      credentials?: RequestCredentials;
-    } = {}
+    }
   ): Promise<any> {
     if (this.endpoint == null) {
       throw new AuthgearError("missing endpoint in api client");
     }
     const endpoint: string = this.endpoint;
 
-    const { headers, query, body, credentials = "include" } = options;
+    const { headers, query, body, credentials } = options;
     let p = path;
     if (query != null && query.length > 0) {
       const params = new URLSearchParams();
@@ -198,10 +198,10 @@ export abstract class _BaseAPIClient {
 
   protected async _post(
     path: string,
-    options?: {
+    options: {
+      credentials: RequestCredentials;
       json?: unknown;
       query?: [string, string][];
-      credentials?: RequestCredentials;
     }
   ): Promise<any> {
     return this._requestJSON("POST", path, options);
@@ -365,6 +365,7 @@ export abstract class _BaseAPIClient {
       x_platform: platform,
     });
     await this._request("POST", "/sso/wechat/callback", {
+      credentials: "omit",
       headers: {
         "content-type": "application/x-www-form-urlencoded",
       },
@@ -376,12 +377,16 @@ export abstract class _BaseAPIClient {
     refreshToken: string
   ): Promise<_AppSessionTokenResponse> {
     return this._post("/oauth2/app_session_token", {
+      credentials: "omit",
       json: { refresh_token: refreshToken },
     });
   }
 
   async oauthChallenge(purpose: string): Promise<_ChallengeResponse> {
-    return this._post("/oauth2/challenge", { json: { purpose } });
+    return this._post("/oauth2/challenge", {
+      credentials: "omit",
+      json: { purpose },
+    });
   }
 
   async signupAnonymousUserWithoutKey(
