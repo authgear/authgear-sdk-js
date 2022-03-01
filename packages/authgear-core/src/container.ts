@@ -265,7 +265,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       // When the error is `invalid_grant`, the refresh token is no longer valid.
       // Clear the session in this case.
       // https://tools.ietf.org/html/rfc6749#section-5.2
-      if (error.error === "invalid_grant") {
+      if (error != null && (error as any).error === "invalid_grant") {
         await this._clearSession("INVALID");
         return;
       }

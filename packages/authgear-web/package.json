@@ -12,6 +12,6 @@
   ],
   "devDependencies": {
     "@authgear/core": "0.18.0",
-    "core-js-pure": "3.6.5"
+    "core-js-pure": "3.21.1"
   }
 }
