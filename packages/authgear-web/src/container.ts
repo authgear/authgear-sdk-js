@@ -513,7 +513,9 @@ export class WebContainer {
    */
   async fetchUserInfo(): Promise<UserInfo> {
     await this.refreshAccessTokenIfNeeded();
-    return this.baseContainer.apiClient._oidcUserInfoRequest(this.accessToken);
+    return this.baseContainer.apiClient._oidcUserInfoRequest(
+      this.sessionType === "cookie" ? undefined : this.accessToken ?? ""
+    );
   }
 
   /**

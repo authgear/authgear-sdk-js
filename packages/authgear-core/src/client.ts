@@ -108,11 +108,12 @@ export abstract class _BaseAPIClient {
     method: "GET" | "POST" | "DELETE",
     path: string,
     options: {
+      credentials: RequestCredentials;
       json?: unknown;
       query?: [string, string][];
-    } = {}
+    }
   ): Promise<any> {
-    const { json, query } = options;
+    const { json, query, credentials } = options;
 
     const headers: Record<string, string> = {};
     if (json != null) {
@@ -125,6 +126,7 @@ export abstract class _BaseAPIClient {
       headers,
       query,
       body: body,
+      credentials,
     });
   }
 
@@ -133,17 +135,18 @@ export abstract class _BaseAPIClient {
     method: "GET" | "POST" | "DELETE",
     path: string,
     options: {
+      credentials: RequestCredentials;
       headers?: Record<string, string>;
       query?: [string, string][];
       body?: string;
-    } = {}
+    }
   ): Promise<any> {
     if (this.endpoint == null) {
       throw new AuthgearError("missing endpoint in api client");
     }
     const endpoint: string = this.endpoint;
 
-    const { headers, query, body } = options;
+    const { headers, query, body, credentials } = options;
     let p = path;
     if (query != null && query.length > 0) {
       const params = new URLSearchParams();
@@ -158,7 +161,7 @@ export abstract class _BaseAPIClient {
       method,
       headers: headers ?? {},
       mode: "cors",
-      credentials: "include",
+      credentials,
       body: body,
     });
 
@@ -195,7 +198,8 @@ export abstract class _BaseAPIClient {
 
   protected async _post(
     path: string,
-    options?: {
+    options: {
+      credentials: RequestCredentials;
       json?: unknown;
       query?: [string, string][];
     }
@@ -283,8 +287,11 @@ export abstract class _BaseAPIClient {
     const headers: Record<string, string> = {
       "content-type": "application/x-www-form-urlencoded",
     };
+
+    let credentials: RequestCredentials = "include";
     if (req.access_token != null) {
       headers.authorization = `Bearer ${req.access_token}`;
+      credentials = "omit";
     }
 
     return this._fetchOIDCJSON(config.token_endpoint, {
@@ -292,7 +299,7 @@ export abstract class _BaseAPIClient {
       headers,
       body: query.toString(),
       mode: "cors",
-      credentials: "include",
+      credentials,
     });
   }
 
@@ -318,15 +325,17 @@ export abstract class _BaseAPIClient {
 
   async _oidcUserInfoRequest(accessToken?: string): Promise<UserInfo> {
     const headers: Record<string, string> = {};
-    if (accessToken) {
+    let credentials: RequestCredentials = "include";
+    if (accessToken !== undefined) {
       headers["authorization"] = `Bearer ${accessToken}`;
+      credentials = "omit";
     }
     const config = await this._fetchOIDCConfiguration();
     const response = await this._fetchOIDCJSON(config.userinfo_endpoint, {
       method: "GET",
       headers: headers,
       mode: "cors",
-      credentials: "include",
+      credentials,
     });
     return _decodeUserInfo(response);
   }
@@ -356,6 +365,7 @@ export abstract class _BaseAPIClient {
       x_platform: platform,
     });
     await this._request("POST", "/sso/wechat/callback", {
+      credentials: "omit",
       headers: {
         "content-type": "application/x-www-form-urlencoded",
       },
@@ -367,12 +377,16 @@ export abstract class _BaseAPIClient {
     refreshToken: string
   ): Promise<_AppSessionTokenResponse> {
     return this._post("/oauth2/app_session_token", {
+      credentials: "omit",
       json: { refresh_token: refreshToken },
     });
   }
 
   async oauthChallenge(purpose: string): Promise<_ChallengeResponse> {
-    return this._post("/oauth2/challenge", { json: { purpose } });
+    return this._post("/oauth2/challenge", {
+      credentials: "omit",
+      json: { purpose },
+    });
   }
 
   async signupAnonymousUserWithoutKey(
@@ -389,6 +403,7 @@ export abstract class _BaseAPIClient {
     }
     const result = await this._post("/api/anonymous_user/signup", {
       json: payload,
+      credentials: sessionType === "cookie" ? "include" : "omit",
     });
 
     // api will return empty object if the session type is cookie
@@ -411,6 +426,7 @@ export abstract class _BaseAPIClient {
     }
     return this._post("/api/anonymous_user/promotion_code", {
       json: payload,
+      credentials: sessionType === "cookie" ? "include" : "omit",
     });
   }
 }
