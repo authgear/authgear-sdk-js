@@ -24,6 +24,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.security.KeyPairGeneratorSpec;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
@@ -321,10 +322,22 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         BiometricManager manager = BiometricManager.from(this.getReactApplicationContext());
         int flags = constraintToFlag(constraint);
         int result = manager.canAuthenticate(flags);
+
         if (result == BiometricManager.BIOMETRIC_SUCCESS) {
-            promise.resolve(null);
-            return;
+            // Further test if the key pair generator can be initialized.
+            // https://issuetracker.google.com/issues/147374428#comment9
+            try {
+                this.createKeyPairGenerator(this.makeGenerateKeyPairSpec("__test__", flags, true));
+                promise.resolve(null);
+                return;
+            } catch (Exception e) {
+                // This branch is reachable only when there is a weak face and no strong fingerprints.
+                // So we treat this situation as BIOMETRIC_ERROR_NONE_ENROLLED.
+                result = BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED;
+                // fallthrough
+            }
         }
+
         String resultString = resultToString(result);
         promise.reject(resultString, resultString);
     }
@@ -448,9 +461,14 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
     @RequiresApi(Build.VERSION_CODES.M)
     private KeyPair createKeyPair(KeyGenParameterSpec spec) throws Exception {
+        return this.createKeyPairGenerator(spec).generateKeyPair();
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private KeyPairGenerator createKeyPairGenerator(KeyGenParameterSpec spec) throws Exception {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
         keyPairGenerator.initialize(spec);
-        return keyPairGenerator.generateKeyPair();
+        return keyPairGenerator;
     }
 
     private WritableMap getJWK(KeyPair keyPair, String kid) {
