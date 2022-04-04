@@ -50,3 +50,9 @@ and npm should be logged in as appropriate user.
 # VERSION should be in format like "0.1.0"
 $ GIT_USER=<github-username> GITHUB_TOKEN=<github-token> GIT_BRANCH=master VERSION=<new-version> ./scripts/release.sh
 ```
+
+## Known issues
+
+### Apple silicon
+
+See https://github.com/facebook/react-native/issues/29605#issuecomment-861783673
