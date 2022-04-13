@@ -131,7 +131,8 @@ const HomeScreen: React.FC = () => {
   const [clientID, setClientID] = useState('');
   const [endpoint, setEndpoint] = useState('');
   const [page, setPage] = useState('');
-  const [useTransientTokenStorage, setUseTransientTokenStorage] = useState(false);
+  const [useTransientTokenStorage, setUseTransientTokenStorage] =
+    useState(false);
   const [shareSessionWithSystemBrowser, setShareSessionWithSystemBrowser] =
     useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
@@ -292,7 +293,9 @@ const HomeScreen: React.FC = () => {
       .configure({
         clientID,
         endpoint,
-        tokenStorage: useTransientTokenStorage ? new TransientTokenStorage() : new PersistentTokenStorage(),
+        tokenStorage: useTransientTokenStorage
+          ? new TransientTokenStorage()
+          : new PersistentTokenStorage(),
         shareSessionWithSystemBrowser,
       })
       .then(() => {
@@ -429,17 +432,17 @@ const HomeScreen: React.FC = () => {
       });
   }, [showError, showUser]);
 
-  const enableBiometric = useCallback(() => {
+  const enableBiometric = useCallback(async () => {
     setLoading(true);
-    authgear
-      .enableBiometric(biometricOptions)
-      .catch(err => {
-        showError(err);
-      })
-      .finally(() => {
-        setLoading(false);
-        updateBiometricState();
-      });
+    try {
+      await authgear.checkBiometricSupported(biometricOptions);
+      await authgear.enableBiometric(biometricOptions);
+    } catch (err) {
+      showError(err);
+    } finally {
+      setLoading(false);
+      updateBiometricState();
+    }
   }, [showError, updateBiometricState]);
 
   const authenticateBiometric = useCallback(() => {
@@ -557,7 +560,8 @@ const HomeScreen: React.FC = () => {
         </View>
         <View style={styles.input}>
           <Text style={styles.inputLabel}>Use TransientTokenStorage</Text>
-          <Switch style={styles.checkbox}
+          <Switch
+            style={styles.checkbox}
             value={useTransientTokenStorage}
             onValueChange={setUseTransientTokenStorage}
           />
