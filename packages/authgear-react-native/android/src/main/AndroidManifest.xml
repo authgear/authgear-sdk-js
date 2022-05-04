@@ -18,4 +18,13 @@
             android:configChanges="orientation|screenSize"/>
     </application>
 
+    <!-- Android 11 requires the app to define which external apps are visiable -->
+    <queries>
+        <package android:name="com.android.chrome" />
+        <package android:name="com.chrome.beta" />
+        <package android:name="com.chrome.dev" />
+        <package android:name="com.google.android.apps.chrome" />
+        <package android:name="com.tencent.mm" />
+    </queries>
+
 </manifest>
