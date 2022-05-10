@@ -56,14 +56,14 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
     private static final int ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION = 1;
     private static final int ACTIVITY_PROMISE_TAG_OPEN_URL = 2;
-    private ActivityPromises mPromises;
+    private StartActivityHandles mHandles;
 
     private final ReactApplicationContext reactContext;
 
     public AuthgearReactNativeModule(ReactApplicationContext context) {
         super(context);
         this.reactContext = context;
-        this.mPromises = new ActivityPromises();
+        this.mHandles = new StartActivityHandles();
         reactContext.addActivityEventListener(this);
     }
 
@@ -321,10 +321,22 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         BiometricManager manager = BiometricManager.from(this.getReactApplicationContext());
         int flags = constraintToFlag(constraint);
         int result = manager.canAuthenticate(flags);
+
         if (result == BiometricManager.BIOMETRIC_SUCCESS) {
-            promise.resolve(null);
-            return;
+            // Further test if the key pair generator can be initialized.
+            // https://issuetracker.google.com/issues/147374428#comment9
+            try {
+                this.createKeyPairGenerator(this.makeGenerateKeyPairSpec("__test__", flags, true));
+                promise.resolve(null);
+                return;
+            } catch (Exception e) {
+                // This branch is reachable only when there is a weak face and no strong fingerprints.
+                // So we treat this situation as BIOMETRIC_ERROR_NONE_ENROLLED.
+                result = BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED;
+                // fallthrough
+            }
         }
+
         String resultString = resultToString(result);
         promise.reject(resultString, resultString);
     }
@@ -448,9 +460,14 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
     @RequiresApi(Build.VERSION_CODES.M)
     private KeyPair createKeyPair(KeyGenParameterSpec spec) throws Exception {
+        return this.createKeyPairGenerator(spec).generateKeyPair();
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private KeyPairGenerator createKeyPairGenerator(KeyGenParameterSpec spec) throws Exception {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
         keyPairGenerator.initialize(spec);
-        return keyPairGenerator.generateKeyPair();
+        return keyPairGenerator;
     }
 
     private WritableMap getJWK(KeyPair keyPair, String kid) {
@@ -642,7 +659,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
     @ReactMethod
     public void openURL(String urlString, String wechatRedirectURI, Promise promise) {
-        final int requestCode = this.mPromises.push(new ActivityPromises.ActivityPromise(ACTIVITY_PROMISE_TAG_OPEN_URL, promise));
+        final int requestCode = this.mHandles.push(new StartActivityHandle(ACTIVITY_PROMISE_TAG_OPEN_URL, promise));
         try {
             Activity currentActivity = getCurrentActivity();
             if (currentActivity == null) {
@@ -660,16 +677,16 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             Intent intent = WebViewActivity.createIntent(context, urlString);
             currentActivity.startActivityForResult(intent, requestCode);
         } catch (Exception e) {
-            ActivityPromises.ActivityPromise activityPromise = this.mPromises.pop(requestCode);
-            if (activityPromise != null) {
-                activityPromise.promise.reject(e);
+            StartActivityHandle<Promise> handle = this.mHandles.pop(requestCode);
+            if (handle != null) {
+                handle.value.reject(e);
             }
         }
     }
 
     @ReactMethod
     public void openAuthorizeURL(String urlString, String callbackURL, boolean shareSessionWithSystemBrowser, String wechatRedirectURI, Promise promise) {
-        final int requestCode = this.mPromises.push(new ActivityPromises.ActivityPromise(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, promise));
+        final int requestCode = this.mHandles.push(new StartActivityHandle(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, promise));
         try {
             Activity currentActivity = getCurrentActivity();
             if (currentActivity == null) {
@@ -690,9 +707,9 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             Intent intent = OAuthCoordinatorActivity.createAuthorizationIntent(context, uri);
             currentActivity.startActivityForResult(intent, requestCode);
         } catch (Exception e) {
-            ActivityPromises.ActivityPromise activityPromise = this.mPromises.pop(requestCode);
-            if (activityPromise != null) {
-                activityPromise.promise.reject(e);
+            StartActivityHandle<Promise> handle = this.mHandles.pop(requestCode);
+            if (handle != null) {
+                handle.value.reject(e);
             }
         }
     }
@@ -753,10 +770,10 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
     @Override
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
-        final ActivityPromises.ActivityPromise activityPromise = this.mPromises.pop(requestCode);
-        if (activityPromise != null) {
-            final int tag = activityPromise.tag;
-            final Promise promise = activityPromise.promise;
+        final StartActivityHandle<Promise> handle = this.mHandles.pop(requestCode);
+        if (handle != null) {
+            final int tag = handle.tag;
+            final Promise promise = handle.value;
             switch (tag) {
                 case ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION:
                     if (resultCode == Activity.RESULT_CANCELED) {
