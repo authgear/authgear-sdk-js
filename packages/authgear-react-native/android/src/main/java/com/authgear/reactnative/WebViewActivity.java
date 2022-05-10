@@ -9,6 +9,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -20,8 +22,10 @@ import androidx.appcompat.app.AppCompatActivity;
 public class WebViewActivity extends AppCompatActivity {
     private static final int MENU_ID_CANCEL = 1;
     private static final String KEY_URL = "KEY_URL";
+    private static final int TAG_FILE_CHOOSER = 1;
 
     private WebView webView;
+    private StartActivityHandles<ValueCallback<Uri[]>> handles = new StartActivityHandles();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +53,16 @@ public class WebViewActivity extends AppCompatActivity {
                     return true;
                 };
                 return super.shouldOverrideUrlLoading(view, url);
+            }
+        });
+        this.webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
+                StartActivityHandle<ValueCallback<Uri[]>> handle = new StartActivityHandle(TAG_FILE_CHOOSER, filePathCallback);
+                int requestCode = handles.push(handle);
+                Intent intent = fileChooserParams.createIntent();
+                WebViewActivity.this.startActivityForResult(intent, requestCode);
+                return true;
             }
         });
         WebSettings webSettings = this.webView.getSettings();
@@ -88,6 +102,33 @@ public class WebViewActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        StartActivityHandle<ValueCallback<Uri[]>> handle = handles.pop(requestCode);
+        if (handle == null) {
+            return;
+        }
+
+        switch (handle.tag) {
+            case TAG_FILE_CHOOSER: {
+                switch (resultCode) {
+                    case Activity.RESULT_CANCELED:
+                        handle.value.onReceiveValue(null);
+                        break;
+                    case Activity.RESULT_OK:
+                        if (data != null && data.getData() != null) {
+                            handle.value.onReceiveValue(new Uri[]{data.getData()});
+                        } else {
+                            handle.value.onReceiveValue(null);
+                        }
+                        break;
+                }
+            }
+        }
     }
 
     public static Intent createIntent(Context context, String url) {
