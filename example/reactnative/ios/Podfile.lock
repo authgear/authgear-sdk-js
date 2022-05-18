@@ -1,5 +1,5 @@
 PODS:
-  - authgear-react-native (0.18.0):
+  - authgear-react-native (0.19.0):
     - React
   - boost (1.76.0)
   - CocoaAsyncSocket (7.6.5)
@@ -484,7 +484,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  authgear-react-native: ed0c50e9ad9b1e9a376907fd7405b924f40de0d9
+  authgear-react-native: e2c7e44b96721db4455d061dcf0ffa1c1f9484bb
   boost: a7c83b31436843459a1961bfd74b96033dc77234
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
   DoubleConversion: 831926d9b8bf8166fd87886c4abab286c2422662
