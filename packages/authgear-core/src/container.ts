@@ -340,6 +340,9 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (options.uiLocales != null) {
       query.append("ui_locales", options.uiLocales.join(" "));
     }
+    if (options.colorScheme != null) {
+      query.append("x_color_scheme", options.colorScheme);
+    }
     if (options.idTokenHint != null) {
       query.append("id_token_hint", options.idTokenHint);
     }

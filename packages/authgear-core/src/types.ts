@@ -8,6 +8,11 @@ export interface UserInfo {
 }
 
 /**
+ * @public
+ */
+export type ColorScheme = "light" | "dark";
+
+/**
  * Prompt parameter options.
  *
  * @public
@@ -26,24 +31,12 @@ export interface _OIDCAuthenticationRequest {
   maxAge?: number;
   loginHint?: string;
   uiLocales?: string[];
+  colorScheme?: ColorScheme;
   idTokenHint?: string;
   wechatRedirectURI?: string;
   platform?: string;
   page?: string;
   suppressIDPSessionCookie?: boolean;
-}
-
-/**
- * Auth UI setting options
- *
- * @public
- */
-export interface SettingOptions {
-  /**
-   * WeChat Redirect URI is needed when integrating WeChat login in react-native
-   * The wechatRedirectURI will be called when user click the login with WeChat button
-   */
-  wechatRedirectURI?: string;
 }
 
 /**

@@ -8,7 +8,6 @@ import {
   AuthorizeResult,
   ReauthenticateResult,
   UserInfo,
-  SettingOptions,
   OAuthError,
   _ContainerStorage,
   _encodeUTF8,
@@ -35,6 +34,7 @@ import {
   AuthorizeOptions,
   ReauthenticateOptions,
   PromoteOptions,
+  SettingOptions,
 } from "./types";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 import { BiometricPrivateKeyNotFoundError } from "./error";
@@ -428,7 +428,17 @@ export class ReactNativeContainer {
 
   // eslint-disable-next-line class-methods-use-this
   async openURL(url: string, options?: SettingOptions): Promise<void> {
-    let targetURL = url;
+    const u = new URL(url);
+    const q = u.searchParams;
+    if (options?.uiLocales != null) {
+      q.set("ui_locales", options.uiLocales.join(" "));
+    }
+    if (options?.colorScheme != null) {
+      q.set("x_color_scheme", options.colorScheme);
+    }
+    u.search = "?" + q.toString();
+
+    let targetURL = u.toString();
 
     const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
     if (!refreshToken) {
@@ -445,7 +455,7 @@ export class ReactNativeContainer {
 
     const platform = Platform.OS;
     targetURL = await this.authorizeEndpoint({
-      redirectURI: url,
+      redirectURI: targetURL,
       prompt: "none",
       responseType: "none",
       loginHint,

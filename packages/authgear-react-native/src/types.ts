@@ -1,4 +1,8 @@
-import { SessionStateChangeReason, PromptOption } from "@authgear/core";
+import {
+  SessionStateChangeReason,
+  PromptOption,
+  ColorScheme,
+} from "@authgear/core";
 import { ReactNativeContainer } from ".";
 
 /**
@@ -63,10 +67,17 @@ export interface AuthorizeOptions {
    * OIDC login hint parameter
    */
   loginHint?: string;
+
   /**
    * UI locale tags
    */
   uiLocales?: string[];
+
+  /**
+   * Override the color scheme
+   */
+  colorScheme?: ColorScheme;
+
   /**
    * OAuth response type
    */
@@ -105,6 +116,10 @@ export interface ReauthenticateOptions {
    */
   uiLocales?: string[];
   /**
+   * Override the color scheme
+   */
+  colorScheme?: ColorScheme;
+  /**
    * WeChat Redirect URI is needed when integrating WeChat login in react-native
    * The wechatRedirectURI will be called when user click the login with WeChat button
    */
@@ -138,6 +153,29 @@ export interface PromoteOptions {
    * UI locale tags
    */
   uiLocales?: string[];
+  /**
+   * Override the color scheme
+   */
+  colorScheme?: ColorScheme;
+  /**
+   * WeChat Redirect URI is needed when integrating WeChat login in react-native
+   * The wechatRedirectURI will be called when user click the login with WeChat button
+   */
+  wechatRedirectURI?: string;
+}
+
+/**
+ * @public
+ */
+export interface SettingOptions {
+  /**
+   * UI locale tags
+   */
+  uiLocales?: string[];
+  /**
+   * Override the color scheme
+   */
+  colorScheme?: ColorScheme;
   /**
    * WeChat Redirect URI is needed when integrating WeChat login in react-native
    * The wechatRedirectURI will be called when user click the login with WeChat button
