@@ -6,23 +6,19 @@
 [![@authgear/react-native](https://img.shields.io/npm/dt/@authgear/react-native.svg?label=@authgear/react-native)](https://www.npmjs.com/package/@authgear/react-native)
 ![License](https://img.shields.io/badge/license-Apache%202-blue)
 
-## Documentation
+## Getting Started
+
+### Web 
+[https://docs.authgear.com/get-started/website](https://docs.authgear.com/get-started/website "https://docs.authgear.com/get-started/website")
+
+### React Native 
+[https://docs.authgear.com/get-started/react-native](https://docs.authgear.com/get-started/react-native "https://docs.authgear.com/get-started/react-native")  
+
+## Documentation 
 
 View the API Reference at [https://authgear.github.io/authgear-sdk-js/](https://authgear.github.io/authgear-sdk-js/).
 
-## Usage
-
-### Web
-
-```sh
-$ npm install --save @authgear/web
-```
-
-### React Native
-
-```sh
-$ npm install --save @authgear/react-native
-```
+View Authgear Documentation at [https://docs.authgear.com/](https://docs.authgear.com/)
 
 ## Contributing
 
