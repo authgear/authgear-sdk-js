@@ -442,7 +442,18 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            builder.setUnlockedDeviceRequired(true);
+            // Samsung Android 12 treats setUnlockedDeviceRequired in a different way.
+            // If setUnlockedDeviceRequired is true, then the device must be unlocked
+            // with the same level of security requirement.
+            // Otherwise, UserNotAuthenticatedException will be thrown when a cryptographic operation is initialized.
+            //
+            // The steps to reproduce the bug
+            //
+            // - Restart the device
+            // - Unlock the device with credentials
+            // - Create a Signature with a PrivateKey with setUnlockedDeviceRequired(true)
+            // - Call Signature.initSign, UserNotAuthenticatedException will be thrown.
+            // builder.setUnlockedDeviceRequired(true);
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
