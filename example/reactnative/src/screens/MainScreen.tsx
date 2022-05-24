@@ -10,6 +10,7 @@ import {
   Platform,
   NativeModules,
   Switch,
+  useColorScheme,
 } from 'react-native';
 import authgear, {
   Page,
@@ -131,12 +132,16 @@ const HomeScreen: React.FC = () => {
   const [clientID, setClientID] = useState('');
   const [endpoint, setEndpoint] = useState('');
   const [page, setPage] = useState('');
-  const [useTransientTokenStorage, setUseTransientTokenStorage] = useState(false);
+  const [useTransientTokenStorage, setUseTransientTokenStorage] =
+    useState(false);
   const [shareSessionWithSystemBrowser, setShareSessionWithSystemBrowser] =
     useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const loggedIn = userInfo != null;
+
+  const colorSchemeNull = useColorScheme();
+  const colorScheme = colorSchemeNull ?? undefined;
 
   const showUser = useCallback((userInfo: UserInfo) => {
     Alert.alert(
@@ -292,7 +297,9 @@ const HomeScreen: React.FC = () => {
       .configure({
         clientID,
         endpoint,
-        tokenStorage: useTransientTokenStorage ? new TransientTokenStorage() : new PersistentTokenStorage(),
+        tokenStorage: useTransientTokenStorage
+          ? new TransientTokenStorage()
+          : new PersistentTokenStorage(),
         shareSessionWithSystemBrowser,
       })
       .then(() => {
@@ -320,6 +327,7 @@ const HomeScreen: React.FC = () => {
       .authorize({
         redirectURI,
         wechatRedirectURI,
+        colorScheme,
         page,
       })
       .then(({userInfo}) => {
@@ -333,7 +341,7 @@ const HomeScreen: React.FC = () => {
         setLoading(false);
         updateBiometricState();
       });
-  }, [page, updateBiometricState, showError, showUser]);
+  }, [page, updateBiometricState, showError, showUser, colorScheme]);
 
   const loginAnonymously = useCallback(() => {
     setLoading(true);
@@ -357,6 +365,7 @@ const HomeScreen: React.FC = () => {
     authgear
       .promoteAnonymousUser({
         redirectURI,
+        colorScheme,
         wechatRedirectURI,
       })
       .then(({userInfo}) => {
@@ -368,7 +377,7 @@ const HomeScreen: React.FC = () => {
         updateBiometricState();
         setLoading(false);
       });
-  }, [showError, showUser, updateBiometricState]);
+  }, [showError, showUser, updateBiometricState, colorScheme]);
 
   const reauthenticate = useCallback(() => {
     async function task() {
@@ -382,6 +391,7 @@ const HomeScreen: React.FC = () => {
       const {userInfo} = await authgear.reauthenticate(
         {
           redirectURI,
+          colorScheme,
           wechatRedirectURI,
         },
         biometricOptions,
@@ -399,7 +409,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [showError, showUser]);
+  }, [showError, showUser, colorScheme]);
 
   const reauthenticateWebOnly = useCallback(() => {
     async function task() {
@@ -412,6 +422,7 @@ const HomeScreen: React.FC = () => {
 
       const {userInfo} = await authgear.reauthenticate({
         redirectURI,
+        colorScheme,
         wechatRedirectURI,
       });
 
@@ -427,7 +438,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [showError, showUser]);
+  }, [showError, showUser, colorScheme]);
 
   const enableBiometric = useCallback(() => {
     setLoading(true);
@@ -473,10 +484,11 @@ const HomeScreen: React.FC = () => {
   const openSettings = useCallback(() => {
     authgear
       .open(Page.Settings, {
+        colorScheme,
         wechatRedirectURI,
       })
       .catch(err => showError(err));
-  }, [showError]);
+  }, [showError, colorScheme]);
 
   const fetchUserInfo = useCallback(() => {
     setLoading(true);
@@ -557,7 +569,8 @@ const HomeScreen: React.FC = () => {
         </View>
         <View style={styles.input}>
           <Text style={styles.inputLabel}>Use TransientTokenStorage</Text>
-          <Switch style={styles.checkbox}
+          <Switch
+            style={styles.checkbox}
             value={useTransientTokenStorage}
             onValueChange={setUseTransientTokenStorage}
           />
