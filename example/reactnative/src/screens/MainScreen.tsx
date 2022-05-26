@@ -27,6 +27,7 @@ import authgear, {
   TransientTokenStorage,
   PersistentTokenStorage,
 } from '@authgear/react-native';
+import RadioGroup from '../RadioGroup';
 
 const styles = StyleSheet.create({
   root: {
@@ -139,6 +140,23 @@ const HomeScreen: React.FC = () => {
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const loggedIn = userInfo != null;
+
+  const pageItems = useMemo(() => {
+    return [
+      {
+        label: 'Unset',
+        value: '',
+      },
+      {
+        label: 'Login',
+        value: 'login',
+      },
+      {
+        label: 'Signup',
+        value: 'signup',
+      },
+    ];
+  }, []);
 
   const colorSchemeNull = useColorScheme();
   const colorScheme = colorSchemeNull ?? undefined;
@@ -558,14 +576,7 @@ const HomeScreen: React.FC = () => {
         </View>
         <View style={styles.input}>
           <Text style={styles.inputLabel}>Page</Text>
-          <TextInput
-            style={styles.inputField}
-            onChangeText={setPage}
-            autoCapitalize="none"
-            autoCompleteType="off"
-            autoCorrect={false}
-            placeholder="'login' or 'signup'"
-          />
+          <RadioGroup items={pageItems} value={page} onChange={setPage} />
         </View>
         <View style={styles.input}>
           <Text style={styles.inputLabel}>Use TransientTokenStorage</Text>
