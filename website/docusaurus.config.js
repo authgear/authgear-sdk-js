@@ -1,8 +1,11 @@
+// @ts-check
+// Note: type annotations allow type checking and IDEs autocompletion
+
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 
 /** @type {import("@docusaurus/types").DocusaurusConfig} */
-module.exports = {
+const config = {
   // Always append trailing slash so that relative link is predictable.
   // https://github.com/facebook/docusaurus/issues/5250
   trailingSlash: true,
@@ -15,6 +18,29 @@ module.exports = {
   favicon: "img/favicon.ico",
   organizationName: "authgear",
   projectName: "authgear-sdk-js",
+
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en"],
+  },
+
+  presets: [
+    [
+      "classic",
+      {
+        docs: {
+          sidebarPath: require.resolve("./sidebars.js"),
+          // Please change this to your repo.
+          editUrl:
+            "https://github.com/authgear/authgear-sdk-js/edit/master/website/",
+        },
+        theme: {
+          customCss: require.resolve("./src/css/custom.css"),
+        },
+      },
+    ],
+  ],
+
   themeConfig: {
     navbar: {
       title: "Authgear SDK JS",
@@ -56,20 +82,6 @@ module.exports = {
       darkTheme: darkCodeTheme,
     },
   },
-  presets: [
-    [
-      "@docusaurus/preset-classic",
-      {
-        docs: {
-          sidebarPath: require.resolve("./sidebars.js"),
-          // Please change this to your repo.
-          editUrl:
-            "https://github.com/authgear/authgear-sdk-js/edit/master/website/",
-        },
-        theme: {
-          customCss: require.resolve("./src/css/custom.css"),
-        },
-      },
-    ],
-  ],
 };
+
+module.exports = config;
