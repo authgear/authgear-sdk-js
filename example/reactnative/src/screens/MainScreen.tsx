@@ -26,8 +26,9 @@ import authgear, {
   BiometricLockoutError,
   TransientTokenStorage,
   PersistentTokenStorage,
+  ColorScheme,
 } from '@authgear/react-native';
-import RadioGroup from '../RadioGroup';
+import RadioGroup, {RadioGroupItemProps} from '../RadioGroup';
 
 const styles = StyleSheet.create({
   root: {
@@ -67,6 +68,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: '#888888',
     fontSize: 16,
+  },
+  radioGroup: {
+    flex: 1,
   },
   configureAction: {
     flexDirection: 'row',
@@ -133,6 +137,8 @@ const HomeScreen: React.FC = () => {
   const [clientID, setClientID] = useState('');
   const [endpoint, setEndpoint] = useState('');
   const [page, setPage] = useState('');
+  const [explicitColorScheme, setExplicitColorScheme] =
+    useState<ColorScheme | null>(null);
   const [useTransientTokenStorage, setUseTransientTokenStorage] =
     useState(false);
   const [shareSessionWithSystemBrowser, setShareSessionWithSystemBrowser] =
@@ -158,8 +164,28 @@ const HomeScreen: React.FC = () => {
     ];
   }, []);
 
-  const colorSchemeNull = useColorScheme();
-  const colorScheme = colorSchemeNull ?? undefined;
+  const colorSchemeItems: RadioGroupItemProps<ColorScheme | null>[] =
+    useMemo(() => {
+      return [
+        {
+          label: 'Use system',
+          value: null,
+        },
+        {
+          label: 'Light',
+          value: 'light',
+        },
+        {
+          label: 'Dark',
+          value: 'dark',
+        },
+      ];
+    }, []);
+
+  const systemColorSchemeNull = useColorScheme();
+  const systemColorScheme = systemColorSchemeNull ?? undefined;
+
+  const colorScheme = explicitColorScheme ?? systemColorScheme;
 
   const showUser = useCallback((userInfo: UserInfo) => {
     Alert.alert(
@@ -576,7 +602,21 @@ const HomeScreen: React.FC = () => {
         </View>
         <View style={styles.input}>
           <Text style={styles.inputLabel}>Page</Text>
-          <RadioGroup items={pageItems} value={page} onChange={setPage} />
+          <RadioGroup
+            style={styles.radioGroup}
+            items={pageItems}
+            value={page}
+            onChange={setPage}
+          />
+        </View>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>Color Scheme</Text>
+          <RadioGroup
+            style={styles.radioGroup}
+            items={colorSchemeItems}
+            value={explicitColorScheme}
+            onChange={setExplicitColorScheme}
+          />
         </View>
         <View style={styles.input}>
           <Text style={styles.inputLabel}>Use TransientTokenStorage</Text>
