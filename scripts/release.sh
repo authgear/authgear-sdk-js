@@ -33,7 +33,7 @@ npm run test
 VERSION="$VERSION" npm run build
 
 git-chglog --next-tag v"$VERSION" -o CHANGELOG.md
-git add CHANGELOG.md 'packages/*/package.json' 'packages/*/package-lock.json'
+git add CHANGELOG.md 'packages/*/package.json'
 git commit -m "Update CHANGELOG for v$VERSION"
 git tag -a v"$VERSION" -s -m "Release v$VERSION"
 git push git@github.com:authgear/authgear-sdk-js.git "$GIT_BRANCH"

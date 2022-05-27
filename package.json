@@ -3,7 +3,8 @@
   "workspaces": [
     "packages/authgear-core",
     "packages/authgear-web",
-    "packages/authgear-react-native"
+    "packages/authgear-react-native",
+    "example/reactweb"
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",

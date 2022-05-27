@@ -1,6 +1,6 @@
 {
   "name": "reactweb",
-  "version": "0.1.0",
+  "version": "0.20.0",
   "private": true,
   "scripts": {
     "start": "PORT=4000 parcel serve --no-cache src/index.html",
