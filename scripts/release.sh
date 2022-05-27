@@ -24,7 +24,7 @@ fi
 
 echo "Making github release and release commit..."
 
-npm version --workspaces "$VERSION"
+npm run set-version "$VERSION"
 npm run clean
 npm run format
 npm run lint
