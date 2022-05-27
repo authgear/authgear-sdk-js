@@ -1,7 +1,7 @@
 FROM node:16.13.2 as build
 WORKDIR /project
 COPY . .
-RUN npm ci && npm run lerna bootstrap && npm run bundle:web-module
+RUN npm ci && npm run bundle:web-module
 WORKDIR /project/example/reactweb
 RUN npm ci && npm run build
 FROM nginx:1.20.2
