@@ -19,7 +19,6 @@ jobs:
       with:
         node-version: "16.14.0"
     - run: npm ci
-    - run: npm run lerna bootstrap
     - run: npm run format
       if: ${{ !cancelled() }}
     - run: npm run lint
