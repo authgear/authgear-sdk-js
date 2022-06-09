@@ -5,6 +5,36 @@ export interface UserInfo {
   sub: string;
   isVerified: boolean;
   isAnonymous: boolean;
+  canReauthenticate: boolean;
+
+  raw: Record<string, unknown>;
+  customAttributes: Record<string, unknown>;
+
+  email?: string;
+  emailVerified?: boolean;
+  phoneNumber?: string;
+  phoneNumberVerified?: boolean;
+  preferredUsername?: string;
+  familyName?: string;
+  givenName?: string;
+  middleName?: string;
+  name?: string;
+  nickname?: string;
+  picture?: string;
+  profile?: string;
+  website?: string;
+  gender?: string;
+  birthdate?: string;
+  zoneinfo?: string;
+  locale?: string;
+  address?: {
+    formatted?: string;
+    streetAddress?: string;
+    locality?: string;
+    region?: string;
+    postalCode?: string;
+    country?: string;
+  };
 }
 
 /**
@@ -96,10 +126,44 @@ export interface _APIClientDelegate {
  * @internal
  */
 export function _decodeUserInfo(r: any): UserInfo {
+  const raw = r;
+  const customAttributes = r["custom_attributes"] ?? {};
+
   return {
     sub: r["sub"],
     isVerified: r["https://authgear.com/claims/user/is_verified"] ?? false,
     isAnonymous: r["https://authgear.com/claims/user/is_anonymous"] ?? false,
+    canReauthenticate:
+      r["https://authgear.com/claims/user/can_reauthenticate"] ?? false,
+
+    raw,
+    customAttributes,
+
+    email: r["email"],
+    emailVerified: r["email_verified"],
+    phoneNumber: r["phone_number"],
+    phoneNumberVerified: r["phone_number_verified"],
+    preferredUsername: r["preferred_username"],
+    familyName: r["family_name"],
+    givenName: r["given_name"],
+    middleName: r["middle_name"],
+    name: r["name"],
+    nickname: r["nickname"],
+    picture: r["picture"],
+    profile: r["profile"],
+    website: r["website"],
+    gender: r["gender"],
+    birthdate: r["birthdate"],
+    zoneinfo: r["zoneinfo"],
+    locale: r["locale"],
+    address: {
+      formatted: r["address"]?.["formatted"],
+      streetAddress: r["address"]?.["street_address"],
+      locality: r["address"]?.["locality"],
+      region: r["address"]?.["region"],
+      postalCode: r["address"]?.["postal_code"],
+      country: r["address"]?.["country"],
+    },
   };
 }
 
