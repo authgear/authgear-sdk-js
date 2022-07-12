@@ -11,6 +11,7 @@ import {
   SessionState,
   SessionStateChangeReason,
   AuthgearError,
+  Page,
 } from "@authgear/core";
 import { _WebAPIClient } from "./client";
 import { PersistentTokenStorage, PersistentContainerStorage } from "./storage";
@@ -20,6 +21,7 @@ import {
   AuthorizeOptions,
   ReauthenticateOptions,
   PromoteOptions,
+  SettingOptions,
 } from "./types";
 
 /**
@@ -355,6 +357,48 @@ export class WebContainer {
    */
   async finishPromoteAnonymousUser(): Promise<ReauthenticateResult> {
     return this.baseContainer._finishAuthorization(window.location.href);
+  }
+
+  /**
+   * Open the URL with the user agent authenticated with current user.
+   */
+  async openURL(url: string, options?: SettingOptions): Promise<void> {
+    const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
+    if (!refreshToken) {
+      throw new AuthgearError("refresh token not found");
+    }
+    const { app_session_token } =
+      await this.baseContainer.apiClient.appSessionToken(refreshToken);
+    const loginHint = `https://authgear.com/login_hint?type=app_session_token&app_session_token=${encodeURIComponent(
+      app_session_token
+    )}`;
+
+    const u = new URL(url);
+    const q = u.searchParams;
+    if (options?.uiLocales != null) {
+      q.set("ui_locales", options.uiLocales.join(" "));
+    }
+    u.search = "?" + q.toString();
+    let targetURL = u.toString();
+    targetURL = await this.authorizeEndpoint({
+      redirectURI: targetURL,
+      prompt: "none",
+      responseType: "none",
+      loginHint,
+    });
+
+    window.location.href = targetURL;
+  }
+
+  async open(page: Page, options?: SettingOptions): Promise<void> {
+    const { endpoint } = this.baseContainer.apiClient;
+    if (endpoint == null) {
+      throw new AuthgearError(
+        "Endpoint cannot be undefined, please double check whether you have run configure()"
+      );
+    }
+    const endpointWithoutTrailingSlash = endpoint.replace(/\/$/, "");
+    await this.openURL(`${endpointWithoutTrailingSlash}${page}`, options);
   }
 
   /**

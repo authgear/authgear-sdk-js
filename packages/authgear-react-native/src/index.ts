@@ -15,6 +15,7 @@ import {
   SessionState,
   SessionStateChangeReason,
   AuthgearError,
+  Page,
 } from "@authgear/core";
 import { PersistentContainerStorage, PersistentTokenStorage } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
@@ -50,14 +51,6 @@ export {
   BiometricLockoutError,
 } from "./error";
 import EventEmitter from "./eventEmitter";
-
-/**
- * @public
- */
-export enum Page {
-  Settings = "/settings",
-  Identities = "/settings/identities",
-}
 
 /**
  * @public

@@ -88,6 +88,16 @@ export interface AuthorizeOptions {
 }
 
 /**
+ * @public
+ */
+export interface SettingOptions {
+  /**
+   * UI locale tags
+   */
+  uiLocales?: string[];
+}
+
+/**
  * Auth UI anonymous user promotion options
  *
  * @public
