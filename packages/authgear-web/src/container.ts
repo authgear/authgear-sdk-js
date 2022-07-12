@@ -491,10 +491,13 @@ export class WebContainer {
             "https://authgear.com/scopes/full-access",
           ];
 
+    const suppressIDPSessionCookie = this.sessionType === "refresh_token";
+
     return this.baseContainer.authorizeEndpoint({
       ...options,
       responseType,
       scope,
+      suppressIDPSessionCookie,
     });
   }
 
