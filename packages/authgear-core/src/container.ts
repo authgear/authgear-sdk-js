@@ -3,7 +3,7 @@ import URL from "core-js-pure/features/url";
 import URLSearchParams from "core-js-pure/features/url-search-params";
 import {
   _OIDCAuthenticationRequest,
-  AuthorizeResult,
+  AuthenticateResult,
   ReauthenticateResult,
   ContainerOptions,
   _ContainerStorage,
@@ -365,10 +365,10 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     return `${config.authorization_endpoint}?${query.toString()}`;
   }
 
-  async _finishAuthorization(
+  async _finishAuthentication(
     url: string,
     tokenRequest?: Partial<_OIDCTokenRequest>
-  ): Promise<AuthorizeResult> {
+  ): Promise<AuthenticateResult> {
     const clientID = this.clientID;
     if (clientID == null) {
       throw new AuthgearError("missing client ID");

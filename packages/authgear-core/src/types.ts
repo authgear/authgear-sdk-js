@@ -74,7 +74,7 @@ export interface _OIDCAuthenticationRequest {
  *
  * @public
  */
-export interface AuthorizeResult {
+export interface AuthenticateResult {
   /**
    * OAuth 2.0 state value.
    */

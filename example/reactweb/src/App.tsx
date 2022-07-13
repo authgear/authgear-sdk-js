@@ -108,7 +108,7 @@ function Root() {
     e.stopPropagation();
     const redirectURI = window.location.origin + "/auth-redirect";
     authgear
-      .startAuthorization({
+      .startAuthentication({
         redirectURI,
       })
       .then(
@@ -338,7 +338,7 @@ function AuthRedirect() {
       })
       .then(
         () => {
-          authgear.finishAuthorization().then(
+          authgear.finishAuthentication().then(
             (_) => {
               navigate("/");
             },

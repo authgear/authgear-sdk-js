@@ -368,7 +368,7 @@ const HomeScreen: React.FC = () => {
   const login = useCallback(() => {
     setLoading(true);
     authgear
-      .authorize({
+      .authenticate({
         redirectURI,
         wechatRedirectURI,
         colorScheme,

@@ -5,7 +5,7 @@ import {
   ContainerOptions,
   TokenStorage,
   _BaseContainer,
-  AuthorizeResult,
+  AuthenticateResult,
   ReauthenticateResult,
   UserInfo,
   OAuthError,
@@ -31,7 +31,7 @@ import {
 import {
   BiometricOptions,
   ReactNativeContainerDelegate,
-  AuthorizeOptions,
+  AuthenticateOptions,
   ReauthenticateOptions,
   PromoteOptions,
   SettingOptions,
@@ -349,7 +349,9 @@ export class ReactNativeContainer {
    *
    * @public
    */
-  async authorize(options: AuthorizeOptions): Promise<AuthorizeResult> {
+  async authenticate(
+    options: AuthenticateOptions
+  ): Promise<AuthenticateResult> {
     const platform = Platform.OS;
     const authorizeURL = await this.authorizeEndpoint({
       ...options,
@@ -362,7 +364,7 @@ export class ReactNativeContainer {
       options.wechatRedirectURI
     );
     const xDeviceInfo = await getXDeviceInfo();
-    const result = await this.baseContainer._finishAuthorization(redirectURL, {
+    const result = await this.baseContainer._finishAuthentication(redirectURL, {
       x_device_info: xDeviceInfo,
     });
     await this.disableBiometric();
@@ -510,7 +512,7 @@ export class ReactNativeContainer {
   /**
    * Authenticate as an anonymous user.
    */
-  async authenticateAnonymously(): Promise<AuthorizeResult> {
+  async authenticateAnonymously(): Promise<AuthenticateResult> {
     const clientID = this.clientID;
     if (clientID == null) {
       throw new AuthgearError("missing client ID");
@@ -559,7 +561,7 @@ export class ReactNativeContainer {
    */
   async promoteAnonymousUser(
     options: PromoteOptions
-  ): Promise<AuthorizeResult> {
+  ): Promise<AuthenticateResult> {
     const keyID = await this.storage.getAnonymousKeyID(this.name);
     if (!keyID) {
       throw new AuthgearError("anonymous user credentials not found");
@@ -596,7 +598,7 @@ export class ReactNativeContainer {
       this._shouldPrefersEphemeralWebBrowserSession(),
       options.wechatRedirectURI
     );
-    const result = await this.baseContainer._finishAuthorization(redirectURL);
+    const result = await this.baseContainer._finishAuthentication(redirectURL);
     await this.storage.delAnonymousKeyID(this.name);
     await this.disableBiometric();
     return result;
@@ -619,7 +621,7 @@ export class ReactNativeContainer {
   /**
    * @internal
    */
-  async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
+  async authorizeEndpoint(options: AuthenticateOptions): Promise<string> {
     return this.baseContainer.authorizeEndpoint({
       ...options,
       responseType: "code",
@@ -761,7 +763,7 @@ export class ReactNativeContainer {
 
   async authenticateBiometric(
     options: BiometricOptions
-  ): Promise<AuthorizeResult> {
+  ): Promise<AuthenticateResult> {
     const kid = await this.storage.getBiometricKeyID(this.name);
     if (kid == null) {
       throw new AuthgearError("biometric key ID not found");
