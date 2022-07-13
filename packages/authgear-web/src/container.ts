@@ -408,16 +408,22 @@ export class WebContainer {
    * If `force` parameter is set to `true`, all potential errors (e.g. network
    * error) would be ignored.
    *
-   * `redirectURI` will be used only for the first party app
+   * `redirectURI` is required. User will be redirected to the uri after they
+   * have logged out.
    *
    * @param options - Logout options
    */
   async logout(
     options: {
       force?: boolean;
-      redirectURI?: string;
-    } = {}
+      redirectURI: string;
+    } = {
+      redirectURI: "",
+    }
   ): Promise<void> {
+    if (!options.redirectURI) {
+      throw new AuthgearError("missing redirect uri");
+    }
     switch (this.sessionType) {
       case "cookie":
         await this._logoutCookie(options);
@@ -486,6 +492,7 @@ export class WebContainer {
 
   private async _logoutRefreshToken(options: {
     force?: boolean;
+    redirectURI: string;
   }): Promise<void> {
     const refreshToken =
       (await this.tokenStorage.getRefreshToken(this.name)) ?? "";
@@ -499,19 +506,25 @@ export class WebContainer {
       }
       await this.baseContainer._clearSession("LOGOUT");
     }
+    await this._redirectToEndSessionEndpoint(options.redirectURI);
   }
 
-  private async _logoutCookie(options: {
-    redirectURI?: string;
-  }): Promise<void> {
+  private async _logoutCookie(options: { redirectURI: string }): Promise<void> {
+    await this._redirectToEndSessionEndpoint(options.redirectURI);
+  }
+
+  // Redirect to end_session_endpoint and logout idp session
+  private async _redirectToEndSessionEndpoint(
+    redirectURI: string
+  ): Promise<void> {
     const clientID = this.clientID;
     if (clientID == null) {
       throw new AuthgearError("missing client ID");
     }
     const config = await this.baseContainer.apiClient._fetchOIDCConfiguration();
     const query = new URLSearchParams();
-    if (options.redirectURI) {
-      query.append("post_logout_redirect_uri", options.redirectURI);
+    if (redirectURI) {
+      query.append("post_logout_redirect_uri", redirectURI);
     }
     const endSessionEndpoint = `${
       config.end_session_endpoint
