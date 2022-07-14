@@ -4,7 +4,7 @@ import {
   UserInfo,
   ContainerOptions,
   _BaseContainer,
-  AuthorizeResult,
+  AuthenticateResult,
   ReauthenticateResult,
   _ContainerStorage,
   TokenStorage,
@@ -18,7 +18,7 @@ import { PersistentTokenStorage, PersistentContainerStorage } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
   WebContainerDelegate,
-  AuthorizeOptions,
+  AuthenticateOptions,
   ReauthenticateOptions,
   PromoteOptions,
   SettingOptions,
@@ -276,9 +276,9 @@ export class WebContainer {
   }
 
   /**
-   * Start authorization by redirecting to the authorization endpoint.
+   * Start authentication by redirecting to the authorization endpoint.
    */
-  async startAuthorization(options: AuthorizeOptions): Promise<void> {
+  async startAuthentication(options: AuthenticateOptions): Promise<void> {
     const authorizeEndpoint = await this.authorizeEndpoint(options);
     window.location.href = authorizeEndpoint;
   }
@@ -333,12 +333,12 @@ export class WebContainer {
   }
 
   /**
-   * Finish authorization.
+   * Finish authentication.
    *
    * It may reject with OAuthError.
    */
-  async finishAuthorization(): Promise<AuthorizeResult> {
-    return this.baseContainer._finishAuthorization(window.location.href);
+  async finishAuthentication(): Promise<AuthenticateResult> {
+    return this.baseContainer._finishAuthentication(window.location.href);
   }
 
   /**
@@ -356,7 +356,7 @@ export class WebContainer {
    * It may reject with OAuthError.
    */
   async finishPromoteAnonymousUser(): Promise<ReauthenticateResult> {
-    return this.baseContainer._finishAuthorization(window.location.href);
+    return this.baseContainer._finishAuthentication(window.location.href);
   }
 
   /**
@@ -437,7 +437,7 @@ export class WebContainer {
   /**
    * Authenticate as an anonymous user.
    */
-  async authenticateAnonymously(): Promise<AuthorizeResult> {
+  async authenticateAnonymously(): Promise<AuthenticateResult> {
     const clientID = this.clientID;
     if (clientID == null) {
       throw new AuthgearError("missing client ID");
@@ -535,7 +535,7 @@ export class WebContainer {
   /**
    * @internal
    */
-  async authorizeEndpoint(options: AuthorizeOptions): Promise<string> {
+  async authorizeEndpoint(options: AuthenticateOptions): Promise<string> {
     // Use shared session cookie by default for first-party web apps.
     const responseType =
       options.responseType ?? this.sessionType === "cookie" ? "none" : "code";
@@ -564,7 +564,7 @@ export class WebContainer {
    * This function will be used if developer wants to redirection in their own
    * code.
    */
-  async makeAuthorizeURL(options: AuthorizeOptions): Promise<string> {
+  async makeAuthorizeURL(options: AuthenticateOptions): Promise<string> {
     return this.authorizeEndpoint(options);
   }
 

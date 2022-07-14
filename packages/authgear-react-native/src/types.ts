@@ -41,7 +41,7 @@ export interface ReactNativeContainerDelegate {
  *
  * @public
  */
-export interface AuthorizeOptions {
+export interface AuthenticateOptions {
   /**
    * Redirect uri. Redirection URI to which the response will be sent after authorization.
    */

@@ -40,7 +40,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Configure data to be the exact redirect URI your app uses. -->
-                <!-- NOTE: The redirectURI supplied in AuthorizeOptions has to match as well -->
+                <!-- NOTE: The redirectURI supplied in AuthenticateOptions has to match as well -->
                 <data
                     android:host="host"
                     android:pathPrefix="/path"
