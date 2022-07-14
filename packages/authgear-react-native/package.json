@@ -12,7 +12,7 @@
   ],
   "devDependencies": {
     "@authgear/core": "0.22.0",
-    "@types/react-native": "0.60.25",
+    "@types/react-native": "0.69.1",
     "core-js-pure": "3.22.7"
   },
   "peerDependencies": {
