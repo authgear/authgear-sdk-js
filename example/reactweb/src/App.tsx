@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
-import authgear, { UserInfo, ConfigureOptions } from "@authgear/web";
+import authgear, { UserInfo, ConfigureOptions, Page } from "@authgear/web";
 import "./App.css";
 
 type SessionType = NonNullable<ConfigureOptions["sessionType"]>;
@@ -87,6 +87,15 @@ function Root() {
       configure(initialSessionType, initialClientID, initialEndpoint);
     }
   }, [initialSessionType, initialClientID, initialEndpoint, configure]);
+
+  const onClickOpenSettings = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      authgear.open(Page.Settings).catch((err) => setError(err));
+    },
+    []
+  );
 
   const onClickSignOut = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
@@ -267,14 +276,6 @@ function Root() {
       </p>
       {userInfo != null ? (
         <div className="button-group">
-          <a
-            className="button"
-            href={endpoint + "/settings"}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Open Settings
-          </a>
           <button
             className="button"
             type="button"
@@ -298,6 +299,13 @@ function Root() {
               Promote Anonymous User
             </button>
           ) : null}
+          <button
+            className="button"
+            type="button"
+            onClick={onClickOpenSettings}
+          >
+            Open Settings
+          </button>
           <button className="button" type="button" onClick={onClickSignOut}>
             Sign out
           </button>

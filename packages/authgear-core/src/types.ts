@@ -319,3 +319,11 @@ export type SessionStateChangeReason =
   | "LOGOUT"
   | "INVALID"
   | "CLEAR";
+
+/**
+ * @public
+ */
+export enum Page {
+  Settings = "/settings",
+  Identities = "/settings/identities",
+}
