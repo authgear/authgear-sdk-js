@@ -1,4 +1,8 @@
-import { SessionStateChangeReason, PromptOption } from "@authgear/core";
+import {
+  SessionStateChangeReason,
+  PromptOption,
+  UserInfo,
+} from "@authgear/core";
 import { WebContainer } from ".";
 
 /**
@@ -120,4 +124,36 @@ export interface PromoteOptions {
    * OAuth response type
    */
   responseType?: "code" | "none";
+}
+
+/**
+ * Result of authorization.
+ *
+ * @public
+ */
+export interface AuthenticateResult {
+  /**
+   * OAuth 2.0 state value.
+   */
+  state?: string;
+  /**
+   * UserInfo.
+   */
+  userInfo: UserInfo;
+}
+
+/**
+ * Result of reauthentication
+ *
+ * @public
+ */
+export interface ReauthenticateResult {
+  /**
+   * OAuth 2.0 state value.
+   */
+  state?: string;
+  /**
+   * UserInfo.
+   */
+  userInfo: UserInfo;
 }

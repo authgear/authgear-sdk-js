@@ -5,8 +5,6 @@ import {
   ContainerOptions,
   TokenStorage,
   _BaseContainer,
-  AuthenticateResult,
-  ReauthenticateResult,
   UserInfo,
   OAuthError,
   _ContainerStorage,
@@ -36,6 +34,8 @@ import {
   ReauthenticateOptions,
   PromoteOptions,
   SettingOptions,
+  AuthenticateResult,
+  ReauthenticateResult,
 } from "./types";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 import { BiometricPrivateKeyNotFoundError } from "./error";

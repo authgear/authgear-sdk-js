@@ -2,6 +2,7 @@ import {
   SessionStateChangeReason,
   PromptOption,
   ColorScheme,
+  UserInfo,
 } from "@authgear/core";
 import { ReactNativeContainer } from ".";
 
@@ -162,6 +163,38 @@ export interface PromoteOptions {
    * The wechatRedirectURI will be called when user click the login with WeChat button
    */
   wechatRedirectURI?: string;
+}
+
+/**
+ * Result of authorization.
+ *
+ * @public
+ */
+export interface AuthenticateResult {
+  /**
+   * OAuth 2.0 state value.
+   */
+  state?: string;
+  /**
+   * UserInfo.
+   */
+  userInfo: UserInfo;
+}
+
+/**
+ * Result of reauthentication
+ *
+ * @public
+ */
+export interface ReauthenticateResult {
+  /**
+   * OAuth 2.0 state value.
+   */
+  state?: string;
+  /**
+   * UserInfo.
+   */
+  userInfo: UserInfo;
 }
 
 /**
