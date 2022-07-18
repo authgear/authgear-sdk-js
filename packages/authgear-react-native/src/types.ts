@@ -48,10 +48,6 @@ export interface AuthenticateOptions {
    */
   redirectURI: string;
   /**
-   * OAuth 2.0 state value.
-   */
-  state?: string;
-  /**
    * OIDC prompt parameter.
    *
    * Prompt parameter will be used for Authgear authorization, it will also be forwarded to the underlying SSO providers.
@@ -109,10 +105,6 @@ export interface ReauthenticateOptions {
    */
   redirectURI: string;
   /**
-   * OAuth 2.0 state value.
-   */
-  state?: string;
-  /**
    * UI locale tags
    */
   uiLocales?: string[];
@@ -147,10 +139,6 @@ export interface PromoteOptions {
    */
   redirectURI: string;
   /**
-   * OAuth 2.0 state value.
-   */
-  state?: string;
-  /**
    * UI locale tags
    */
   uiLocales?: string[];
@@ -172,10 +160,6 @@ export interface PromoteOptions {
  */
 export interface AuthenticateResult {
   /**
-   * OAuth 2.0 state value.
-   */
-  state?: string;
-  /**
    * UserInfo.
    */
   userInfo: UserInfo;
@@ -187,10 +171,6 @@ export interface AuthenticateResult {
  * @public
  */
 export interface ReauthenticateResult {
-  /**
-   * OAuth 2.0 state value.
-   */
-  state?: string;
   /**
    * UserInfo.
    */
