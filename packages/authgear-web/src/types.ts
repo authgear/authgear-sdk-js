@@ -89,6 +89,11 @@ export interface AuthenticateOptions {
    * Initial page to open. Valid values are 'login' and 'signup'.
    */
   page?: string;
+
+  /**
+   * Auto redirect the user to the oauth provider
+   */
+  oauthProviderAlias?: string;
 }
 
 /**

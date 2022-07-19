@@ -361,6 +361,9 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (options.suppressIDPSessionCookie === true) {
       query.append("x_suppress_idp_session_cookie", "true");
     }
+    if (options.oauthProviderAlias != null) {
+      query.append("x_oauth_provider_alias", options.oauthProviderAlias);
+    }
 
     return `${config.authorization_endpoint}?${query.toString()}`;
   }
