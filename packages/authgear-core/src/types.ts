@@ -70,34 +70,18 @@ export interface _OIDCAuthenticationRequest {
 }
 
 /**
- * Result of authorization.
- *
- * @public
+ * @internal
  */
-export interface AuthenticateResult {
-  /**
-   * OAuth 2.0 state value.
-   */
+export interface _AuthenticateResult {
   state?: string;
-  /**
-   * UserInfo.
-   */
   userInfo: UserInfo;
 }
 
 /**
- * Result of reauthentication
- *
- * @public
+ * @internal
  */
-export interface ReauthenticateResult {
-  /**
-   * OAuth 2.0 state value.
-   */
+export interface _ReauthenticateResult {
   state?: string;
-  /**
-   * UserInfo.
-   */
   userInfo: UserInfo;
 }
 

@@ -4,8 +4,6 @@ import {
   UserInfo,
   ContainerOptions,
   _BaseContainer,
-  AuthenticateResult,
-  ReauthenticateResult,
   _ContainerStorage,
   TokenStorage,
   SessionState,
@@ -22,6 +20,8 @@ import {
   ReauthenticateOptions,
   PromoteOptions,
   SettingOptions,
+  AuthenticateResult,
+  ReauthenticateResult,
 } from "./types";
 
 /**
