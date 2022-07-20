@@ -67,6 +67,7 @@ export interface _OIDCAuthenticationRequest {
   platform?: string;
   page?: string;
   suppressIDPSessionCookie?: boolean;
+  oauthProviderAlias?: string;
 }
 
 /**
