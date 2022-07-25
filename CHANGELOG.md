@@ -1,6 +1,10 @@
 
+<a name="v1.0.0"></a>
+## [v1.0.0](https://github.com/authgear/authgear-sdk-js/compare/v0.22.0...v1.0.0) (2022-07-20)
+
+
 <a name="v0.22.0"></a>
-## [v0.22.0](https://github.com/authgear/authgear-sdk-js/compare/v0.21.0...v0.22.0) (2022-06-09)
+## [v0.22.0](https://github.com/authgear/authgear-sdk-js/compare/v0.21.0...v0.22.0) (2022-06-21)
 
 
 <a name="v0.21.0"></a>
@@ -12,11 +16,7 @@
 
 
 <a name="v0.19.0"></a>
-## [v0.19.0](https://github.com/authgear/authgear-sdk-js/compare/v0.0.0...v0.19.0) (2022-05-11)
-
-
-<a name="v0.0.0"></a>
-## [v0.0.0](https://github.com/authgear/authgear-sdk-js/compare/v1.8.0-fixed-credentials...v0.0.0) (2022-03-01)
+## [v0.19.0](https://github.com/authgear/authgear-sdk-js/compare/v1.8.0-fixed-credentials...v0.19.0) (2022-05-11)
 
 
 <a name="v1.8.0-fixed-credentials"></a>
