@@ -392,7 +392,11 @@ export class WebContainer {
       });
     }
 
-    window.location.href = targetURL;
+    if (options?.openInSameTab) {
+      window.location.href = targetURL;
+    } else {
+      window.open(targetURL, "_blank");
+    }
   }
 
   async open(page: Page, options?: SettingOptions): Promise<void> {
