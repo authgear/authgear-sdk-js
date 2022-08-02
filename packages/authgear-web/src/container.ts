@@ -361,6 +361,8 @@ export class WebContainer {
 
   /**
    * Open the URL with the user agent authenticated with current user.
+   *
+   * @internal
    */
   async openURL(url: string, options?: SettingOptions): Promise<void> {
     const u = new URL(url);
