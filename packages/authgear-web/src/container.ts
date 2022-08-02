@@ -363,16 +363,6 @@ export class WebContainer {
    * Open the URL with the user agent authenticated with current user.
    */
   async openURL(url: string, options?: SettingOptions): Promise<void> {
-    const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
-    if (!refreshToken) {
-      throw new AuthgearError("refresh token not found");
-    }
-    const { app_session_token } =
-      await this.baseContainer.apiClient.appSessionToken(refreshToken);
-    const loginHint = `https://authgear.com/login_hint?type=app_session_token&app_session_token=${encodeURIComponent(
-      app_session_token
-    )}`;
-
     const u = new URL(url);
     const q = u.searchParams;
     if (options?.uiLocales != null) {
@@ -380,12 +370,27 @@ export class WebContainer {
     }
     u.search = "?" + q.toString();
     let targetURL = u.toString();
-    targetURL = await this.authorizeEndpoint({
-      redirectURI: targetURL,
-      prompt: "none",
-      responseType: "none",
-      loginHint,
-    });
+
+    // use authorize endpoint with app_session_token to open the setting page only
+    // if session type is refresh_token
+    if (this.sessionType === "refresh_token") {
+      const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
+      if (!refreshToken) {
+        throw new AuthgearError("refresh token not found");
+      }
+      const { app_session_token } =
+        await this.baseContainer.apiClient.appSessionToken(refreshToken);
+      const loginHint = `https://authgear.com/login_hint?type=app_session_token&app_session_token=${encodeURIComponent(
+        app_session_token
+      )}`;
+
+      targetURL = await this.authorizeEndpoint({
+        redirectURI: targetURL,
+        prompt: "none",
+        responseType: "none",
+        loginHint,
+      });
+    }
 
     window.location.href = targetURL;
   }
