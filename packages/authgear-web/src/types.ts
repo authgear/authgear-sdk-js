@@ -104,6 +104,11 @@ export interface SettingOptions {
    * UI locale tags
    */
   uiLocales?: string[];
+
+  /**
+   * Indicates whether to open the settings page in the same tab
+   */
+  openInSameTab?: boolean;
 }
 
 /**

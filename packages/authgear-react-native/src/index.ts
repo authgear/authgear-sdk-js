@@ -419,6 +419,8 @@ export class ReactNativeContainer {
 
   /**
    * Open the URL with the user agent authenticated with current user.
+   *
+   * @internal
    */
 
   // eslint-disable-next-line class-methods-use-this
