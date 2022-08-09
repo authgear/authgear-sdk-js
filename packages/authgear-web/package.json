@@ -1,6 +1,6 @@
 {
   "name": "@authgear/web",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "Apache-2.0",
   "main": "dist/authgear-web.cjs.js",
   "module": "dist/authgear-web.module.js",
@@ -11,7 +11,7 @@
     "dist/authgear-web.iife.js"
   ],
   "devDependencies": {
-    "@authgear/core": "1.0.0",
+    "@authgear/core": "1.0.1",
     "core-js-pure": "3.22.7"
   }
 }
