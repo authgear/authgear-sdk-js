@@ -53,7 +53,7 @@ export enum ColorScheme {
 export enum PromptOption {
   None = "none",
   Login = "login",
-  Conset = "consent",
+  Consent = "consent",
   SelectAccount = "select_account",
 }
 
