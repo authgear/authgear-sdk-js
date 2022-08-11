@@ -203,10 +203,11 @@ export interface SettingOptions {
 /**
  * @public
  */
-export type BiometricAccessConstraintIOS =
-  | "biometryAny"
-  | "biometryCurrentSet"
-  | "userPresence";
+export enum BiometricAccessConstraintIOS {
+  BiometricAny = "biometryAny",
+  BiometryCurrentSet = "biometryCurrentSet",
+  UserPresence = "userPresence",
+}
 
 /**
  * @public
@@ -219,9 +220,10 @@ export interface BiometricPrivateKeyOptionsIOS {
 /**
  * @public
  */
-export type BiometricAccessConstraintAndroid =
-  | "BIOMETRIC_STRONG"
-  | "DEVICE_CREDENTIAL";
+export enum BiometricAccessConstraintAndroid {
+  BiometricStrong = "BIOMETRIC_STRONG",
+  DeviceCredential = "DEVICE_CREDENTIAL",
+}
 
 /**
  * @public

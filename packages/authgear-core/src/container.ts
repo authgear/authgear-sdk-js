@@ -129,7 +129,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   ) {
     this.name = options.name ?? "default";
     this.apiClient = apiClient;
-    this.sessionState = "UNKNOWN";
+    this.sessionState = SessionState.Unknown;
     this._delegate = _delegate;
   }
 
@@ -175,7 +175,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     this.expireAt = new Date(
       new Date(Date.now()).getTime() + expires_in * EXPIRE_IN_PERCENTAGE * 1000
     );
-    this._updateSessionState("AUTHENTICATED", reason);
+    this._updateSessionState(SessionState.Authenticated, reason);
 
     if (refresh_token) {
       await this._delegate.tokenStorage.setRefreshToken(
@@ -191,7 +191,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     this.accessToken = undefined;
     this.refreshToken = undefined;
     this.expireAt = undefined;
-    this._updateSessionState("NO_SESSION", reason);
+    this._updateSessionState(SessionState.NoSession, reason);
   }
 
   async refreshAccessTokenIfNeeded(): Promise<void> {
@@ -201,7 +201,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   }
 
   async clearSessionState(): Promise<void> {
-    await this._clearSession("CLEAR");
+    await this._clearSession(SessionStateChangeReason.Clear);
   }
 
   shouldRefreshAccessToken(): boolean {
@@ -249,7 +249,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     );
     if (refreshToken == null) {
       // The API client has access token but we do not have the refresh token.
-      await this._clearSession("NO_TOKEN");
+      await this._clearSession(SessionStateChangeReason.NoToken);
       return;
     }
 
@@ -266,14 +266,17 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       // Clear the session in this case.
       // https://tools.ietf.org/html/rfc6749#section-5.2
       if (error != null && (error as any).error === "invalid_grant") {
-        await this._clearSession("INVALID");
+        await this._clearSession(SessionStateChangeReason.Invalid);
         return;
       }
 
       throw error;
     }
 
-    await this._persistTokenResponse(tokenResponse, "FOUND_TOKEN");
+    await this._persistTokenResponse(
+      tokenResponse,
+      SessionStateChangeReason.FoundToken
+    );
   }
 
   async refreshIDToken(): Promise<void> {
@@ -421,7 +424,10 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     }
 
     if (tokenResponse) {
-      await this._persistTokenResponse(tokenResponse, "AUTHENTICATED");
+      await this._persistTokenResponse(
+        tokenResponse,
+        SessionStateChangeReason.Authenticated
+      );
     }
 
     return {

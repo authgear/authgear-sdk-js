@@ -10,6 +10,7 @@ import {
   SessionStateChangeReason,
   AuthgearError,
   Page,
+  PromptOption,
 } from "@authgear/core";
 import { _WebAPIClient } from "./client";
 import { PersistentTokenStorage, PersistentContainerStorage } from "./storage";
@@ -246,17 +247,23 @@ export class WebContainer {
 
     switch (this.sessionType) {
       case "cookie":
-        this.baseContainer._updateSessionState("UNKNOWN", "NO_TOKEN");
+        this.baseContainer._updateSessionState(
+          SessionState.Unknown,
+          SessionStateChangeReason.NoToken
+        );
         break;
       case "refresh_token":
         if (this.baseContainer.refreshToken != null) {
           // consider user as logged in if refresh token is available
           this.baseContainer._updateSessionState(
-            "AUTHENTICATED",
-            "FOUND_TOKEN"
+            SessionState.Authenticated,
+            SessionStateChangeReason.FoundToken
           );
         } else {
-          this.baseContainer._updateSessionState("NO_SESSION", "NO_TOKEN");
+          this.baseContainer._updateSessionState(
+            SessionState.NoSession,
+            SessionStateChangeReason.NoToken
+          );
         }
         break;
     }
@@ -326,7 +333,7 @@ export class WebContainer {
 
     const authorizeEndpoint = await this.authorizeEndpoint({
       ...options,
-      prompt: "login",
+      prompt: PromptOption.Login,
       loginHint,
     });
     window.location.href = authorizeEndpoint;
@@ -388,7 +395,7 @@ export class WebContainer {
 
       targetURL = await this.authorizeEndpoint({
         redirectURI: targetURL,
-        prompt: "none",
+        prompt: PromptOption.None,
         responseType: "none",
         loginHint,
       });
@@ -486,7 +493,7 @@ export class WebContainer {
 
         await this.baseContainer._persistTokenResponse(
           tokenResponse,
-          "AUTHENTICATED"
+          SessionStateChangeReason.Authenticated
         );
 
         const userInfo =
@@ -515,7 +522,7 @@ export class WebContainer {
           throw error;
         }
       }
-      await this.baseContainer._clearSession("LOGOUT");
+      await this.baseContainer._clearSession(SessionStateChangeReason.Logout);
     }
     await this._redirectToEndSessionEndpoint(options.redirectURI);
   }

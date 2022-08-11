@@ -40,14 +40,22 @@ export interface UserInfo {
 /**
  * @public
  */
-export type ColorScheme = "light" | "dark";
+export enum ColorScheme {
+  Light = "light",
+  Dark = "dark",
+}
 
 /**
  * Prompt parameter options.
  *
  * @public
  */
-export type PromptOption = "none" | "login" | "consent" | "select_account";
+export enum PromptOption {
+  None = "none",
+  Login = "login",
+  Consent = "consent",
+  SelectAccount = "select_account",
+}
 
 /**
  * @internal
@@ -279,7 +287,11 @@ export interface _OIDCTokenResponse {
  *
  * @public
  */
-export type SessionState = "UNKNOWN" | "NO_SESSION" | "AUTHENTICATED";
+export enum SessionState {
+  Unknown = "UNKNOWN",
+  NoSession = "NO_SESSION",
+  Authenticated = "AUTHENTICATED",
+}
 
 /**
  * The reason why SessionState is changed.
@@ -297,13 +309,14 @@ export type SessionState = "UNKNOWN" | "NO_SESSION" | "AUTHENTICATED";
  * ```
  * @public
  */
-export type SessionStateChangeReason =
-  | "NO_TOKEN"
-  | "FOUND_TOKEN"
-  | "AUTHENTICATED"
-  | "LOGOUT"
-  | "INVALID"
-  | "CLEAR";
+export enum SessionStateChangeReason {
+  NoToken = "NO_TOKEN",
+  FoundToken = "FOUND_TOKEN",
+  Authenticated = "AUTHENTICATED",
+  Logout = "LOGOUT",
+  Invalid = "INVALID",
+  Clear = "CLEAR",
+}
 
 /**
  * @public

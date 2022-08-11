@@ -14,6 +14,7 @@ import {
   SessionStateChangeReason,
   AuthgearError,
   Page,
+  PromptOption,
 } from "@authgear/core";
 import { PersistentContainerStorage, PersistentTokenStorage } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
@@ -316,9 +317,15 @@ export class ReactNativeContainer {
 
     if (this.baseContainer.refreshToken != null) {
       // consider user as logged in if refresh token is available
-      this.baseContainer._updateSessionState("AUTHENTICATED", "FOUND_TOKEN");
+      this.baseContainer._updateSessionState(
+        SessionState.Authenticated,
+        SessionStateChangeReason.FoundToken
+      );
     } else {
-      this.baseContainer._updateSessionState("NO_SESSION", "NO_TOKEN");
+      this.baseContainer._updateSessionState(
+        SessionState.NoSession,
+        SessionStateChangeReason.NoToken
+      );
     }
   }
 
@@ -453,7 +460,7 @@ export class ReactNativeContainer {
     const platform = Platform.OS;
     targetURL = await this.authorizeEndpoint({
       redirectURI: targetURL,
-      prompt: "none",
+      prompt: PromptOption.None,
       responseType: "none",
       loginHint,
       platform,
@@ -500,7 +507,7 @@ export class ReactNativeContainer {
           throw error;
         }
       }
-      await this.baseContainer._clearSession("LOGOUT");
+      await this.baseContainer._clearSession(SessionStateChangeReason.Logout);
     }
   }
 
@@ -542,7 +549,7 @@ export class ReactNativeContainer {
 
     await this.baseContainer._persistTokenResponse(
       tokenResponse,
-      "AUTHENTICATED"
+      SessionStateChangeReason.Authenticated
     );
     await this.storage.setAnonymousKeyID(this.name, key.kid);
     await this.disableBiometric();
@@ -583,7 +590,7 @@ export class ReactNativeContainer {
     const platform = Platform.OS;
     const authorizeURL = await this.authorizeEndpoint({
       ...options,
-      prompt: "login",
+      prompt: PromptOption.Login,
       loginHint,
       platform,
     });
@@ -798,7 +805,7 @@ export class ReactNativeContainer {
       );
       await this.baseContainer._persistTokenResponse(
         tokenResponse,
-        "AUTHENTICATED"
+        SessionStateChangeReason.Authenticated
       );
       return { userInfo };
     } catch (e: unknown) {

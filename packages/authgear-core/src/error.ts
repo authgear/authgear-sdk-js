@@ -15,28 +15,21 @@ export class AuthgearError extends Error {
 }
 
 /**
- * ErrorNames contains all possible name in {@link ServerError}
+ * ErrorName contains all possible name in {@link ServerError}
  *
  * @public
  */
-export const ErrorNames = {
-  BadRequest: "BadRequest",
-  Invalid: "Invalid",
-  Unauthorized: "Unauthorized",
-  Forbidden: "Forbidden",
-  NotFound: "NotFound",
-  AlreadyExists: "AlreadyExists",
-  TooManyRequest: "TooManyRequest",
-  InternalError: "InternalError",
-  ServiceUnavailable: "ServiceUnavailable",
-} as const;
-
-/**
- * ErrorName is the union of the keys of {@link ErrorNames}.
- *
- * @public
- */
-export type ErrorName = typeof ErrorNames[keyof typeof ErrorNames];
+export enum ErrorName {
+  BadRequest = "BadRequest",
+  Invalid = "Invalid",
+  Unauthorized = "Unauthorized",
+  Forbidden = "Forbidden",
+  NotFound = "NotFound",
+  AlreadyExists = "AlreadyExists",
+  TooManyRequest = "TooManyRequest",
+  InternalError = "InternalError",
+  ServiceUnavailable = "ServiceUnavailable",
+}
 
 /**
  * CancelError means cancel.
@@ -57,7 +50,7 @@ export class ServerError extends AuthgearError {
    * Error name.
    *
    * @remarks
-   * See {@link ErrorNames} for possible values.
+   * See {@link ErrorName} for possible values.
    * New error names may be added in future.
    */
   name: string;
