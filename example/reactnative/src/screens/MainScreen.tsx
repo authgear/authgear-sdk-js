@@ -27,6 +27,10 @@ import authgear, {
   TransientTokenStorage,
   PersistentTokenStorage,
   ColorScheme,
+  BiometricOptions,
+  BiometricAccessConstraintIOS,
+  BiometricLAPolicy,
+  BiometricAccessConstraintAndroid,
 } from '@authgear/react-native';
 import RadioGroup, {RadioGroupItemProps} from '../RadioGroup';
 
@@ -116,17 +120,18 @@ const wechatRedirectURI = Platform.select<string>({
   ios: 'https://authgear-demo-rn.pandawork.com/authgear/open_wechat_app',
 });
 
-const biometricOptions = {
+const biometricOptions: BiometricOptions = {
   ios: {
     localizedReason: 'Use biometric to authenticate',
-    constraint: 'biometryCurrentSet' as const,
+    constraint: BiometricAccessConstraintIOS.BiometryCurrentSet,
+    policy: BiometricLAPolicy.deviceOwnerAuthenticationWithBiometrics,
   },
   android: {
     title: 'Biometric Authentication',
     subtitle: 'Biometric authentication',
     description: 'Use biometric to authenticate',
     negativeButtonText: 'Cancel',
-    constraint: ['BIOMETRIC_STRONG' as const],
+    constraint: [BiometricAccessConstraintAndroid.BiometricStrong],
     invalidatedByBiometricEnrollment: true,
   },
 };
@@ -173,11 +178,11 @@ const HomeScreen: React.FC = () => {
         },
         {
           label: 'Light',
-          value: 'light',
+          value: ColorScheme.Light,
         },
         {
           label: 'Dark',
-          value: 'dark',
+          value: ColorScheme.Dark,
         },
       ];
     }, []);
@@ -371,7 +376,7 @@ const HomeScreen: React.FC = () => {
       .authenticate({
         redirectURI,
         wechatRedirectURI,
-        colorScheme,
+        colorScheme: colorScheme as ColorScheme,
         page,
       })
       .then(({userInfo}) => {
@@ -409,7 +414,7 @@ const HomeScreen: React.FC = () => {
     authgear
       .promoteAnonymousUser({
         redirectURI,
-        colorScheme,
+        colorScheme: colorScheme as ColorScheme,
         wechatRedirectURI,
       })
       .then(({userInfo}) => {
@@ -435,7 +440,7 @@ const HomeScreen: React.FC = () => {
       const {userInfo} = await authgear.reauthenticate(
         {
           redirectURI,
-          colorScheme,
+          colorScheme: colorScheme as ColorScheme,
           wechatRedirectURI,
         },
         biometricOptions,
@@ -466,7 +471,7 @@ const HomeScreen: React.FC = () => {
 
       const {userInfo} = await authgear.reauthenticate({
         redirectURI,
-        colorScheme,
+        colorScheme: colorScheme as ColorScheme,
         wechatRedirectURI,
       });
 
@@ -528,7 +533,7 @@ const HomeScreen: React.FC = () => {
   const openSettings = useCallback(() => {
     authgear
       .open(Page.Settings, {
-        colorScheme,
+        colorScheme: colorScheme as ColorScheme,
         wechatRedirectURI,
       })
       .catch(err => showError(err));
@@ -583,7 +588,6 @@ const HomeScreen: React.FC = () => {
             value={clientID}
             onChangeText={setClientID}
             autoCapitalize="none"
-            autoCompleteType="off"
             autoCorrect={false}
             placeholder="Enter client ID"
           />
@@ -595,7 +599,6 @@ const HomeScreen: React.FC = () => {
             value={endpoint}
             onChangeText={setEndpoint}
             autoCapitalize="none"
-            autoCompleteType="off"
             autoCorrect={false}
             placeholder="Enter endpoint"
           />
