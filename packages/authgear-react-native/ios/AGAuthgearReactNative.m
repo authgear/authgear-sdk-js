@@ -372,9 +372,10 @@ RCT_EXPORT_METHOD(generateUUID:(RCTPromiseResolveBlock)resolve rejecter:(RCTProm
 RCT_EXPORT_METHOD(checkBiometricSupported:(NSDictionary *)options resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     if (@available(iOS 11.3, *)) {
-        LAContext *context = [[LAContext alloc] init];
+        LAPolicy policy = LAPolicyDeviceOwnerAuthenticationWithBiometrics;
+        LAContext *context = [self laContextFromPolicy:policy];
         NSError *error = NULL;
-        [context canEvaluatePolicy:kLAPolicyDeviceOwnerAuthenticationWithBiometrics error:&error];
+        [context canEvaluatePolicy:policy error:&error];
         if (error) {
             reject([@(error.code) stringValue], error.localizedDescription, error);
         } else {
@@ -412,9 +413,10 @@ RCT_EXPORT_METHOD(createBiometricPrivateKey:(NSDictionary *)options resolver:(RC
     NSString *constraint = iosDict[@"constraint"];
     NSString *localizedReason = iosDict[@"localizedReason"];
     NSString *tag = [NSString stringWithFormat:@"com.authgear.keys.biometric.%@", kid];
+    LAPolicy policy = LAPolicyDeviceOwnerAuthenticationWithBiometrics;
+    LAContext *context = [self laContextFromPolicy:policy];
 
-    LAContext *context = [[LAContext alloc] init];
-    [context evaluatePolicy:kLAPolicyDeviceOwnerAuthenticationWithBiometrics localizedReason:localizedReason reply:^(BOOL success, NSError * _Nullable laError) {
+    [context evaluatePolicy:policy localizedReason:localizedReason reply:^(BOOL success, NSError * _Nullable laError) {
         dispatch_async(dispatch_get_main_queue(), ^{
             if (laError) {
                 reject([@(laError.code) stringValue], laError.localizedDescription, laError);
@@ -428,7 +430,7 @@ RCT_EXPORT_METHOD(createBiometricPrivateKey:(NSDictionary *)options resolver:(RC
                 return;
             }
 
-            [self addBiometricPrivateKey:privateKey tag:tag constraint:constraint error:&error];
+            [self addBiometricPrivateKey:privateKey tag:tag constraint:constraint laContext:context error:&error];
             if (error) {
                 CFRelease(privateKey);
                 reject([@(error.code) stringValue], error.localizedDescription, error);
@@ -450,23 +452,41 @@ RCT_EXPORT_METHOD(createBiometricPrivateKey:(NSDictionary *)options resolver:(RC
 RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(RCTPromiseResolveBlock)resolve
                       rejecter:(RCTPromiseRejectBlock)reject)
 {
-    NSError *error = NULL;
+
     NSString *kid = options[@"kid"];
     NSDictionary *payload = options[@"payload"];
-    SecKeyRef privateKey = [self getBiometricPrivateKey:kid error:&error];
-    if (error) {
-        reject([@(error.code) stringValue], error.localizedDescription, error);
-        return;
-    }
+    NSDictionary *iosDict = options[@"ios"];
+    NSString *localizedReason = iosDict[@"localizedReason"];
+    NSString *policyString = iosDict[@"policy"];
+    NSString *tag = [NSString stringWithFormat:@"com.authgear.keys.biometric.%@", kid];
+    LAPolicy policy = [self laPolicyFromString:policyString];
+    LAContext *context = [self laContextFromPolicy:policy];
 
-    NSString *jwt = [self signBiometricJWT:privateKey kid:kid payload:payload error:&error];
-    CFRelease(privateKey);
-    if (error) {
-        reject([@(error.code) stringValue], error.localizedDescription, error);
-        return;
-    }
+    [context evaluatePolicy:policy localizedReason:localizedReason reply:^(BOOL success, NSError * _Nullable laError) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (laError) {
+                reject([@(laError.code) stringValue], laError.localizedDescription, laError);
+                return;
+            }
 
-    resolve(jwt);
+            NSError *error = NULL;
+
+            SecKeyRef privateKey = [self getBiometricPrivateKey:tag laContext:context error:&error];
+            if (error) {
+                reject([@(error.code) stringValue], error.localizedDescription, error);
+                return;
+            }
+
+            NSString *jwt = [self signBiometricJWT:privateKey kid:kid payload:payload error:&error];
+            CFRelease(privateKey);
+            if (error) {
+                reject([@(error.code) stringValue], error.localizedDescription, error);
+                return;
+            }
+
+            resolve(jwt);
+        });
+    }];
 }
 
 -(NSString *)signBiometricJWT:(SecKeyRef)privateKey kid:(NSString *)kid payload:(NSDictionary *)payload error:(out NSError **)error
@@ -485,15 +505,15 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
     return jwt;
 }
 
-- (SecKeyRef)getBiometricPrivateKey:(NSString *)kid error:(out NSError **)error
+- (SecKeyRef)getBiometricPrivateKey:(NSString *)tag laContext:(LAContext *)laContext error:(out NSError **)error
 {
-    NSString *tag = [NSString stringWithFormat:@"com.authgear.keys.biometric.%@", kid];
     NSDictionary *query = @{
         (id)kSecClass: (id)kSecClassKey,
         (id)kSecMatchLimit: (id)kSecMatchLimitOne,
         (id)kSecAttrKeyType: (id)kSecAttrKeyTypeRSA,
         (id)kSecAttrApplicationTag: tag,
         (id)kSecReturnRef: @YES,
+        (id)kSecUseAuthenticationContext: laContext,
     };
     CFTypeRef item = NULL;
     OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, &item);
@@ -519,9 +539,8 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
     return privateKey;
 }
 
-- (void)addBiometricPrivateKey:(SecKeyRef)privateKey tag:(NSString *)tag constraint:(NSString *)constraint error:(out NSError **)error
+- (void)addBiometricPrivateKey:(SecKeyRef)privateKey tag:(NSString *)tag constraint:(NSString *)constraint laContext:(LAContext *)context error:(out NSError **)error
 {
-    LAContext *context = [[LAContext alloc] init];
     CFErrorRef cfError = NULL;
 
     SecAccessControlCreateFlags flags;
@@ -828,6 +847,26 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
     default:
         return @"unknown";
     }
+}
+
+-(LAPolicy)laPolicyFromString:(NSString *)str
+{
+    if ([str isEqualToString:@"deviceOwnerAuthenticationWithBiometrics"]) {
+        return LAPolicyDeviceOwnerAuthenticationWithBiometrics;
+    }
+    if ([str isEqualToString:@"deviceOwnerAuthentication"]) {
+        return LAPolicyDeviceOwnerAuthentication;
+    }
+    return LAPolicyDeviceOwnerAuthentication;
+}
+
+-(LAContext *)laContextFromPolicy:(LAPolicy)policy
+{
+    LAContext *context = [[LAContext alloc] init];
+    if (policy == LAPolicyDeviceOwnerAuthenticationWithBiometrics) {
+        context.localizedFallbackTitle = @"";
+    }
+    return context;
 }
 
 @end
