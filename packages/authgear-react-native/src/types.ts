@@ -203,6 +203,14 @@ export interface SettingOptions {
 /**
  * @public
  */
+export enum BiometricLAPolicy {
+  deviceOwnerAuthenticationWithBiometrics = "deviceOwnerAuthenticationWithBiometrics",
+  deviceOwnerAuthentication = "deviceOwnerAuthentication",
+}
+
+/**
+ * @public
+ */
 export enum BiometricAccessConstraintIOS {
   BiometricAny = "biometryAny",
   BiometryCurrentSet = "biometryCurrentSet",
@@ -212,9 +220,10 @@ export enum BiometricAccessConstraintIOS {
 /**
  * @public
  */
-export interface BiometricPrivateKeyOptionsIOS {
+export interface BiometricOptionsIOS {
   localizedReason: string;
   constraint: BiometricAccessConstraintIOS;
+  policy: BiometricLAPolicy;
 }
 
 /**
@@ -228,7 +237,7 @@ export enum BiometricAccessConstraintAndroid {
 /**
  * @public
  */
-export interface BiometricPrivateKeyOptionsAndroid {
+export interface BiometricOptionsAndroid {
   title: string;
   subtitle: string;
   description: string;
@@ -241,8 +250,8 @@ export interface BiometricPrivateKeyOptionsAndroid {
  * @public
  */
 export interface BiometricOptions {
-  ios: BiometricPrivateKeyOptionsIOS;
-  android: BiometricPrivateKeyOptionsAndroid;
+  ios: BiometricOptionsIOS;
+  android: BiometricOptionsAndroid;
 }
 
 /**
