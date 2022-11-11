@@ -489,6 +489,7 @@
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = E2F6KNYMR6;
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = M7HB6C3N6X;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = reactNativeExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -500,9 +501,10 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.authgear.exampleapp.reactnative;
+				PRODUCT_BUNDLE_IDENTIFIER = com.authgear.sdk.exampleapp.reactnative;
 				PRODUCT_NAME = reactNativeExample;
 				PROVISIONING_PROFILE_SPECIFIER = "Authgear demo app iOS react native development";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Authgear Demo React Native Dev";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -519,6 +521,7 @@
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = E2F6KNYMR6;
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = M7HB6C3N6X;
 				INFOPLIST_FILE = reactNativeExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -529,9 +532,10 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.authgear.exampleapp.reactnative;
+				PRODUCT_BUNDLE_IDENTIFIER = com.authgear.sdk.exampleapp.reactnative;
 				PRODUCT_NAME = reactNativeExample;
 				PROVISIONING_PROFILE_SPECIFIER = "Authgear demo app iOS react native";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Authgear Demo React Native";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
