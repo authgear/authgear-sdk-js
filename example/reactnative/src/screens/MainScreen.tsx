@@ -146,8 +146,7 @@ const HomeScreen: React.FC = () => {
     useState<ColorScheme | null>(null);
   const [useTransientTokenStorage, setUseTransientTokenStorage] =
     useState(false);
-  const [shareSessionWithSystemBrowser, setShareSessionWithSystemBrowser] =
-    useState(false);
+  const [ssoEnabled, setSSOEnabled] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const loggedIn = userInfo != null;
@@ -349,7 +348,7 @@ const HomeScreen: React.FC = () => {
         tokenStorage: useTransientTokenStorage
           ? new TransientTokenStorage()
           : new PersistentTokenStorage(),
-        shareSessionWithSystemBrowser,
+        ssoEnabled,
       })
       .then(() => {
         postConfigure();
@@ -365,7 +364,7 @@ const HomeScreen: React.FC = () => {
     clientID,
     endpoint,
     useTransientTokenStorage,
-    shareSessionWithSystemBrowser,
+    ssoEnabled,
     postConfigure,
     showError,
   ]);
@@ -630,13 +629,11 @@ const HomeScreen: React.FC = () => {
           />
         </View>
         <View style={styles.input}>
-          <Text style={styles.inputLabel}>
-            Share Session With Device Browser
-          </Text>
+          <Text style={styles.inputLabel}>SSO Enabled</Text>
           <Switch
             style={styles.checkbox}
-            value={shareSessionWithSystemBrowser}
-            onValueChange={setShareSessionWithSystemBrowser}
+            value={ssoEnabled}
+            onValueChange={setSSOEnabled}
           />
         </View>
         <View style={styles.configureAction}>
