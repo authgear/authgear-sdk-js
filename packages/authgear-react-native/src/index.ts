@@ -72,10 +72,13 @@ export interface ConfigureOptions {
   tokenStorage?: TokenStorage;
 
   /**
-   * shareSessionWithSystemBrowser indicates whether the Authgear session is
-   * shared with the system browser.
+   * Single-sign-on (SSO) is defined as login once, logged in all apps.
+   * When SSOEnabled is true, users only need to enter their authentication credentials once.
+   * When the user login the second app, they will see the continue screen so that they can log in with just a click.
+   * Logout from one app will also logout from all the apps.
+   * @defaultValue false
    */
-  shareSessionWithSystemBrowser?: boolean;
+  ssoEnabled?: boolean;
 }
 
 /**
@@ -119,11 +122,6 @@ export class ReactNativeContainer {
   /**
    * @internal
    */
-  _shareSessionWithSystemBrowser: boolean;
-
-  /**
-   * @internal
-   */
   wechatRedirectDeepLinkListener: (url: string) => void;
 
   /**
@@ -160,11 +158,16 @@ export class ReactNativeContainer {
   }
 
   /**
+   * SSO enabled
    *
    * @public
    */
-  public get shareSessionWithSystemBrowser(): boolean {
-    return this._shareSessionWithSystemBrowser;
+  public get ssoEnabled(): boolean {
+    return this.baseContainer.ssoEnabled;
+  }
+
+  public set ssoEnabled(ssoEnabled: boolean) {
+    this.baseContainer.ssoEnabled = ssoEnabled;
   }
 
   /**
@@ -207,8 +210,6 @@ export class ReactNativeContainer {
 
     this.storage = new PersistentContainerStorage();
     this.tokenStorage = new PersistentTokenStorage();
-
-    this._shareSessionWithSystemBrowser = false;
 
     this.wechatRedirectDeepLinkListener = (url: string) => {
       this._sendWechatRedirectURIToDelegate(url);
@@ -300,8 +301,7 @@ export class ReactNativeContainer {
    * @public
    */
   async configure(options: ConfigureOptions): Promise<void> {
-    this._shareSessionWithSystemBrowser =
-      options.shareSessionWithSystemBrowser ?? false;
+    this.ssoEnabled = options.ssoEnabled ?? false;
     if (options.tokenStorage != null) {
       this.tokenStorage = options.tokenStorage;
     } else {
@@ -405,7 +405,6 @@ export class ReactNativeContainer {
       idTokenHint: idToken,
       responseType: "code",
       scope: ["openid", "https://authgear.com/scopes/full-access"],
-      suppressIDPSessionCookie: this._shouldSuppressIDPSessionCookie(),
     });
 
     const redirectURL = await openAuthorizeURL(
@@ -609,15 +608,11 @@ export class ReactNativeContainer {
   /**
    * @internal
    */
-  _shouldSuppressIDPSessionCookie(): boolean {
-    return !this.shareSessionWithSystemBrowser;
-  }
-
-  /**
-   * @internal
-   */
   _shouldPrefersEphemeralWebBrowserSession(): boolean {
-    return !this.shareSessionWithSystemBrowser;
+    if (this.ssoEnabled) {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -632,7 +627,6 @@ export class ReactNativeContainer {
         "offline_access",
         "https://authgear.com/scopes/full-access",
       ],
-      suppressIDPSessionCookie: this._shouldSuppressIDPSessionCookie(),
     });
   }
 

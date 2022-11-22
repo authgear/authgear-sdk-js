@@ -110,6 +110,8 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
   apiClient: T;
 
+  ssoEnabled: boolean;
+
   sessionState: SessionState;
 
   idToken?: string;
@@ -129,6 +131,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   ) {
     this.name = options.name ?? "default";
     this.apiClient = apiClient;
+    this.ssoEnabled = false;
     this.sessionState = SessionState.Unknown;
     this._delegate = _delegate;
   }
@@ -361,12 +364,10 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (options.page != null) {
       query.append("x_page", options.page);
     }
-    if (options.suppressIDPSessionCookie === true) {
-      query.append("x_suppress_idp_session_cookie", "true");
-    }
     if (options.oauthProviderAlias != null) {
       query.append("x_oauth_provider_alias", options.oauthProviderAlias);
     }
+    query.append("x_sso_enabled", this.ssoEnabled ? "true" : "false");
 
     return `${config.authorization_endpoint}?${query.toString()}`;
   }
