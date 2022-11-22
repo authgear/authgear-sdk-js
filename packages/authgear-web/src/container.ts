@@ -542,7 +542,6 @@ export class WebContainer {
 
   private async _logoutRefreshToken(options: {
     force?: boolean;
-    redirectURI: string;
   }): Promise<void> {
     const refreshToken =
       (await this.tokenStorage.getRefreshToken(this.name)) ?? "";
@@ -556,7 +555,6 @@ export class WebContainer {
       }
       await this.baseContainer._clearSession(SessionStateChangeReason.Logout);
     }
-    await this._redirectToEndSessionEndpoint(options.redirectURI);
   }
 
   private async _logoutCookie(options: { redirectURI: string }): Promise<void> {
