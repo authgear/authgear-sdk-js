@@ -407,6 +407,7 @@ function AuthRedirect() {
     <div>
       <p>Redirecting</p>
       <ShowError error={error} />
+      <a href="/">Back to home</a>
     </div>
   );
 }
@@ -444,6 +445,7 @@ function ReauthRedirect() {
     <div>
       <p>Redirecting</p>
       <ShowError error={error} />
+      <a href="/">Back to home</a>
     </div>
   );
 }
@@ -479,8 +481,9 @@ function PromoteAnonymousUserRedirect() {
 
   return (
     <div>
-      <p>Redirecting FIXME remove text</p>
+      <p>Redirecting</p>
       <ShowError error={error} />
+      <a href="/">Back to home</a>
     </div>
   );
 }
