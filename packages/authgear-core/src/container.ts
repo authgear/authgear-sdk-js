@@ -374,6 +374,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
   async _finishAuthentication(
     url: string,
+    codeRequired: boolean,
     tokenRequest?: Partial<_OIDCTokenRequest>
   ): Promise<_AuthenticateResult> {
     const clientID = this.clientID;
@@ -396,7 +397,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
     let userInfo;
     let tokenResponse;
-    if (!params.has("code")) {
+    if (!codeRequired) {
       // if authorization code is not provided (i.e. first-party web app), use
       // session cookie for authorization; no code exchange is needed.
       userInfo = await this.apiClient._oidcUserInfoRequest();

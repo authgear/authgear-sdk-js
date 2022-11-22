@@ -377,7 +377,12 @@ export class WebContainer {
    * It may reject with OAuthError.
    */
   async finishAuthentication(): Promise<AuthenticateResult> {
-    return this.baseContainer._finishAuthentication(window.location.href);
+    // only sessionType === "cookie" doesn't require authorization code
+    const codeRequired = this.sessionType === "cookie" ? false : true;
+    return this.baseContainer._finishAuthentication(
+      window.location.href,
+      codeRequired
+    );
   }
 
   /**
@@ -395,7 +400,12 @@ export class WebContainer {
    * It may reject with OAuthError.
    */
   async finishPromoteAnonymousUser(): Promise<ReauthenticateResult> {
-    return this.baseContainer._finishAuthentication(window.location.href);
+    // only sessionType === "cookie" doesn't require authorization code
+    const codeRequired = this.sessionType === "cookie" ? false : true;
+    return this.baseContainer._finishAuthentication(
+      window.location.href,
+      codeRequired
+    );
   }
 
   /**

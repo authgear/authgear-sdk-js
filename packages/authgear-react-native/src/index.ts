@@ -364,9 +364,13 @@ export class ReactNativeContainer {
       options.wechatRedirectURI
     );
     const xDeviceInfo = await getXDeviceInfo();
-    const result = await this.baseContainer._finishAuthentication(redirectURL, {
-      x_device_info: xDeviceInfo,
-    });
+    const result = await this.baseContainer._finishAuthentication(
+      redirectURL,
+      true,
+      {
+        x_device_info: xDeviceInfo,
+      }
+    );
     await this.disableBiometric();
     return result;
   }
@@ -599,7 +603,10 @@ export class ReactNativeContainer {
       this._shouldPrefersEphemeralWebBrowserSession(),
       options.wechatRedirectURI
     );
-    const result = await this.baseContainer._finishAuthentication(redirectURL);
+    const result = await this.baseContainer._finishAuthentication(
+      redirectURL,
+      true
+    );
     await this.storage.delAnonymousKeyID(this.name);
     await this.disableBiometric();
     return result;
