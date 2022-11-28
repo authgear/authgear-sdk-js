@@ -367,6 +367,11 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (options.oauthProviderAlias != null) {
       query.append("x_oauth_provider_alias", options.oauthProviderAlias);
     }
+    if (!this.ssoEnabled) {
+      // For backward compatibility
+      // If the developer updates the SDK but not the server
+      query.append("x_suppress_idp_session_cookie", "true");
+    }
     query.append("x_sso_enabled", this.ssoEnabled ? "true" : "false");
 
     return `${config.authorization_endpoint}?${query.toString()}`;
