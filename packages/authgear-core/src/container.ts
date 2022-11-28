@@ -110,6 +110,8 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
   apiClient: T;
 
+  ssoEnabled: boolean;
+
   sessionState: SessionState;
 
   idToken?: string;
@@ -129,6 +131,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   ) {
     this.name = options.name ?? "default";
     this.apiClient = apiClient;
+    this.ssoEnabled = false;
     this.sessionState = SessionState.Unknown;
     this._delegate = _delegate;
   }
@@ -361,18 +364,22 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (options.page != null) {
       query.append("x_page", options.page);
     }
-    if (options.suppressIDPSessionCookie === true) {
-      query.append("x_suppress_idp_session_cookie", "true");
-    }
     if (options.oauthProviderAlias != null) {
       query.append("x_oauth_provider_alias", options.oauthProviderAlias);
     }
+    if (!this.ssoEnabled) {
+      // For backward compatibility
+      // If the developer updates the SDK but not the server
+      query.append("x_suppress_idp_session_cookie", "true");
+    }
+    query.append("x_sso_enabled", this.ssoEnabled ? "true" : "false");
 
     return `${config.authorization_endpoint}?${query.toString()}`;
   }
 
   async _finishAuthentication(
     url: string,
+    codeRequired: boolean,
     tokenRequest?: Partial<_OIDCTokenRequest>
   ): Promise<_AuthenticateResult> {
     const clientID = this.clientID;
@@ -395,7 +402,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
     let userInfo;
     let tokenResponse;
-    if (!params.has("code")) {
+    if (!codeRequired) {
       // if authorization code is not provided (i.e. first-party web app), use
       // session cookie for authorization; no code exchange is needed.
       userInfo = await this.apiClient._oidcUserInfoRequest();
