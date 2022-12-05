@@ -110,7 +110,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
   apiClient: T;
 
-  ssoEnabled: boolean;
+  isSSOEnabled: boolean;
 
   sessionState: SessionState;
 
@@ -131,7 +131,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   ) {
     this.name = options.name ?? "default";
     this.apiClient = apiClient;
-    this.ssoEnabled = false;
+    this.isSSOEnabled = false;
     this.sessionState = SessionState.Unknown;
     this._delegate = _delegate;
   }
@@ -367,12 +367,12 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (options.oauthProviderAlias != null) {
       query.append("x_oauth_provider_alias", options.oauthProviderAlias);
     }
-    if (!this.ssoEnabled) {
+    if (!this.isSSOEnabled) {
       // For backward compatibility
       // If the developer updates the SDK but not the server
       query.append("x_suppress_idp_session_cookie", "true");
     }
-    query.append("x_sso_enabled", this.ssoEnabled ? "true" : "false");
+    query.append("x_sso_enabled", this.isSSOEnabled ? "true" : "false");
 
     return `${config.authorization_endpoint}?${query.toString()}`;
   }

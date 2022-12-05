@@ -73,12 +73,12 @@ export interface ConfigureOptions {
 
   /**
    * Single-sign-on (SSO) is defined as login once, logged in all apps.
-   * When SSOEnabled is true, users only need to enter their authentication credentials once.
+   * When isSSOEnabled is true, users only need to enter their authentication credentials once.
    * When the user login the second app, they will see the continue screen so that they can log in with just a click.
    * Logout from one app will also logout from all the apps.
    * @defaultValue false
    */
-  ssoEnabled?: boolean;
+  isSSOEnabled?: boolean;
 }
 
 /**
@@ -158,16 +158,16 @@ export class ReactNativeContainer {
   }
 
   /**
-   * SSO enabled
+   * Is SSO enabled
    *
    * @public
    */
-  public get ssoEnabled(): boolean {
-    return this.baseContainer.ssoEnabled;
+  public get isSSOEnabled(): boolean {
+    return this.baseContainer.isSSOEnabled;
   }
 
-  public set ssoEnabled(ssoEnabled: boolean) {
-    this.baseContainer.ssoEnabled = ssoEnabled;
+  public set isSSOEnabled(isSSOEnabled: boolean) {
+    this.baseContainer.isSSOEnabled = isSSOEnabled;
   }
 
   /**
@@ -301,7 +301,7 @@ export class ReactNativeContainer {
    * @public
    */
   async configure(options: ConfigureOptions): Promise<void> {
-    this.ssoEnabled = options.ssoEnabled ?? false;
+    this.isSSOEnabled = options.isSSOEnabled ?? false;
     if (options.tokenStorage != null) {
       this.tokenStorage = options.tokenStorage;
     } else {
@@ -616,7 +616,7 @@ export class ReactNativeContainer {
    * @internal
    */
   _shouldPrefersEphemeralWebBrowserSession(): boolean {
-    if (this.ssoEnabled) {
+    if (this.isSSOEnabled) {
       return false;
     }
     return true;

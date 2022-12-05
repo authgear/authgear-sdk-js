@@ -25,8 +25,8 @@ function readEndpoint(): string {
   return window.localStorage.getItem("authgear.demo.endpoint") ?? "";
 }
 
-function readSSOEnabled(): boolean {
-  return window.localStorage.getItem("authgear.demo.ssoEnabled") === "true";
+function readIsSSOEnabled(): boolean {
+  return window.localStorage.getItem("authgear.demo.isSSOEnabled") === "true";
 }
 
 function ShowError(props: { error: unknown }) {
@@ -51,12 +51,12 @@ function Root() {
   const initialClientID = readClientID();
   const initialEndpoint = readEndpoint();
   const initialSessionType = readSessionType();
-  const initialSSOEnabled = readSSOEnabled();
+  const initialIsSSOEnabled = readIsSSOEnabled();
 
   const [sessionType, setSessionType] = useState(initialSessionType);
   const [clientID, setClientID] = useState(initialClientID);
   const [endpoint, setEndpoint] = useState(initialEndpoint);
-  const [ssoEnabled, setSSOEnabled] = useState(initialSSOEnabled);
+  const [isSSOEnabled, setIsSSOEnabled] = useState(initialIsSSOEnabled);
 
   const [error, setError] = useState<unknown>(null);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -66,21 +66,21 @@ function Root() {
       sessionType: SessionType,
       clientID: string,
       endpoint: string,
-      ssoEnabled: boolean
+      isSSOEnabled: boolean
     ) => {
       window.localStorage.setItem("authgear.demo.sessionType", sessionType);
       window.localStorage.setItem("authgear.demo.clientID", clientID);
       window.localStorage.setItem("authgear.demo.endpoint", endpoint);
       window.localStorage.setItem(
-        "authgear.demo.ssoEnabled",
-        ssoEnabled ? "true" : "false"
+        "authgear.demo.isSSOEnabled",
+        isSSOEnabled ? "true" : "false"
       );
       authgear
         .configure({
           endpoint,
           clientID,
           sessionType,
-          ssoEnabled,
+          isSSOEnabled,
         })
         .then(
           () => {
@@ -105,14 +105,14 @@ function Root() {
         initialSessionType,
         initialClientID,
         initialEndpoint,
-        initialSSOEnabled
+        initialIsSSOEnabled
       );
     }
   }, [
     initialSessionType,
     initialClientID,
     initialEndpoint,
-    initialSSOEnabled,
+    initialIsSSOEnabled,
     configure,
   ]);
 
@@ -191,9 +191,9 @@ function Root() {
     []
   );
 
-  const onChangeSSOEnabled = useCallback(
+  const onChangeIsSSOEnabled = useCallback(
     (e: React.FormEvent<HTMLInputElement>) => {
-      setSSOEnabled(e.currentTarget.checked);
+      setIsSSOEnabled(e.currentTarget.checked);
     },
     []
   );
@@ -202,9 +202,9 @@ function Root() {
     (e: React.MouseEvent<HTMLElement>) => {
       e.preventDefault();
       e.stopPropagation();
-      configure(sessionType, clientID, endpoint, ssoEnabled);
+      configure(sessionType, clientID, endpoint, isSSOEnabled);
     },
-    [sessionType, clientID, endpoint, ssoEnabled, configure]
+    [sessionType, clientID, endpoint, isSSOEnabled, configure]
   );
 
   const onClickReauthenticate = useCallback(
@@ -303,12 +303,12 @@ function Root() {
         />
       </label>
       <label className="label">
-        SSO Enabled
+        Is SSO Enabled
         <input
           className="input"
           type="checkbox"
-          checked={ssoEnabled}
-          onChange={onChangeSSOEnabled}
+          checked={isSSOEnabled}
+          onChange={onChangeIsSSOEnabled}
         />
       </label>
       <button className="button" type="button" onClick={onClickConfigure}>
@@ -382,13 +382,13 @@ function AuthRedirect() {
     const sessionType = readSessionType();
     const clientID = readClientID();
     const endpoint = readEndpoint();
-    const ssoEnabled = readSSOEnabled();
+    const isSSOEnabled = readIsSSOEnabled();
     authgear
       .configure({
         clientID,
         endpoint,
         sessionType,
-        ssoEnabled,
+        isSSOEnabled,
       })
       .then(
         () => {
@@ -420,13 +420,13 @@ function ReauthRedirect() {
     const sessionType = readSessionType();
     const clientID = readClientID();
     const endpoint = readEndpoint();
-    const ssoEnabled = readSSOEnabled();
+    const isSSOEnabled = readIsSSOEnabled();
     authgear
       .configure({
         clientID,
         endpoint,
         sessionType,
-        ssoEnabled,
+        isSSOEnabled,
       })
       .then(
         () => {
@@ -458,13 +458,13 @@ function PromoteAnonymousUserRedirect() {
     const sessionType = readSessionType();
     const clientID = readClientID();
     const endpoint = readEndpoint();
-    const ssoEnabled = readSSOEnabled();
+    const isSSOEnabled = readIsSSOEnabled();
     authgear
       .configure({
         clientID,
         endpoint,
         sessionType,
-        ssoEnabled,
+        isSSOEnabled,
       })
       .then(
         () => {
