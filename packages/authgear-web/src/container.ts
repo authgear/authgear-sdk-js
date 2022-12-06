@@ -54,7 +54,7 @@ export interface ConfigureOptions {
 
   /**
    * Single-sign-on (SSO) is defined as login once, logged in all apps.
-   * When SSOEnabled is true, users only need to enter their authentication credentials once.
+   * When isSSOEnabled is true, users only need to enter their authentication credentials once.
    * When the user login the second app, they will see the continue screen so that they can log in with just a click.
    * Logout from one app will also logout from all the apps.
    *
@@ -62,7 +62,7 @@ export interface ConfigureOptions {
    * When sessionType is "cookie", sessions are shared among subdomains and this flag is not needed.
    * @defaultValue false
    */
-  ssoEnabled?: boolean;
+  isSSOEnabled?: boolean;
 }
 
 /**
@@ -125,16 +125,16 @@ export class WebContainer {
   }
 
   /**
-   * SSO enabled
+   * Is SSO enabled
    *
    * @public
    */
-  public get ssoEnabled(): boolean {
-    return this.baseContainer.ssoEnabled;
+  public get isSSOEnabled(): boolean {
+    return this.baseContainer.isSSOEnabled;
   }
 
-  public set ssoEnabled(ssoEnabled: boolean) {
-    this.baseContainer.ssoEnabled = ssoEnabled;
+  public set isSSOEnabled(isSSOEnabled: boolean) {
+    this.baseContainer.isSSOEnabled = isSSOEnabled;
   }
 
   /**
@@ -268,11 +268,11 @@ export class WebContainer {
       this.sessionType = options.sessionType;
     }
 
-    // When sessionType is "cookie", ssoEnabled must be true so that IDP session will be generated.
+    // When sessionType is "cookie", isSSOEnabled must be true so that IDP session will be generated.
     if (this.sessionType === "cookie") {
-      this.ssoEnabled = true;
+      this.isSSOEnabled = true;
     } else {
-      this.ssoEnabled = options.ssoEnabled ?? false;
+      this.isSSOEnabled = options.isSSOEnabled ?? false;
     }
 
     this.baseContainer.refreshToken = refreshToken ?? undefined;

@@ -146,7 +146,7 @@ const HomeScreen: React.FC = () => {
     useState<ColorScheme | null>(null);
   const [useTransientTokenStorage, setUseTransientTokenStorage] =
     useState(false);
-  const [ssoEnabled, setSSOEnabled] = useState(false);
+  const [isSSOEnabled, setIsSSOEnabled] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const loggedIn = userInfo != null;
@@ -348,7 +348,7 @@ const HomeScreen: React.FC = () => {
         tokenStorage: useTransientTokenStorage
           ? new TransientTokenStorage()
           : new PersistentTokenStorage(),
-        ssoEnabled,
+        isSSOEnabled,
       })
       .then(() => {
         postConfigure();
@@ -364,7 +364,7 @@ const HomeScreen: React.FC = () => {
     clientID,
     endpoint,
     useTransientTokenStorage,
-    ssoEnabled,
+    isSSOEnabled,
     postConfigure,
     showError,
   ]);
@@ -629,11 +629,11 @@ const HomeScreen: React.FC = () => {
           />
         </View>
         <View style={styles.input}>
-          <Text style={styles.inputLabel}>SSO Enabled</Text>
+          <Text style={styles.inputLabel}>Is SSO Enabled</Text>
           <Switch
             style={styles.checkbox}
-            value={ssoEnabled}
-            onValueChange={setSSOEnabled}
+            value={isSSOEnabled}
+            onValueChange={setIsSSOEnabled}
           />
         </View>
         <View style={styles.configureAction}>
