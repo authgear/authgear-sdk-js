@@ -1,6 +1,98 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  name: authgear-demo-webapp-cookie-app1
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  tls:
+  - secretName: authgear-demo-webapp-cookie-app1-tls
+    hosts:
+    - cookie-app1.authgear-demo-webapp.pandawork.com
+  rules:
+  - host: cookie-app1.authgear-demo-webapp.pandawork.com
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: authgear-demo-webapp
+            port:
+              name: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: authgear-demo-webapp-cookie-app2
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  tls:
+  - secretName: authgear-demo-webapp-cookie-app2-tls
+    hosts:
+    - cookie-app2.authgear-demo-webapp.pandawork.com
+  rules:
+  - host: cookie-app2.authgear-demo-webapp.pandawork.com
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: authgear-demo-webapp
+            port:
+              name: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: authgear-token-app1
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  tls:
+  - secretName: authgear-token-app1-tls
+    hosts:
+    - token-app1.authgear.pandawork.com
+  rules:
+  - host: token-app1.authgear.pandawork.com
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: authgear-demo-webapp
+            port:
+              name: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: authgear-token-app2
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  tls:
+  - secretName: authgear-token-app2-tls
+    hosts:
+    - token-app2.authgear.pandawork.com
+  rules:
+  - host: token-app2.authgear.pandawork.com
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: authgear-demo-webapp
+            port:
+              name: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
   name: authgear-demo-webapp
   annotations:
     kubernetes.io/tls-acme: "true"
@@ -50,7 +142,7 @@ spec:
     spec:
       containers:
       - name: authgear-demo-webapp
-        image: quay.io/theauthgear/authgear-demo-webapp:git-f4f9f003abe0
+        image: quay.io/theauthgear/authgear-demo-webapp:git-9e0e550e5cba
         ports:
         - name: http
           containerPort: 80
