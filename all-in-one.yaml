@@ -1,17 +1,17 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: authgear-demo-webapp-cookie-app1
+  name: authgear-qa-app-cookie-app1
   annotations:
     kubernetes.io/tls-acme: "true"
 spec:
   ingressClassName: nginx
   tls:
-  - secretName: authgear-demo-webapp-cookie-app1-tls
+  - secretName: authgear-qa-app-cookie-app1-tls
     hosts:
-    - cookie-app1.authgear-demo-webapp.pandawork.com
+    - cookie-app1.authgear-qa-app.pandawork.com
   rules:
-  - host: cookie-app1.authgear-demo-webapp.pandawork.com
+  - host: cookie-app1.authgear-qa-app.pandawork.com
     http:
       paths:
       - path: /
@@ -25,17 +25,17 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: authgear-demo-webapp-cookie-app2
+  name: authgear-qa-app-cookie-app2
   annotations:
     kubernetes.io/tls-acme: "true"
 spec:
   ingressClassName: nginx
   tls:
-  - secretName: authgear-demo-webapp-cookie-app2-tls
+  - secretName: authgear-qa-app-cookie-app2-tls
     hosts:
-    - cookie-app2.authgear-demo-webapp.pandawork.com
+    - cookie-app2.authgear-qa-app.pandawork.com
   rules:
-  - host: cookie-app2.authgear-demo-webapp.pandawork.com
+  - host: cookie-app2.authgear-qa-app.pandawork.com
     http:
       paths:
       - path: /
