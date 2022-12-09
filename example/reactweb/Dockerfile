@@ -1,4 +1,4 @@
-FROM node:16.13.2 as build
+FROM node:16.14-bullseye as build
 WORKDIR /project
 COPY . .
 RUN npm ci && npm run bundle:web-module

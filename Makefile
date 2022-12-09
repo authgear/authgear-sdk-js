@@ -45,7 +45,7 @@ deploy-docs: docs
 
 .PHONY: build-image
 build-image:
-	docker build --tag $(IMAGE) --file ./example/reactweb/Dockerfile .
+	docker build --platform linux/x86-64 --tag $(IMAGE) --file ./example/reactweb/Dockerfile .
 
 .PHONY: push-image
 push-image:
