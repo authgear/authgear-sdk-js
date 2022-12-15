@@ -288,6 +288,22 @@ function Root() {
     []
   );
 
+  const onClickFetchUserInfo = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      authgear.fetchUserInfo().then(
+        (userInfo) => {
+          setUserInfo(userInfo);
+        },
+        (err) => {
+          setError(err);
+        }
+      );
+    },
+    []
+  );
+
   return (
     <div>
       <p>
@@ -350,6 +366,13 @@ function Root() {
             onClick={onClickReauthenticate}
           >
             Reauthenticate
+          </button>
+          <button
+            className="button"
+            type="button"
+            onClick={onClickFetchUserInfo}
+          >
+            Fetch User Info
           </button>
           <button
             className="button"
