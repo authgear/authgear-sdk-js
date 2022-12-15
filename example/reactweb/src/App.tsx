@@ -1,6 +1,12 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
-import authgear, { UserInfo, ConfigureOptions, Page } from "@authgear/web";
+import authgear, {
+  UserInfo,
+  ConfigureOptions,
+  Page,
+  WebContainerDelegate,
+  SessionState,
+} from "@authgear/web";
 import "./App.css";
 
 type SessionType = NonNullable<ConfigureOptions["sessionType"]>;
@@ -60,6 +66,9 @@ function Root() {
 
   const [error, setError] = useState<unknown>(null);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [sessionState, setSessionState] = useState<SessionState | null>(
+    authgear.sessionState
+  );
 
   const configure = useCallback(
     (
@@ -99,7 +108,16 @@ function Root() {
     []
   );
 
+  const delegate: WebContainerDelegate = useMemo(() => {
+    return {
+      onSessionStateChange(container, _) {
+        setSessionState(container.sessionState);
+      },
+    };
+  }, []);
+
   useEffect(() => {
+    authgear.delegate = delegate;
     if (initialClientID !== "" && initialEndpoint !== "") {
       configure(
         initialSessionType,
@@ -108,7 +126,12 @@ function Root() {
         initialIsSSOEnabled
       );
     }
+
+    return () => {
+      authgear.delegate = undefined;
+    };
   }, [
+    delegate,
     initialSessionType,
     initialClientID,
     initialEndpoint,
@@ -311,6 +334,7 @@ function Root() {
           onChange={onChangeIsSSOEnabled}
         />
       </label>
+      <label className="label">{`SessionState: ${sessionState}`}</label>
       <button className="button" type="button" onClick={onClickConfigure}>
         Configure
       </button>
@@ -318,7 +342,7 @@ function Root() {
         After that, click one of the following buttons to try different
         features.
       </p>
-      {userInfo != null ? (
+      {sessionState === SessionState.Authenticated ? (
         <div className="button-group">
           <button
             className="button"
@@ -334,7 +358,7 @@ function Root() {
           >
             Show auth_time
           </button>
-          {userInfo.isAnonymous ? (
+          {userInfo != null && userInfo.isAnonymous ? (
             <button
               className="button"
               type="button"
@@ -368,7 +392,9 @@ function Root() {
           </button>
         </div>
       )}
-      {userInfo != null ? <pre>{JSON.stringify(userInfo, null, 2)}</pre> : null}
+      {sessionState === SessionState.Authenticated && userInfo != null ? (
+        <pre>{JSON.stringify(userInfo, null, 2)}</pre>
+      ) : null}
       <ShowError error={error} />
     </div>
   );
