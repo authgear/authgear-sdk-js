@@ -453,11 +453,12 @@ export class ReactNativeContainer {
     }
 
     // Use app session token to copy session into webview.
-    const { app_session_token } =
-      await this.baseContainer.apiClient.appSessionToken(refreshToken);
+    const appSessionToken = await this.baseContainer._getAppSessionToken(
+      refreshToken
+    );
 
     const loginHint = `https://authgear.com/login_hint?type=app_session_token&app_session_token=${encodeURIComponent(
-      app_session_token
+      appSessionToken
     )}`;
 
     const platform = Platform.OS;
@@ -642,7 +643,7 @@ export class ReactNativeContainer {
    */
   async fetchUserInfo(): Promise<UserInfo> {
     await this.refreshAccessTokenIfNeeded();
-    return this.baseContainer.apiClient._oidcUserInfoRequest(this.accessToken);
+    return this.baseContainer._fetchUserInfo(this.accessToken);
   }
 
   /**

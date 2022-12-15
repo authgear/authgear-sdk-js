@@ -13,6 +13,7 @@ import {
   _OIDCTokenResponse,
   SessionStateChangeReason,
   SessionState,
+  UserInfo,
 } from "./types";
 import { _base64URLDecode } from "./base64";
 import { _decodeUTF8 } from "./utf8";
@@ -197,6 +198,19 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     this._updateSessionState(SessionState.NoSession, reason);
   }
 
+  async _handleInvalidGrantError(error: any): Promise<void> {
+    // When the error is `invalid_grant`, the refresh token is no longer valid.
+    // Clear the session in this case.
+    // https://tools.ietf.org/html/rfc6749#section-5.2
+    if (error != null) {
+      if (error.error === "invalid_grant") {
+        await this._clearSession(SessionStateChangeReason.Invalid);
+      } else if (error.reason === "InvalidGrant") {
+        await this._clearSession(SessionStateChangeReason.Invalid);
+      }
+    }
+  }
+
   async refreshAccessTokenIfNeeded(): Promise<void> {
     if (this.shouldRefreshAccessToken()) {
       await this._delegate.refreshAccessToken();
@@ -265,11 +279,8 @@ export class _BaseContainer<T extends _BaseAPIClient> {
         refresh_token: refreshToken,
       });
     } catch (error: unknown) {
-      // When the error is `invalid_grant`, the refresh token is no longer valid.
-      // Clear the session in this case.
-      // https://tools.ietf.org/html/rfc6749#section-5.2
+      await this._handleInvalidGrantError(error);
       if (error != null && (error as any).error === "invalid_grant") {
-        await this._clearSession(SessionStateChangeReason.Invalid);
         return;
       }
 
@@ -294,9 +305,13 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       client_id: clientID,
       access_token: accessToken,
     };
-    const { id_token } = await this.apiClient._oidcTokenRequest(tokenRequest);
-    if (id_token != null) {
-      this.idToken = id_token;
+    try {
+      const { id_token } = await this.apiClient._oidcTokenRequest(tokenRequest);
+      if (id_token != null) {
+        this.idToken = id_token;
+      }
+    } catch (error: unknown) {
+      await this._handleInvalidGrantError(error);
     }
   }
 
@@ -508,5 +523,26 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   ): void {
     this.sessionState = state;
     this._delegate.onSessionStateChange(reason);
+  }
+
+  async _fetchUserInfo(accessToken?: string): Promise<UserInfo> {
+    try {
+      return await this.apiClient._oidcUserInfoRequest(accessToken);
+    } catch (error: unknown) {
+      await this._handleInvalidGrantError(error);
+      throw error;
+    }
+  }
+
+  async _getAppSessionToken(refreshToken: string): Promise<string> {
+    try {
+      const { app_session_token } = await this.apiClient.appSessionToken(
+        refreshToken
+      );
+      return app_session_token;
+    } catch (error: unknown) {
+      await this._handleInvalidGrantError(error);
+      throw error;
+    }
   }
 }
