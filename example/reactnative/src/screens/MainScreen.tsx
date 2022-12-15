@@ -31,6 +31,7 @@ import authgear, {
   BiometricAccessConstraintIOS,
   BiometricLAPolicy,
   BiometricAccessConstraintAndroid,
+  SessionState,
 } from '@authgear/react-native';
 import RadioGroup, {RadioGroupItemProps} from '../RadioGroup';
 
@@ -75,6 +76,13 @@ const styles = StyleSheet.create({
   },
   radioGroup: {
     flex: 1,
+  },
+  textValue: {
+    flex: 1,
+    fontWeight: '600',
+    color: '#707070',
+    fontSize: 15,
+    textAlign: 'right',
   },
   configureAction: {
     flexDirection: 'row',
@@ -149,6 +157,9 @@ const HomeScreen: React.FC = () => {
   const [isSSOEnabled, setIsSSOEnabled] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [sessionState, setSessionState] = useState<SessionState | null>(
+    authgear.sessionState,
+  );
   const loggedIn = userInfo != null;
 
   const pageItems = useMemo(() => {
@@ -285,6 +296,7 @@ const HomeScreen: React.FC = () => {
         container: ReactNativeContainer,
         _reason: SessionStateChangeReason,
       ) => {
+        setSessionState(container.sessionState);
         if (container.sessionState !== 'AUTHENTICATED') {
           setUserInfo(null);
         }
@@ -306,7 +318,7 @@ const HomeScreen: React.FC = () => {
       },
     };
     return d;
-  }, [showError]);
+  }, [setSessionState, setUserInfo, showError]);
 
   useEffect(() => {
     authgear.delegate = delegate;
@@ -635,6 +647,10 @@ const HomeScreen: React.FC = () => {
             value={isSSOEnabled}
             onValueChange={setIsSSOEnabled}
           />
+        </View>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>SessionState</Text>
+          <Text style={styles.textValue}>{sessionState}</Text>
         </View>
         <View style={styles.configureAction}>
           <Button title="Configure" onPress={configure} disabled={loading} />
