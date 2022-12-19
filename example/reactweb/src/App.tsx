@@ -114,10 +114,9 @@ function Root() {
         setSessionState(container.sessionState);
       },
     };
-  }, []);
+  }, [setSessionState]);
 
   useEffect(() => {
-    authgear.delegate = delegate;
     if (initialClientID !== "" && initialEndpoint !== "") {
       configure(
         initialSessionType,
@@ -126,18 +125,21 @@ function Root() {
         initialIsSSOEnabled
       );
     }
-
-    return () => {
-      authgear.delegate = undefined;
-    };
   }, [
-    delegate,
     initialSessionType,
     initialClientID,
     initialEndpoint,
     initialIsSSOEnabled,
     configure,
   ]);
+
+  useEffect(() => {
+    authgear.delegate = delegate;
+
+    return () => {
+      authgear.delegate = undefined;
+    };
+  }, [delegate]);
 
   const onClickOpenSettings = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
