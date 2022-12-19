@@ -312,6 +312,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       }
     } catch (error: unknown) {
       await this._handleInvalidGrantError(error);
+      throw error;
     }
   }
 
