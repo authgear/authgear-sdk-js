@@ -147,7 +147,7 @@ spec:
     spec:
       containers:
       - name: authgear-demo-webapp
-        image: quay.io/theauthgear/authgear-demo-webapp:git-9e0e550e5cba
+        image: quay.io/theauthgear/authgear-demo-webapp:git-72e7d2e68a5f
         ports:
         - name: http
           containerPort: 80
