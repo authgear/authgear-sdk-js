@@ -429,10 +429,11 @@ export class WebContainer {
       if (!refreshToken) {
         throw new AuthgearError("refresh token not found");
       }
-      const { app_session_token } =
-        await this.baseContainer.apiClient.appSessionToken(refreshToken);
+      const appSessionToken = await this.baseContainer._getAppSessionToken(
+        refreshToken
+      );
       const loginHint = `https://authgear.com/login_hint?type=app_session_token&app_session_token=${encodeURIComponent(
-        app_session_token
+        appSessionToken
       )}`;
 
       targetURL = await this.authorizeEndpoint({
@@ -631,7 +632,7 @@ export class WebContainer {
    */
   async fetchUserInfo(): Promise<UserInfo> {
     await this.refreshAccessTokenIfNeeded();
-    return this.baseContainer.apiClient._oidcUserInfoRequest(
+    return this.baseContainer._fetchUserInfo(
       this.sessionType === "cookie" ? undefined : this.accessToken ?? ""
     );
   }
