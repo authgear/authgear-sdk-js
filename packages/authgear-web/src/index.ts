@@ -2,6 +2,8 @@ export * from "@authgear/core";
 import { WebContainer } from "./container";
 export * from "./container";
 export * from "./types";
+export * from "./experimental";
+export * from "./latte";
 
 /**
  * Default container.
