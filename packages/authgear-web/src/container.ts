@@ -24,6 +24,7 @@ import {
   AuthenticateResult,
   ReauthenticateResult,
 } from "./types";
+import { AuthgearExperimental } from "./experimental";
 
 /**
  * @public
@@ -95,6 +96,11 @@ export class WebContainer {
    * @public
    */
   delegate?: WebContainerDelegate;
+
+  /**
+   * @public
+   */
+  experimental: AuthgearExperimental;
 
   /**
    *
@@ -175,6 +181,8 @@ export class WebContainer {
     this.tokenStorage = new PersistentTokenStorage();
 
     this.sessionType = "refresh_token";
+
+    this.experimental = new AuthgearExperimental(this);
   }
 
   /**
