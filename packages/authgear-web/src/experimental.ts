@@ -1,6 +1,9 @@
 import { WebContainer } from "./container";
 import { AuthenticateOptions } from "./types";
 
+/**
+ * @public
+ */
 class AuthgearExperimental {
   private authgear: WebContainer;
 

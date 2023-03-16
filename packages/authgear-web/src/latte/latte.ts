@@ -2,6 +2,9 @@ import { WebContainer } from "../container";
 import { AuthenticateOptions } from "../types";
 import { LatteFlows } from "./flows";
 
+/**
+ * @public
+ */
 class Latte {
   public authgear: WebContainer;
   public customUIEndpoint: string;
