@@ -61,6 +61,10 @@ export interface AuthenticateOptions {
    */
   state?: string;
   /**
+   * Custom state.
+   */
+  xState?: string;
+  /**
    * OIDC prompt parameter.
    *
    * Prompt parameter will be used for Authgear authorization, it will also be forwarded to the underlying SSO providers.

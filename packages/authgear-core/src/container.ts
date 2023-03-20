@@ -349,6 +349,9 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (options.state != null) {
       query.append("state", options.state);
     }
+    if (options.xState != null) {
+      query.append("x_state", options.xState);
+    }
     if (options.prompt != null) {
       if (typeof options.prompt === "string") {
         query.append("prompt", options.prompt);
