@@ -37,6 +37,10 @@ export interface ReauthenticateOptions {
    */
   state?: string;
   /**
+   * Custom state.
+   */
+  xState?: string;
+  /**
    * UI locale tags
    */
   uiLocales?: string[];
@@ -60,6 +64,10 @@ export interface AuthenticateOptions {
    * OAuth 2.0 state value.
    */
   state?: string;
+  /**
+   * Custom state.
+   */
+  xState?: string;
   /**
    * OIDC prompt parameter.
    *
@@ -126,6 +134,10 @@ export interface PromoteOptions {
    * OAuth 2.0 state value.
    */
   state?: string;
+  /**
+   * Custom state.
+   */
+  xState?: string;
   /**
    * UI locale tags
    */

@@ -1,6 +1,6 @@
 import { WebContainer } from "../container";
-import { AuthenticateOptions } from "../types";
 import { LatteFlows } from "./flows";
+import { LatteAuthenticateOptions } from "./types";
 
 /**
  * @public
@@ -19,7 +19,7 @@ class Latte {
   }
 
   public async startAuthentication(
-    options: AuthenticateOptions
+    options: LatteAuthenticateOptions
   ): Promise<void> {
     return this.flows.startAuthentication(options);
   }

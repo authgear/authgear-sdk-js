@@ -65,6 +65,7 @@ export interface _OIDCAuthenticationRequest {
   responseType: "code" | "none";
   scope: string[];
   state?: string;
+  xState?: string;
   prompt?: PromptOption[] | PromptOption;
   maxAge?: number;
   loginHint?: string;
