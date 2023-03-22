@@ -29,3 +29,16 @@ jobs:
       if: ${{ !cancelled() }}
     - run: npm run bundle
       if: ${{ !cancelled() }}
+
+  release:
+    if: github.ref == 'refs/heads/2023C01'
+    needs: test
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: "16.14.0"
+    - run: npm ci
+    - run: npm build
+      if: ${{ !cancelled() }}
