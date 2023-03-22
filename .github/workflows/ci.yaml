@@ -137,3 +137,16 @@ jobs:
       env:
         APPCENTER_ACCESS_TOKEN: ${{ secrets.ANDROID_APPCENTER_ACCESS_TOKEN }}
       run: appcenter distribute release --debug --silent --file ./example/reactnative/android/app/build/outputs/apk/release/app-release-signed.apk --group "Collaborators" --app "Oursky/Authgear-demo-RN-Android" --release-notes "no release notes"
+
+  release:
+    if: github.ref == 'refs/heads/2023C01'
+    needs: test
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: "16.14.0"
+    - run: npm ci
+    - run: npm build
+      if: ${{ !cancelled() }}
