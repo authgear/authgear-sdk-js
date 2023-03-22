@@ -34,11 +34,19 @@ jobs:
     if: github.ref == 'refs/heads/2023C01'
     needs: test
     runs-on: ubuntu-18.04
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
         node-version: "16.14.0"
     - run: npm ci
-    - run: npm build
+    - run: npm run build
+      if: ${{ !cancelled() }}
+    - run: |
+        cd packages/authgear-web
+        cp package.latte.json package.json
+        npm version $(npm pkg get version | tr -d '"')-$(git rev-parse --short=8 HEAD)
+        npm publish --access public
       if: ${{ !cancelled() }}
