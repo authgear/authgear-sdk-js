@@ -10,12 +10,14 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsService;
 
 public class OAuthCoordinatorActivity extends Activity {
 
     private static final String KEY_AUTHORIZATION_URL = "KEY_AUTHORIZATION_URL";
+    private static final String KEY_AUTHORIZATION_ACTIVITY_STARTED = "KEY_AUTHORIZATION_ACTIVITY_STARTED";
 
     private boolean mAuthorizationActivityStarted = false;
 
@@ -48,6 +50,18 @@ public class OAuthCoordinatorActivity extends Activity {
         }
 
         this.finish();
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putBoolean(KEY_AUTHORIZATION_ACTIVITY_STARTED, this.mAuthorizationActivityStarted);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        this.mAuthorizationActivityStarted = savedInstanceState.getBoolean(KEY_AUTHORIZATION_ACTIVITY_STARTED);
     }
 
     private void startAuthorizationActivity() {
