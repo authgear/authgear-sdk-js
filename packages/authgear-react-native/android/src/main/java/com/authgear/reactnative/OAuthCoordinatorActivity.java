@@ -37,7 +37,15 @@ public class OAuthCoordinatorActivity extends Activity {
         super.onResume();
 
         if (!this.mAuthorizationActivityStarted) {
-            this.startAuthorizationActivity();
+            String authzURL = this.getIntent().getStringExtra(KEY_AUTHORIZATION_URL);
+            if (authzURL == null) {
+                // We expect to have authz url when the OAuthCoordinatorActivity is first opened
+                // It should not happen in normal case
+                // e.g. OAuthRedirectActivity is started before the authorization activity is started
+                this.finish();
+                return;
+            }
+            this.startAuthorizationActivity(authzURL);
             this.mAuthorizationActivityStarted = true;
             return;
         }
@@ -64,13 +72,13 @@ public class OAuthCoordinatorActivity extends Activity {
         this.mAuthorizationActivityStarted = savedInstanceState.getBoolean(KEY_AUTHORIZATION_ACTIVITY_STARTED);
     }
 
-    private void startAuthorizationActivity() {
+    private void startAuthorizationActivity(@NonNull String authzURL) {
         Context context = this;
         CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
                 .build();
         String chromePackageName = getChromePackageName(context);
 
-        Uri uri = Uri.parse(this.getIntent().getStringExtra(KEY_AUTHORIZATION_URL));
+        Uri uri = Uri.parse(authzURL);
 
         Intent intent;
 
