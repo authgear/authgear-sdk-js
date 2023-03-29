@@ -1,6 +1,14 @@
 
+<a name="v2.1.0"></a>
+## [v2.1.0](https://github.com/authgear/authgear-sdk-js/compare/latte-178-r...v2.1.0) (2023-03-29)
+
+
+<a name="latte-178-r"></a>
+## [latte-178-r](https://github.com/authgear/authgear-sdk-js/compare/v2.0.0...latte-178-r) (2023-03-16)
+
+
 <a name="v2.0.0"></a>
-## [v2.0.0](https://github.com/authgear/authgear-sdk-js/compare/v1.0.1...v2.0.0) (2022-12-20)
+## [v2.0.0](https://github.com/authgear/authgear-sdk-js/compare/v1.0.1...v2.0.0) (2023-01-10)
 
 
 <a name="v1.0.1"></a>
@@ -24,7 +32,15 @@
 
 
 <a name="v0.19.0"></a>
-## [v0.19.0](https://github.com/authgear/authgear-sdk-js/compare/v0.18.0...v0.19.0) (2022-05-11)
+## [v0.19.0](https://github.com/authgear/authgear-sdk-js/compare/v0.0.0...v0.19.0) (2022-05-11)
+
+
+<a name="v0.0.0"></a>
+## [v0.0.0](https://github.com/authgear/authgear-sdk-js/compare/v1.8.0-fixed-credentials...v0.0.0) (2022-03-01)
+
+
+<a name="v1.8.0-fixed-credentials"></a>
+## [v1.8.0-fixed-credentials](https://github.com/authgear/authgear-sdk-js/compare/v0.18.0...v1.8.0-fixed-credentials) (2022-02-24)
 
 
 <a name="v0.18.0"></a>
