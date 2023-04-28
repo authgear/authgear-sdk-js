@@ -125,6 +125,8 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
   _delegate: _BaseContainerDelegate;
 
+  private refreshAccessTokenTask: Promise<void> | null = null;
+
   constructor(
     options: ContainerOptions,
     apiClient: T,
@@ -212,9 +214,20 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   }
 
   async refreshAccessTokenIfNeeded(): Promise<void> {
-    if (this.shouldRefreshAccessToken()) {
-      await this._delegate.refreshAccessToken();
+    if (this.refreshAccessTokenTask !== null) {
+      return this.refreshAccessTokenTask;
     }
+    const task = (async () => {
+      if (this.shouldRefreshAccessToken()) {
+        await this._delegate.refreshAccessToken();
+      }
+    })().finally(() => {
+      if (task === this.refreshAccessTokenTask) {
+        this.refreshAccessTokenTask = null;
+      }
+    });
+    this.refreshAccessTokenTask = task;
+    return task;
   }
 
   async clearSessionState(): Promise<void> {
