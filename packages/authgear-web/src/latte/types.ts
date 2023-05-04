@@ -9,6 +9,7 @@ export interface LatteAuthenticateOptions
   extends Pick<
     AuthenticateOptions,
     | "redirectURI"
+    | "state"
     | "xState"
     | "prompt"
     | "loginHint"
