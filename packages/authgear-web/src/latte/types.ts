@@ -10,11 +10,13 @@ export interface LatteAuthenticateOptions
     AuthenticateOptions,
     | "redirectURI"
     | "state"
-    | "xState"
     | "prompt"
     | "loginHint"
     | "uiLocales"
     | "responseType"
     | "page"
     | "oauthProviderAlias"
-  > {}
+  > {
+  xSecrets?: Record<string, string>;
+  xState?: Record<string, string>;
+}
