@@ -228,9 +228,12 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         packageInfoMap.putString("longVersionCode", longVersionCode);
 
         ContentResolver contentResolver = context.getContentResolver();
-        String bluetoothName = Settings.Secure.getString(contentResolver, "bluetooth_name");
-        if (bluetoothName == null) {
-            bluetoothName = "";
+        String bluetoothName = "";
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S) {
+            bluetoothName = Settings.Secure.getString(contentResolver, "bluetooth_name");
+            if (bluetoothName == null) {
+                bluetoothName = "";
+            }
         }
         String deviceName = "";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
