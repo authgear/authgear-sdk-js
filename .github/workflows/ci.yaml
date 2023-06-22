@@ -109,3 +109,53 @@ jobs:
       run: |
         security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
         rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
+  react_native_android:
+    #if: github.ref == 'refs/heads/2023C01'
+    if: github.ref == 'refs/heads/louis-build-test'
+    #needs: test
+    runs-on: macos-13
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: "16.14.0"
+    - run: npm install -g appcenter-cli
+    - run: npm ci
+    - run: npm run build
+    - working-directory: ./example/reactnative
+      run: yarn
+    - name: Set versionCode
+      run: |
+        VERSION_CODE=$(date +%s)
+        sed -I "" "s/versionCode 1/versionCode $VERSION_CODE/" ./example/reactnative/android/app/build.gradle
+    - name: Build unsigned APK
+      working-directory: ./example/reactnative/android
+      run: ./gradlew :app:assembleRelease
+    - name: Install keystore
+      env:
+        ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      run: |
+        KEYSTORE_PATH=$RUNNER_TEMP/keystore.jks
+        echo -n "$ANDROID_KEYSTORE_BASE64" | base64 --decode -o $KEYSTORE_PATH
+    - name: Run zipalign
+      run: |
+        BUILD_TOOLS_VERSION=$(sed -n -E 's/.*buildToolsVersion = "(.*)"/\1/p' ./example/reactnative/android/build.gradle)
+        "$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION/zipalign" -c -v 4 ./example/reactnative/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    - name: Run apksigner
+      env:
+        ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      run: |
+        BUILD_TOOLS_VERSION=$(sed -n -E 's/.*buildToolsVersion = "(.*)"/\1/p' ./example/reactnative/android/build.gradle)
+        "$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION/apksigner" sign \
+          --ks $RUNNER_TEMP/keystore.jks \
+          --ks-key-alias "$ANDROID_KEY_ALIAS" \
+          --ks-pass "pass:$ANDROID_KEYSTORE_PASSWORD" \
+          --key-pass "pass:$ANDROID_KEY_PASSWORD" \
+          --out ./example/reactnative/android/app/build/outputs/apk/release/app-release-signed.apk \
+          ./example/reactnative/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    - name: Distribute to App Center
+      env:
+        APPCENTER_ACCESS_TOKEN: ${{ secrets.ANDROID_APPCENTER_ACCESS_TOKEN }}
+      run: appcenter distribute release --debug --silent --file ./example/reactnative/android/app/build/outputs/apk/release/app-release-signed.apk --group "Collaborators" --app "Oursky/Authgear-demo-RN-Android" --release-notes "no release notes"
