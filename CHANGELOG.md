@@ -1,4 +1,8 @@
 
+<a name="v2.2.0"></a>
+## [v2.2.0](https://github.com/authgear/authgear-sdk-js/compare/v2.1.0...v2.2.0) (2023-06-22)
+
+
 <a name="v2.1.0"></a>
 ## [v2.1.0](https://github.com/authgear/authgear-sdk-js/compare/latte-178-r...v2.1.0) (2023-03-29)
 
