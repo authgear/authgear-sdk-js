@@ -1,3 +1,9 @@
+<div align="center">
+
+[![Authgear banner](./.github/assets/banner.png)](https://www.authgear.com/)
+
+</div>
+
 # Authgear SDK for Single Page Applications (SPA)
 
 [![@authgear/web](https://img.shields.io/npm/v/@authgear/web.svg?label=@authgear/web)](https://www.npmjs.com/package/@authgear/web)
