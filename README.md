@@ -20,7 +20,7 @@ In most cases, it involves just **a few lines of code** to enable **multiple aut
 
 ## What is Authgear?
 
-[Auhgear](https://www.authgear.com/) is a highly adaptable identity-as-a-service (IDaaS) platform for web and mobile applications.
+[Authgear](https://www.authgear.com/) is a highly adaptable identity-as-a-service (IDaaS) platform for web and mobile applications.
 Authgear makes user authentication easier and faster to implement by integrating it into various types of applications - from single-page web apps to mobile applications to API services.
 
 ### Key Features
