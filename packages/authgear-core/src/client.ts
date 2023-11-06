@@ -141,10 +141,8 @@ export abstract class _BaseAPIClient {
       body?: string;
     }
   ): Promise<any> {
-    if (this.endpoint == null) {
-      throw new AuthgearError("missing endpoint in api client");
-    }
-    const endpoint: string = this.endpoint;
+    const config = await this._fetchOIDCConfiguration();
+    const endpoint = new URL(config.authorization_endpoint).origin;
 
     const { headers, query, body, credentials } = options;
     let p = path;
