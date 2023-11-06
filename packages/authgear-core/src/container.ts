@@ -329,6 +329,11 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     }
   }
 
+  async getAuthorizationEndpoint(): Promise<URL> {
+    const config = await this.apiClient._fetchOIDCConfiguration();
+    return new URL(config.authorization_endpoint);
+  }
+
   // eslint-disable-next-line complexity
   async authorizeEndpoint(
     options: _OIDCAuthenticationRequest
