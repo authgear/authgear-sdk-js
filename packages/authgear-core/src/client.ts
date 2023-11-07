@@ -1,4 +1,5 @@
 import URLSearchParams from "core-js-pure/features/url-search-params";
+import URL from "core-js-pure/features/url";
 
 import {
   UserInfo,
