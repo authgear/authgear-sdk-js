@@ -451,15 +451,21 @@ export class WebContainer {
     }
   }
 
+  /**
+   * Open the path in authorization endpoint returned from oidc config,
+   * with the user agent authenticated with current user.
+   *
+   * @internal
+   */
+
+  // eslint-disable-next-line class-methods-use-this
+  async openAuthgearURL(path: string, options?: SettingOptions): Promise<void> {
+    const endpoint = await this.baseContainer.getAuthorizationEndpoint();
+    await this.openURL(`${endpoint.origin}${path}`, options);
+  }
+
   async open(page: Page, options?: SettingOptions): Promise<void> {
-    const { endpoint } = this.baseContainer.apiClient;
-    if (endpoint == null) {
-      throw new AuthgearError(
-        "Endpoint cannot be undefined, please double check whether you have run configure()"
-      );
-    }
-    const endpointWithoutTrailingSlash = endpoint.replace(/\/$/, "");
-    await this.openURL(`${endpointWithoutTrailingSlash}${page}`, options);
+    await this.openAuthgearURL(page, options);
   }
 
   /**
