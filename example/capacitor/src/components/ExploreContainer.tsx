@@ -1,6 +1,10 @@
 import { useCallback, useState, type MouseEventHandler } from "react";
 import { IonButton, IonAlert } from "@ionic/react";
-import { Authgear } from "@authgear/capacitor";
+import {
+  Authgear,
+  base64URLDecode,
+  base64URLEncode,
+} from "@authgear/capacitor";
 import "./ExploreContainer.css";
 
 interface ContainerProps {}
@@ -17,7 +21,15 @@ const ExploreContainer: React.FC<ContainerProps> = () => {
     (e) => {
       e.preventDefault();
       e.stopPropagation();
-      Authgear.echo({ value: "it works" }).then(
+
+      const arrayBuffer1 = new TextEncoder().encode(
+        "can import from @authgear/core"
+      );
+      const base64url = base64URLEncode(arrayBuffer1);
+      const arrayBuffer2 = base64URLDecode(base64url);
+      const str = new TextDecoder().decode(arrayBuffer2);
+
+      Authgear.echo({ value: str }).then(
         (result) => {
           setMessage(result.value);
           setIsOpen(true);
