@@ -1,0 +1,7 @@
+{
+  "name": "AuthgearCapacitor",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
