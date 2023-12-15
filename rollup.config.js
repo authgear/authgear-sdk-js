@@ -132,7 +132,8 @@ export default function makeConfig(commandLineArgs) {
       };
     case "capacitor":
       return {
-        input: "packages/authgear-capacitor/dist/esm/index.js",
+        plugins,
+        input: "packages/authgear-capacitor/src/index.ts",
         output: [
           {
             file: "packages/authgear-capacitor/dist/plugin.iife.js",
@@ -147,6 +148,12 @@ export default function makeConfig(commandLineArgs) {
           {
             file: "packages/authgear-capacitor/dist/plugin.cjs.js",
             format: "cjs",
+            sourcemap: true,
+            inlineDynamicImports: true,
+          },
+          {
+            file: "packages/authgear-capacitor/dist/plugin.module.js",
+            format: "esm",
             sourcemap: true,
             inlineDynamicImports: true,
           },

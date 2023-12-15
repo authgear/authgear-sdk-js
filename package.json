@@ -15,7 +15,7 @@
     "bundle:web-cjs": "rollup --config --configBundleType web-cjs",
     "bundle:web-module": "rollup --config --configBundleType web-module",
     "bundle:react-native": "rollup --config --configBundleType react-native",
-    "bundle:capacitor": "rimraf packages/authgear-capacitor/dist && cd packages/authgear-capacitor && tsc && cd ../.. && rollup --config --configBundleType capacitor",
+    "bundle:capacitor": "rollup --config --configBundleType capacitor",
     "bundle": "npm run bundle:iife && npm run bundle:web-cjs && npm run bundle:web-module && npm run bundle:react-native && npm run bundle:capacitor",
     "dts": "tsc --emitDeclarationOnly && node scripts/dts.js && npm run clean-decl",
     "clean-decl": "rimraf \"packages/*/src/*.d.ts\" \"packages/*/src/!(@types)/**/*.d.ts\" \"packages/*/src/*.d.ts.map\" \"packages/*/src/!(@types)/**/*.d.ts.map\"",
