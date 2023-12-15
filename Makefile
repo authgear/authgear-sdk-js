@@ -30,9 +30,18 @@ docs:
 		--out ./temp/docs/react-native \
 		--namedAnchors \
 		--entryDocument index.md
+	npx typedoc \
+		--options typedoc/typedoc.json \
+		--tsconfig typedoc/tsconfig.capacitor.json \
+		--name @authgear/capacitor \
+		--entryPoints packages/authgear-capacitor/index.d.ts \
+		--out ./temp/docs/capacitor \
+		--namedAnchors \
+		--entryDocument index.md
 	cp ./typedoc/index.md ./temp/docs/index.md
 	cp ./typedoc/web_index.md ./temp/docs/web/index.md
 	cp ./typedoc/react_native_index.md ./temp/docs/react-native/index.md
+	cp ./typedoc/capacitor_index.md ./temp/docs/capacitor/index.md
 	node ./scripts/generate_sidebars_js.js ./temp/docs >./temp/sidebars.js
 	rm -rf ./website/docs
 	cp -R ./temp/docs/. ./website/docs
