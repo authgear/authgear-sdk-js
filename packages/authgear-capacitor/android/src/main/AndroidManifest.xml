@@ -1,2 +1,29 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- androidx.security requires API 23 -->
+    <!-- If we do not add this line, we will have compilation error -->
+    <!-- We will do runtime API level checking before accessing the features from androidx.security -->
+    <uses-sdk tools:overrideLibrary="androidx.security" />
+
+    <application>
+        <activity android:name=".OAuthCoordinatorActivity"
+            android:exported="false"
+            android:launchMode="singleTask" />
+        <activity android:name=".WebViewActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:theme="@style/AuthgearTheme"
+            android:configChanges="orientation|screenSize"/>
+    </application>
+
+    <!-- Android 11 requires the app to define which external apps are visiable -->
+    <queries>
+        <package android:name="com.android.chrome" />
+        <package android:name="com.chrome.beta" />
+        <package android:name="com.chrome.dev" />
+        <package android:name="com.google.android.apps.chrome" />
+        <package android:name="com.tencent.mm" />
+    </queries>
 </manifest>

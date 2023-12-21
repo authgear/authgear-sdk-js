@@ -29,6 +29,7 @@ import { Capacitor } from "@capacitor/core";
 
 export * from "@authgear/core";
 export * from "./types";
+export * from "./storage";
 
 function getPlatform(): string {
   const platform = Capacitor.getPlatform();
