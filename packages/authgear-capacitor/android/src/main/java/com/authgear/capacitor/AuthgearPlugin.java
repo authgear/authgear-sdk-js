@@ -116,8 +116,11 @@ public class AuthgearPlugin extends Plugin {
     public void openAuthorizeURL(PluginCall call) {
         String urlString = call.getString("url");
         Uri uri = Uri.parse(urlString).normalizeScheme();
+        String callbackURLString = call.getString("callbackURL");
+        Uri callbackURL = Uri.parse(callbackURLString).normalizeScheme();
 
         Context ctx = this.getContext();
+        OAuthRedirectActivity.registerCallbackURL(callbackURL.toString());
         Intent intent = OAuthCoordinatorActivity.createAuthorizationIntent(ctx, uri);
         this.startActivityForResult(call, intent, "handleOpenAuthorizeURL");
     }

@@ -153,7 +153,7 @@ class Authgear {
         androidMap.put("ApplicationInfoLabel", applicationInfoLabel.toString());
 
         JSONObject rootMap = new JSONObject();
-        rootMap.put("android", rootMap);
+        rootMap.put("android", androidMap);
 
         return rootMap;
     }
