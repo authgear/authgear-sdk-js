@@ -6,6 +6,12 @@ const config: CapacitorConfig = {
   webDir: "dist",
   server: {
     androidScheme: "https",
+    cleartext: true,
+  },
+  android: {
+    // Allow loading from http: during development.
+    // See https://capacitorjs.com/docs/config
+    allowMixedContent: true,
   },
 };
 
