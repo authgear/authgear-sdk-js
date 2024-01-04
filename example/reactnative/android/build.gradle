@@ -2,7 +2,10 @@
 
 buildscript {
     ext {
-        buildToolsVersion = "33.0.0"
+        // As of 2024-01-04, we are using macos-13 Github runner.
+        // Only 33.0.2 is available on that runner.
+        // See https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
+        buildToolsVersion = "33.0.2"
         minSdkVersion = 21
         compileSdkVersion = 33
         targetSdkVersion = 33
