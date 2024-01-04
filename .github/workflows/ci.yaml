@@ -114,7 +114,7 @@ jobs:
       run: ./gradlew :app:assembleRelease
     - name: Install keystore
       env:
-        ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        ANDROID_KEYSTORE_BASE64: ${{ secrets.REACT_NATIVE_ANDROID_KEYSTORE_BASE64 }}
       run: |
         KEYSTORE_PATH=$RUNNER_TEMP/keystore.jks
         echo -n "$ANDROID_KEYSTORE_BASE64" | base64 --decode -o $KEYSTORE_PATH
@@ -123,9 +123,9 @@ jobs:
         "$ANDROID_HOME/build-tools/33.0.2/zipalign" -c -v 4 ./example/reactnative/android/app/build/outputs/apk/release/app-release-unsigned.apk
     - name: Run apksigner
       env:
-        ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-        ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-        ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        ANDROID_KEYSTORE_PASSWORD: ${{ secrets.REACT_NATIVE_ANDROID_KEYSTORE_PASSWORD }}
+        ANDROID_KEY_ALIAS: ${{ secrets.REACT_NATIVE_ANDROID_KEY_ALIAS }}
+        ANDROID_KEY_PASSWORD: ${{ secrets.REACT_NATIVE_ANDROID_KEY_PASSWORD }}
       run: |
         "$ANDROID_HOME/build-tools/33.0.2/apksigner" sign \
           --ks $RUNNER_TEMP/keystore.jks \
@@ -136,5 +136,56 @@ jobs:
           ./example/reactnative/android/app/build/outputs/apk/release/app-release-unsigned.apk
     - name: Distribute to App Center
       env:
-        APPCENTER_ACCESS_TOKEN: ${{ secrets.ANDROID_APPCENTER_ACCESS_TOKEN }}
+        APPCENTER_ACCESS_TOKEN: ${{ secrets.REACT_NATIVE_ANDROID_APPCENTER_ACCESS_TOKEN }}
       run: appcenter distribute release --debug --silent --file ./example/reactnative/android/app/build/outputs/apk/release/app-release-signed.apk --group "Collaborators" --app "Oursky/Authgear-demo-RN-Android" --release-notes "no release notes"
+  capacitor_android:
+    if: github.ref == 'refs/heads/master'
+    needs: test
+    runs-on: macos-13
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version-file: "./.tool-versions"
+    - run: npm install -g appcenter-cli
+    - run: npm ci
+    - run: npm run build
+    - working-directory: ./example/capacitor
+      run: npm ci
+    - working-directory: ./example/capacitor
+      run: npm run build
+    - working-directory: ./example/capacitor
+      run: npx cap sync
+    - name: Set versionCode
+      run: |
+        VERSION_CODE=$(date +%s)
+        sed -I "" "s/versionCode 1/versionCode $VERSION_CODE/" ./example/capacitor/android/app/build.gradle
+    - name: Build unsigned APK
+      working-directory: ./example/capacitor/android
+      run: ./gradlew :app:assembleRelease
+    - name: Install keystore
+      env:
+        ANDROID_KEYSTORE_BASE64: ${{ secrets.CAPACITOR_ANDROID_KEYSTORE_BASE64 }}
+      run: |
+        KEYSTORE_PATH=$RUNNER_TEMP/keystore.jks
+        echo -n "$ANDROID_KEYSTORE_BASE64" | base64 --decode -o $KEYSTORE_PATH
+    - name: Run zipalign
+      run: |
+        "$ANDROID_HOME/build-tools/33.0.2/zipalign" -c -v 4 ./example/capacitor/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    - name: Run apksigner
+      env:
+        ANDROID_KEYSTORE_PASSWORD: ${{ secrets.CAPACITOR_ANDROID_KEYSTORE_PASSWORD }}
+        ANDROID_KEY_ALIAS: ${{ secrets.CAPACITOR_ANDROID_KEY_ALIAS }}
+        ANDROID_KEY_PASSWORD: ${{ secrets.CAPACITOR_ANDROID_KEY_PASSWORD }}
+      run: |
+        "$ANDROID_HOME/build-tools/33.0.2/apksigner" sign \
+          --ks $RUNNER_TEMP/keystore.jks \
+          --ks-key-alias "$ANDROID_KEY_ALIAS" \
+          --ks-pass "pass:$ANDROID_KEYSTORE_PASSWORD" \
+          --key-pass "pass:$ANDROID_KEY_PASSWORD" \
+          --out ./example/capacitor/android/app/build/outputs/apk/release/app-release-signed.apk \
+          ./example/capacitor/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    - name: Distribute to App Center
+      env:
+        APPCENTER_ACCESS_TOKEN: ${{ secrets.CAPACITOR_ANDROID_APPCENTER_ACCESS_TOKEN }}
+      run: appcenter distribute release --debug --silent --file ./example/capacitor/android/app/build/outputs/apk/release/app-release-signed.apk --group "Collaborators" --app "Oursky/Authgear-Demo-Capacitor-Android" --release-notes "no release notes"
