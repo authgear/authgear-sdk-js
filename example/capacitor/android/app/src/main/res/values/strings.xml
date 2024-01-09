@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">AuthgearCapacitor</string>
+    <string name="title_activity_main">AuthgearCapacitor</string>
+    <string name="package_name">com.authgear.sdk.exampleapp.capacitor</string>
+    <string name="custom_url_scheme">com.authgear.sdk.exampleapp.capacitor</string>
+</resources>

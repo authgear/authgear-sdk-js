@@ -43,3 +43,4 @@ github-release release -u authgear -r authgear-sdk-js --draft --tag v"$VERSION" 
 
 (cd packages/authgear-web && npm publish --access public)
 (cd packages/authgear-react-native && npm publish --access public)
+(cd packages/authgear-capacitor && npm publish --access public)

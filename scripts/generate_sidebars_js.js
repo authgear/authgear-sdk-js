@@ -59,6 +59,31 @@ const sidebar = {
         },
       ],
     },
+    {
+      type: "category",
+      label: "@authgear/capacitor",
+      items: [
+        {
+          type: "doc",
+          id: "capacitor/index",
+        },
+        {
+          type: "category",
+          label: "Interfaces",
+          items: [],
+        },
+        {
+          type: "category",
+          label: "Classes",
+          items: [],
+        },
+        {
+          type: "category",
+          label: "Enums",
+          items: [],
+        },
+      ],
+    },
   ],
 };
 
@@ -81,6 +106,7 @@ function indexForPackage(packageName) {
 
 const WEB_PACKAGE_INDEX = indexForPackage("@authgear/web");
 const REACT_NATIVE_PACKAGE_INDEX = indexForPackage("@authgear/react-native");
+const CAPACITOR_PACKAGE_INDEX = indexForPackage("@authgear/capacitor");
 
 function indexForCategory(package, categoryLabel) {
   return package.items.findIndex(
@@ -119,6 +145,8 @@ function recur(dir) {
         i = WEB_PACKAGE_INDEX;
       } else if (package == "react-native") {
         i = REACT_NATIVE_PACKAGE_INDEX;
+      } else if (package == "capacitor") {
+        i = CAPACITOR_PACKAGE_INDEX;
       } else {
         throw new Error("unexpected package " + package);
       }

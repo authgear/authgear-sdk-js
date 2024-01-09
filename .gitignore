@@ -9,6 +9,7 @@ dist/
 /packages/authgear-web/index.d.ts
 /packages/authgear-react-native/index.d.ts
 /packages/authgear-react-native/android/build/
+/packages/authgear-capacitor/index.d.ts
 
 xcuserdata/
 xcshareddata/

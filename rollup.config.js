@@ -64,6 +64,26 @@ function makeReactNativeExternal() {
   return external;
 }
 
+function makeCapacitorExternal() {
+  const packageJSONString = readFileSync(
+    "packages/authgear-capacitor/package.json",
+    { encoding: "utf8" }
+  );
+  const packageJSON = JSON.parse(packageJSONString);
+  const deps = Object.keys(packageJSON["depdendencies"] || {});
+  if (deps.length > 0) {
+    throw new Error("@authgear/capacitor should not have any dependencies");
+  }
+
+  const peerDeps = Object.keys(packageJSON["peerDependencies"] || []);
+
+  function external(id) {
+    return peerDeps.indexOf(id) >= 0;
+  }
+
+  return external;
+}
+
 export default function makeConfig(commandLineArgs) {
   const configBundleType = commandLineArgs.configBundleType;
   switch (configBundleType) {
@@ -109,6 +129,36 @@ export default function makeConfig(commandLineArgs) {
           exports: "named",
         },
         external: makeReactNativeExternal(),
+      };
+    case "capacitor":
+      return {
+        plugins,
+        input: "packages/authgear-capacitor/src/index.ts",
+        output: [
+          {
+            file: "packages/authgear-capacitor/dist/plugin.iife.js",
+            format: "iife",
+            name: "authgearCapacitor",
+            globals: {
+              "@capacitor/core": "capacitorExports",
+            },
+            sourcemap: true,
+            inlineDynamicImports: true,
+          },
+          {
+            file: "packages/authgear-capacitor/dist/plugin.cjs.js",
+            format: "cjs",
+            sourcemap: true,
+            inlineDynamicImports: true,
+          },
+          {
+            file: "packages/authgear-capacitor/dist/plugin.module.js",
+            format: "esm",
+            sourcemap: true,
+            inlineDynamicImports: true,
+          },
+        ],
+        external: makeCapacitorExternal(),
       };
     default:
       throw new Error("unknown bundle type: " + configBundleType);

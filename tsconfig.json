@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es5",
     "module": "es6",
-    "lib": ["ES5", "ES2015.Promise", "DOM"],
+    "lib": ["ES5", "ES2015.Promise", "ES2015.Iterable", "ES2018.Promise", "DOM"],
     "skipLibCheck": true,
     "declaration": true,
     "declarationMap": true,

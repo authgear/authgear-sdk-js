@@ -1,0 +1,111 @@
+import Foundation
+import Capacitor
+
+@objc(AuthgearPlugin)
+public class AuthgearPlugin: CAPPlugin {
+    private let impl = AuthgearPluginImpl()
+
+    @objc func storageGetItem(_ call: CAPPluginCall) {
+        let key = call.getString("key")!
+        do {
+            let value = try self.impl.storageGetItem(key: key)
+            call.resolve([
+                "value": value,
+            ])
+        } catch {
+            let nsError = error as NSError
+            if nsError.domain == NSOSStatusErrorDomain && nsError.code == errSecItemNotFound {
+                call.resolve([
+                    "value": nil
+                ])
+            } else {
+                error.reject(call)
+            }
+        }
+    }
+
+    @objc func storageSetItem(_ call: CAPPluginCall) {
+        let key = call.getString("key")!
+        let value = call.getString("value")!
+        do {
+            try self.impl.storageSetItem(key: key, value: value)
+            call.resolve()
+        } catch {
+            error.reject(call)
+        }
+    }
+
+    @objc func storageDeleteItem(_ call: CAPPluginCall) {
+        let key = call.getString("key")!
+        do {
+            try self.impl.storageDeleteItem(key: key)
+            call.resolve()
+        } catch {
+            error.reject(call)
+        }
+    }
+
+    @objc func randomBytes(_ call: CAPPluginCall) {
+        let length = call.getInt("length")!
+        do {
+            let bytes = try self.impl.randomBytes(length: length)
+            call.resolve([
+                "bytes": bytes,
+            ])
+        } catch {
+            error.reject(call)
+        }
+    }
+
+    @objc func sha256String(_ call: CAPPluginCall) {
+        let input = call.getString("input")!
+        do {
+            let bytes = try self.impl.sha256String(input: input)
+            call.resolve([
+                "bytes": bytes,
+            ])
+        } catch {
+            error.reject(call)
+        }
+    }
+
+    @objc func getDeviceInfo(_ call: CAPPluginCall) {
+        let deviceInfo = self.impl.getDeviceInfo();
+        call.resolve([
+            "deviceInfo": deviceInfo
+        ])
+    }
+
+    @objc func openAuthorizeURL(_ call: CAPPluginCall) {
+        let url = URL(string: call.getString("url")!)!
+        let callbackURL = URL(string: call.getString("callbackURL")!)!
+        let prefersEphemeralWebBrowserSession = call.getBool("prefersEphemeralWebBrowserSession")!
+
+        DispatchQueue.main.async {
+            self.impl.openAuthorizeURL(window: (self.bridge?.webView?.window)!, url: url, callbackURL: callbackURL, prefersEphemeralWebBrowserSession:                prefersEphemeralWebBrowserSession) { (redirectURI, error) in
+                if let error = error {
+                    error.reject(call)
+                }
+                if let redirectURI = redirectURI {
+                    call.resolve([
+                        "redirectURI": redirectURI
+                    ])
+                }
+            }
+        }
+    }
+
+    @objc func openURL(_ call: CAPPluginCall) {
+        let url = URL(string: call.getString("url")!)!
+
+        DispatchQueue.main.async {
+            self.impl.openURL(window: (self.bridge?.webView?.window)!, url: url) { (error) in
+                if let error = error {
+                    error.reject(call)
+                } else {
+                    call.resolve()
+                }
+            }
+        }
+    }
+}

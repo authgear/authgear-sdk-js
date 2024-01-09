@@ -4,7 +4,11 @@ const { Extractor, ExtractorConfig } = require("@microsoft/api-extractor");
 
 const projectRoot = path.join(__dirname, "..");
 
-const publishedPackages = ["authgear-web", "authgear-react-native"];
+const publishedPackages = [
+  "authgear-web",
+  "authgear-react-native",
+  "authgear-capacitor",
+];
 const packages = ["authgear-core", ...publishedPackages];
 
 const coreDtsPath = path.join(projectRoot, `packages/authgear-core/index.d.ts`);
@@ -54,7 +58,7 @@ for (const p of publishedPackages) {
     .split("\n")
     // Remove lines that reference @authgear/core
     // because we are going to inline its index.d.ts
-    .filter(line => !/@authgear\/core/.test(line));
+    .filter((line) => !/@authgear\/core/.test(line));
   const content =
     fs.readFileSync(coreDtsPath, { encoding: "utf8" }) + lines.join("\n");
   fs.writeFileSync(dtsPath, content);
