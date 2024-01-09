@@ -1,5 +1,5 @@
 {
-  "name": "authgear-sdk-capacitor",
+  "name": "@authgear/capacitor",
   "version": "2.3.0",
   "license": "Apache-2.0",
   "main": "dist/plugin.cjs.js",
