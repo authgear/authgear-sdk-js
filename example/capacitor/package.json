@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "5.6.0",
+    "@ionic/cli": "7.2.0",
     "@testing-library/dom": ">=7.21.4",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
@@ -45,6 +46,7 @@
     "eslint": "^8.35.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "jsdom": "^22.1.0",
+    "native-run": "^2.0.0",
     "terser": "^5.4.0",
     "typescript": "^5.1.6",
     "vite": "^5.0.0",
