@@ -151,3 +151,71 @@ export interface SettingOptions {
    */
   colorScheme?: ColorScheme;
 }
+
+/**
+ * @public
+ */
+export enum BiometricLAPolicy {
+  deviceOwnerAuthenticationWithBiometrics = "deviceOwnerAuthenticationWithBiometrics",
+  deviceOwnerAuthentication = "deviceOwnerAuthentication",
+}
+
+/**
+ * @public
+ */
+export enum BiometricAccessConstraintIOS {
+  BiometricAny = "biometryAny",
+  BiometryCurrentSet = "biometryCurrentSet",
+  UserPresence = "userPresence",
+}
+
+/**
+ * @public
+ */
+export interface BiometricOptionsIOS {
+  localizedReason: string;
+  constraint: BiometricAccessConstraintIOS;
+  policy: BiometricLAPolicy;
+}
+
+/**
+ * @public
+ */
+export enum BiometricAccessConstraintAndroid {
+  BiometricStrong = "BIOMETRIC_STRONG",
+  DeviceCredential = "DEVICE_CREDENTIAL",
+}
+
+/**
+ * @public
+ */
+export interface BiometricOptionsAndroid {
+  title: string;
+  subtitle: string;
+  description: string;
+  negativeButtonText: string;
+  constraint: BiometricAccessConstraintAndroid[];
+  invalidatedByBiometricEnrollment: boolean;
+}
+
+/**
+ * @public
+ */
+export interface BiometricOptions {
+  ios: BiometricOptionsIOS;
+  android: BiometricOptionsAndroid;
+}
+
+/**
+ * @internal
+ */
+export interface BiometricPrivateKeyOptions extends BiometricOptions {
+  kid: string;
+  payload: {
+    iat: number;
+    exp: number;
+    challenge: string;
+    action: string;
+    device_info: unknown;
+  };
+}
