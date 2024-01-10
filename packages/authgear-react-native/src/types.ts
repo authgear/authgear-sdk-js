@@ -255,7 +255,7 @@ export interface BiometricOptions {
 }
 
 /**
- * @public
+ * @internal
  */
 export interface BiometricPrivateKeyOptions extends BiometricOptions {
   kid: string;
