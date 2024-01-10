@@ -11,50 +11,50 @@ import { AuthgearError, CancelError } from "@authgear/core";
 // }
 
 // iOS LocalAuthentication
-export const kLAErrorDomain = "com.apple.LocalAuthentication";
-// export const kLAErrorAuthenticationFailed = "-1";
-export const kLAErrorUserCancel = "-2";
-// export const kLAErrorUserFallback = "-3";
-// export const kLAErrorSystemCancel = "-4";
-export const kLAErrorPasscodeNotSet = "-5";
-// export const kLAErrorAppCancel = "-9";
-// export const kLAErrorInvalidContext = "-10";
-// export const kLAErrorWatchNotAvailable = "-11";
-// export const kLAErrorNotInteractive = "-1004";
-export const kLAErrorBiometryNotAvailable = "-6";
-export const kLAErrorBiometryNotEnrolled = "-7";
-export const kLAErrorBiometryLockout = "-8";
+const kLAErrorDomain = "com.apple.LocalAuthentication";
+// const kLAErrorAuthenticationFailed = "-1";
+const kLAErrorUserCancel = "-2";
+// const kLAErrorUserFallback = "-3";
+// const kLAErrorSystemCancel = "-4";
+const kLAErrorPasscodeNotSet = "-5";
+// const kLAErrorAppCancel = "-9";
+// const kLAErrorInvalidContext = "-10";
+// const kLAErrorWatchNotAvailable = "-11";
+// const kLAErrorNotInteractive = "-1004";
+const kLAErrorBiometryNotAvailable = "-6";
+const kLAErrorBiometryNotEnrolled = "-7";
+const kLAErrorBiometryLockout = "-8";
 
 // iOS Keychain
-export const NSOSStatusErrorDomain = "NSOSStatusErrorDomain";
-export const errSecUserCanceled = "-128";
-export const errSecAuthFailed = "-25293";
-export const errSecItemNotFound = "-25300";
+const NSOSStatusErrorDomain = "NSOSStatusErrorDomain";
+const errSecUserCanceled = "-128";
+// const errSecAuthFailed = "-25293";
+const errSecItemNotFound = "-25300";
 
 // Android BiometricManager.canAuthenticate
-export const BIOMETRIC_ERROR_HW_UNAVAILABLE = "BIOMETRIC_ERROR_HW_UNAVAILABLE";
-export const BIOMETRIC_ERROR_NONE_ENROLLED = "BIOMETRIC_ERROR_NONE_ENROLLED";
-export const BIOMETRIC_ERROR_NO_HARDWARE = "BIOMETRIC_ERROR_NO_HARDWARE";
-export const BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED =
+const BIOMETRIC_ERROR_HW_UNAVAILABLE = "BIOMETRIC_ERROR_HW_UNAVAILABLE";
+const BIOMETRIC_ERROR_NONE_ENROLLED = "BIOMETRIC_ERROR_NONE_ENROLLED";
+const BIOMETRIC_ERROR_NO_HARDWARE = "BIOMETRIC_ERROR_NO_HARDWARE";
+const BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED =
   "BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED";
-export const BIOMETRIC_ERROR_UNSUPPORTED = "BIOMETRIC_ERROR_UNSUPPORTED";
-// export const BIOMETRIC_STATUS_UNKNOWN = "BIOMETRIC_STATUS_UNKNOWN";
+const BIOMETRIC_ERROR_UNSUPPORTED = "BIOMETRIC_ERROR_UNSUPPORTED";
+// const BIOMETRIC_STATUS_UNKNOWN = "BIOMETRIC_STATUS_UNKNOWN";
 
 // Android BiometricPrompt
-export const ERROR_CANCELED = "ERROR_CANCELED";
-export const ERROR_HW_NOT_PRESENT = "ERROR_HW_NOT_PRESENT";
-export const ERROR_HW_UNAVAILABLE = "ERROR_HW_UNAVAILABLE";
-export const ERROR_LOCKOUT = "ERROR_LOCKOUT";
-export const ERROR_LOCKOUT_PERMANENT = "ERROR_LOCKOUT_PERMANENT";
-export const ERROR_NEGATIVE_BUTTON = "ERROR_NEGATIVE_BUTTON";
-export const ERROR_NO_BIOMETRICS = "ERROR_NO_BIOMETRICS";
-export const ERROR_NO_DEVICE_CREDENTIAL = "ERROR_NO_DEVICE_CREDENTIAL";
-// export const ERROR_NO_SPACE = "ERROR_NO_SPACE";
-export const ERROR_SECURITY_UPDATE_REQUIRED = "ERROR_SECURITY_UPDATE_REQUIRED";
-// export const ERROR_TIMEOUT = "ERROR_TIMEOUT";
-// export const ERROR_UNABLE_TO_PROCESS = "ERROR_UNABLE_TO_PROCESS";
-export const ERROR_USER_CANCELED = "ERROR_USER_CANCELED";
-// export const ERROR_VENDOR = "ERROR_VENDOR";
+const ERROR_CANCELED = "ERROR_CANCELED";
+const ERROR_HW_NOT_PRESENT = "ERROR_HW_NOT_PRESENT";
+const ERROR_HW_UNAVAILABLE = "ERROR_HW_UNAVAILABLE";
+const ERROR_LOCKOUT = "ERROR_LOCKOUT";
+const ERROR_LOCKOUT_PERMANENT = "ERROR_LOCKOUT_PERMANENT";
+const ERROR_NEGATIVE_BUTTON = "ERROR_NEGATIVE_BUTTON";
+const ERROR_NO_BIOMETRICS = "ERROR_NO_BIOMETRICS";
+const ERROR_NO_DEVICE_CREDENTIAL = "ERROR_NO_DEVICE_CREDENTIAL";
+// const ERROR_NO_SPACE = "ERROR_NO_SPACE";
+const ERROR_SECURITY_UPDATE_REQUIRED = "ERROR_SECURITY_UPDATE_REQUIRED";
+// const ERROR_TIMEOUT = "ERROR_TIMEOUT";
+// const ERROR_UNABLE_TO_PROCESS = "ERROR_UNABLE_TO_PROCESS";
+const ERROR_USER_CANCELED = "ERROR_USER_CANCELED";
+// const ERROR_VENDOR = "ERROR_VENDOR";
 
 export interface PlatformErrorIOS {
   code: string;
