@@ -41,6 +41,10 @@ import authgearCapacitor, {
   CancelError as CapacitorCancelError,
   ColorScheme,
   Page as CapacitorPage,
+  BiometricOptions,
+  BiometricAccessConstraintIOS,
+  BiometricLAPolicy,
+  BiometricAccessConstraintAndroid,
 } from "@authgear/capacitor";
 import {
   readClientID,
@@ -58,6 +62,22 @@ const TITLE = "Authgear SDK";
 const REDIRECT_URI_WEB_AUTHENTICATE = "http://localhost:8100/oauth-redirect";
 const REDIRECT_URI_WEB_REAUTH = "http://localhost:8100/reauth-redirect";
 const REDIRECT_URI_CAPACITOR = "com.authgear.exampleapp.capacitor://host/path";
+
+const biometricOptions: BiometricOptions = {
+  ios: {
+    localizedReason: "Use biometric to authenticate",
+    constraint: BiometricAccessConstraintIOS.BiometryCurrentSet,
+    policy: BiometricLAPolicy.deviceOwnerAuthenticationWithBiometrics,
+  },
+  android: {
+    title: "Biometric Authentication",
+    subtitle: "Biometric authentication",
+    description: "Use biometric to authenticate",
+    negativeButtonText: "Cancel",
+    constraint: [BiometricAccessConstraintAndroid.BiometricStrong],
+    invalidatedByBiometricEnrollment: true,
+  },
+};
 
 function isPlatformWeb(): boolean {
   return Capacitor.getPlatform() === "web";
@@ -83,6 +103,7 @@ function AuthgearDemo() {
   const [isSSOEnabled, setIsSSOEnabled] = useState(() => {
     return readIsSSOEnabled();
   });
+  const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
 
   const [sessionState, setSessionState] = useState<SessionState | null>(() => {
     if (isPlatformWeb()) {
@@ -104,6 +125,20 @@ function AuthgearDemo() {
     };
     return d;
   }, [setSessionState]);
+
+  const updateBiometricState = useCallback(async () => {
+    if (isPlatformWeb()) {
+      return;
+    }
+
+    try {
+      await authgearCapacitor.checkBiometricSupported(biometricOptions);
+      const enabled = await authgearCapacitor.isBiometricEnabled();
+      setBiometricEnabled(enabled);
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
 
   const showError = useCallback((e: any) => {
     const json = JSON.parse(JSON.stringify(e));
@@ -129,6 +164,7 @@ function AuthgearDemo() {
   }, []);
 
   const postConfigure = useCallback(async () => {
+    await updateBiometricState();
     const sessionState = isPlatformWeb()
       ? authgearWeb.sessionState
       : authgearCapacitor.sessionState;
@@ -144,7 +180,7 @@ function AuthgearDemo() {
     }
 
     setInitialized(true);
-  }, []);
+  }, [updateBiometricState]);
 
   const configure = useCallback(async () => {
     setLoading(true);
@@ -207,8 +243,48 @@ function AuthgearDemo() {
       showError(e);
     } finally {
       setLoading(false);
+      await updateBiometricState();
     }
-  }, [colorScheme, page, showError, showUserInfo]);
+  }, [colorScheme, page, showError, showUserInfo, updateBiometricState]);
+
+  const enableBiometric = useCallback(async () => {
+    setLoading(true);
+    try {
+      await authgearCapacitor.enableBiometric(biometricOptions);
+    } catch (e: unknown) {
+      showError(e);
+    } finally {
+      setLoading(false);
+      await updateBiometricState();
+    }
+  }, [showError, updateBiometricState]);
+
+  const authenticateBiometric = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { userInfo } = await authgearCapacitor.authenticateBiometric(
+        biometricOptions
+      );
+      showUserInfo(userInfo);
+    } catch (e: unknown) {
+      showError(e);
+    } finally {
+      setLoading(false);
+      await updateBiometricState();
+    }
+  }, [showError, showUserInfo, updateBiometricState]);
+
+  const disableBiometric = useCallback(async () => {
+    setLoading(true);
+    try {
+      await authgearCapacitor.disableBiometric();
+    } catch (e: unknown) {
+      showError(e);
+    } finally {
+      setLoading(false);
+      await updateBiometricState();
+    }
+  }, [showError, updateBiometricState]);
 
   const showAuthTime = useCallback(() => {
     if (isPlatformWeb()) {
@@ -224,7 +300,7 @@ function AuthgearDemo() {
     }
   }, []);
 
-  const reauthenticate = useCallback(async () => {
+  const reauthenticateWebOnly = useCallback(async () => {
     setLoading(true);
     try {
       if (isPlatformWeb()) {
@@ -251,6 +327,45 @@ function AuthgearDemo() {
           colorScheme:
             colorScheme === "" ? undefined : (colorScheme as ColorScheme),
         });
+        showAuthTime();
+      }
+    } catch (e) {
+      showError(e);
+    } finally {
+      setLoading(false);
+    }
+  }, [showError, colorScheme, showAuthTime]);
+
+  const reauthenticate = useCallback(async () => {
+    setLoading(true);
+    try {
+      if (isPlatformWeb()) {
+        await authgearWeb.refreshIDToken();
+        if (!authgearWeb.canReauthenticate()) {
+          throw new Error(
+            "canReauthenticate() returns false for the current user"
+          );
+        }
+
+        authgearWeb.startReauthentication({
+          redirectURI: REDIRECT_URI_WEB_REAUTH,
+        });
+      } else {
+        await authgearCapacitor.refreshIDToken();
+        if (!authgearCapacitor.canReauthenticate()) {
+          throw new Error(
+            "canReauthenticate() returns false for the current user"
+          );
+        }
+
+        await authgearCapacitor.reauthenticate(
+          {
+            redirectURI: REDIRECT_URI_CAPACITOR,
+            colorScheme:
+              colorScheme === "" ? undefined : (colorScheme as ColorScheme),
+          },
+          biometricOptions
+        );
         showAuthTime();
       }
     } catch (e) {
@@ -409,6 +524,46 @@ function AuthgearDemo() {
     [reauthenticate]
   );
 
+  const onClickReauthenticateWebOnly = useCallback(
+    (e: MouseEvent<HTMLIonButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      reauthenticateWebOnly();
+    },
+    [reauthenticateWebOnly]
+  );
+
+  const onClickEnableBiometric = useCallback(
+    (e: MouseEvent<HTMLIonButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      enableBiometric();
+    },
+    [enableBiometric]
+  );
+
+  const onClickAuthenticateBiometric = useCallback(
+    (e: MouseEvent<HTMLIonButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      authenticateBiometric();
+    },
+    [authenticateBiometric]
+  );
+
+  const onClickDisableBiometric = useCallback(
+    (e: MouseEvent<HTMLIonButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      disableBiometric();
+    },
+    [disableBiometric]
+  );
+
   const onClickOpenSettings = useCallback(
     (e: MouseEvent<HTMLIonButtonElement>) => {
       e.preventDefault();
@@ -525,9 +680,39 @@ function AuthgearDemo() {
         <IonButton
           className="button"
           disabled={!initialized || loading || !loggedIn}
-          onClick={onClickReauthenticate}
+          onClick={onClickReauthenticateWebOnly}
         >
           Re-authenticate
+        </IonButton>
+        <IonButton
+          className="button"
+          disabled={!initialized || loading || !loggedIn}
+          onClick={onClickReauthenticate}
+        >
+          Re-authenticate (biometric or web)
+        </IonButton>
+        {isPlatformWeb() ? null : (
+          <IonButton
+            className="button"
+            disabled={!initialized || loading || !loggedIn || biometricEnabled}
+            onClick={onClickEnableBiometric}
+          >
+            Enable biometric
+          </IonButton>
+        )}
+        <IonButton
+          className="button"
+          disabled={!initialized || loading || !biometricEnabled}
+          onClick={onClickDisableBiometric}
+        >
+          Disable biometric
+        </IonButton>
+        <IonButton
+          className="button"
+          disabled={!initialized || loading || loggedIn || !biometricEnabled}
+          onClick={onClickAuthenticateBiometric}
+        >
+          Authenticate with biometric
         </IonButton>
         <IonButton
           className="button"
