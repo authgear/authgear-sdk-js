@@ -198,7 +198,7 @@ import Capacitor
                     if isCancel {
                         completion(nil, NSError.makeCancel(error: error))
                     } else {
-                        completion(nil, NSError.makeError(message: "openAuthorizeURL failed", code: nil, error: error))
+                        completion(nil, NSError.makeUnrecoverableAuthgearError(message: "openAuthorizeURL failed", error: error))
                     }
                 }
                 if let redirectURI = redirectURI {
@@ -212,7 +212,7 @@ import Capacitor
             }
             asWebSession!.start()
         } else {
-            completion(nil, NSError.makeError(message: "SDK supports only iOS 12.0 or newer", code: nil, error: nil))
+            completion(nil, NSError.makeUnrecoverableAuthgearError(message: "SDK supports only iOS 12.0 or newer", error: nil))
         }
     }
 
@@ -231,7 +231,7 @@ import Capacitor
                     if isCancel {
                         completion(nil)
                     } else {
-                        completion(NSError.makeError(message: "openURL failed", code: nil, error: error))
+                        completion(NSError.makeUnrecoverableAuthgearError(message: "openURL failed", error: error))
                     }
                 } else {
                     completion(nil)
@@ -244,7 +244,7 @@ import Capacitor
             }
             asWebSession!.start()
         } else {
-            completion(NSError.makeError(message: "SDK supports only iOS 12.0 or newer", code: nil, error: nil))
+            completion(NSError.makeUnrecoverableAuthgearError(message: "SDK supports only iOS 12.0 or newer", error: nil))
         }
     }
 
@@ -258,7 +258,7 @@ import Capacitor
                 throw error
             }
         } else {
-            throw NSError.makeError(message: "Biometric authentication requires at least iOS 11.3", code: nil, error: nil)
+            throw NSError.makeUnrecoverableAuthgearError(message: "Biometric authentication requires at least iOS 11.3", error: nil)
         }
     }
 
@@ -458,7 +458,7 @@ import Capacitor
         var publicKeyBytes = [UInt8](data)
 
         guard publicKeyBytes.removeFirst() == 0x04 else {
-            throw NSError.makeError(message: "unexpected ec public key format", code: nil, error: nil)
+            throw NSError.makeUnrecoverableAuthgearError(message: "unexpected ec public key format", error: nil)
         }
 
         let coordinateOctetLength = 32
@@ -553,13 +553,10 @@ private extension UIUserInterfaceIdiom {
 extension NSError {
     static let AuthgearDomain = "Authgear"
 
-    static func makeError(message: String, code: String?, error: Error?) -> NSError {
+    static func makeUnrecoverableAuthgearError(message: String, error: Error?) -> NSError {
         var userInfo: [String: Any] = [
             NSLocalizedDescriptionKey: message
         ]
-        if let code = code {
-            userInfo["code"] = code
-        }
         if let error = error {
             userInfo[NSUnderlyingErrorKey] = error
         }
@@ -567,7 +564,20 @@ extension NSError {
     }
 
     static func makeCancel(error: Error?) -> NSError {
-        return makeError(message: "CANCEL", code: "CANCEL", error: error)
+        var userInfo: [String: Any] = [
+            NSLocalizedDescriptionKey: "CANCEL"
+        ]
+        userInfo["code"] = "CANCEL"
+        if let error = error {
+            userInfo[NSUnderlyingErrorKey] = error
+        }
+        return NSError(domain: AuthgearDomain, code: 0, userInfo: userInfo)
+    }
+
+    var capacitorMessage: String {
+        get {
+            return self.localizedDescription
+        }
     }
 
     var capacitorCode: String? {
@@ -582,16 +592,9 @@ extension NSError {
         }
     }
 
-    var capacitorMessage: String {
-        get {
-            return self.localizedDescription
-        }
-    }
-
     var capacitorData: [String: Any]? {
         get {
-            let underlying = self.capacitorUnderlyingError
-            if let underlying = underlying {
+            if let underlying = self.capacitorUnderlyingError {
                 let nsError = underlying as NSError
                 let domain = nsError.domain
                 let code = nsError.code
@@ -603,8 +606,19 @@ extension NSError {
                         "userInfo": userInfo
                     ]
                 ]
+            } else {
+                let nsError = self
+                let domain = nsError.domain
+                let code = nsError.code
+                let userInfo = nsError.userInfo
+                return [
+                    "cause": [
+                        "domain": domain,
+                        "code": code,
+                        "userInfo": userInfo
+                    ]
+                ]
             }
-            return nil
         }
     }
 }
