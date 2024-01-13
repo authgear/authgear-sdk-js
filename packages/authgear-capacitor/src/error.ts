@@ -46,6 +46,7 @@ const ERROR_SECURITY_UPDATE_REQUIRED = "ERROR_SECURITY_UPDATE_REQUIRED";
 const ERROR_USER_CANCELED = "ERROR_USER_CANCELED";
 // const ERROR_VENDOR = "ERROR_VENDOR";
 
+// on iOS
 // {
 //     "errorMessage": "CANCEL",
 //     "message": "CANCEL",
@@ -58,13 +59,19 @@ const ERROR_USER_CANCELED = "ERROR_USER_CANCELED";
 //     },
 //     "code": "CANCEL"
 // }
+//
+// on Android
+// {
+//     "message": "CANCEL",
+//     "code": "CANCEL",
+//     "data": undefined
+// }
 
 /**
  * @internal
  */
 export interface PlatformError {
   message: string;
-  errorMessage: string;
   code: string;
 }
 
@@ -85,13 +92,7 @@ export interface PlatformErrorIOSWithCause extends PlatformError {
  * @internal
  */
 export function isPlatformError(e: unknown): e is PlatformError {
-  return (
-    typeof e === "object" &&
-    e != null &&
-    "message" in e &&
-    "errorMessage" in e &&
-    "code" in e
-  );
+  return typeof e === "object" && e != null && "message" in e && "code" in e;
 }
 
 /**
