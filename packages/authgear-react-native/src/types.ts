@@ -201,52 +201,147 @@ export interface SettingOptions {
 }
 
 /**
+ * BiometricLAPolicy configures iOS specific behavior.
+ * It must be consistent with BiometricAccessConstraintIOS.
+ *
  * @public
  */
 export enum BiometricLAPolicy {
+  /**
+   * The biometric prompt only prompts for biometric. No fallback to device passcode.
+   *
+   * See https://developer.apple.com/documentation/localauthentication/lapolicy/deviceownerauthenticationwithbiometrics
+   *
+   * @public
+   */
   deviceOwnerAuthenticationWithBiometrics = "deviceOwnerAuthenticationWithBiometrics",
+  /**
+   * The biometric prompt prompts for biometric first, and then fallback to device passcode.
+   *
+   * See https://developer.apple.com/documentation/localauthentication/lapolicy/deviceownerauthentication
+   *
+   * @public
+   */
   deviceOwnerAuthentication = "deviceOwnerAuthentication",
 }
 
 /**
+ * BiometricAccessConstraintIOS configures iOS specific behavior.
+ * It must be consistent with BiometricLAPolicy.
+ *
  * @public
  */
 export enum BiometricAccessConstraintIOS {
+  /**
+   * The user does not need to set up biometric again when a new finger or face is added or removed.
+   *
+   * See https://developer.apple.com/documentation/security/secaccesscontrolcreateflags/2937191-biometryany
+   *
+   * @public
+   */
   BiometricAny = "biometryAny",
+  /**
+   * The user needs to set up biometric again when a new finger or face is added or removed.
+   *
+   * See https://developer.apple.com/documentation/security/secaccesscontrolcreateflags/2937192-biometrycurrentset
+   *
+   * @public
+   */
   BiometryCurrentSet = "biometryCurrentSet",
+  /**
+   * The user can either use biometric or device code to authenticate.
+   *
+   * See https://developer.apple.com/documentation/security/secaccesscontrolcreateflags/1392879-userpresence
+   *
+   * @public
+   */
   UserPresence = "userPresence",
 }
 
 /**
+ * iOS specific options for biometric authentication.
+ *
  * @public
  */
 export interface BiometricOptionsIOS {
+  /**
+   * See https://developer.apple.com/documentation/localauthentication/lacontext/1514176-evaluatepolicy#parameters
+   *
+   * @public
+   */
   localizedReason: string;
   constraint: BiometricAccessConstraintIOS;
   policy: BiometricLAPolicy;
 }
 
 /**
+ * See https://developer.android.com/reference/androidx/biometric/BiometricManager.Authenticators
+ *
  * @public
  */
 export enum BiometricAccessConstraintAndroid {
+  /**
+   * The user can use Class 3 biometric to authenticate.
+   *
+   * See https://developer.android.com/reference/androidx/biometric/BiometricManager.Authenticators#BIOMETRIC_STRONG()
+   *
+   * @public
+   */
   BiometricStrong = "BIOMETRIC_STRONG",
+  /**
+   * The user can either use biometric or device code to authenticate.
+   *
+   * See https://developer.android.com/reference/androidx/biometric/BiometricManager.Authenticators#DEVICE_CREDENTIAL()
+   *
+   * @public
+   */
   DeviceCredential = "DEVICE_CREDENTIAL",
 }
 
 /**
+ * Android specific options for biometric authentication.
+ *
  * @public
  */
 export interface BiometricOptionsAndroid {
+  /**
+   * See https://developer.android.com/reference/androidx/biometric/BiometricPrompt.PromptInfo#getTitle()
+   *
+   * @public
+   */
   title: string;
+  /**
+   * See https://developer.android.com/reference/androidx/biometric/BiometricPrompt.PromptInfo#getSubtitle()
+   *
+   * @public
+   */
   subtitle: string;
+  /**
+   * See https://developer.android.com/reference/androidx/biometric/BiometricPrompt.PromptInfo#getDescription()
+   *
+   * @public
+   */
   description: string;
+  /**
+   * https://developer.android.com/reference/androidx/biometric/BiometricPrompt.PromptInfo#getNegativeButtonText()
+   *
+   * @public
+   */
   negativeButtonText: string;
   constraint: BiometricAccessConstraintAndroid[];
+  /**
+   * The user needs to set up biometric again when a new biometric is enrolled or all enrolled biometrics are removed.
+   *
+   * See https://developer.android.com/reference/android/security/keystore/KeyGenParameterSpec#isInvalidatedByBiometricEnrollment()
+   *
+   * @public
+   */
   invalidatedByBiometricEnrollment: boolean;
 }
 
 /**
+ * BiometricOptions is options for biometric authentication.
+ *
  * @public
  */
 export interface BiometricOptions {
