@@ -9,6 +9,6 @@ See all the available methods in [CapacitorContainer Reference](./classes/Capaci
 
 :::tip Just getting started?
 
-Check out our [Get Started guide](https://docs.authgear.com/get-started/capacitor) to see usage.
+Check out our [Get Started guide](https://docs.authgear.com/get-started/native-mobile-app/ionic-sdk) to see usage.
 
 :::
