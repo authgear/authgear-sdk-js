@@ -350,6 +350,10 @@ import Capacitor
         // https://developer.apple.com/documentation/security/certificate_key_and_trust_services/keys/protecting_keys_with_the_secure_enclave
         flags.insert(.privateKeyUsage)
 
+        #if targetEnvironment(simulator)
+        // On Xcode 15.2, iPhone 15 iOS 17.2, using any of these flags will result in
+        // NSOSStatusErrorDomain code=-25293 message="Key generation failed"
+        #else
         switch constraint {
         case "biometryAny":
             flags.insert(.biometryAny)
@@ -360,6 +364,7 @@ import Capacitor
         default:
             break
         }
+        #endif
 
         guard let accessControl = SecAccessControlCreateWithFlags(
             kCFAllocatorDefault,
