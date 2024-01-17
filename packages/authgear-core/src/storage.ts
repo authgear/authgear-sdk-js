@@ -83,6 +83,13 @@ export class _MemoryStorageDriver implements _StorageDriver {
 }
 
 /**
+ * TransientTokenStorage stores the refresh token in memory.
+ * The refresh token is forgotten as soon as the user quits the app, or
+ * the app was killed by the system.
+ * When the app launches again next time, no refresh token is found.
+ * The user is considered unauthenticated.
+ * This implies the user needs to authenticate over again on every app launch.
+ *
  * @public
  */
 export class TransientTokenStorage implements TokenStorage {

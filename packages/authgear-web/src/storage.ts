@@ -20,7 +20,13 @@ const _localStorageStorageDriver: _StorageDriver = {
 };
 
 /**
- * @internal
+ * PersistentTokenStorage stores the refresh token in a persistent storage.
+ * When the app launches again next time, the refresh token is loaded from the persistent storage.
+ * The user is considered authenticated as long as the refresh token is found.
+ * However, the validity of the refresh token is not guaranteed.
+ * You must call fetchUserInfo to ensure the refresh token is still valid.
+ *
+ * @public
  */
 export class PersistentTokenStorage implements TokenStorage {
   private keyMaker: _KeyMaker;

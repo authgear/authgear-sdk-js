@@ -97,7 +97,13 @@ async function getXDeviceInfo(): Promise<string> {
 }
 
 /**
- * React Native Container.
+ * ReactNativeContainer is the entrypoint of the SDK.
+ * An instance of a container allows the user to authenticate, reauthenticate, etc.
+ *
+ * Every container has a name.
+ * The default name of a container is `default`.
+ * If your app supports multi login sessions, you can use multiple containers with different names.
+ * You are responsible for managing the list of names in this case.
  *
  * @public
  */
