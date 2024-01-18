@@ -1,4 +1,5 @@
 import { registerPlugin } from "@capacitor/core";
+import { BiometricPrivateKeyOptions, BiometricOptions } from "./types";
 import { _wrapError } from "./error";
 
 export interface AuthgearPlugin {
@@ -8,12 +9,21 @@ export interface AuthgearPlugin {
   randomBytes(options: { length: number }): Promise<{ bytes: number[] }>;
   sha256String(options: { input: string }): Promise<{ bytes: number[] }>;
   getDeviceInfo(): Promise<{ deviceInfo: unknown }>;
+  generateUUID(): Promise<{ uuid: string }>;
   openAuthorizeURL(options: {
     url: string;
     callbackURL: string;
     prefersEphemeralWebBrowserSession: boolean;
   }): Promise<{ redirectURI: string }>;
   openURL(options: { url: string }): Promise<void>;
+  checkBiometricSupported(options: BiometricOptions): Promise<void>;
+  createBiometricPrivateKey(
+    options: BiometricPrivateKeyOptions
+  ): Promise<{ jwt: string }>;
+  signWithBiometricPrivateKey(
+    options: BiometricPrivateKeyOptions
+  ): Promise<{ jwt: string }>;
+  removeBiometricPrivateKey(options: { kid: string }): Promise<void>;
 }
 
 const Authgear = registerPlugin<AuthgearPlugin>("Authgear", {});
@@ -73,6 +83,15 @@ export async function getDeviceInfo(): Promise<unknown> {
   }
 }
 
+export async function generateUUID(): Promise<string> {
+  try {
+    const { uuid } = await Authgear.generateUUID();
+    return uuid;
+  } catch (e: unknown) {
+    throw _wrapError(e);
+  }
+}
+
 export async function openAuthorizeURL(options: {
   url: string;
   callbackURL: string;
@@ -89,6 +108,46 @@ export async function openAuthorizeURL(options: {
 export async function openURL(options: { url: string }): Promise<void> {
   try {
     await Authgear.openURL(options);
+  } catch (e: unknown) {
+    throw _wrapError(e);
+  }
+}
+
+export async function checkBiometricSupported(
+  options: BiometricOptions
+): Promise<void> {
+  try {
+    await Authgear.checkBiometricSupported(options);
+  } catch (e: unknown) {
+    throw _wrapError(e);
+  }
+}
+
+export async function createBiometricPrivateKey(
+  options: BiometricPrivateKeyOptions
+): Promise<string> {
+  try {
+    const { jwt } = await Authgear.createBiometricPrivateKey(options);
+    return jwt;
+  } catch (e: unknown) {
+    throw _wrapError(e);
+  }
+}
+
+export async function signWithBiometricPrivateKey(
+  options: BiometricPrivateKeyOptions
+): Promise<string> {
+  try {
+    const { jwt } = await Authgear.signWithBiometricPrivateKey(options);
+    return jwt;
+  } catch (e: unknown) {
+    throw _wrapError(e);
+  }
+}
+
+export async function removeBiometricPrivateKey(kid: string): Promise<void> {
+  try {
+    await Authgear.removeBiometricPrivateKey({ kid });
   } catch (e: unknown) {
     throw _wrapError(e);
   }

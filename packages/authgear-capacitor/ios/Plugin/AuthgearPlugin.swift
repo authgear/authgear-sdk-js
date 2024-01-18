@@ -1,4 +1,5 @@
 import Foundation
+import LocalAuthentication
 import Capacitor
 
 @objc(AuthgearPlugin)
@@ -70,9 +71,16 @@ public class AuthgearPlugin: CAPPlugin {
     }
 
     @objc func getDeviceInfo(_ call: CAPPluginCall) {
-        let deviceInfo = self.impl.getDeviceInfo();
+        let deviceInfo = self.impl.getDeviceInfo()
         call.resolve([
             "deviceInfo": deviceInfo
+        ])
+    }
+
+    @objc func generateUUID(_ call: CAPPluginCall) {
+        let uuid = self.impl.generateUUID()
+        call.resolve([
+            "uuid": uuid
         ])
     }
 
@@ -105,6 +113,89 @@ public class AuthgearPlugin: CAPPlugin {
                 } else {
                     call.resolve()
                 }
+            }
+        }
+    }
+
+    @objc func checkBiometricSupported(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            do {
+                try self.impl.checkBiometricSupported()
+                call.resolve()
+            } catch {
+                error.reject(call)
+            }
+        }
+    }
+
+    @objc func createBiometricPrivateKey(_ call: CAPPluginCall) {
+        let kid = call.getString("kid")!
+        let payload = call.getObject("payload")!
+        let ios = call.getObject("ios")!
+        let constraint = ios["constraint"] as! String
+        let localizedReason = ios["localizedReason"] as! String
+        let tag = "com.authgear.keys.biometric.\(kid)"
+        let policy = LAPolicy.deviceOwnerAuthenticationWithBiometrics
+
+        DispatchQueue.main.async {
+            self.impl.createBiometricPrivateKey(
+                policy: policy,
+                localizedReason: localizedReason,
+                constraint: constraint,
+                kid: kid,
+                tag: tag,
+                payload: payload
+            ) { (jwt, error) in
+                if let error = error {
+                    error.reject(call)
+                }
+                if let jwt = jwt {
+                    call.resolve([
+                        "jwt": jwt
+                    ])
+                }
+            }
+        }
+    }
+
+    @objc func signWithBiometricPrivateKey(_ call: CAPPluginCall) {
+        let kid = call.getString("kid")!
+        let payload = call.getObject("payload")!
+        let ios = call.getObject("ios")!
+        let policyString = ios["policy"] as! String
+        let localizedReason = ios["localizedReason"] as! String
+        let tag = "com.authgear.keys.biometric.\(kid)"
+
+        DispatchQueue.main.async {
+            self.impl.signWithBiometricPrivateKey(
+                policyString: policyString,
+                localizedReason: localizedReason,
+                kid: kid,
+                tag: tag,
+                payload: payload
+            ) { (jwt, error) in
+                if let error = error {
+                    error.reject(call)
+                }
+                if let jwt = jwt {
+                    call.resolve([
+                        "jwt": jwt
+                    ])
+                }
+            }
+        }
+    }
+
+    @objc func removeBiometricPrivateKey(_ call: CAPPluginCall) {
+        let kid = call.getString("kid")!
+        let tag = "com.authgear.keys.biometric.\(kid)"
+
+        DispatchQueue.main.async {
+            do {
+                try self.impl.removeBiometricPrivateKey(tag: tag)
+                call.resolve()
+            } catch {
+                error.reject(call)
             }
         }
     }

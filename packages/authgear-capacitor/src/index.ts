@@ -4,6 +4,7 @@ import {
   type TokenStorage,
   type UserInfo,
   AuthgearError,
+  OAuthError,
   SessionState,
   SessionStateChangeReason,
   Page,
@@ -16,7 +17,16 @@ import {
 } from "@authgear/core";
 import { PersistentContainerStorage, PersistentTokenStorage } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
-import { getDeviceInfo, openAuthorizeURL, openURL } from "./plugin";
+import {
+  generateUUID,
+  getDeviceInfo,
+  openAuthorizeURL,
+  openURL,
+  createBiometricPrivateKey,
+  checkBiometricSupported,
+  removeBiometricPrivateKey,
+  signWithBiometricPrivateKey,
+} from "./plugin";
 import {
   type CapacitorContainerDelegate,
   type AuthenticateOptions,
@@ -24,12 +34,21 @@ import {
   type ReauthenticateOptions,
   type ReauthenticateResult,
   type SettingOptions,
+  type BiometricOptions,
 } from "./types";
+import { BiometricPrivateKeyNotFoundError } from "./error";
 import { Capacitor } from "@capacitor/core";
 
 export * from "@authgear/core";
 export * from "./types";
 export * from "./storage";
+export {
+  BiometricPrivateKeyNotFoundError,
+  BiometricNotSupportedOrPermissionDeniedError,
+  BiometricNoPasscodeError,
+  BiometricNoEnrollmentError,
+  BiometricLockoutError,
+} from "./error";
 
 function getPlatform(): string {
   const platform = Capacitor.getPlatform();
@@ -87,6 +106,14 @@ async function getXDeviceInfo(): Promise<string> {
 }
 
 /**
+ * CapacitorContainer is the entrypoint of the SDK.
+ * An instance of a container allows the user to authenticate, reauthenticate, etc.
+ *
+ * Every container has a name.
+ * The default name of a container is `default`.
+ * If your app supports multi login sessions, you can use multiple containers with different names.
+ * You are responsible for managing the list of names in this case.
+ *
  * @public
  */
 export class CapacitorContainer {
@@ -376,7 +403,7 @@ export class CapacitorContainer {
         x_device_info: xDeviceInfo,
       }
     );
-    // await this.disableBiometric();
+    await this.disableBiometric();
     return result;
   }
 
@@ -388,13 +415,14 @@ export class CapacitorContainer {
    * @public
    */
   async reauthenticate(
-    options: ReauthenticateOptions
+    options: ReauthenticateOptions,
+    biometricOptions?: BiometricOptions
   ): Promise<ReauthenticateResult> {
     // Use biometric to reauthenticate if the developer instructs us to do so.
-    // const biometricEnabled = await this.isBiometricEnabled();
-    // if (biometricEnabled && biometricOptions != null) {
-    //   return this.authenticateBiometric(biometricOptions);
-    // }
+    const biometricEnabled = await this.isBiometricEnabled();
+    if (biometricEnabled && biometricOptions != null) {
+      return this.authenticateBiometric(biometricOptions);
+    }
 
     const platform = getPlatform();
 
@@ -547,6 +575,127 @@ export class CapacitorContainer {
         "https://authgear.com/scopes/full-access",
       ],
     });
+  }
+
+  /**
+   * @public
+   */
+  // eslint-disable-next-line class-methods-use-this
+  async checkBiometricSupported(options: BiometricOptions): Promise<void> {
+    await checkBiometricSupported(options);
+  }
+
+  /**
+   * @public
+   */
+  async isBiometricEnabled(): Promise<boolean> {
+    const keyID = await this.storage.getBiometricKeyID(this.name);
+    return keyID != null;
+  }
+
+  async disableBiometric(): Promise<void> {
+    const keyID = await this.storage.getBiometricKeyID(this.name);
+    if (keyID != null) {
+      await removeBiometricPrivateKey(keyID);
+      await this.storage.delBiometricKeyID(this.name);
+    }
+  }
+
+  async enableBiometric(options: BiometricOptions): Promise<void> {
+    const clientID = this.clientID;
+    if (clientID == null) {
+      throw new AuthgearError("missing client ID");
+    }
+    await this.refreshAccessTokenIfNeeded();
+    const accessToken = this.accessToken;
+    if (accessToken == null) {
+      throw new AuthgearError("enableBiometric requires authenticated user");
+    }
+
+    const kid = await generateUUID();
+    const deviceInfo = await getDeviceInfo();
+    const { token } = await this.baseContainer.apiClient.oauthChallenge(
+      "biometric_request"
+    );
+    const now = Math.floor(+new Date() / 1000);
+    const payload = {
+      iat: now,
+      exp: now + 300,
+      challenge: token,
+      action: "setup",
+      device_info: deviceInfo,
+    };
+    const jwt = await createBiometricPrivateKey({
+      ...options,
+      kid,
+      payload,
+    });
+    await this.baseContainer.apiClient._setupBiometricRequest({
+      access_token: accessToken,
+      client_id: clientID,
+      jwt,
+    });
+    await this.storage.setBiometricKeyID(this.name, kid);
+  }
+
+  async authenticateBiometric(
+    options: BiometricOptions
+  ): Promise<AuthenticateResult> {
+    const kid = await this.storage.getBiometricKeyID(this.name);
+    if (kid == null) {
+      throw new AuthgearError("biometric key ID not found");
+    }
+    const clientID = this.clientID;
+    if (clientID == null) {
+      throw new AuthgearError("missing client ID");
+    }
+    const deviceInfo = await getDeviceInfo();
+    const { token } = await this.baseContainer.apiClient.oauthChallenge(
+      "biometric_request"
+    );
+    const now = Math.floor(+new Date() / 1000);
+    const payload = {
+      iat: now,
+      exp: now + 300,
+      challenge: token,
+      action: "authenticate",
+      device_info: deviceInfo,
+    };
+
+    try {
+      const jwt = await signWithBiometricPrivateKey({
+        ...options,
+        kid,
+        payload,
+      });
+      const tokenResponse =
+        await this.baseContainer.apiClient._oidcTokenRequest({
+          grant_type: "urn:authgear:params:oauth:grant-type:biometric-request",
+          client_id: clientID,
+          jwt,
+        });
+
+      const userInfo = await this.baseContainer.apiClient._oidcUserInfoRequest(
+        tokenResponse.access_token
+      );
+      await this.baseContainer._persistTokenResponse(
+        tokenResponse,
+        SessionStateChangeReason.Authenticated
+      );
+      return { userInfo };
+    } catch (e: unknown) {
+      if (e instanceof BiometricPrivateKeyNotFoundError) {
+        await this.disableBiometric();
+      }
+      if (
+        e instanceof OAuthError &&
+        e.error === "invalid_grant" &&
+        e.error_description === "InvalidCredentials"
+      ) {
+        await this.disableBiometric();
+      }
+      throw e;
+    }
   }
 }
 

@@ -1,4 +1,8 @@
 /**
+ * UserInfo is the result of fetchUserInfo.
+ * It contains `sub` which is the User ID,
+ * as well OIDC standard claims like `email`.
+ *
  * @public
  */
 export interface UserInfo {
@@ -38,6 +42,9 @@ export interface UserInfo {
 }
 
 /**
+ * ColorScheme represents the color scheme supported by Authgear.
+ * A colorscheme is either light or dark. Authgear supports both by default.
+ *
  * @public
  */
 export enum ColorScheme {
@@ -186,6 +193,10 @@ export interface _AnonymousUserPromotionCodeResponse {
 }
 
 /**
+ * TokenStorage is an interface controlling when refresh tokens are stored.
+ * Normally you do not need to implement this interface.
+ * You can use one of those implementations provided by the SDK.
+ *
  * @public
  */
 export interface TokenStorage {
@@ -221,6 +232,8 @@ export interface _StorageDriver {
 }
 
 /**
+ * Options for the constructor of a Container.
+ *
  * @public
  */
 export interface ContainerOptions {
