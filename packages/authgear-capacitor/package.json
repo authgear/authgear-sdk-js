@@ -11,7 +11,7 @@
     "android/build.gradle",
     "dist/",
     "ios/Plugin/",
-    "AuthgearSdkCapacitor.podspec"
+    "AuthgearCapacitor.podspec"
   ],
   "scripts": {
     "verify": "npm run verify:ios && npm run verify:android",
