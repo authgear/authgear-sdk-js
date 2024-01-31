@@ -16,12 +16,12 @@ import {
   Page,
   PromptOption,
 } from "@authgear/core";
+import { Platform } from "react-native";
 import { PersistentContainerStorage, PersistentTokenStorage } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
   registerWechatRedirectURI,
   openURL,
-  openAuthorizeURL,
   createBiometricPrivateKey,
   checkBiometricSupported,
   removeBiometricPrivateKey,
@@ -41,7 +41,8 @@ import {
 } from "./types";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 import { BiometricPrivateKeyNotFoundError } from "./error";
-import { Platform } from "react-native";
+import { WebView, DefaultWebView } from "./webview";
+import EventEmitter from "./eventEmitter";
 export * from "@authgear/core";
 export * from "./types";
 export * from "./storage";
@@ -52,7 +53,7 @@ export {
   BiometricNoEnrollmentError,
   BiometricLockoutError,
 } from "./error";
-import EventEmitter from "./eventEmitter";
+export * from "./webview";
 
 /**
  * @public
@@ -80,6 +81,11 @@ export interface ConfigureOptions {
    * @defaultValue false
    */
   isSSOEnabled?: boolean;
+
+  /*
+   * An implementation of WebView.
+   */
+  webView?: WebView;
 }
 
 /**
@@ -125,6 +131,11 @@ export class ReactNativeContainer {
    * @internal
    */
   tokenStorage: TokenStorage;
+
+  /**
+   * @internal
+   */
+  webView: WebView;
 
   /**
    * @internal
@@ -217,6 +228,7 @@ export class ReactNativeContainer {
 
     this.storage = new PersistentContainerStorage();
     this.tokenStorage = new PersistentTokenStorage();
+    this.webView = new DefaultWebView();
 
     this.wechatRedirectDeepLinkListener = (url: string) => {
       this._sendWechatRedirectURIToDelegate(url);
@@ -314,6 +326,12 @@ export class ReactNativeContainer {
     } else {
       this.tokenStorage = new PersistentTokenStorage();
     }
+    if (options.webView != null) {
+      this.webView = options.webView;
+    } else {
+      this.webView = new DefaultWebView();
+    }
+
     // TODO: verify if we need to support configure for second time
     // and guard if initialized
     const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
@@ -367,11 +385,11 @@ export class ReactNativeContainer {
     if (options.wechatRedirectURI != null) {
       await registerWechatRedirectURI(options.wechatRedirectURI);
     }
-    const redirectURL = await openAuthorizeURL(
-      authorizeURL,
-      options.redirectURI,
-      this._shouldPrefersEphemeralWebBrowserSession()
-    );
+    const redirectURL = await this.webView.openAuthorizationURL({
+      url: authorizeURL,
+      redirectURI: options.redirectURI,
+      shareCookiesWithDeviceBrowser: this._shareCookiesWithDeviceBrowser(),
+    });
     const xDeviceInfo = await getXDeviceInfo();
     const result = await this.baseContainer._finishAuthentication(
       redirectURL,
@@ -424,11 +442,11 @@ export class ReactNativeContainer {
       await registerWechatRedirectURI(options.wechatRedirectURI);
     }
 
-    const redirectURL = await openAuthorizeURL(
-      endpoint,
-      options.redirectURI,
-      this._shouldPrefersEphemeralWebBrowserSession()
-    );
+    const redirectURL = await this.webView.openAuthorizationURL({
+      url: endpoint,
+      redirectURI: options.redirectURI,
+      shareCookiesWithDeviceBrowser: this._shareCookiesWithDeviceBrowser(),
+    });
     const xDeviceInfo = await getXDeviceInfo();
     const result = await this.baseContainer._finishReauthentication(
       redirectURL,
@@ -623,11 +641,11 @@ export class ReactNativeContainer {
     if (options.wechatRedirectURI != null) {
       await registerWechatRedirectURI(options.wechatRedirectURI);
     }
-    const redirectURL = await openAuthorizeURL(
-      authorizeURL,
-      options.redirectURI,
-      this._shouldPrefersEphemeralWebBrowserSession()
-    );
+    const redirectURL = await this.webView.openAuthorizationURL({
+      url: authorizeURL,
+      redirectURI: options.redirectURI,
+      shareCookiesWithDeviceBrowser: this._shareCookiesWithDeviceBrowser(),
+    });
     const result = await this.baseContainer._finishAuthentication(
       redirectURL,
       true
@@ -640,11 +658,11 @@ export class ReactNativeContainer {
   /**
    * @internal
    */
-  _shouldPrefersEphemeralWebBrowserSession(): boolean {
+  _shareCookiesWithDeviceBrowser(): boolean {
     if (this.isSSOEnabled) {
-      return false;
+      return true;
     }
-    return true;
+    return false;
   }
 
   /**
