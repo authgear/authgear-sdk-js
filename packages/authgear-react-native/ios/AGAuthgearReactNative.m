@@ -226,10 +226,9 @@ RCT_EXPORT_METHOD(dismiss:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseReje
     resolve(nil);
 }
 
-RCT_EXPORT_METHOD(openURL:(NSURL *)url
-        wechatRedirectURI:(NSString *)wechatRedirectURI
-                  resolve:(RCTPromiseResolveBlock)resolve
-                   reject:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(registerWechatRedirectURI:(NSString *)wechatRedirectURI
+    resolve:(RCTPromiseResolveBlock)resolve
+    reject:(RCTPromiseRejectBlock)reject)
 {
     // For opening setting page, sdk will not know when user end
     // the setting page.
@@ -238,8 +237,15 @@ RCT_EXPORT_METHOD(openURL:(NSURL *)url
     // new authorize section (authorize or setting page)
     // registerCurrentWechatRedirectURI will be called and overwrite
     // previous registered wechatRedirectURI
-    NSString *scheme = @"nocallback";
     [AGAuthgearReactNative registerCurrentWechatRedirectURI:wechatRedirectURI];
+    resolve(nil);
+}
+
+RCT_EXPORT_METHOD(openURL:(NSURL *)url
+                  resolve:(RCTPromiseResolveBlock)resolve
+                   reject:(RCTPromiseRejectBlock)reject)
+{
+    NSString *scheme = @"nocallback";
     if (@available(iOS 12.0, *)) {
         self.asSession = [[ASWebAuthenticationSession alloc] initWithURL:url
                                                                             callbackURLScheme:scheme
@@ -271,12 +277,10 @@ RCT_EXPORT_METHOD(openURL:(NSURL *)url
 RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
                        callbackURL:(NSString *)callbackURL
  prefersEphemeralWebBrowserSession:(BOOL)prefersEphemeralWebBrowserSession
-                 wechatRedirectURI:(NSString *)wechatRedirectURI
                            resolve:(RCTPromiseResolveBlock)resolve
                             reject:(RCTPromiseRejectBlock)reject)
 {
     NSString *scheme = [self getCallbackURLScheme:callbackURL];
-    [AGAuthgearReactNative registerCurrentWechatRedirectURI:wechatRedirectURI];
 
     if (@available(iOS 12.0, *)) {
         self.asSession = [[ASWebAuthenticationSession alloc] initWithURL:url

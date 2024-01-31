@@ -19,6 +19,7 @@ import {
 import { PersistentContainerStorage, PersistentTokenStorage } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
+  registerWechatRedirectURI,
   openURL,
   openAuthorizeURL,
   createBiometricPrivateKey,
@@ -363,11 +364,13 @@ export class ReactNativeContainer {
       ...options,
       platform,
     });
+    if (options.wechatRedirectURI != null) {
+      await registerWechatRedirectURI(options.wechatRedirectURI);
+    }
     const redirectURL = await openAuthorizeURL(
       authorizeURL,
       options.redirectURI,
-      this._shouldPrefersEphemeralWebBrowserSession(),
-      options.wechatRedirectURI
+      this._shouldPrefersEphemeralWebBrowserSession()
     );
     const xDeviceInfo = await getXDeviceInfo();
     const result = await this.baseContainer._finishAuthentication(
@@ -417,11 +420,14 @@ export class ReactNativeContainer {
       scope: ["openid", "https://authgear.com/scopes/full-access"],
     });
 
+    if (options.wechatRedirectURI != null) {
+      await registerWechatRedirectURI(options.wechatRedirectURI);
+    }
+
     const redirectURL = await openAuthorizeURL(
       endpoint,
       options.redirectURI,
-      this._shouldPrefersEphemeralWebBrowserSession(),
-      options.wechatRedirectURI
+      this._shouldPrefersEphemeralWebBrowserSession()
     );
     const xDeviceInfo = await getXDeviceInfo();
     const result = await this.baseContainer._finishReauthentication(
@@ -479,7 +485,11 @@ export class ReactNativeContainer {
         : {}),
     });
 
-    await openURL(targetURL, options?.wechatRedirectURI);
+    if (options?.wechatRedirectURI != null) {
+      await registerWechatRedirectURI(options.wechatRedirectURI);
+    }
+
+    await openURL(targetURL);
   }
 
   /**
@@ -610,11 +620,13 @@ export class ReactNativeContainer {
       loginHint,
       platform,
     });
+    if (options.wechatRedirectURI != null) {
+      await registerWechatRedirectURI(options.wechatRedirectURI);
+    }
     const redirectURL = await openAuthorizeURL(
       authorizeURL,
       options.redirectURI,
-      this._shouldPrefersEphemeralWebBrowserSession(),
-      options.wechatRedirectURI
+      this._shouldPrefersEphemeralWebBrowserSession()
     );
     const result = await this.baseContainer._finishAuthentication(
       redirectURL,

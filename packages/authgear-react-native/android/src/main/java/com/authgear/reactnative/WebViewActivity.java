@@ -83,7 +83,7 @@ public class WebViewActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        AuthgearReactNativeModule.unregisterWechatRedirectURI();
+        AuthgearReactNativeModule.unregisterCurrentWechatRedirectURI();
     }
 
     @Override

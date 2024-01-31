@@ -44,25 +44,28 @@ export async function generateUUID(): Promise<string> {
   return _wrapPromise(AuthgearReactNative.generateUUID());
 }
 
-export async function openURL(
-  url: string,
-  wechatRedirectURI?: string
+export async function registerWechatRedirectURI(
+  wechatRedirectURI: string
 ): Promise<void> {
-  return _wrapPromise(AuthgearReactNative.openURL(url, wechatRedirectURI));
+  return _wrapPromise(
+    AuthgearReactNative.registerWechatRedirectURI(wechatRedirectURI)
+  );
+}
+
+export async function openURL(url: string): Promise<void> {
+  return _wrapPromise(AuthgearReactNative.openURL(url));
 }
 
 export async function openAuthorizeURL(
   url: string,
   callbackURL: string,
-  prefersEphemeralWebBrowserSession: boolean,
-  wechatRedirectURI?: string
+  prefersEphemeralWebBrowserSession: boolean
 ): Promise<string> {
   const redirectURI: string = await _wrapPromise(
     AuthgearReactNative.openAuthorizeURL(
       url,
       callbackURL,
-      prefersEphemeralWebBrowserSession,
-      wechatRedirectURI
+      prefersEphemeralWebBrowserSession
     )
   );
   await dismiss();
