@@ -1,4 +1,4 @@
-import { openAuthorizeURL } from "./nativemodule";
+import { openAuthorizeURL, openAuthorizeURLWithWebView } from "./nativemodule";
 
 /**
  * @public
@@ -53,5 +53,53 @@ export class DefaultWebView implements WebView {
       options.redirectURI,
       prefersEphemeralWebBrowserSession
     );
+  }
+}
+
+/**
+ * Color is an integer according to this encoding https://developer.android.com/reference/android/graphics/Color#encoding
+ *
+ * @public
+ */
+export interface PlatformWebViewOptionsIOS {
+  backgroundColor?: number;
+  navigationBarBackgroundColor?: number;
+  navigationBarButtonTintColor?: number;
+  modalPresentationStyle?: "automatic" | "fullScreen" | "pageSheet";
+}
+
+/**
+ * @public
+ */
+export interface PlatformWebViewOptions {
+  ios?: PlatformWebViewOptionsIOS;
+}
+
+/**
+ * PlatformWebView is WKWebView on iOS, android.webkit.WebView on Android.
+ *
+ * @public
+ */
+export class PlatformWebView implements WebView {
+  private options?: PlatformWebViewOptions;
+
+  constructor(options?: PlatformWebViewOptions) {
+    this.options = options;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async openAuthorizationURL(
+    options: OpenAuthorizationURLOptions
+  ): Promise<string> {
+    return openAuthorizeURLWithWebView({
+      url: options.url,
+      redirectURI: options.redirectURI,
+      backgroundColor: this.options?.ios?.backgroundColor,
+      navigationBarBackgroundColor:
+        this.options?.ios?.navigationBarBackgroundColor,
+      navigationBarButtonTintColor:
+        this.options?.ios?.navigationBarButtonTintColor,
+      modalPresentationStyle: this.options?.ios?.modalPresentationStyle,
+    });
   }
 }
