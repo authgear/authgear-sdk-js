@@ -49,6 +49,11 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
         [self.webView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor].active = YES;
     }
 
+    // Configure the bounce behavior
+    self.webView.scrollView.bounces = NO;
+    self.webView.scrollView.alwaysBounceVertical = NO;
+    self.webView.scrollView.alwaysBounceHorizontal = NO;
+
     // Configure navigation bar appearance
     if (@available(iOS 13.0, *)) {
         UINavigationBarAppearance *appearance = [[UINavigationBarAppearance alloc] init];
