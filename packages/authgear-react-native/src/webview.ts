@@ -69,10 +69,21 @@ export interface PlatformWebViewOptionsIOS {
 }
 
 /**
+ * Color is an integer according to this encoding https://developer.android.com/reference/android/graphics/Color#encoding
+ *
+ * @public
+ */
+export interface PlatformWebViewOptionsAndroid {
+  actionBarBackgroundColor?: number;
+  actionBarButtonTintColor?: number;
+}
+
+/**
  * @public
  */
 export interface PlatformWebViewOptions {
   ios?: PlatformWebViewOptionsIOS;
+  android?: PlatformWebViewOptionsAndroid;
 }
 
 /**
@@ -100,6 +111,8 @@ export class PlatformWebView implements WebView {
       navigationBarButtonTintColor:
         this.options?.ios?.navigationBarButtonTintColor,
       modalPresentationStyle: this.options?.ios?.modalPresentationStyle,
+      actionBarBackgroundColor: this.options?.android?.actionBarBackgroundColor,
+      actionBarButtonTintColor: this.options?.android?.actionBarButtonTintColor,
     });
   }
 }

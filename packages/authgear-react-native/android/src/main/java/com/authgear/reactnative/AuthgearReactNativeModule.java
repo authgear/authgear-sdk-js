@@ -19,6 +19,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -701,6 +702,52 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
                 handle.value.reject(e);
             }
         }
+    }
+
+    @ReactMethod
+    public void openAuthorizeURLWithWebView(ReadableMap options, Promise promise) {
+        final int requestCode = this.mHandles.push(new StartActivityHandle(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, promise));
+
+        try {
+            Activity currentActivity = this.getCurrentActivity();
+            if (currentActivity == null) {
+                promise.reject(new Exception("No Activity"));
+                return;
+            }
+
+            Context ctx = currentActivity;
+
+            Uri url = Uri.parse(options.getString("url"));
+            Uri redirectURI = Uri.parse(options.getString("redirectURI"));
+            Integer actionBarBackgroundColor = this.readColorInt(options, "actionBarBackgroundColor");
+            Integer actionBarButtonTintColor = this.readColorInt(options, "actionBarButtonTintColor");
+            WebKitWebViewActivity.Options webViewOptions = new WebKitWebViewActivity.Options();
+            webViewOptions.url = url;
+            webViewOptions.redirectURI = redirectURI;
+            webViewOptions.actionBarBackgroundColor = actionBarBackgroundColor;
+            webViewOptions.actionBarButtonTintColor = actionBarButtonTintColor;
+
+            Intent intent = WebKitWebViewActivity.createIntent(ctx, webViewOptions);
+            currentActivity.startActivityForResult(intent, requestCode);
+        } catch (Exception e) {
+            StartActivityHandle<Promise> handle = this.mHandles.pop(requestCode);
+            if (handle != null) {
+                handle.value.reject(e);
+            }
+        }
+    }
+
+    private Integer readColorInt(ReadableMap map, String key) {
+        if (map.hasKey(key)) {
+            double d = map.getDouble(key);
+            long l = Double.valueOf(d).longValue();
+            int a = (int) ((l >> 24) & 0xff);
+            int r = (int) ((l >> 16) & 0xff);
+            int g = (int) ((l >> 8) &0xff);
+            int b = (int) (l & 0xff);
+            return Color.argb(a, r, g, b);
+        }
+        return null;
     }
 
     @ReactMethod

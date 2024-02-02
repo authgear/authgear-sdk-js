@@ -75,10 +75,14 @@ export async function openAuthorizeURL(
 export async function openAuthorizeURLWithWebView(options: {
   url: string;
   redirectURI: string;
+
   backgroundColor?: number;
   navigationBarBackgroundColor?: number;
   navigationBarButtonTintColor?: number;
   modalPresentationStyle?: string;
+
+  actionBarBackgroundColor?: number;
+  actionBarButtonTintColor?: number;
 }): Promise<string> {
   const redirectURIWithQuery: string = await _wrapPromise(
     AuthgearReactNative.openAuthorizeURLWithWebView(options)
