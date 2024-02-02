@@ -32,6 +32,7 @@ import authgear, {
   BiometricLAPolicy,
   BiometricAccessConstraintAndroid,
   SessionState,
+  PlatformWebView,
 } from '@authgear/react-native';
 import RadioGroup, {RadioGroupItemProps} from '../RadioGroup';
 
@@ -155,6 +156,7 @@ const HomeScreen: React.FC = () => {
   const [useTransientTokenStorage, setUseTransientTokenStorage] =
     useState(false);
   const [isSSOEnabled, setIsSSOEnabled] = useState(false);
+  const [useWebKitWebView, setUseWebKitWebView] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [sessionState, setSessionState] = useState<SessionState | null>(
@@ -360,6 +362,13 @@ const HomeScreen: React.FC = () => {
         tokenStorage: useTransientTokenStorage
           ? new TransientTokenStorage()
           : new PersistentTokenStorage(),
+        webView: useWebKitWebView
+          ? new PlatformWebView({
+              ios: {
+                modalPresentationStyle: 'fullScreen',
+              },
+            })
+          : undefined,
         isSSOEnabled,
       })
       .then(() => {
@@ -377,6 +386,7 @@ const HomeScreen: React.FC = () => {
     endpoint,
     useTransientTokenStorage,
     isSSOEnabled,
+    useWebKitWebView,
     postConfigure,
     showError,
   ]);
@@ -646,6 +656,14 @@ const HomeScreen: React.FC = () => {
             style={styles.checkbox}
             value={isSSOEnabled}
             onValueChange={setIsSSOEnabled}
+          />
+        </View>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>Use WebKit WebView</Text>
+          <Switch
+            style={styles.checkbox}
+            value={useWebKitWebView}
+            onValueChange={setUseWebKitWebView}
           />
         </View>
         <View style={styles.input}>
