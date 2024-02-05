@@ -37,6 +37,8 @@ export abstract class _BaseAPIClient {
   set endpoint(newEndpoint: string | undefined) {
     if (newEndpoint != null) {
       this._endpoint = _removeTrailingSlash(newEndpoint);
+      // When endpoint changes, remove the cached openid configuration.
+      this._config = undefined;
     } else {
       this._endpoint = undefined;
     }
