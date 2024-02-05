@@ -120,6 +120,8 @@ export async function openAuthorizeURLWithWebView(options: {
   backgroundColor?: number;
   navigationBarBackgroundColor?: number;
   navigationBarButtonTintColor?: number;
+  actionBarBackgroundColor?: number;
+  actionBarButtonTintColor?: number;
 }): Promise<string> {
   try {
     const { redirectURI } = await Authgear.openAuthorizeURLWithWebView(options);

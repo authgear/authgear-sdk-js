@@ -3,6 +3,7 @@ package com.authgear.capacitor;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 
 import androidx.activity.result.ActivityResult;
@@ -143,6 +144,37 @@ public class AuthgearPlugin extends Plugin {
     @ActivityCallback
     private void handleOpenAuthorizeURL(PluginCall call, ActivityResult activityResult) {
         int resultCode = activityResult.getResultCode();
+        if (resultCode == Activity.RESULT_CANCELED) {
+            this.rejectWithCancel(call);
+        }
+        if (resultCode == Activity.RESULT_OK) {
+            String redirectURI = activityResult.getData().getData().toString();
+            JSObject ret = new JSObject();
+            ret.put("redirectURI", redirectURI);
+            call.resolve(ret);
+        }
+    }
+
+    @PluginMethod
+    public void openAuthorizeURLWithWebView(PluginCall call) {
+        Uri url = Uri.parse(call.getString("url"));
+        Uri redirectURI = Uri.parse(call.getString("redirectURI"));
+        Integer actionBarBackgroundColor = this.readColorInt(call, "actionBarBackgroundColor");
+        Integer actionBarButtonTintColor = this.readColorInt(call, "actionBarButtonTintColor");
+        WebKitWebViewActivity.Options webViewOptions = new WebKitWebViewActivity.Options();
+        webViewOptions.url = url;
+        webViewOptions.redirectURI = redirectURI;
+        webViewOptions.actionBarBackgroundColor = actionBarBackgroundColor;
+        webViewOptions.actionBarButtonTintColor = actionBarButtonTintColor;
+
+        Context ctx = this.getContext();
+        Intent intent = WebKitWebViewActivity.createIntent(ctx, webViewOptions);
+        this.startActivityForResult(call, intent, "handleOpenAuthorizeURLWithWebView");
+    }
+
+    @ActivityCallback
+    private void handleOpenAuthorizeURLWithWebView(PluginCall call, ActivityResult activityResult) {
+        int resultCode= activityResult.getResultCode();
         if (resultCode == Activity.RESULT_CANCELED) {
             this.rejectWithCancel(call);
         }
@@ -396,6 +428,19 @@ public class AuthgearPlugin extends Plugin {
             default:
                 return "ERROR_UNKNOWN";
         }
+    }
+
+    private Integer readColorInt(PluginCall call, String key) {
+        if (call.hasOption(key)) {
+            double d = call.getDouble(key);
+            long l = Double.valueOf(d).longValue();
+            int a = (int) ((l >> 24) & 0xff);
+            int r = (int) ((l >> 16) & 0xff);
+            int g = (int) ((l >> 8) &0xff);
+            int b = (int) (l & 0xff);
+            return Color.argb(a, r, g, b);
+        }
+        return null;
     }
 
     private void reject(PluginCall call, Exception e) {
