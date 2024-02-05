@@ -6,6 +6,7 @@
 #import <LocalAuthentication/LocalAuthentication.h>
 #import <sys/utsname.h>
 #import "AGAuthgearReactNative.h"
+#import "AGWKWebViewController.h"
 
 static NSString *currentWechatRedirectURI = nil;
 static void postOpenWechatRedirectURINotification(NSURL *URL, id sender)
@@ -17,7 +18,7 @@ static void postOpenWechatRedirectURINotification(NSURL *URL, id sender)
 }
 
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 12000)
-@interface AGAuthgearReactNative() <ASWebAuthenticationPresentationContextProviding>
+@interface AGAuthgearReactNative() <ASWebAuthenticationPresentationContextProviding, AGWKWebViewControllerPresentationContextProviding>
 // We must have strong reference to the session otherwise it is closed immediately when
 // it goes out of scope.
 @property (nonatomic, strong) ASWebAuthenticationSession *asSession API_AVAILABLE(ios(12));
@@ -226,10 +227,9 @@ RCT_EXPORT_METHOD(dismiss:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseReje
     resolve(nil);
 }
 
-RCT_EXPORT_METHOD(openURL:(NSURL *)url
-        wechatRedirectURI:(NSString *)wechatRedirectURI
-                  resolve:(RCTPromiseResolveBlock)resolve
-                   reject:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(registerWechatRedirectURI:(NSString *)wechatRedirectURI
+    resolve:(RCTPromiseResolveBlock)resolve
+    reject:(RCTPromiseRejectBlock)reject)
 {
     // For opening setting page, sdk will not know when user end
     // the setting page.
@@ -238,8 +238,15 @@ RCT_EXPORT_METHOD(openURL:(NSURL *)url
     // new authorize section (authorize or setting page)
     // registerCurrentWechatRedirectURI will be called and overwrite
     // previous registered wechatRedirectURI
-    NSString *scheme = @"nocallback";
     [AGAuthgearReactNative registerCurrentWechatRedirectURI:wechatRedirectURI];
+    resolve(nil);
+}
+
+RCT_EXPORT_METHOD(openURL:(NSURL *)url
+                  resolve:(RCTPromiseResolveBlock)resolve
+                   reject:(RCTPromiseRejectBlock)reject)
+{
+    NSString *scheme = @"nocallback";
     if (@available(iOS 12.0, *)) {
         self.asSession = [[ASWebAuthenticationSession alloc] initWithURL:url
                                                                             callbackURLScheme:scheme
@@ -268,15 +275,45 @@ RCT_EXPORT_METHOD(openURL:(NSURL *)url
     }
 }
 
+RCT_EXPORT_METHOD(openAuthorizeURLWithWebView:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
+{
+    NSString *url = options[@"url"];
+    NSString *redirectURI = options[@"redirectURI"];
+    UIModalPresentationStyle modalPresentationStyle = [self modalPresentationStyleFromString:options[@"modalPresentationStyle"]];
+    UIColor *backgroundColor = [self uiColorFromNSNumber:options[@"backgroundColor"]];
+    UIColor *navigationBarBackgroundColor = [self uiColorFromNSNumber:options[@"navigationBarBackgroundColor"]];
+    UIColor *navigationBarButtonTintColor = [self uiColorFromNSNumber:options[@"navigationBarButtonTintColor"]];
+
+    AGWKWebViewController *controller = [[AGWKWebViewController alloc] initWithURL:[[NSURL alloc] initWithString:url]
+                                                                       redirectURI:[[NSURL alloc] initWithString:redirectURI] completionHandler:^(NSURL *url, NSError *error) {
+        if (error) {
+            BOOL isUserCancelled = [error.domain isEqualToString:AGWKWebViewControllerErrorDomain] && error.code == AGWKWebViewControllerErrorCodeCanceledLogin;
+            if (isUserCancelled) {
+                reject(@"CANCEL", @"CANCEL", error);
+            } else {
+                reject(RCTErrorUnspecified, [NSString stringWithFormat:@"Unable to open URL: %@", url], error);
+            }
+        } else {
+            resolve([url absoluteString]);
+        }
+    }];
+    controller.backgroundColor = backgroundColor;
+    controller.navigationBarBackgroundColor = navigationBarBackgroundColor;
+    controller.navigationBarButtonTintColor = navigationBarButtonTintColor;
+    controller.modalPresentationStyle = modalPresentationStyle;
+    controller.presentationContextProvider = self;
+    [controller start];
+}
+
 RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
                        callbackURL:(NSString *)callbackURL
  prefersEphemeralWebBrowserSession:(BOOL)prefersEphemeralWebBrowserSession
-                 wechatRedirectURI:(NSString *)wechatRedirectURI
                            resolve:(RCTPromiseResolveBlock)resolve
                             reject:(RCTPromiseRejectBlock)reject)
 {
     NSString *scheme = [self getCallbackURLScheme:callbackURL];
-    [AGAuthgearReactNative registerCurrentWechatRedirectURI:wechatRedirectURI];
 
     if (@available(iOS 12.0, *)) {
         self.asSession = [[ASWebAuthenticationSession alloc] initWithURL:url
@@ -599,6 +636,16 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
   return nil;
 }
 
+- (UIWindow *)presentationAnchorForAGWKWebViewController:(AGWKWebViewController *)controller
+{
+  for (__kindof UIWindow *w in [RCTSharedApplication() windows]) {
+    if ([w isKeyWindow]) {
+      return w;
+    }
+  }
+  return nil;
+}
+
 -(NSArray *)randomBytes:(NSUInteger)length
 {
     NSMutableData *data = [NSMutableData dataWithLength:length];
@@ -867,6 +914,36 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
         context.localizedFallbackTitle = @"";
     }
     return context;
+}
+
+-(UIModalPresentationStyle)modalPresentationStyleFromString:(NSString *)str
+{
+    if (str != nil) {
+        if ([str isEqualToString:@"fullScreen"]) {
+            return UIModalPresentationFullScreen;
+        }
+        if ([str isEqualToString:@"pageSheet"]) {
+            return UIModalPresentationPageSheet;
+        }
+    }
+    if (@available(iOS 13.0, *)) {
+        return UIModalPresentationAutomatic;
+    } else {
+        return UIModalPresentationFullScreen;
+    }
+}
+
+-(UIColor *)uiColorFromNSNumber:(NSNumber *)num
+{
+    if (num == nil) {
+        return nil;
+    }
+    NSUInteger argb = num.unsignedIntegerValue;
+    CGFloat a = ((argb >> 24) & 0xFF) / 255.0;
+    CGFloat r = ((argb >> 16) & 0xFF) / 255.0;
+    CGFloat g = ((argb >> 8) & 0xFF) / 255.0;
+    CGFloat b = (argb & 0xFF) / 255.0;
+    return [UIColor colorWithRed:r green:g blue:b alpha:a];
 }
 
 @end

@@ -19,6 +19,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -73,16 +74,16 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     private static String currentWechatRedirectURI;
     private static OnOpenWechatRedirectURIListener onOpenWechatRedirectURIListener;
 
-    public static void registerWechatRedirectURI(String uri, OnOpenWechatRedirectURIListener listener) {
+    public static void registerCurrentWechatRedirectURI(String uri, OnOpenWechatRedirectURIListener listener) {
         if (uri != null) {
             currentWechatRedirectURI = uri;
             onOpenWechatRedirectURIListener = listener;
         } else {
-            unregisterWechatRedirectURI();
+            unregisterCurrentWechatRedirectURI();
         }
     }
 
-    public static void unregisterWechatRedirectURI() {
+    public static void unregisterCurrentWechatRedirectURI() {
         currentWechatRedirectURI = null;
         onOpenWechatRedirectURIListener = null;
     }
@@ -672,7 +673,18 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     }
 
     @ReactMethod
-    public void openURL(String urlString, String wechatRedirectURI, Promise promise) {
+    public void registerWechatRedirectURI(String wechatRedirectURI, Promise promise) {
+        registerCurrentWechatRedirectURI(wechatRedirectURI, new OnOpenWechatRedirectURIListener() {
+            @Override
+            public void OnURI(Uri uri) {
+                sendOpenWechatRedirectURI(uri);
+            }
+        });
+        promise.resolve(null);
+    }
+
+    @ReactMethod
+    public void openURL(String urlString, Promise promise) {
         final int requestCode = this.mHandles.push(new StartActivityHandle(ACTIVITY_PROMISE_TAG_OPEN_URL, promise));
         try {
             Activity currentActivity = getCurrentActivity();
@@ -682,12 +694,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             }
 
             Context context = currentActivity;
-            registerWechatRedirectURI(wechatRedirectURI, new OnOpenWechatRedirectURIListener() {
-                @Override
-                public void OnURI(Uri uri) {
-                    sendOpenWechatRedirectURI(uri);
-                }
-            });
             Intent intent = WebViewActivity.createIntent(context, urlString);
             currentActivity.startActivityForResult(intent, requestCode);
         } catch (Exception e) {
@@ -699,7 +705,53 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     }
 
     @ReactMethod
-    public void openAuthorizeURL(String urlString, String callbackURL, boolean shareSessionWithSystemBrowser, String wechatRedirectURI, Promise promise) {
+    public void openAuthorizeURLWithWebView(ReadableMap options, Promise promise) {
+        final int requestCode = this.mHandles.push(new StartActivityHandle(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, promise));
+
+        try {
+            Activity currentActivity = this.getCurrentActivity();
+            if (currentActivity == null) {
+                promise.reject(new Exception("No Activity"));
+                return;
+            }
+
+            Context ctx = currentActivity;
+
+            Uri url = Uri.parse(options.getString("url"));
+            Uri redirectURI = Uri.parse(options.getString("redirectURI"));
+            Integer actionBarBackgroundColor = this.readColorInt(options, "actionBarBackgroundColor");
+            Integer actionBarButtonTintColor = this.readColorInt(options, "actionBarButtonTintColor");
+            WebKitWebViewActivity.Options webViewOptions = new WebKitWebViewActivity.Options();
+            webViewOptions.url = url;
+            webViewOptions.redirectURI = redirectURI;
+            webViewOptions.actionBarBackgroundColor = actionBarBackgroundColor;
+            webViewOptions.actionBarButtonTintColor = actionBarButtonTintColor;
+
+            Intent intent = WebKitWebViewActivity.createIntent(ctx, webViewOptions);
+            currentActivity.startActivityForResult(intent, requestCode);
+        } catch (Exception e) {
+            StartActivityHandle<Promise> handle = this.mHandles.pop(requestCode);
+            if (handle != null) {
+                handle.value.reject(e);
+            }
+        }
+    }
+
+    private Integer readColorInt(ReadableMap map, String key) {
+        if (map.hasKey(key)) {
+            double d = map.getDouble(key);
+            long l = Double.valueOf(d).longValue();
+            int a = (int) ((l >> 24) & 0xff);
+            int r = (int) ((l >> 16) & 0xff);
+            int g = (int) ((l >> 8) &0xff);
+            int b = (int) (l & 0xff);
+            return Color.argb(a, r, g, b);
+        }
+        return null;
+    }
+
+    @ReactMethod
+    public void openAuthorizeURL(String urlString, String callbackURL, boolean shareSessionWithSystemBrowser, Promise promise) {
         final int requestCode = this.mHandles.push(new StartActivityHandle(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, promise));
         try {
             Activity currentActivity = getCurrentActivity();
@@ -710,12 +762,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
             Context context = currentActivity;
             Uri uri = Uri.parse(urlString).normalizeScheme();
-            registerWechatRedirectURI(wechatRedirectURI, new OnOpenWechatRedirectURIListener() {
-                @Override
-                public void OnURI(Uri uri) {
-                    sendOpenWechatRedirectURI(uri);
-                }
-            });
             OAuthRedirectActivity.registerCallbackURL(callbackURL);
 
             Intent intent = OAuthCoordinatorActivity.createAuthorizationIntent(context, uri);
