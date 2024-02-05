@@ -1,4 +1,5 @@
 /* global window, Request */
+import { Capacitor } from "@capacitor/core";
 import {
   type ContainerOptions,
   type TokenStorage,
@@ -20,13 +21,13 @@ import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
   generateUUID,
   getDeviceInfo,
-  openAuthorizeURL,
   openURL,
   createBiometricPrivateKey,
   checkBiometricSupported,
   removeBiometricPrivateKey,
   signWithBiometricPrivateKey,
 } from "./plugin";
+import { WebView, DefaultWebView } from "./webview";
 import {
   type CapacitorContainerDelegate,
   type AuthenticateOptions,
@@ -37,11 +38,11 @@ import {
   type BiometricOptions,
 } from "./types";
 import { BiometricPrivateKeyNotFoundError } from "./error";
-import { Capacitor } from "@capacitor/core";
 
 export * from "@authgear/core";
 export * from "./types";
 export * from "./storage";
+export * from "./webview";
 export {
   BiometricPrivateKeyNotFoundError,
   BiometricNotSupportedOrPermissionDeniedError,
@@ -88,6 +89,11 @@ export interface ConfigureOptions {
    * @defaultValue false
    */
   isSSOEnabled?: boolean;
+
+  /*
+   * An implementation of WebView.
+   */
+  webView?: WebView;
 }
 
 /**
@@ -131,6 +137,11 @@ export class CapacitorContainer {
    * @internal
    */
   tokenStorage: TokenStorage;
+
+  /**
+   * @internal
+   */
+  webView: WebView;
 
   /**
    * @public
@@ -210,6 +221,7 @@ export class CapacitorContainer {
 
     this.storage = new PersistentContainerStorage();
     this.tokenStorage = new PersistentTokenStorage();
+    this.webView = new DefaultWebView();
   }
 
   /**
@@ -287,6 +299,11 @@ export class CapacitorContainer {
       this.tokenStorage = options.tokenStorage;
     } else {
       this.tokenStorage = new PersistentTokenStorage();
+    }
+    if (options.webView != null) {
+      this.webView = options.webView;
+    } else {
+      this.webView = new DefaultWebView();
     }
     // TODO: verify if we need to support configure for second time
     // and guard if initialized
@@ -389,11 +406,10 @@ export class CapacitorContainer {
       ...options,
       platform,
     });
-    const redirectURL = await openAuthorizeURL({
+    const redirectURL = await this.webView.openAuthorizationURL({
       url: authorizeURL,
-      callbackURL: options.redirectURI,
-      prefersEphemeralWebBrowserSession:
-        this._shouldPrefersEphemeralWebBrowserSession(),
+      redirectURI: options.redirectURI,
+      shareCookiesWithDeviceBrowser: this._shareCookiesWithDeviceBrowser(),
     });
     const xDeviceInfo = await getXDeviceInfo();
     const result = await this.baseContainer._finishAuthentication(
@@ -443,11 +459,10 @@ export class CapacitorContainer {
       scope: ["openid", "https://authgear.com/scopes/full-access"],
     });
 
-    const redirectURL = await openAuthorizeURL({
+    const redirectURL = await this.webView.openAuthorizationURL({
       url: endpoint,
-      callbackURL: options.redirectURI,
-      prefersEphemeralWebBrowserSession:
-        this._shouldPrefersEphemeralWebBrowserSession(),
+      redirectURI: options.redirectURI,
+      shareCookiesWithDeviceBrowser: this._shareCookiesWithDeviceBrowser(),
     });
     const xDeviceInfo = await getXDeviceInfo();
     const result = await this.baseContainer._finishReauthentication(
@@ -555,11 +570,11 @@ export class CapacitorContainer {
   /**
    * @internal
    */
-  _shouldPrefersEphemeralWebBrowserSession(): boolean {
+  _shareCookiesWithDeviceBrowser(): boolean {
     if (this.isSSOEnabled) {
-      return false;
+      return true;
     }
-    return true;
+    return false;
   }
 
   /**
