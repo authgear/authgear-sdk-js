@@ -16,6 +16,14 @@ export function readIsSSOEnabled(): boolean {
   return false;
 }
 
+export function readUseWebKitWebView(): boolean {
+  const str = window.localStorage.getItem("authgear.useWebKitWebView");
+  if (str === "true") {
+    return true;
+  }
+  return false;
+}
+
 export function writeClientID(clientID: string) {
   window.localStorage.setItem("authgear.clientID", clientID);
 }
@@ -26,4 +34,11 @@ export function writeEndpoint(endpoint: string) {
 
 export function writeIsSSOEnabled(isSSOEnabled: boolean) {
   window.localStorage.setItem("authgear.isSSOEnabled", String(isSSOEnabled));
+}
+
+export function writeUseWebKitWebView(useWebKitWebView: boolean) {
+  window.localStorage.setItem(
+    "authgear.useWebKitWebView",
+    String(useWebKitWebView)
+  );
 }
