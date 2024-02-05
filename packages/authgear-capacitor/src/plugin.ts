@@ -19,9 +19,11 @@ export interface AuthgearPlugin {
     url: string;
     redirectURI: string;
     modalPresentationStyle?: string;
-    backgroundColor?: number;
-    navigationBarBackgroundColor?: number;
-    navigationBarButtonTintColor?: number;
+    backgroundColor?: string;
+    navigationBarBackgroundColor?: string;
+    navigationBarButtonTintColor?: string;
+    actionBarBackgroundColor?: string;
+    actionBarButtonTintColor?: string;
   }): Promise<{ redirectURI: string }>;
   openURL(options: { url: string }): Promise<void>;
   checkBiometricSupported(options: BiometricOptions): Promise<void>;
@@ -117,11 +119,11 @@ export async function openAuthorizeURLWithWebView(options: {
   url: string;
   redirectURI: string;
   modalPresentationStyle?: string;
-  backgroundColor?: number;
-  navigationBarBackgroundColor?: number;
-  navigationBarButtonTintColor?: number;
-  actionBarBackgroundColor?: number;
-  actionBarButtonTintColor?: number;
+  backgroundColor?: string;
+  navigationBarBackgroundColor?: string;
+  navigationBarButtonTintColor?: string;
+  actionBarBackgroundColor?: string;
+  actionBarButtonTintColor?: string;
 }): Promise<string> {
   try {
     const { redirectURI } = await Authgear.openAuthorizeURLWithWebView(options);

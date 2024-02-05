@@ -432,8 +432,8 @@ public class AuthgearPlugin extends Plugin {
 
     private Integer readColorInt(PluginCall call, String key) {
         if (call.hasOption(key)) {
-            double d = call.getDouble(key);
-            long l = Double.valueOf(d).longValue();
+            String s = call.getString(key);
+            long l = Long.parseLong(s, 16);
             int a = (int) ((l >> 24) & 0xff);
             int r = (int) ((l >> 16) & 0xff);
             int g = (int) ((l >> 8) &0xff);

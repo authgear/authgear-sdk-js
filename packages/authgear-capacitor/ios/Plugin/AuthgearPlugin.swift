@@ -107,9 +107,9 @@ public class AuthgearPlugin: CAPPlugin {
         let url = URL(string: call.getString("url")!)!
         let redirectURI = URL(string: call.getString("redirectURI")!)!
         let modalPresentationStyle = call.getString("modalPresentationStyle")
-        let backgroundColor = call.getInt("backgroundColor")
-        let navigationBarBackgroundColor = call.getInt("navigationBarBackgroundColor")
-        let navigationBarButtonTintColor = call.getInt("navigationBarButtonTintColor")
+        let backgroundColor = call.getString("backgroundColor")
+        let navigationBarBackgroundColor = call.getString("navigationBarBackgroundColor")
+        let navigationBarButtonTintColor = call.getString("navigationBarButtonTintColor")
 
         DispatchQueue.main.async {
             self.impl.openAuthorizeURLWithWebView(
@@ -117,9 +117,9 @@ public class AuthgearPlugin: CAPPlugin {
                 url: url,
                 redirectURI: redirectURI,
                 modalPresentationStyleString: modalPresentationStyle,
-                backgroundColorInt: backgroundColor,
-                navigationBarBackgroundColorInt: navigationBarBackgroundColor,
-                navigationBarButtonTintColorInt: navigationBarButtonTintColor
+                backgroundColorString: backgroundColor,
+                navigationBarBackgroundColorString: navigationBarBackgroundColor,
+                navigationBarButtonTintColorString: navigationBarButtonTintColor
             ) { (redirectURI, error) in
                 if let error = error {
                     error.reject(call)

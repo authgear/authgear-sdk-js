@@ -222,9 +222,9 @@ import Capacitor
         url: URL,
         redirectURI: URL,
         modalPresentationStyleString: String?,
-        backgroundColorInt: Int?,
-        navigationBarBackgroundColorInt: Int?,
-        navigationBarButtonTintColorInt: Int?,
+        backgroundColorString: String?,
+        navigationBarBackgroundColorString: String?,
+        navigationBarButtonTintColorString: String?,
         completion: @escaping (String?, Error?) -> Void
     ) {
         var controller: AGWKWebViewController?
@@ -243,9 +243,9 @@ import Capacitor
             }
         }
         self.agWKWebViewControllerHandles[controller!] = window
-        controller?.backgroundColor = UIColor(argb: backgroundColorInt)
-        controller?.navigationBarBackgroundColor = UIColor(argb: navigationBarBackgroundColorInt)
-        controller?.navigationBarButtonTintColor = UIColor(argb: navigationBarButtonTintColorInt)
+        controller?.backgroundColor = UIColor(argb: backgroundColorString)
+        controller?.navigationBarBackgroundColor = UIColor(argb: navigationBarBackgroundColorString)
+        controller?.navigationBarButtonTintColor = UIColor(argb: navigationBarButtonTintColorString)
         controller?.modalPresentationStyle = UIModalPresentationStyle.from(string: modalPresentationStyleString)
         controller?.presentationContextProvider = self
         controller?.start()
@@ -724,14 +724,15 @@ private extension LAPolicy {
 }
 
 private extension UIColor {
-    convenience init?(argb: Int?) {
+    convenience init?(argb: String?) {
         guard let argb = argb else {
             return nil
         }
-        let a = CGFloat((argb >> 24) & 0xFF) / 255.0
-        let r = CGFloat((argb >> 16) & 0xFF) / 255.0
-        let g = CGFloat((argb >> 8) & 0xFF) / 255.0
-        let b = CGFloat(argb & 0xFF) / 255.0
+        let argbInt = UInt32(argb, radix: 16)!
+        let a = CGFloat((argbInt >> 24) & 0xFF) / 255.0
+        let r = CGFloat((argbInt >> 16) & 0xFF) / 255.0
+        let g = CGFloat((argbInt >> 8) & 0xFF) / 255.0
+        let b = CGFloat(argbInt & 0xFF) / 255.0
         self.init(red: r, green: g, blue: b, alpha: a)
     }
 }

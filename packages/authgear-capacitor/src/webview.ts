@@ -105,14 +105,16 @@ export class PlatformWebView implements WebView {
     return openAuthorizeURLWithWebView({
       url: options.url,
       redirectURI: options.redirectURI,
-      backgroundColor: this.options?.ios?.backgroundColor,
+      backgroundColor: this.options?.ios?.backgroundColor?.toString(16),
       navigationBarBackgroundColor:
-        this.options?.ios?.navigationBarBackgroundColor,
+        this.options?.ios?.navigationBarBackgroundColor?.toString(16),
       navigationBarButtonTintColor:
-        this.options?.ios?.navigationBarButtonTintColor,
+        this.options?.ios?.navigationBarButtonTintColor?.toString(16),
       modalPresentationStyle: this.options?.ios?.modalPresentationStyle,
-      actionBarBackgroundColor: this.options?.android?.actionBarBackgroundColor,
-      actionBarButtonTintColor: this.options?.android?.actionBarButtonTintColor,
+      actionBarBackgroundColor:
+        this.options?.android?.actionBarBackgroundColor?.toString(16),
+      actionBarButtonTintColor:
+        this.options?.android?.actionBarButtonTintColor?.toString(16),
     });
   }
 }
