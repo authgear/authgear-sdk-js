@@ -33,6 +33,8 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
 
 - (void)viewDidLoad
 {
+    [super viewDidLoad];
+
     // Configure background color
     if (self.backgroundColor != nil) {
         self.view.backgroundColor = self.backgroundColor;
@@ -103,6 +105,8 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
 
 - (void)viewDidDisappear:(BOOL)animated
 {
+    [super viewDidDisappear:animated];
+
     // We only call completion handler here because
     // The view controller could be swiped to dismiss.
     // viewDidDisappear is the most rebust way to detect whether the view controller is dismissed.
