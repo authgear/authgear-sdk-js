@@ -15,6 +15,14 @@ export interface AuthgearPlugin {
     callbackURL: string;
     prefersEphemeralWebBrowserSession: boolean;
   }): Promise<{ redirectURI: string }>;
+  openAuthorizeURLWithWebView(options: {
+    url: string;
+    redirectURI: string;
+    modalPresentationStyle?: string;
+    backgroundColor?: number;
+    navigationBarBackgroundColor?: number;
+    navigationBarButtonTintColor?: number;
+  }): Promise<{ redirectURI: string }>;
   openURL(options: { url: string }): Promise<void>;
   checkBiometricSupported(options: BiometricOptions): Promise<void>;
   createBiometricPrivateKey(
@@ -99,6 +107,22 @@ export async function openAuthorizeURL(options: {
 }): Promise<string> {
   try {
     const { redirectURI } = await Authgear.openAuthorizeURL(options);
+    return redirectURI;
+  } catch (e: unknown) {
+    throw _wrapError(e);
+  }
+}
+
+export async function openAuthorizeURLWithWebView(options: {
+  url: string;
+  redirectURI: string;
+  modalPresentationStyle?: string;
+  backgroundColor?: number;
+  navigationBarBackgroundColor?: number;
+  navigationBarButtonTintColor?: number;
+}): Promise<string> {
+  try {
+    const { redirectURI } = await Authgear.openAuthorizeURLWithWebView(options);
     return redirectURI;
   } catch (e: unknown) {
     throw _wrapError(e);
