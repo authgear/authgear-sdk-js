@@ -110,10 +110,12 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
     // We only call completion handler here because
     // The view controller could be swiped to dismiss.
     // viewDidDisappear is the most rebust way to detect whether the view controller is dismissed.
-    if (self.result != nil) {
-        self.completionHandler(self.result, nil);
-    } else {
-        self.completionHandler(nil, [[NSError alloc] initWithDomain:AGWKWebViewControllerErrorDomain code:AGWKWebViewControllerErrorCodeCanceledLogin userInfo:nil]);
+    if (self.completionHandler != nil) {
+        if (self.result != nil) {
+            self.completionHandler(self.result, nil);
+        } else {
+            self.completionHandler(nil, [[NSError alloc] initWithDomain:AGWKWebViewControllerErrorDomain code:AGWKWebViewControllerErrorCodeCanceledLogin userInfo:nil]);
+        }
     }
     self.completionHandler = nil;
 }
