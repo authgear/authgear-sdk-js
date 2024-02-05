@@ -739,8 +739,8 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
     private Integer readColorInt(ReadableMap map, String key) {
         if (map.hasKey(key)) {
-            double d = map.getDouble(key);
-            long l = Double.valueOf(d).longValue();
+            String s = map.getString(key);
+            long l = Long.parseLong(s, 16);
             int a = (int) ((l >> 24) & 0xff);
             int r = (int) ((l >> 16) & 0xff);
             int g = (int) ((l >> 8) &0xff);
