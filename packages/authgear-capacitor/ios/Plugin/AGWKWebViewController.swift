@@ -69,10 +69,13 @@ class AGWKWebViewController: UIViewController, WKNavigationDelegate {
         // Configure layout
         self.view.addSubview(self.webView)
         if #available(iOS 11.0, *) {
-            self.webView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
+            // Extend the web view to the top edge of the screen.
+            // WKWebView magically offset the content so that the content is not covered by the navigation bar initially.
+            self.webView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
             self.webView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor).isActive = true
             self.webView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor).isActive = true
-            self.webView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+            // Extend the web view to the bottom edge of the screen.
+            self.webView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
         }
 
         // Configure the bounce behavior
