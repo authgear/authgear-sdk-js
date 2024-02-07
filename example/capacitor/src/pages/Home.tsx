@@ -45,7 +45,7 @@ import authgearCapacitor, {
   BiometricAccessConstraintIOS,
   BiometricLAPolicy,
   BiometricAccessConstraintAndroid,
-  PlatformWebView,
+  WebKitWebViewUIImplementation,
 } from "@authgear/capacitor";
 import {
   readClientID,
@@ -210,8 +210,8 @@ function AuthgearDemo() {
           tokenStorage: useTransientTokenStorage
             ? new TransientTokenStorage()
             : new PersistentTokenStorage(),
-          webView: useWebKitWebView
-            ? new PlatformWebView({
+          uiImplementation: useWebKitWebView
+            ? new WebKitWebViewUIImplementation({
                 ios: {
                   modalPresentationStyle: "fullScreen",
                 },

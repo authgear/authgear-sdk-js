@@ -27,7 +27,10 @@ import {
   removeBiometricPrivateKey,
   signWithBiometricPrivateKey,
 } from "./plugin";
-import { WebView, DefaultWebView } from "./webview";
+import {
+  UIImplementation,
+  DeviceBrowserUIImplementation,
+} from "./ui_implementation";
 import {
   type CapacitorContainerDelegate,
   type AuthenticateOptions,
@@ -42,7 +45,7 @@ import { BiometricPrivateKeyNotFoundError } from "./error";
 export * from "@authgear/core";
 export * from "./types";
 export * from "./storage";
-export * from "./webview";
+export * from "./ui_implementation";
 export {
   BiometricPrivateKeyNotFoundError,
   BiometricNotSupportedOrPermissionDeniedError,
@@ -91,9 +94,9 @@ export interface ConfigureOptions {
   isSSOEnabled?: boolean;
 
   /*
-   * An implementation of WebView.
+   * The UIImplementation.
    */
-  webView?: WebView;
+  uiImplementation?: UIImplementation;
 }
 
 /**
@@ -141,7 +144,7 @@ export class CapacitorContainer {
   /**
    * @internal
    */
-  webView: WebView;
+  uiImplementation: UIImplementation;
 
   /**
    * @public
@@ -221,7 +224,7 @@ export class CapacitorContainer {
 
     this.storage = new PersistentContainerStorage();
     this.tokenStorage = new PersistentTokenStorage();
-    this.webView = new DefaultWebView();
+    this.uiImplementation = new DeviceBrowserUIImplementation();
   }
 
   /**
@@ -300,10 +303,10 @@ export class CapacitorContainer {
     } else {
       this.tokenStorage = new PersistentTokenStorage();
     }
-    if (options.webView != null) {
-      this.webView = options.webView;
+    if (options.uiImplementation != null) {
+      this.uiImplementation = options.uiImplementation;
     } else {
-      this.webView = new DefaultWebView();
+      this.uiImplementation = new DeviceBrowserUIImplementation();
     }
     // TODO: verify if we need to support configure for second time
     // and guard if initialized
@@ -406,7 +409,7 @@ export class CapacitorContainer {
       ...options,
       platform,
     });
-    const redirectURL = await this.webView.openAuthorizationURL({
+    const redirectURL = await this.uiImplementation.openAuthorizationURL({
       url: authorizeURL,
       redirectURI: options.redirectURI,
       shareCookiesWithDeviceBrowser: this._shareCookiesWithDeviceBrowser(),
@@ -459,7 +462,7 @@ export class CapacitorContainer {
       scope: ["openid", "https://authgear.com/scopes/full-access"],
     });
 
-    const redirectURL = await this.webView.openAuthorizationURL({
+    const redirectURL = await this.uiImplementation.openAuthorizationURL({
       url: endpoint,
       redirectURI: options.redirectURI,
       shareCookiesWithDeviceBrowser: this._shareCookiesWithDeviceBrowser(),
