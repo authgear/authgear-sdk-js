@@ -33,6 +33,8 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
 
 - (void)viewDidLoad
 {
+    [super viewDidLoad];
+
     // Configure background color
     if (self.backgroundColor != nil) {
         self.view.backgroundColor = self.backgroundColor;
@@ -43,10 +45,13 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
     // Configure layout
     [self.view addSubview: self.webView];
     if (@available(iOS 11.0, *)) {
-        [self.webView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor].active = YES;
+        // Extend the web view to the top edge of the screen.
+        // WKWebView magically offset the content so that the content is not covered by the navigation bar initially.
+        [self.webView.topAnchor constraintEqualToAnchor:self.view.topAnchor].active = YES;
         [self.webView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor].active = YES;
         [self.webView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor].active = YES;
-        [self.webView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor].active = YES;
+            // Extend the web view to the bottom edge of the screen.
+        [self.webView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor].active = YES;
     }
 
     // Configure the bounce behavior
@@ -103,13 +108,17 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
 
 - (void)viewDidDisappear:(BOOL)animated
 {
+    [super viewDidDisappear:animated];
+
     // We only call completion handler here because
     // The view controller could be swiped to dismiss.
     // viewDidDisappear is the most rebust way to detect whether the view controller is dismissed.
-    if (self.result != nil) {
-        self.completionHandler(self.result, nil);
-    } else {
-        self.completionHandler(nil, [[NSError alloc] initWithDomain:AGWKWebViewControllerErrorDomain code:AGWKWebViewControllerErrorCodeCanceledLogin userInfo:nil]);
+    if (self.completionHandler != nil) {
+        if (self.result != nil) {
+            self.completionHandler(self.result, nil);
+        } else {
+            self.completionHandler(nil, [[NSError alloc] initWithDomain:AGWKWebViewControllerErrorDomain code:AGWKWebViewControllerErrorCodeCanceledLogin userInfo:nil]);
+        }
     }
     self.completionHandler = nil;
 }

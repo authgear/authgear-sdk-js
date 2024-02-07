@@ -103,6 +103,36 @@ public class AuthgearPlugin: CAPPlugin {
         }
     }
 
+    @objc func openAuthorizeURLWithWebView(_ call: CAPPluginCall) {
+        let url = URL(string: call.getString("url")!)!
+        let redirectURI = URL(string: call.getString("redirectURI")!)!
+        let modalPresentationStyle = call.getString("modalPresentationStyle")
+        let backgroundColor = call.getString("backgroundColor")
+        let navigationBarBackgroundColor = call.getString("navigationBarBackgroundColor")
+        let navigationBarButtonTintColor = call.getString("navigationBarButtonTintColor")
+
+        DispatchQueue.main.async {
+            self.impl.openAuthorizeURLWithWebView(
+                window: (self.bridge?.webView?.window)!,
+                url: url,
+                redirectURI: redirectURI,
+                modalPresentationStyleString: modalPresentationStyle,
+                backgroundColorString: backgroundColor,
+                navigationBarBackgroundColorString: navigationBarBackgroundColor,
+                navigationBarButtonTintColorString: navigationBarButtonTintColor
+            ) { (redirectURI, error) in
+                if let error = error {
+                    error.reject(call)
+                }
+                if let redirectURI = redirectURI {
+                    call.resolve([
+                        "redirectURI": redirectURI
+                    ])
+                }
+            }
+        }
+    }
+
     @objc func openURL(_ call: CAPPluginCall) {
         let url = URL(string: call.getString("url")!)!
 

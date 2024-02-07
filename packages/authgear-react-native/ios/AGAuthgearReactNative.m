@@ -282,9 +282,9 @@ RCT_EXPORT_METHOD(openAuthorizeURLWithWebView:(NSDictionary *)options
     NSString *url = options[@"url"];
     NSString *redirectURI = options[@"redirectURI"];
     UIModalPresentationStyle modalPresentationStyle = [self modalPresentationStyleFromString:options[@"modalPresentationStyle"]];
-    UIColor *backgroundColor = [self uiColorFromNSNumber:options[@"backgroundColor"]];
-    UIColor *navigationBarBackgroundColor = [self uiColorFromNSNumber:options[@"navigationBarBackgroundColor"]];
-    UIColor *navigationBarButtonTintColor = [self uiColorFromNSNumber:options[@"navigationBarButtonTintColor"]];
+    UIColor *backgroundColor = [self uiColorFromNSString:options[@"backgroundColor"]];
+    UIColor *navigationBarBackgroundColor = [self uiColorFromNSString:options[@"navigationBarBackgroundColor"]];
+    UIColor *navigationBarButtonTintColor = [self uiColorFromNSString:options[@"navigationBarButtonTintColor"]];
 
     AGWKWebViewController *controller = [[AGWKWebViewController alloc] initWithURL:[[NSURL alloc] initWithString:url]
                                                                        redirectURI:[[NSURL alloc] initWithString:redirectURI] completionHandler:^(NSURL *url, NSError *error) {
@@ -933,12 +933,14 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
     }
 }
 
--(UIColor *)uiColorFromNSNumber:(NSNumber *)num
+-(UIColor *)uiColorFromNSString:(NSString *)inHex
 {
-    if (num == nil) {
+    if (inHex == nil) {
         return nil;
     }
-    NSUInteger argb = num.unsignedIntegerValue;
+    NSScanner *scanner = [NSScanner scannerWithString:inHex];
+    unsigned long long argb = 0;
+    [scanner scanHexLongLong:&argb];
     CGFloat a = ((argb >> 24) & 0xFF) / 255.0;
     CGFloat r = ((argb >> 16) & 0xFF) / 255.0;
     CGFloat g = ((argb >> 8) & 0xFF) / 255.0;

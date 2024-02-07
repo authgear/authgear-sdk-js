@@ -45,14 +45,17 @@ import authgearCapacitor, {
   BiometricAccessConstraintIOS,
   BiometricLAPolicy,
   BiometricAccessConstraintAndroid,
+  WebKitWebViewUIImplementation,
 } from "@authgear/capacitor";
 import {
   readClientID,
   readEndpoint,
   readIsSSOEnabled,
+  readUseWebKitWebView,
   writeClientID,
   writeEndpoint,
   writeIsSSOEnabled,
+  writeUseWebKitWebView,
 } from "../storage";
 
 import "./Home.css";
@@ -102,6 +105,9 @@ function AuthgearDemo() {
     useState(false);
   const [isSSOEnabled, setIsSSOEnabled] = useState(() => {
     return readIsSSOEnabled();
+  });
+  const [useWebKitWebView, setUseWebKitWebView] = useState<boolean>(() => {
+    return readUseWebKitWebView();
   });
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
 
@@ -188,6 +194,7 @@ function AuthgearDemo() {
       writeClientID(clientID);
       writeEndpoint(endpoint);
       writeIsSSOEnabled(isSSOEnabled);
+      writeUseWebKitWebView(useWebKitWebView);
 
       if (isPlatformWeb()) {
         await authgearWeb.configure({
@@ -203,6 +210,13 @@ function AuthgearDemo() {
           tokenStorage: useTransientTokenStorage
             ? new TransientTokenStorage()
             : new PersistentTokenStorage(),
+          uiImplementation: useWebKitWebView
+            ? new WebKitWebViewUIImplementation({
+                ios: {
+                  modalPresentationStyle: "fullScreen",
+                },
+              })
+            : undefined,
           isSSOEnabled,
         });
       }
@@ -216,6 +230,7 @@ function AuthgearDemo() {
     clientID,
     endpoint,
     isSSOEnabled,
+    useWebKitWebView,
     useTransientTokenStorage,
     postConfigure,
     showError,
@@ -494,6 +509,13 @@ function AuthgearDemo() {
     []
   );
 
+  const onChangeUseWebKitWebView = useCallback(
+    (e: IonToggleCustomEvent<ToggleChangeEventDetail<unknown>>) => {
+      setUseWebKitWebView(e.detail.checked);
+    },
+    []
+  );
+
   const onClickConfigure = useCallback(
     (e: MouseEvent<HTMLIonButtonElement>) => {
       e.preventDefault();
@@ -658,6 +680,13 @@ function AuthgearDemo() {
           onIonChange={onChangeIsSSOEnabled}
         >
           Is SSO Enabled
+        </IonToggle>
+        <IonToggle
+          className="toggle"
+          checked={useWebKitWebView}
+          onIonChange={onChangeUseWebKitWebView}
+        >
+          Use WebKit WebView
         </IonToggle>
         <div className="information">
           <IonLabel>Session State</IonLabel>

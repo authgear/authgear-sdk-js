@@ -5,8 +5,9 @@ import AuthenticationServices
 import LocalAuthentication
 import Capacitor
 
-@objc class AuthgearPluginImpl: NSObject, ASWebAuthenticationPresentationContextProviding {
+@objc class AuthgearPluginImpl: NSObject, ASWebAuthenticationPresentationContextProviding, AGWKWebViewControllerPresentationContextProviding {
     private var asWebAuthenticationSessionHandles: [ASWebAuthenticationSession: UIWindow] = [:]
+    private var agWKWebViewControllerHandles: [AGWKWebViewController: UIWindow] = [:]
 
     @objc func storageGetItem(key: String) throws -> String {
         let query: [String: Any] = [
@@ -216,6 +217,40 @@ import Capacitor
         }
     }
 
+    func openAuthorizeURLWithWebView(
+        window: UIWindow,
+        url: URL,
+        redirectURI: URL,
+        modalPresentationStyleString: String?,
+        backgroundColorString: String?,
+        navigationBarBackgroundColorString: String?,
+        navigationBarButtonTintColorString: String?,
+        completion: @escaping (String?, Error?) -> Void
+    ) {
+        var controller: AGWKWebViewController?
+        controller = AGWKWebViewController(url: url, redirectURI: redirectURI) { result, error in
+            self.agWKWebViewControllerHandles.removeValue(forKey: controller!)
+            if let error = error {
+                let nsError = error as NSError
+                if (nsError.domain == AGWKWebViewControllerErrorDomain && nsError.code == AGWKWebViewControllerErrorCodeCanceledLogin) {
+                    completion(nil, NSError.makeCancel(error: error))
+                } else {
+                    completion(nil, error)
+                }
+            }
+            if let result = result {
+                completion(result.absoluteString, nil)
+            }
+        }
+        self.agWKWebViewControllerHandles[controller!] = window
+        controller?.backgroundColor = UIColor(argb: backgroundColorString)
+        controller?.navigationBarBackgroundColor = UIColor(argb: navigationBarBackgroundColorString)
+        controller?.navigationBarButtonTintColor = UIColor(argb: navigationBarButtonTintColorString)
+        controller?.modalPresentationStyle = UIModalPresentationStyle.from(string: modalPresentationStyleString)
+        controller?.presentationContextProvider = self
+        controller?.start()
+    }
+
     @objc func openURL(window: UIWindow, url: URL, completion: @escaping (Error?) -> Void) {
         if #available(iOS 12.0, *) {
             let scheme = "nocallback"
@@ -332,6 +367,11 @@ import Capacitor
 
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
         let window = self.asWebAuthenticationSessionHandles[session]!
+        return window
+    }
+
+    func presentationAnchor(for controller: AGWKWebViewController) -> UIWindow {
+        let window = self.agWKWebViewControllerHandles[controller]!
         return window
     }
 
@@ -679,6 +719,40 @@ private extension LAPolicy {
             return .deviceOwnerAuthentication
         default:
             return nil
+        }
+    }
+}
+
+private extension UIColor {
+    convenience init?(argb: String?) {
+        guard let argb = argb else {
+            return nil
+        }
+        let argbInt = UInt32(argb, radix: 16)!
+        let a = CGFloat((argbInt >> 24) & 0xFF) / 255.0
+        let r = CGFloat((argbInt >> 16) & 0xFF) / 255.0
+        let g = CGFloat((argbInt >> 8) & 0xFF) / 255.0
+        let b = CGFloat(argbInt & 0xFF) / 255.0
+        self.init(red: r, green: g, blue: b, alpha: a)
+    }
+}
+
+private extension UIModalPresentationStyle {
+    static func from(string: String?) -> UIModalPresentationStyle {
+        if let string = string {
+            switch string {
+            case "fullScreen":
+                return .fullScreen
+            case "pageSheet":
+                return .pageSheet
+            default:
+                break
+            }
+        }
+        if #available(iOS 13.0, *) {
+            return .automatic
+        } else {
+            return .fullScreen
         }
     }
 }
