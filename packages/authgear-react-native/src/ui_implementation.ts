@@ -61,7 +61,6 @@ export class DeviceBrowserUIImplementation implements UIImplementation {
  * @public
  */
 export interface WebKitWebViewUIImplementationOptionsIOS {
-  backgroundColor?: number;
   navigationBarBackgroundColor?: number;
   navigationBarButtonTintColor?: number;
   modalPresentationStyle?: "automatic" | "fullScreen" | "pageSheet";
@@ -104,7 +103,6 @@ export class WebKitWebViewUIImplementation implements UIImplementation {
     return openAuthorizeURLWithWebView({
       url: options.url,
       redirectURI: options.redirectURI,
-      backgroundColor: this.options?.ios?.backgroundColor?.toString(16),
       navigationBarBackgroundColor:
         this.options?.ios?.navigationBarBackgroundColor?.toString(16),
       navigationBarButtonTintColor:

@@ -24,7 +24,6 @@ typedef void(^AGWKWebViewControllerCompletionHandler)(NSURL *url, NSError *error
 - (instancetype)initWithURL:(NSURL *)url redirectURI:(NSURL *)redirectURI completionHandler:(AGWKWebViewControllerCompletionHandler) completionHandler;
 
 @property (nonatomic, weak) id<AGWKWebViewControllerPresentationContextProviding> presentationContextProvider;
-@property (nonatomic, copy) UIColor *backgroundColor;
 @property (nonatomic, copy) UIColor *navigationBarBackgroundColor;
 @property (nonatomic, copy) UIColor *navigationBarButtonTintColor;
 
