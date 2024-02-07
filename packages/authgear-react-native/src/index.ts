@@ -41,7 +41,10 @@ import {
 } from "./types";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 import { BiometricPrivateKeyNotFoundError } from "./error";
-import { WebView, DefaultWebView } from "./webview";
+import {
+  UIImplementation,
+  DeviceBrowserUIImplementation,
+} from "./ui_implementation";
 import EventEmitter from "./eventEmitter";
 export * from "@authgear/core";
 export * from "./types";
@@ -53,7 +56,7 @@ export {
   BiometricNoEnrollmentError,
   BiometricLockoutError,
 } from "./error";
-export * from "./webview";
+export * from "./ui_implementation";
 
 /**
  * @public
@@ -83,9 +86,9 @@ export interface ConfigureOptions {
   isSSOEnabled?: boolean;
 
   /*
-   * An implementation of WebView.
+   * The UIImplementation.
    */
-  webView?: WebView;
+  uiImplementation?: UIImplementation;
 }
 
 /**
@@ -135,7 +138,7 @@ export class ReactNativeContainer {
   /**
    * @internal
    */
-  webView: WebView;
+  uiImplementation: UIImplementation;
 
   /**
    * @internal
@@ -228,7 +231,7 @@ export class ReactNativeContainer {
 
     this.storage = new PersistentContainerStorage();
     this.tokenStorage = new PersistentTokenStorage();
-    this.webView = new DefaultWebView();
+    this.uiImplementation = new DeviceBrowserUIImplementation();
 
     this.wechatRedirectDeepLinkListener = (url: string) => {
       this._sendWechatRedirectURIToDelegate(url);
@@ -326,10 +329,10 @@ export class ReactNativeContainer {
     } else {
       this.tokenStorage = new PersistentTokenStorage();
     }
-    if (options.webView != null) {
-      this.webView = options.webView;
+    if (options.uiImplementation != null) {
+      this.uiImplementation = options.uiImplementation;
     } else {
-      this.webView = new DefaultWebView();
+      this.uiImplementation = new DeviceBrowserUIImplementation();
     }
 
     // TODO: verify if we need to support configure for second time
@@ -385,7 +388,7 @@ export class ReactNativeContainer {
     if (options.wechatRedirectURI != null) {
       await registerWechatRedirectURI(options.wechatRedirectURI);
     }
-    const redirectURL = await this.webView.openAuthorizationURL({
+    const redirectURL = await this.uiImplementation.openAuthorizationURL({
       url: authorizeURL,
       redirectURI: options.redirectURI,
       shareCookiesWithDeviceBrowser: this._shareCookiesWithDeviceBrowser(),
@@ -442,7 +445,7 @@ export class ReactNativeContainer {
       await registerWechatRedirectURI(options.wechatRedirectURI);
     }
 
-    const redirectURL = await this.webView.openAuthorizationURL({
+    const redirectURL = await this.uiImplementation.openAuthorizationURL({
       url: endpoint,
       redirectURI: options.redirectURI,
       shareCookiesWithDeviceBrowser: this._shareCookiesWithDeviceBrowser(),
@@ -641,7 +644,7 @@ export class ReactNativeContainer {
     if (options.wechatRedirectURI != null) {
       await registerWechatRedirectURI(options.wechatRedirectURI);
     }
-    const redirectURL = await this.webView.openAuthorizationURL({
+    const redirectURL = await this.uiImplementation.openAuthorizationURL({
       url: authorizeURL,
       redirectURI: options.redirectURI,
       shareCookiesWithDeviceBrowser: this._shareCookiesWithDeviceBrowser(),

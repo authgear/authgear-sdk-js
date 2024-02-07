@@ -32,7 +32,7 @@ import authgear, {
   BiometricLAPolicy,
   BiometricAccessConstraintAndroid,
   SessionState,
-  PlatformWebView,
+  WebKitWebViewUIImplementation,
 } from '@authgear/react-native';
 import RadioGroup, {RadioGroupItemProps} from '../RadioGroup';
 
@@ -362,8 +362,8 @@ const HomeScreen: React.FC = () => {
         tokenStorage: useTransientTokenStorage
           ? new TransientTokenStorage()
           : new PersistentTokenStorage(),
-        webView: useWebKitWebView
-          ? new PlatformWebView({
+        uiImplementation: useWebKitWebView
+          ? new WebKitWebViewUIImplementation({
               ios: {
                 modalPresentationStyle: 'fullScreen',
               },
