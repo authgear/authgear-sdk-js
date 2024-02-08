@@ -35,13 +35,6 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
 {
     [super viewDidLoad];
 
-    // Configure background color
-    if (self.backgroundColor != nil) {
-        self.view.backgroundColor = self.backgroundColor;
-    } else {
-        self.view.backgroundColor = [self getDefaultBackgroundColor];
-    }
-
     // Configure layout
     [self.view addSubview: self.webView];
     if (@available(iOS 11.0, *)) {
@@ -183,19 +176,6 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
 - (void)dismissSelf
 {
     [self.navigationController.presentingViewController dismissViewControllerAnimated:YES completion:nil];
-}
-
-- (UIColor *)getDefaultBackgroundColor
-{
-    if (@available(iOS 12.0, *)) {
-        switch (self.traitCollection.userInterfaceStyle) {
-            case UIUserInterfaceStyleDark:
-                return [UIColor blackColor];
-            default:
-                return [UIColor whiteColor];
-        }
-    }
-    return [UIColor whiteColor];
 }
 
 @end

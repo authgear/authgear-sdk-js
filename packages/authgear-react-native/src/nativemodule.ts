@@ -76,7 +76,6 @@ export async function openAuthorizeURLWithWebView(options: {
   url: string;
   redirectURI: string;
 
-  backgroundColor?: string;
   navigationBarBackgroundColor?: string;
   navigationBarButtonTintColor?: string;
   modalPresentationStyle?: string;

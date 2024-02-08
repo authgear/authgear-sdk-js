@@ -19,7 +19,6 @@ export interface AuthgearPlugin {
     url: string;
     redirectURI: string;
     modalPresentationStyle?: string;
-    backgroundColor?: string;
     navigationBarBackgroundColor?: string;
     navigationBarButtonTintColor?: string;
     actionBarBackgroundColor?: string;
@@ -119,7 +118,6 @@ export async function openAuthorizeURLWithWebView(options: {
   url: string;
   redirectURI: string;
   modalPresentationStyle?: string;
-  backgroundColor?: string;
   navigationBarBackgroundColor?: string;
   navigationBarButtonTintColor?: string;
   actionBarBackgroundColor?: string;

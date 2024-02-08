@@ -282,7 +282,6 @@ RCT_EXPORT_METHOD(openAuthorizeURLWithWebView:(NSDictionary *)options
     NSString *url = options[@"url"];
     NSString *redirectURI = options[@"redirectURI"];
     UIModalPresentationStyle modalPresentationStyle = [self modalPresentationStyleFromString:options[@"modalPresentationStyle"]];
-    UIColor *backgroundColor = [self uiColorFromNSString:options[@"backgroundColor"]];
     UIColor *navigationBarBackgroundColor = [self uiColorFromNSString:options[@"navigationBarBackgroundColor"]];
     UIColor *navigationBarButtonTintColor = [self uiColorFromNSString:options[@"navigationBarButtonTintColor"]];
 
@@ -299,7 +298,6 @@ RCT_EXPORT_METHOD(openAuthorizeURLWithWebView:(NSDictionary *)options
             resolve([url absoluteString]);
         }
     }];
-    controller.backgroundColor = backgroundColor;
     controller.navigationBarBackgroundColor = navigationBarBackgroundColor;
     controller.navigationBarButtonTintColor = navigationBarButtonTintColor;
     controller.modalPresentationStyle = modalPresentationStyle;
