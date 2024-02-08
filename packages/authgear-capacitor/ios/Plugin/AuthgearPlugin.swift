@@ -107,7 +107,6 @@ public class AuthgearPlugin: CAPPlugin {
         let url = URL(string: call.getString("url")!)!
         let redirectURI = URL(string: call.getString("redirectURI")!)!
         let modalPresentationStyle = call.getString("modalPresentationStyle")
-        let backgroundColor = call.getString("backgroundColor")
         let navigationBarBackgroundColor = call.getString("navigationBarBackgroundColor")
         let navigationBarButtonTintColor = call.getString("navigationBarButtonTintColor")
 
@@ -117,7 +116,6 @@ public class AuthgearPlugin: CAPPlugin {
                 url: url,
                 redirectURI: redirectURI,
                 modalPresentationStyleString: modalPresentationStyle,
-                backgroundColorString: backgroundColor,
                 navigationBarBackgroundColorString: navigationBarBackgroundColor,
                 navigationBarButtonTintColorString: navigationBarButtonTintColor
             ) { (redirectURI, error) in

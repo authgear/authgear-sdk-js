@@ -13,7 +13,6 @@ class AGWKWebViewController: UIViewController, WKNavigationDelegate {
     typealias CompletionHandler = (URL?, Error?) -> Void
 
     weak var presentationContextProvider: AGWKWebViewControllerPresentationContextProviding?
-    var backgroundColor: UIColor?
     var navigationBarBackgroundColor: UIColor?
     var navigationBarButtonTintColor: UIColor?
 
@@ -58,13 +57,6 @@ class AGWKWebViewController: UIViewController, WKNavigationDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Configure background color
-        if let backgroundColor = self.backgroundColor {
-            self.view.backgroundColor = backgroundColor
-        } else {
-            self.view.backgroundColor = self.defaultBackgroundColor
-        }
 
         // Configure layout
         self.view.addSubview(self.webView)

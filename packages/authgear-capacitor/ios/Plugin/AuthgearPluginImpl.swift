@@ -222,7 +222,6 @@ import Capacitor
         url: URL,
         redirectURI: URL,
         modalPresentationStyleString: String?,
-        backgroundColorString: String?,
         navigationBarBackgroundColorString: String?,
         navigationBarButtonTintColorString: String?,
         completion: @escaping (String?, Error?) -> Void
@@ -243,7 +242,6 @@ import Capacitor
             }
         }
         self.agWKWebViewControllerHandles[controller!] = window
-        controller?.backgroundColor = UIColor(argb: backgroundColorString)
         controller?.navigationBarBackgroundColor = UIColor(argb: navigationBarBackgroundColorString)
         controller?.navigationBarButtonTintColor = UIColor(argb: navigationBarButtonTintColorString)
         controller?.modalPresentationStyle = UIModalPresentationStyle.from(string: modalPresentationStyleString)
