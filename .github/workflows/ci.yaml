@@ -45,8 +45,12 @@ jobs:
     - run: npm run build
     - working-directory: ./example/reactnative
       run: yarn
-    - working-directory: ./example/reactnative/ios
-      run: pod install
+    - working-directory: ./example/reactnative
+      # Install cocoapods from the Gemfile
+      run: bundle install
+    - working-directory: ./example/reactnative
+      # Run the specific cocoapods
+      run: bundle exec pod install --project-directory=ios
     - name: Install the Apple certificate and provisioning profile
       env:
         IOS_CERTIFICATE_BASE64: ${{ secrets.REACT_NATIVE_IOS_CERTIFICATE_BASE64 }}
