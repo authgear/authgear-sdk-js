@@ -44,7 +44,7 @@ export interface ReauthenticateOptions {
   /**
    * UI locale tags. You can use this parameter to set the display language for Auth UI.
    *
-   * First, enable the language you want to change to in Authgear Portal (Your project > UI Settings > click on the settings icon beside Language.)
+   * First, enable the language you want to change to in Authgear Portal (Your project \> UI Settings \> click on the settings icon beside Language.)
    *
    * For example, to change the language for Auth UI to Hong Kong,
    * set the value for uiLocales to ["zh-HK"] after enabling "Chinese (Hong Kong)" in Authgear Portal.
@@ -95,7 +95,7 @@ export interface AuthenticateOptions {
   /**
    * UI locale tags. You can use this parameter to set the display language for Auth UI.
    *
-   * First, enable the language you want to change to in Authgear Portal (Your project > UI Settings > click on the settings icon beside Language.)
+   * First, enable the language you want to change to in Authgear Portal (Your project \> UI Settings \> click on the settings icon beside Language.)
    *
    * For example, to change the language for Auth UI to Hong Kong,
    * set the value for uiLocales to ["zh-HK"] after enabling "Chinese (Hong Kong)" in Authgear Portal.
@@ -111,7 +111,7 @@ export interface AuthenticateOptions {
   page?: string;
   /**
    * Auto-redirect the user to the OAuth provider. You can set the value for each OAuth provider in Authgear portal via
-   * Authentication > Social / Enterprise Login.
+   * Authentication \> Social / Enterprise Login.
    *
    * For example, to auto-redirect your users to sign in with Google, first, set the alias for Sign in with Google to "google" in Authgear portal,
    * then set oauthProviderAlias to "google".
@@ -126,7 +126,7 @@ export interface SettingOptions {
   /**
    * UI locale tags. You can use this parameter to set the display language for Auth UI.
    *
-   * First, enable the language you want to change to in Authgear Portal (Your project > UI Settings > click on the settings icon beside Language.)
+   * First, enable the language you want to change to in Authgear Portal (Your project \> UI Settings \> click on the settings icon beside Language.)
    *
    * For example, to change the language for Auth UI to Hong Kong,
    * set the value for uiLocales to ["zh-HK"] after enabling "Chinese (Hong Kong)" in Authgear Portal.
@@ -162,7 +162,7 @@ export interface PromoteOptions {
   /**
    * UI locale tags. You can use this parameter to set the display language for Auth UI.
    *
-   * First, enable the language you want to change to in Authgear Portal (Your project > UI Settings > click on the settings icon beside Language.)
+   * First, enable the language you want to change to in Authgear Portal (Your project \> UI Settings \> click on the settings icon beside Language.)
    *
    * For example, to change the language for Auth UI to Hong Kong,
    * set the value for uiLocales to ["zh-HK"] after enabling "Chinese (Hong Kong)" in Authgear Portal.
