@@ -30,6 +30,7 @@ import androidx.core.graphics.drawable.DrawableCompat;
 public class WebKitWebViewActivity extends AppCompatActivity {
 
     private static final String KEY_OPTIONS = "KEY_OPTIONS";
+    private static final String KEY_WEB_VIEW_STATE = "KEY_WEB_VIEW_STATE";
     private static final int MENU_ID_CANCEL = 1;
     private static final int TAG_FILE_CHOOSER = 1;
 
@@ -181,7 +182,26 @@ public class WebKitWebViewActivity extends AppCompatActivity {
         WebSettings webSettings = this.mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
 
-        this.mWebView.loadUrl(options.url.toString());
+        if (savedInstanceState == null) {
+            this.mWebView.loadUrl(options.url.toString());
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Bundle webViewBundle = new Bundle();
+        this.mWebView.saveState(webViewBundle);
+        outState.putBundle(KEY_WEB_VIEW_STATE, webViewBundle);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        Bundle webViewBundle = savedInstanceState.getBundle(KEY_WEB_VIEW_STATE);
+        if (webViewBundle != null) {
+            this.mWebView.restoreState(webViewBundle);
+        }
     }
 
     @Override
