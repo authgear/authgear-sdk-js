@@ -19,8 +19,7 @@
         <activity android:name=".WebKitWebViewActivity"
             android:exported="false"
             android:launchMode="singleTask"
-            android:theme="@style/AuthgearTheme"
-            android:configChanges="orientation|screenSize"/>
+            android:theme="@style/AuthgearTheme"/>
     </application>
 
     <!-- Android 11 requires the app to define which external apps are visiable -->
