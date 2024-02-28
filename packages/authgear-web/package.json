@@ -11,7 +11,7 @@
     "dist/authgear-web.iife.js"
   ],
   "devDependencies": {
-    "@authgear/core": "2.5.1",
+    "@authgear/core": "file:../authgear-core",
     "core-js-pure": "3.22.7"
   }
 }

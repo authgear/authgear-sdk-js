@@ -150,6 +150,17 @@ function Root() {
     []
   );
 
+  const onClickChangePassword = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      authgear.startChangePassword({
+        redirectURI: window.location.origin + "/after-changing-password",
+      }).catch((err) => setError(err));
+    },
+    []
+  );
+
   const onClickSignOut = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -399,6 +410,13 @@ function Root() {
           >
             Open Settings
           </button>
+          <button
+            className="button"
+            type="button"
+            onClick={onClickChangePassword}
+          >
+            Change Password
+          </button>
           <button className="button" type="button" onClick={onClickSignOut}>
             Sign out
           </button>
@@ -539,6 +557,44 @@ function PromoteAnonymousUserRedirect() {
   );
 }
 
+function ChangePasswordRedirect() {
+  const navigate = useNavigate();
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const sessionType = readSessionType();
+    const clientID = readClientID();
+    const endpoint = readEndpoint();
+    const isSSOEnabled = readIsSSOEnabled();
+    authgear
+      .configure({
+        clientID,
+        endpoint,
+        sessionType,
+        isSSOEnabled,
+      })
+      .then(
+        () => {
+          authgear.finishChangePassword().then(
+            (_) => {
+              navigate("/");
+            },
+            (err) => setError(err)
+          );
+        },
+        (err) => setError(err)
+      );
+  }, [navigate]);
+
+  return (
+    <div>
+      <p>Redirecting</p>
+      <ShowError error={error} />
+      <a href="/">Back to home</a>
+    </div>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -550,6 +606,7 @@ function App() {
           path="/promote-anonymous-user-redirect"
           element={<PromoteAnonymousUserRedirect />}
         />
+        <Route path="/after-changing-password" element={<ChangePasswordRedirect />} />
       </Routes>
     </BrowserRouter>
   );
