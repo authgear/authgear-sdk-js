@@ -38,6 +38,7 @@ import {
   SettingOptions,
   AuthenticateResult,
   ReauthenticateResult,
+  SettingsActionOptions,
 } from "./types";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 import { BiometricPrivateKeyNotFoundError } from "./error";
@@ -403,6 +404,71 @@ export class ReactNativeContainer {
     );
     await this.disableBiometric();
     return result;
+  }
+
+  /**
+   * Opens the settings page with given action.
+   *
+   * @internal
+   */
+  async _openSettingsAction(
+    action: "change_password",
+    options: SettingsActionOptions
+  ): Promise<void> {
+    const idToken = this.getIDTokenHint();
+    if (idToken == null) {
+      throw new Error(
+        "You can only trigger settings action when authenticated"
+      );
+    }
+
+    const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
+    if (!refreshToken) {
+      throw new AuthgearError("refresh token not found");
+    }
+
+    // Use app session token to copy session into webview.
+    const appSessionToken = await this.baseContainer._getAppSessionToken(
+      refreshToken
+    );
+
+    const loginHint = `https://authgear.com/login_hint?type=app_session_token&app_session_token=${encodeURIComponent(
+      appSessionToken
+    )}`;
+
+    const platform = Platform.OS;
+    const authorizeURL = await this.baseContainer.authorizeEndpoint({
+      ...options,
+      platform,
+      loginHint,
+      idTokenHint: idToken,
+      responseType: "settings_action",
+      scope: ["openid", "https://authgear.com/scopes/full-access"],
+      xSettingsAction: action,
+    });
+    if (options.wechatRedirectURI != null) {
+      await registerWechatRedirectURI(options.wechatRedirectURI);
+    }
+    const redirectURL = await this.uiImplementation.openAuthorizationURL({
+      url: authorizeURL,
+      redirectURI: options.redirectURI,
+      shareCookiesWithDeviceBrowser: this._shareCookiesWithDeviceBrowser(),
+    });
+    const xDeviceInfo = await getXDeviceInfo();
+    await this.baseContainer._finishSettingsAction(
+      redirectURL,
+      {
+        x_device_info: xDeviceInfo,
+      }
+    );
+    await this.disableBiometric();
+  }
+
+  /**
+   * @public
+   */
+  async changePassword(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction("change_password", options);
   }
 
   /**

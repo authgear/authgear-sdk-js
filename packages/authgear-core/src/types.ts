@@ -69,7 +69,7 @@ export enum PromptOption {
  */
 export interface _OIDCAuthenticationRequest {
   redirectURI: string;
-  responseType: "code" | "none";
+  responseType: "code" | "none" | "settings_action";
   scope: string[];
   state?: string;
   xState?: string;
@@ -84,6 +84,7 @@ export interface _OIDCAuthenticationRequest {
   page?: string;
   suppressIDPSessionCookie?: boolean;
   oauthProviderAlias?: string;
+  xSettingsAction?: "change_password";
 }
 
 /**
@@ -260,7 +261,8 @@ export interface _OIDCTokenRequest {
     | "refresh_token"
     | "urn:authgear:params:oauth:grant-type:anonymous-request"
     | "urn:authgear:params:oauth:grant-type:biometric-request"
-    | "urn:authgear:params:oauth:grant-type:id-token";
+    | "urn:authgear:params:oauth:grant-type:id-token"
+    | "urn:authgear:params:oauth:grant-type:settings-action";
   client_id: string;
   redirect_uri?: string;
   code?: string;

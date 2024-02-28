@@ -124,6 +124,7 @@ const styles = StyleSheet.create({
 });
 
 const redirectURI = 'com.authgear.example.rn://host/path';
+const changePasswordRedirectURI = 'com.authgear.example.rn://host/after-changing-password';
 const wechatRedirectURI = Platform.select<string>({
   android: 'com.authgear.example.rn://host/open_wechat_app',
   ios: 'https://authgear-demo-rn.pandawork.com/authgear/open_wechat_app',
@@ -148,8 +149,8 @@ const biometricOptions: BiometricOptions = {
 const HomeScreen: React.FC = () => {
   const [initialized, setInitialized] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [clientID, setClientID] = useState('');
-  const [endpoint, setEndpoint] = useState('');
+  const [clientID, setClientID] = useState('b83d2114b0705ad1');
+  const [endpoint, setEndpoint] = useState('http://192.168.3.146:3100');
   const [page, setPage] = useState('');
   const [explicitColorScheme, setExplicitColorScheme] =
     useState<ColorScheme | null>(null);
@@ -560,6 +561,17 @@ const HomeScreen: React.FC = () => {
       .catch(err => showError(err));
   }, [showError, colorScheme]);
 
+  const changePassword = useCallback(async () => {
+    await authgear.refreshIDToken();
+    authgear
+      .changePassword({
+        redirectURI: changePasswordRedirectURI,
+        colorScheme: colorScheme as ColorScheme,
+        wechatRedirectURI,
+      })
+      .catch(err => showError(err));
+  }, [showError, colorScheme]);
+
   const fetchUserInfo = useCallback(() => {
     setLoading(true);
     authgear
@@ -747,6 +759,13 @@ const HomeScreen: React.FC = () => {
           <Button
             title="Open Settings"
             onPress={openSettings}
+            disabled={!initialized || !loggedIn}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Change Password"
+            onPress={changePassword}
             disabled={!initialized || !loggedIn}
           />
         </View>
