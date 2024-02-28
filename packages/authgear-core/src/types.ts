@@ -69,7 +69,7 @@ export enum PromptOption {
  */
 export interface _OIDCAuthenticationRequest {
   redirectURI: string;
-  responseType: "code" | "none" | "settings_action";
+  responseType: "code" | "none" | "urn:authgear:params:oauth:response-type:settings-action";
   scope: string[];
   state?: string;
   xState?: string;

@@ -348,7 +348,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
     const responseType = options.responseType;
     query.append("response_type", responseType);
-    if (responseType === "code" || responseType === "settings_action") {
+    if (responseType === "code" || responseType === "urn:authgear:params:oauth:response-type:settings-action") {
       // Authorization code need PKCE.
       const codeVerifier = await this._delegate._setupCodeVerifier();
       await this._delegate.storage.setOIDCCodeVerifier(

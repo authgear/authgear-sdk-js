@@ -442,7 +442,7 @@ export class ReactNativeContainer {
       platform,
       loginHint,
       idTokenHint: idToken,
-      responseType: "settings_action",
+      responseType: "urn:authgear:params:oauth:response-type:settings-action",
       scope: ["openid", "https://authgear.com/scopes/full-access"],
       xSettingsAction: action,
     });
