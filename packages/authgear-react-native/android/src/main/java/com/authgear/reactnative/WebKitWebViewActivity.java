@@ -1,5 +1,8 @@
 package com.authgear.reactnative;
 
+import static android.webkit.WebView.HitTestResult.SRC_ANCHOR_TYPE;
+import static android.webkit.WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
@@ -9,6 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.ValueCallback;
@@ -142,6 +146,40 @@ public class WebKitWebViewActivity extends AppCompatActivity {
             this.activity.startActivityForResult(intent, requestCode);
             return true;
         }
+
+        @Override
+        public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
+            if (view == null) {
+                return false;
+            }
+            WebView.HitTestResult result = view.getHitTestResult();
+            switch (result.getType()) {
+                case SRC_IMAGE_ANCHOR_TYPE: {
+                    // ref: https://pacheco.dev/posts/android/webview-image-anchor/
+                    Message message = view.getHandler().obtainMessage();
+                    view.requestFocusNodeHref(message);
+                    String url = message.getData().getString("url");
+                    if (url == null) {
+                        return false;
+                    }
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    view.getContext().startActivity(browserIntent);
+                    break;
+                }
+                case SRC_ANCHOR_TYPE: {
+                    String url = result.getExtra();
+                    if (url == null) {
+                        return false;
+                    }
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    view.getContext().startActivity(browserIntent);
+                    return true;
+                }
+                default:
+                    return false;
+            }
+            return false;
+        }
     }
 
     public static Intent createIntent(Context ctx, Options options) {
@@ -176,6 +214,7 @@ public class WebKitWebViewActivity extends AppCompatActivity {
 
         // Configure web view.
         this.mWebView = new WebView(this);
+        this.mWebView.getSettings().setSupportMultipleWindows(true);
         this.setContentView(this.mWebView);
         this.mWebView.setWebViewClient(new MyWebViewClient(this));
         this.mWebView.setWebChromeClient(new MyWebChromeClient(this));
