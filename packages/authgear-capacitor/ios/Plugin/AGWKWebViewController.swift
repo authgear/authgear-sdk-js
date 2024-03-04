@@ -165,6 +165,16 @@ class AGWKWebViewController: UIViewController, WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         if let navigationURL = navigationAction.request.url {
+            // Handle target="_blank" links
+            if (navigationAction.targetFrame == nil) {
+                if (UIApplication.shared.canOpenURL(navigationURL)) {
+                    UIApplication.shared.open(navigationURL) { _ in
+                        decisionHandler(.cancel)
+                    }
+                    return
+                }
+            }
+            // Handle redirect uri
             var parts = URLComponents(url: navigationURL, resolvingAgainstBaseURL: false)
             parts?.query = nil
             parts?.fragment = nil
