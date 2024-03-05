@@ -164,7 +164,7 @@ public class WebKitWebViewActivity extends AppCompatActivity {
                     }
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                     view.getContext().startActivity(browserIntent);
-                    break;
+                    return false;
                 }
                 case SRC_ANCHOR_TYPE: {
                     String url = result.getExtra();
@@ -173,12 +173,11 @@ public class WebKitWebViewActivity extends AppCompatActivity {
                     }
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                     view.getContext().startActivity(browserIntent);
-                    return true;
+                    return false;
                 }
                 default:
                     return false;
             }
-            return false;
         }
     }
 
