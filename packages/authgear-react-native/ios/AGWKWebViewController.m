@@ -134,6 +134,16 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
 {
     NSURL *navigationURL = navigationAction.request.URL;
     if (navigationURL != nil) {
+        // Handle target="_blank" links
+        if (navigationAction.targetFrame == nil) {
+            if ([UIApplication.sharedApplication canOpenURL:navigationURL]) {
+                [UIApplication.sharedApplication openURL:navigationURL options:@{} completionHandler:^(BOOL success) {
+                    decisionHandler(WKNavigationActionPolicyCancel);
+                }];
+                return;
+            }
+        }
+        // Handle redirect uri
         NSURLComponents *parts = [[NSURLComponents alloc] initWithURL:navigationURL resolvingAgainstBaseURL:NO];
         parts.query = nil;
         parts.fragment = nil;
