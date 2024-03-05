@@ -10,6 +10,7 @@ export interface UserInfo {
   isVerified: boolean;
   isAnonymous: boolean;
   canReauthenticate: boolean;
+  roles?: string[];
 
   raw: Record<string, unknown>;
   customAttributes: Record<string, unknown>;
@@ -136,6 +137,7 @@ export function _decodeUserInfo(r: any): UserInfo {
     isAnonymous: r["https://authgear.com/claims/user/is_anonymous"] ?? false,
     canReauthenticate:
       r["https://authgear.com/claims/user/can_reauthenticate"] ?? false,
+    roles: r["https://authgear.com/claims/user/roles"],
 
     raw,
     customAttributes,
