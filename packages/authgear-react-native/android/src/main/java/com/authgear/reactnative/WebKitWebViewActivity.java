@@ -214,6 +214,7 @@ public class WebKitWebViewActivity extends AppCompatActivity {
         // Configure web view.
         this.mWebView = new WebView(this);
         this.mWebView.getSettings().setSupportMultipleWindows(true);
+        this.mWebView.getSettings().setDomStorageEnabled(true);
         this.setContentView(this.mWebView);
         this.mWebView.setWebViewClient(new MyWebViewClient(this));
         this.mWebView.setWebChromeClient(new MyWebChromeClient(this));
