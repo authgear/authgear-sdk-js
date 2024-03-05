@@ -6,6 +6,7 @@ const USER_INFO = `
   "https://authgear.com/claims/user/is_verified": true,
   "https://authgear.com/claims/user/is_anonymous": false,
   "https://authgear.com/claims/user/can_reauthenticate": true,
+  "https://authgear.com/claims/user/roles": ["role_a"],
 
   "email": "user@example.com",
   "email_verified": true,
@@ -53,6 +54,7 @@ describe("_decodeUserInfo", () => {
       },
       birthdate: "1970-01-01",
       canReauthenticate: true,
+      roles: ["role_a"],
       customAttributes: {
         foobar: 42,
       },
@@ -90,6 +92,7 @@ describe("_decodeUserInfo", () => {
         family_name: "Doe",
         gender: "gender",
         given_name: "John",
+        "https://authgear.com/claims/user/roles": ["role_a"],
         "https://authgear.com/claims/user/can_reauthenticate": true,
         "https://authgear.com/claims/user/is_anonymous": false,
         "https://authgear.com/claims/user/is_verified": true,
