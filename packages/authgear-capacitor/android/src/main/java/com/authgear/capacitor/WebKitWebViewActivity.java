@@ -151,7 +151,7 @@ public class WebKitWebViewActivity extends AppCompatActivity {
             }
             WebView.HitTestResult result = view.getHitTestResult();
             switch (result.getType()) {
-                case SRC_IMAGE_ANCHOR_TYPE -> {
+                case SRC_IMAGE_ANCHOR_TYPE: {
                     // ref: https://pacheco.dev/posts/android/webview-image-anchor/
                     Message message = view.getHandler().obtainMessage();
                     view.requestFocusNodeHref(message);
@@ -163,7 +163,7 @@ public class WebKitWebViewActivity extends AppCompatActivity {
                     view.getContext().startActivity(browserIntent);
                     return false;
                 }
-                case SRC_ANCHOR_TYPE -> {
+                case SRC_ANCHOR_TYPE: {
                     String url = result.getExtra();
                     if (url == null) {
                         return false;
@@ -172,7 +172,7 @@ public class WebKitWebViewActivity extends AppCompatActivity {
                     view.getContext().startActivity(browserIntent);
                     return false;
                 }
-                default -> {
+                default: {
                     return false;
                 }
             }
