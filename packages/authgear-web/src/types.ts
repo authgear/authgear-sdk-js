@@ -140,18 +140,6 @@ export interface SettingOptions {
 }
 
 /**
- * Auth UI settings actions
- *
- * @public
- */
-export enum SettingsAction {
-  /**
-   * Change password
-   */
-  ChangePassword = "change_password",
-}
-
-/**
  * Auth UI settings action options
  *
  * @public
@@ -172,7 +160,6 @@ export interface SettingsActionOptions {
    */
   uiLocales?: string[];
 }
-
 
 /**
  * Auth UI anonymous user promotion options

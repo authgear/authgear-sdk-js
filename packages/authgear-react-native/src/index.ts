@@ -15,6 +15,7 @@ import {
   AuthgearError,
   Page,
   PromptOption,
+  SettingsAction,
 } from "@authgear/core";
 import { Platform } from "react-native";
 import { PersistentContainerStorage, PersistentTokenStorage } from "./storage";
@@ -412,7 +413,7 @@ export class ReactNativeContainer {
    * @internal
    */
   async _openSettingsAction(
-    action: "change_password",
+    action: SettingsAction,
     options: SettingsActionOptions
   ): Promise<void> {
     const idToken = this.getIDTokenHint();
@@ -455,12 +456,9 @@ export class ReactNativeContainer {
       shareCookiesWithDeviceBrowser: this._shareCookiesWithDeviceBrowser(),
     });
     const xDeviceInfo = await getXDeviceInfo();
-    await this.baseContainer._finishSettingsAction(
-      redirectURL,
-      {
-        x_device_info: xDeviceInfo,
-      }
-    );
+    await this.baseContainer._finishSettingsAction(redirectURL, {
+      x_device_info: xDeviceInfo,
+    });
     await this.disableBiometric();
   }
 
@@ -468,7 +466,7 @@ export class ReactNativeContainer {
    * @public
    */
   async changePassword(options: SettingsActionOptions): Promise<void> {
-    return this._openSettingsAction("change_password", options);
+    return this._openSettingsAction(SettingsAction.ChangePassword, options);
   }
 
   /**

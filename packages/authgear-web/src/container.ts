@@ -11,6 +11,7 @@ import {
   AuthgearError,
   Page,
   PromptOption,
+  SettingsAction,
 } from "@authgear/core";
 import { _WebAPIClient } from "./client";
 import { PersistentTokenStorage, PersistentContainerStorage } from "./storage";
@@ -24,7 +25,6 @@ import {
   AuthenticateResult,
   ReauthenticateResult,
   SettingsActionOptions,
-  SettingsAction,
 } from "./types";
 
 /**
@@ -335,7 +335,10 @@ export class WebContainer {
    *
    * @internal
    */
-  async startSettingsAction(action: SettingsAction, options: SettingsActionOptions): Promise<void> {
+  async startSettingsAction(
+    action: SettingsAction,
+    options: SettingsActionOptions
+  ): Promise<void> {
     const idToken = this.getIDTokenHint();
     if (idToken == null || !this.canReauthenticate()) {
       throw new Error(

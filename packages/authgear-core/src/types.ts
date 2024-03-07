@@ -69,7 +69,10 @@ export enum PromptOption {
  */
 export interface _OIDCAuthenticationRequest {
   redirectURI: string;
-  responseType: "code" | "none" | "urn:authgear:params:oauth:response-type:settings-action";
+  responseType:
+    | "code"
+    | "none"
+    | "urn:authgear:params:oauth:response-type:settings-action";
   scope: string[];
   state?: string;
   xState?: string;
@@ -340,4 +343,11 @@ export enum SessionStateChangeReason {
 export enum Page {
   Settings = "/settings",
   Identities = "/settings/identities",
+}
+
+/**
+ * @public
+ */
+export enum SettingsAction {
+  ChangePassword = "change_password",
 }
