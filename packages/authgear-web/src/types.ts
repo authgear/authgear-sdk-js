@@ -151,6 +151,14 @@ export interface SettingsActionOptions {
    */
   redirectURI: string;
   /**
+   * OAuth 2.0 state value.
+   */
+  state?: string;
+  /**
+   * Custom state.
+   */
+  xState?: string;
+  /**
    * UI locale tags. You can use this parameter to set the display language for Auth UI.
    *
    * First, enable the language you want to change to in Authgear Portal (Your project \> UI Settings \> click on the settings icon beside Language.)
