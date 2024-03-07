@@ -23,6 +23,16 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
     self.completionHandler = completionHandler;
 
     WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
+
+    // Inject `user-select: none` style
+    WKUserContentController *controller = [[WKUserContentController alloc] init];
+    NSString *disableUserSelectScript =
+        @"document.documentElement.style.webkitUserSelect = 'none';"
+        "document.documentElement.style.userSelect = 'none';";
+    WKUserScript *userScript = [[WKUserScript alloc] initWithSource:disableUserSelectScript injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:NO];
+    [controller addUserScript:userScript];
+    configuration.userContentController = controller;
+
     self.webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:configuration];
     self.webView.translatesAutoresizingMaskIntoConstraints = false;
     self.webView.allowsBackForwardNavigationGestures = YES;

@@ -36,12 +36,26 @@ class AGWKWebViewController: UIViewController, WKNavigationDelegate {
         }
     }
 
+    private let disableUserSelectSource: String = """
+        document.documentElement.style.webkitUserSelect = 'none';
+        document.documentElement.style.userSelect = 'none';
+    """
+
     init(url: URL, redirectURI: URL, completionHandler: @escaping CompletionHandler) {
         self.url = url
         self.redirectURI = redirectURI
         self.completionHandler = completionHandler
 
         let configuration = WKWebViewConfiguration()
+
+        // Inject `user-select: none` style
+        let disableUserSelectScript = WKUserScript(
+            source: self.disableUserSelectSource,
+            injectionTime: .atDocumentStart,
+            forMainFrameOnly: false
+        )
+        configuration.userContentController.addUserScript(disableUserSelectScript)
+
         self.webView = WKWebView(frame: .zero, configuration: configuration)
         self.webView.translatesAutoresizingMaskIntoConstraints = false
         self.webView.allowsBackForwardNavigationGestures = true

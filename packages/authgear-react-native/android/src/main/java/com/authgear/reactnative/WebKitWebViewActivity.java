@@ -215,6 +215,13 @@ public class WebKitWebViewActivity extends AppCompatActivity {
         this.mWebView = new WebView(this);
         this.mWebView.getSettings().setSupportMultipleWindows(true);
         this.mWebView.getSettings().setDomStorageEnabled(true);
+
+        // Disable text selection
+        // NOTE: `evaluateJavascript` cannot be set to run per navigation in WebChromeClient,
+        // need to disable long click instead.
+        // Selection in text fields should still work
+        this.mWebView.setOnLongClickListener(v -> true);
+
         this.setContentView(this.mWebView);
         this.mWebView.setWebViewClient(new MyWebViewClient(this));
         this.mWebView.setWebChromeClient(new MyWebChromeClient(this));
