@@ -400,7 +400,7 @@ function AuthgearDemo() {
 
   const changePassword = useCallback(async () => {
     if (isPlatformWeb()) {
-      authgearWeb.open(WebPage.changePassword);
+      // Not implemented.
     } else {
       authgearCapacitor.changePassword({
         redirectURI: REDIRECT_URI_CAPACITOR,
@@ -770,13 +770,15 @@ function AuthgearDemo() {
         >
           Open settings
         </IonButton>
-        <IonButton
-          className="button"
-          disabled={!initialized || !loggedIn}
-          onClick={onClickChangePassword}
-        >
-          Change password
-        </IonButton>
+        {isPlatformWeb() ? null : (
+          <IonButton
+            className="button"
+            disabled={!initialized || !loggedIn}
+            onClick={onClickChangePassword}
+          >
+            Change password
+          </IonButton>
+        )}
         <IonButton
           className="button"
           disabled={!initialized || loading || !loggedIn}
