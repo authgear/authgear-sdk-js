@@ -124,7 +124,6 @@ const styles = StyleSheet.create({
 });
 
 const redirectURI = 'com.authgear.example.rn://host/path';
-const changePasswordRedirectURI = 'com.authgear.example.rn://host/after-changing-password';
 const wechatRedirectURI = Platform.select<string>({
   android: 'com.authgear.example.rn://host/open_wechat_app',
   ios: 'https://authgear-demo-rn.pandawork.com/authgear/open_wechat_app',
@@ -565,7 +564,7 @@ const HomeScreen: React.FC = () => {
     await authgear.refreshIDToken();
     authgear
       .changePassword({
-        redirectURI: changePasswordRedirectURI,
+        redirectURI: redirectURI,
         colorScheme: colorScheme as ColorScheme,
         wechatRedirectURI,
       })

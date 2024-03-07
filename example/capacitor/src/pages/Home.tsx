@@ -65,7 +65,6 @@ const TITLE = "Authgear SDK";
 const REDIRECT_URI_WEB_AUTHENTICATE = "http://localhost:8100/oauth-redirect";
 const REDIRECT_URI_WEB_REAUTH = "http://localhost:8100/reauth-redirect";
 const REDIRECT_URI_CAPACITOR = "com.authgear.exampleapp.capacitor://host/path";
-const REDIRECT_URI_CAPACITOR_CHANGE_PASSWORD = "com.authgear.exampleapp.capacitor://host/after-changing-password";
 
 const biometricOptions: BiometricOptions = {
   ios: {
@@ -403,7 +402,9 @@ function AuthgearDemo() {
     if (isPlatformWeb()) {
       authgearWeb.open(WebPage.changePassword);
     } else {
-      authgearCapacitor.changePassword({ redirectURI: REDIRECT_URI_CAPACITOR_CHANGE_PASSWORD });
+      authgearCapacitor.changePassword({
+        redirectURI: REDIRECT_URI_CAPACITOR,
+      });
     }
   }, []);
 

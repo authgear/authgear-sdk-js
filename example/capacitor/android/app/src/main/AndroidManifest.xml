@@ -38,10 +38,6 @@
                     android:host="host"
                     android:pathPrefix="/path"
                     android:scheme="com.authgear.exampleapp.capacitor" />
-                <data
-                    android:host="host"
-                    android:pathPrefix="/after-changing-password"
-                    android:scheme="com.authgear.exampleapp.capacitor" />
             </intent-filter>
         </activity>
 
