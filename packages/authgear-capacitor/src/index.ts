@@ -597,7 +597,6 @@ export class CapacitorContainer {
     await this.baseContainer._finishSettingsAction(redirectURL, {
       x_device_info: xDeviceInfo,
     });
-    await this.disableBiometric();
   }
 
   /**
