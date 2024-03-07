@@ -148,8 +148,8 @@ const biometricOptions: BiometricOptions = {
 const HomeScreen: React.FC = () => {
   const [initialized, setInitialized] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [clientID, setClientID] = useState('b83d2114b0705ad1');
-  const [endpoint, setEndpoint] = useState('http://192.168.3.146:3100');
+  const [clientID, setClientID] = useState('');
+  const [endpoint, setEndpoint] = useState('');
   const [page, setPage] = useState('');
   const [explicitColorScheme, setExplicitColorScheme] =
     useState<ColorScheme | null>(null);
