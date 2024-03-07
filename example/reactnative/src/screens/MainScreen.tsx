@@ -560,6 +560,17 @@ const HomeScreen: React.FC = () => {
       .catch(err => showError(err));
   }, [showError, colorScheme]);
 
+  const changePassword = useCallback(async () => {
+    await authgear.refreshIDToken();
+    authgear
+      .changePassword({
+        redirectURI: redirectURI,
+        colorScheme: colorScheme as ColorScheme,
+        wechatRedirectURI,
+      })
+      .catch(err => showError(err));
+  }, [showError, colorScheme]);
+
   const fetchUserInfo = useCallback(() => {
     setLoading(true);
     authgear
@@ -747,6 +758,13 @@ const HomeScreen: React.FC = () => {
           <Button
             title="Open Settings"
             onPress={openSettings}
+            disabled={!initialized || !loggedIn}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Change Password"
+            onPress={changePassword}
             disabled={!initialized || !loggedIn}
           />
         </View>

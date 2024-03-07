@@ -11,6 +11,7 @@ import {
   AuthgearError,
   Page,
   PromptOption,
+  SettingsAction,
 } from "@authgear/core";
 import { _WebAPIClient } from "./client";
 import { PersistentTokenStorage, PersistentContainerStorage } from "./storage";
@@ -23,6 +24,7 @@ import {
   SettingOptions,
   AuthenticateResult,
   ReauthenticateResult,
+  SettingsActionOptions,
 } from "./types";
 
 /**
@@ -329,6 +331,55 @@ export class WebContainer {
   }
 
   /**
+   * Start settings action by redirecting to the authorization endpoint.
+   *
+   * @internal
+   */
+  async startSettingsAction(
+    action: SettingsAction,
+    options: SettingsActionOptions
+  ): Promise<void> {
+    const idToken = this.getIDTokenHint();
+    if (idToken == null || !this.canReauthenticate()) {
+      throw new Error(
+        "You can only trigger settings action when authenticated"
+      );
+    }
+
+    if (this.sessionType === "refresh_token") {
+      const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
+      if (!refreshToken) {
+        throw new AuthgearError("refresh token not found");
+      }
+      const appSessionToken = await this.baseContainer._getAppSessionToken(
+        refreshToken
+      );
+      const loginHint = `https://authgear.com/login_hint?type=app_session_token&app_session_token=${encodeURIComponent(
+        appSessionToken
+      )}`;
+
+      const endpoint = await this.baseContainer.authorizeEndpoint({
+        ...options,
+        loginHint,
+        idTokenHint: idToken,
+        responseType: "urn:authgear:params:oauth:response-type:settings-action",
+        scope: ["openid", "https://authgear.com/scopes/full-access"],
+        xSettingsAction: action,
+      });
+      window.location.href = endpoint;
+    }
+  }
+
+  /**
+   * Start settings action "change_password" by redirecting to the authorization endpoint.
+   *
+   * @public
+   */
+  async startChangePassword(options: SettingsActionOptions): Promise<void> {
+    await this.startSettingsAction(SettingsAction.ChangePassword, options);
+  }
+
+  /**
    * Start reauthentication by redirecting to the authorization endpoint.
    */
   async startReauthentication(options: ReauthenticateOptions): Promise<void> {
@@ -398,6 +449,28 @@ export class WebContainer {
    */
   async finishReauthentication(): Promise<ReauthenticateResult> {
     return this.baseContainer._finishReauthentication(window.location.href);
+  }
+
+  /**
+   * Finish settings action.
+   *
+   * It may reject with OAuthError.
+   *
+   * @internal
+   */
+  async finishSettingsAction(): Promise<void> {
+    return this.baseContainer._finishSettingsAction(window.location.href);
+  }
+
+  /**
+   * Finish settings action "change_password".
+   *
+   * It may reject with OAuthError.
+   *
+   * @public
+   */
+  async finishChangePassword(): Promise<void> {
+    return this.finishSettingsAction();
   }
 
   /**

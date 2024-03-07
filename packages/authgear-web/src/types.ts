@@ -140,6 +140,36 @@ export interface SettingOptions {
 }
 
 /**
+ * Auth UI settings action options
+ *
+ * @public
+ */
+export interface SettingsActionOptions {
+  /**
+   * The value should be a valid Redirect URI to which the response will be sent after authentication.
+   * You must also add a Redirect URI in Authgear Poral via the Redirect URI section of your Authgear Application.
+   */
+  redirectURI: string;
+  /**
+   * OAuth 2.0 state value.
+   */
+  state?: string;
+  /**
+   * Custom state.
+   */
+  xState?: string;
+  /**
+   * UI locale tags. You can use this parameter to set the display language for Auth UI.
+   *
+   * First, enable the language you want to change to in Authgear Portal (Your project \> UI Settings \> click on the settings icon beside Language.)
+   *
+   * For example, to change the language for Auth UI to Hong Kong,
+   * set the value for uiLocales to ["zh-HK"] after enabling "Chinese (Hong Kong)" in Authgear Portal.
+   */
+  uiLocales?: string[];
+}
+
+/**
  * Auth UI anonymous user promotion options
  *
  * @public

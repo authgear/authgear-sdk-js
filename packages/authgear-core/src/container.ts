@@ -348,7 +348,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
     const responseType = options.responseType;
     query.append("response_type", responseType);
-    if (responseType === "code") {
+    if (responseType === "code" || responseType === "urn:authgear:params:oauth:response-type:settings-action") {
       // Authorization code need PKCE.
       const codeVerifier = await this._delegate._setupCodeVerifier();
       await this._delegate.storage.setOIDCCodeVerifier(
@@ -403,6 +403,9 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     }
     if (options.oauthProviderAlias != null) {
       query.append("x_oauth_provider_alias", options.oauthProviderAlias);
+    }
+    if (options.xSettingsAction != null) {
+      query.append("x_settings_action", options.xSettingsAction);
     }
     if (!this.isSSOEnabled) {
       // For backward compatibility
@@ -534,6 +537,48 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       userInfo,
       state: params.get("state") ?? undefined,
     };
+  }
+
+  async _finishSettingsAction(
+    url: string,
+    tokenRequest?: Partial<_OIDCTokenRequest>
+  ): Promise<void> {
+    const clientID = this.clientID;
+    if (clientID == null) {
+      throw new AuthgearError("missing client ID");
+    }
+
+    const u = new URL(url);
+    const params = u.searchParams;
+    const uu = new URL(url);
+    uu.hash = "";
+    uu.search = "";
+    const redirectURI: string = uu.toString();
+    if (params.get("error")) {
+      throw new OAuthError({
+        error: params.get("error")!,
+        error_description: params.get("error_description") ?? undefined,
+      });
+    }
+
+    const code = params.get("code");
+    if (!code) {
+      throw new OAuthError({
+        error: "invalid_request",
+        error_description: "Missing parameter: code",
+      });
+    }
+    const codeVerifier = await this._delegate.storage.getOIDCCodeVerifier(
+      this.name
+    );
+    await this.apiClient._oidcTokenRequest({
+      ...tokenRequest,
+      grant_type: "urn:authgear:params:oauth:grant-type:settings-action",
+      code: code,
+      redirect_uri: redirectURI,
+      client_id: clientID,
+      code_verifier: codeVerifier ?? "",
+    });
   }
 
   /**

@@ -172,6 +172,29 @@ export interface SettingOptions {
 }
 
 /**
+ * @public
+ */
+export interface SettingsActionOptions {
+  /**
+   * UI locale tags. You can use this parameter to set the display language for Auth UI.
+   *
+   * First, enable the language you want to change to in Authgear Portal (Your project \> UI Settings \> click on the settings icon beside Language.)
+   *
+   * For example, to change the language for Auth UI to Hong Kong,
+   * set the value for uiLocales to ["zh-HK"] after enabling "Chinese (Hong Kong)" in Authgear Portal.
+   */
+  uiLocales?: string[];
+  /**
+   * Override the color scheme
+   */
+  colorScheme?: ColorScheme;
+  /**
+   * Redirect URI after the settings action is completed.
+   */
+  redirectURI: string;
+}
+
+/**
  * BiometricLAPolicy configures iOS specific behavior.
  * It must be consistent with BiometricAccessConstraintIOS.
  *

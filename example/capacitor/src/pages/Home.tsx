@@ -398,6 +398,16 @@ function AuthgearDemo() {
     }
   }, []);
 
+  const changePassword = useCallback(async () => {
+    if (isPlatformWeb()) {
+      // Not implemented.
+    } else {
+      authgearCapacitor.changePassword({
+        redirectURI: REDIRECT_URI_CAPACITOR,
+      });
+    }
+  }, []);
+
   const fetchUserInfo = useCallback(async () => {
     setLoading(true);
     try {
@@ -596,6 +606,16 @@ function AuthgearDemo() {
     [openSettings]
   );
 
+  const onClickChangePassword = useCallback(
+    (e: MouseEvent<HTMLIonButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      changePassword();
+    },
+    [changePassword]
+  );
+
   const onClickFetchUserInfo = useCallback(
     (e: MouseEvent<HTMLIonButtonElement>) => {
       e.preventDefault();
@@ -750,6 +770,15 @@ function AuthgearDemo() {
         >
           Open settings
         </IonButton>
+        {isPlatformWeb() ? null : (
+          <IonButton
+            className="button"
+            disabled={!initialized || !loggedIn}
+            onClick={onClickChangePassword}
+          >
+            Change password
+          </IonButton>
+        )}
         <IonButton
           className="button"
           disabled={!initialized || loading || !loggedIn}

@@ -10,6 +10,7 @@ import {
   SessionStateChangeReason,
   Page,
   PromptOption,
+  SettingsAction,
   _BaseAPIClient,
   _BaseContainer,
   _ContainerStorage,
@@ -39,6 +40,7 @@ import {
   type ReauthenticateResult,
   type SettingOptions,
   type BiometricOptions,
+  type SettingsActionOptions,
 } from "./types";
 import { BiometricPrivateKeyNotFoundError } from "./error";
 
@@ -541,6 +543,67 @@ export class CapacitorContainer {
    */
   async open(page: Page, options?: SettingOptions): Promise<void> {
     await this.openAuthgearURL(page, options);
+  }
+
+  /**
+   * @internal
+   */
+  /**
+   * Opens the settings page with given action.
+   *
+   * @internal
+   */
+  async _openSettingsAction(
+    action: SettingsAction,
+    options: SettingsActionOptions
+  ): Promise<void> {
+    const idToken = this.getIDTokenHint();
+    if (idToken == null) {
+      throw new Error(
+        "You can only trigger settings action when authenticated"
+      );
+    }
+
+    const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
+    if (!refreshToken) {
+      throw new AuthgearError("refresh token not found");
+    }
+
+    // Use app session token to copy session into webview.
+    const appSessionToken = await this.baseContainer._getAppSessionToken(
+      refreshToken
+    );
+
+    const loginHint = `https://authgear.com/login_hint?type=app_session_token&app_session_token=${encodeURIComponent(
+      appSessionToken
+    )}`;
+
+    const platform = getPlatform();
+    const authorizeURL = await this.baseContainer.authorizeEndpoint({
+      ...options,
+      platform,
+      loginHint,
+      idTokenHint: idToken,
+      responseType: "urn:authgear:params:oauth:response-type:settings-action",
+      scope: ["openid", "https://authgear.com/scopes/full-access"],
+      xSettingsAction: action,
+    });
+    const redirectURL = await this.uiImplementation.openAuthorizationURL({
+      url: authorizeURL,
+      redirectURI: options.redirectURI,
+      shareCookiesWithDeviceBrowser: this._shareCookiesWithDeviceBrowser(),
+    });
+    const xDeviceInfo = await getXDeviceInfo();
+    await this.baseContainer._finishSettingsAction(redirectURL, {
+      x_device_info: xDeviceInfo,
+    });
+  }
+
+  /**
+   * @public
+   */
+  async changePassword(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.ChangePassword, options);
   }
 
   /**

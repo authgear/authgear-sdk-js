@@ -35,6 +35,33 @@ function readIsSSOEnabled(): boolean {
   return window.localStorage.getItem("authgear.demo.isSSOEnabled") === "true";
 }
 
+function makeRedirectURI(): string {
+  return window.location.origin + "/auth-redirect";
+}
+
+function getOAuthState(): OAuthState | undefined {
+  const u = new URL(window.location.href);
+  const searchParams = u.searchParams;
+  const state = searchParams.get("state");
+  switch (state) {
+    case "authenticate":
+      return "authenticate";
+    case "reauthenticate":
+      return "reauthenticate";
+    case "promote":
+      return "promote";
+    case "change_password":
+      return "change_password";
+  }
+  return undefined;
+}
+
+type OAuthState =
+  | "authenticate"
+  | "reauthenticate"
+  | "promote"
+  | "change_password";
+
 function ShowError(props: { error: unknown }) {
   const { error } = props;
   if (error == null) {
@@ -150,6 +177,20 @@ function Root() {
     []
   );
 
+  const onClickChangePassword = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      authgear
+        .startChangePassword({
+          redirectURI: makeRedirectURI(),
+          state: "change_password",
+        })
+        .catch((err) => setError(err));
+    },
+    []
+  );
+
   const onClickSignOut = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -168,10 +209,10 @@ function Root() {
   const onClickSignIn = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    const redirectURI = window.location.origin + "/auth-redirect";
     authgear
       .startAuthentication({
-        redirectURI,
+        redirectURI: makeRedirectURI(),
+        state: "authenticate",
       })
       .then(
         () => {},
@@ -236,14 +277,13 @@ function Root() {
     (e: React.MouseEvent<HTMLElement>) => {
       e.preventDefault();
       e.stopPropagation();
-      const redirectURI = window.location.origin + "/reauth-redirect";
-
       authgear.refreshIDToken().then(
         () => {
           if (authgear.canReauthenticate()) {
             authgear
               .startReauthentication({
-                redirectURI,
+                redirectURI: makeRedirectURI(),
+                state: "reauthenticate",
               })
               .then(
                 () => {},
@@ -267,11 +307,10 @@ function Root() {
     (e: React.MouseEvent<HTMLElement>) => {
       e.preventDefault();
       e.stopPropagation();
-      const redirectURI =
-        window.location.origin + "/promote-anonymous-user-redirect";
       authgear
         .startPromoteAnonymousUser({
-          redirectURI,
+          redirectURI: makeRedirectURI(),
+          state: "promote",
         })
         .then(
           () => {},
@@ -399,6 +438,13 @@ function Root() {
           >
             Open Settings
           </button>
+          <button
+            className="button"
+            type="button"
+            onClick={onClickChangePassword}
+          >
+            Change Password
+          </button>
           <button className="button" type="button" onClick={onClickSignOut}>
             Sign out
           </button>
@@ -434,6 +480,9 @@ function AuthRedirect() {
     const clientID = readClientID();
     const endpoint = readEndpoint();
     const isSSOEnabled = readIsSSOEnabled();
+
+    const oauthState = getOAuthState();
+
     authgear
       .configure({
         clientID,
@@ -443,88 +492,42 @@ function AuthRedirect() {
       })
       .then(
         () => {
-          authgear.finishAuthentication().then(
-            (_) => {
-              navigate("/");
-            },
-            (err) => setError(err)
-          );
-        },
-        (err) => setError(err)
-      );
-  }, [navigate]);
-
-  return (
-    <div>
-      <p>Redirecting</p>
-      <ShowError error={error} />
-      <a href="/">Back to home</a>
-    </div>
-  );
-}
-
-function ReauthRedirect() {
-  const navigate = useNavigate();
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const sessionType = readSessionType();
-    const clientID = readClientID();
-    const endpoint = readEndpoint();
-    const isSSOEnabled = readIsSSOEnabled();
-    authgear
-      .configure({
-        clientID,
-        endpoint,
-        sessionType,
-        isSSOEnabled,
-      })
-      .then(
-        () => {
-          authgear.finishReauthentication().then(
-            (_) => {
-              navigate("/");
-            },
-            (err) => setError(err)
-          );
-        },
-        (err) => setError(err)
-      );
-  }, [navigate]);
-
-  return (
-    <div>
-      <p>Redirecting</p>
-      <ShowError error={error} />
-      <a href="/">Back to home</a>
-    </div>
-  );
-}
-
-function PromoteAnonymousUserRedirect() {
-  const navigate = useNavigate();
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const sessionType = readSessionType();
-    const clientID = readClientID();
-    const endpoint = readEndpoint();
-    const isSSOEnabled = readIsSSOEnabled();
-    authgear
-      .configure({
-        clientID,
-        endpoint,
-        sessionType,
-        isSSOEnabled,
-      })
-      .then(
-        () => {
-          authgear.finishPromoteAnonymousUser().then(
-            (_) => {
-              navigate("/");
-            },
-            (err) => setError(err)
-          );
+          switch (oauthState) {
+            case "authenticate":
+              authgear.finishAuthentication().then(
+                (_) => {
+                  navigate("/");
+                },
+                (err) => setError(err)
+              );
+              break;
+            case "reauthenticate":
+              authgear.finishReauthentication().then(
+                (_) => {
+                  navigate("/");
+                },
+                (err) => setError(err)
+              );
+              break;
+            case "promote":
+              authgear.finishPromoteAnonymousUser().then(
+                (_) => {
+                  navigate("/");
+                },
+                (err) => setError(err)
+              );
+              break;
+            case "change_password":
+              authgear.finishChangePassword().then(
+                (_) => {
+                  navigate("/");
+                },
+                (err) => setError(err)
+              );
+              break;
+            default:
+              throw new Error("unknown oauth state: " + oauthState);
+          }
         },
         (err) => setError(err)
       );
@@ -545,11 +548,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Root />} />
         <Route path="/auth-redirect" element={<AuthRedirect />} />
-        <Route path="/reauth-redirect" element={<ReauthRedirect />} />
-        <Route
-          path="/promote-anonymous-user-redirect"
-          element={<PromoteAnonymousUserRedirect />}
-        />
       </Routes>
     </BrowserRouter>
   );
