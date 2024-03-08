@@ -79,9 +79,23 @@ public class WebKitWebViewActivity extends AppCompatActivity {
     private static class MyWebViewClient extends WebViewClient {
 
         private WebKitWebViewActivity activity;
+        private final String USERSCRIPT_USER_SELECT_NONE = "document.documentElement.style.webkitUserSelect='none';document.documentElement.style.userSelect='none';";
 
         private MyWebViewClient(WebKitWebViewActivity activity) {
             this.activity = activity;
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view, url);
+
+            // android.webkit.view does not have WKUserContentController that allows us to inject userscript.
+            // onPageFinished will be called for each navigation.
+            // So it can be used as a replacement of WKUserContentController to allow us to
+            // run a script for every page.
+            // The caveat is that the script is run in the main frame only.
+            // But we do not actually use iframes so it does not matter.
+            view.evaluateJavascript(USERSCRIPT_USER_SELECT_NONE, null);
         }
 
         @TargetApi(Build.VERSION_CODES.N)
@@ -213,13 +227,6 @@ public class WebKitWebViewActivity extends AppCompatActivity {
         this.mWebView = new WebView(this);
         this.mWebView.getSettings().setSupportMultipleWindows(true);
         this.mWebView.getSettings().setDomStorageEnabled(true);
-
-        // Disable text selection
-        // NOTE: `evaluateJavascript` cannot be set to run on per navigation in WebChromeClient,
-        // need to disable long click instead.
-        // Selection in text fields should still work
-        this.mWebView.setOnLongClickListener(v -> true);
-
         this.setContentView(this.mWebView);
         this.mWebView.setWebViewClient(new MyWebViewClient(this));
         this.mWebView.setWebChromeClient(new MyWebChromeClient(this));
