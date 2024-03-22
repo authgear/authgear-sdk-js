@@ -30,6 +30,67 @@ jobs:
     - run: npm run bundle
       if: ${{ !cancelled() }}
 
+  # react_native_ios cannot be built on simulator due to WeChat SDK
+
+  test_react_native_android:
+    if: ${{ github.event_name == 'pull_request' }}
+    # When we change the runner image, the available Android build tools versions will also change.
+    # We need to update build.gradle too.
+    # See https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
+    runs-on: macos-13
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version-file: "./.tool-versions"
+    - run: npm ci
+    - run: npm run build
+    - working-directory: ./example/reactnative
+      run: yarn
+    - name: Build unsigned APK
+      working-directory: ./example/reactnative/android
+      run: ./gradlew :app:assembleRelease
+
+  test_capacitor_ios:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: macos-13
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version-file: "./.tool-versions"
+    - run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
+    - run: npm ci
+    - run: npm run build
+    - working-directory: ./example/capacitor
+      run: npm ci
+    - working-directory: ./example/capacitor
+      run: npm run build
+    - working-directory: ./example/capacitor
+      run: npx cap sync
+    - name: Run xcodebuild
+      working-directory: ./example/capacitor/ios/App
+      run: xcodebuild -quiet -workspace App.xcworkspace -scheme App -sdk iphonesimulator build
+  test_capacitor_android:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: macos-13
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version-file: "./.tool-versions"
+    - run: npm ci
+    - run: npm run build
+    - working-directory: ./example/capacitor
+      run: npm ci
+    - working-directory: ./example/capacitor
+      run: npm run build
+    - working-directory: ./example/capacitor
+      run: npx cap sync
+    - name: Build unsigned APK
+      working-directory: ./example/capacitor/android
+      run: ./gradlew :app:assembleRelease
+
   react_native_ios:
     if: github.ref == 'refs/heads/master'
     needs: test
@@ -39,7 +100,7 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version-file: "./.tool-versions"
-    - run: sudo xcode-select -s /Applications/Xcode_14.3.1.app/Contents/Developer
+    - run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
     - run: npm install -g appcenter-cli
     - run: npm ci
     - run: npm run build
@@ -151,7 +212,7 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version-file: "./.tool-versions"
-    - run: sudo xcode-select -s /Applications/Xcode_14.3.1.app/Contents/Developer
+    - run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
     - run: npm install -g appcenter-cli
     - run: npm ci
     - run: npm run build
