@@ -109,6 +109,7 @@ public class AuthgearPlugin: CAPPlugin {
         let modalPresentationStyle = call.getString("modalPresentationStyle")
         let navigationBarBackgroundColor = call.getString("navigationBarBackgroundColor")
         let navigationBarButtonTintColor = call.getString("navigationBarButtonTintColor")
+        let isInspectable = call.getBool("iosIsInspectable")
 
         DispatchQueue.main.async {
             self.impl.openAuthorizeURLWithWebView(
@@ -117,7 +118,8 @@ public class AuthgearPlugin: CAPPlugin {
                 redirectURI: redirectURI,
                 modalPresentationStyleString: modalPresentationStyle,
                 navigationBarBackgroundColorString: navigationBarBackgroundColor,
-                navigationBarButtonTintColorString: navigationBarButtonTintColor
+                navigationBarButtonTintColorString: navigationBarButtonTintColor,
+                isInspectable: isInspectable
             ) { (redirectURI, error) in
                 if let error = error {
                     error.reject(call)

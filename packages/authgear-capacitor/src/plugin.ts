@@ -23,6 +23,7 @@ export interface AuthgearPlugin {
     navigationBarButtonTintColor?: string;
     actionBarBackgroundColor?: string;
     actionBarButtonTintColor?: string;
+    iosIsInspectable?: boolean;
   }): Promise<{ redirectURI: string }>;
   openURL(options: { url: string }): Promise<void>;
   checkBiometricSupported(options: BiometricOptions): Promise<void>;
@@ -122,6 +123,7 @@ export async function openAuthorizeURLWithWebView(options: {
   navigationBarButtonTintColor?: string;
   actionBarBackgroundColor?: string;
   actionBarButtonTintColor?: string;
+  iosIsInspectable?: boolean;
 }): Promise<string> {
   try {
     const { redirectURI } = await Authgear.openAuthorizeURLWithWebView(options);

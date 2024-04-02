@@ -224,10 +224,11 @@ import Capacitor
         modalPresentationStyleString: String?,
         navigationBarBackgroundColorString: String?,
         navigationBarButtonTintColorString: String?,
+        isInspectable: Bool?,
         completion: @escaping (String?, Error?) -> Void
     ) {
         var controller: AGWKWebViewController?
-        controller = AGWKWebViewController(url: url, redirectURI: redirectURI) { result, error in
+        controller = AGWKWebViewController(url: url, redirectURI: redirectURI, isInspectable: isInspectable ?? false) { result, error in
             self.agWKWebViewControllerHandles.removeValue(forKey: controller!)
             if let error = error {
                 let nsError = error as NSError
