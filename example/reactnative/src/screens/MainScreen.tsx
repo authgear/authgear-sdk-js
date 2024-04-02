@@ -366,6 +366,7 @@ const HomeScreen: React.FC = () => {
           ? new WebKitWebViewUIImplementation({
               ios: {
                 modalPresentationStyle: 'fullScreen',
+                isInspectable: true,
               },
             })
           : undefined,
