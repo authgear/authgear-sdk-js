@@ -10,17 +10,19 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
 @property (nonatomic, copy) AGWKWebViewControllerCompletionHandler completionHandler;
 @property (nonatomic) WKWebView *webView;
 @property (nonatomic, copy) NSURL* result;
+@property (nonatomic) BOOL isInspectable;
 
 @end
 
 @implementation AGWKWebViewController
 
-- (instancetype)initWithURL:(NSURL *)url redirectURI:(NSURL *)redirectURI completionHandler:(void (^)(NSURL *url, NSError *error))completionHandler
+- (instancetype)initWithURL:(NSURL *)url redirectURI:(NSURL *)redirectURI isInspectable:(BOOL)isInspectable completionHandler:(void (^)(NSURL *url, NSError *error))completionHandler
 {
     self = [super initWithNibName:nil bundle:nil];
     self.url = url;
     self.redirectURI = redirectURI;
     self.completionHandler = completionHandler;
+    self.isInspectable = isInspectable;
 
     WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
 
@@ -35,6 +37,13 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
     self.webView.translatesAutoresizingMaskIntoConstraints = false;
     self.webView.allowsBackForwardNavigationGestures = YES;
     self.webView.navigationDelegate = self;
+
+    if (@available(iOS 16.4, *)) {
+        self.webView.inspectable = isInspectable;
+    } else {
+        // inspectable is not available under ios 16.4
+        // The webview is always inspectable
+    }
 
     return self;
 }

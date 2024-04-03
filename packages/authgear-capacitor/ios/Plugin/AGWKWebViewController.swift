@@ -21,6 +21,7 @@ class AGWKWebViewController: UIViewController, WKNavigationDelegate {
     private var completionHandler: CompletionHandler?
     private let webView: WKWebView
     private var result: URL?
+    private let isInspectable: Bool
 
     private var defaultBackgroundColor: UIColor {
         get {
@@ -41,10 +42,11 @@ class AGWKWebViewController: UIViewController, WKNavigationDelegate {
         document.documentElement.style.userSelect = 'none';
     """
 
-    init(url: URL, redirectURI: URL, completionHandler: @escaping CompletionHandler) {
+    init(url: URL, redirectURI: URL, isInspectable: Bool, completionHandler: @escaping CompletionHandler) {
         self.url = url
         self.redirectURI = redirectURI
         self.completionHandler = completionHandler
+        self.isInspectable = isInspectable
 
         let configuration = WKWebViewConfiguration()
 
@@ -59,6 +61,12 @@ class AGWKWebViewController: UIViewController, WKNavigationDelegate {
         self.webView = WKWebView(frame: .zero, configuration: configuration)
         self.webView.translatesAutoresizingMaskIntoConstraints = false
         self.webView.allowsBackForwardNavigationGestures = true
+        if #available(iOS 16.4, *) {
+            self.webView.isInspectable = isInspectable
+        } else {
+            // isInspectable is not available under ios 16.4
+            // The webview is always inspectable
+        }
 
         super.init(nibName: nil, bundle: nil)
 

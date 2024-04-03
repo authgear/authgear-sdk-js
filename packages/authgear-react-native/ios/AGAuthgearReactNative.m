@@ -284,9 +284,11 @@ RCT_EXPORT_METHOD(openAuthorizeURLWithWebView:(NSDictionary *)options
     UIModalPresentationStyle modalPresentationStyle = [self modalPresentationStyleFromString:options[@"modalPresentationStyle"]];
     UIColor *navigationBarBackgroundColor = [self uiColorFromNSString:options[@"navigationBarBackgroundColor"]];
     UIColor *navigationBarButtonTintColor = [self uiColorFromNSString:options[@"navigationBarButtonTintColor"]];
+    BOOL isInspectable = [self boolFromNSString:options[@"iosIsInspectable"]];
 
     AGWKWebViewController *controller = [[AGWKWebViewController alloc] initWithURL:[[NSURL alloc] initWithString:url]
-                                                                       redirectURI:[[NSURL alloc] initWithString:redirectURI] completionHandler:^(NSURL *url, NSError *error) {
+                                                                       redirectURI:[[NSURL alloc] initWithString:redirectURI]
+                                                                       isInspectable:isInspectable completionHandler:^(NSURL *url, NSError *error) {
         if (error) {
             BOOL isUserCancelled = [error.domain isEqualToString:AGWKWebViewControllerErrorDomain] && error.code == AGWKWebViewControllerErrorCodeCanceledLogin;
             if (isUserCancelled) {
@@ -944,6 +946,17 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
     CGFloat g = ((argb >> 8) & 0xFF) / 255.0;
     CGFloat b = (argb & 0xFF) / 255.0;
     return [UIColor colorWithRed:r green:g blue:b alpha:a];
+}
+
+-(BOOL)boolFromNSString:(NSString *)str
+{
+    if (str != nil) {
+        if ([str isEqualToString:@"true"]) {
+            return true;
+        }
+        return false;
+    }
+    return false;
 }
 
 @end

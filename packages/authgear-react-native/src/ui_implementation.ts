@@ -64,6 +64,7 @@ export interface WebKitWebViewUIImplementationOptionsIOS {
   navigationBarBackgroundColor?: number;
   navigationBarButtonTintColor?: number;
   modalPresentationStyle?: "automatic" | "fullScreen" | "pageSheet";
+  isInspectable?: boolean;
 }
 
 /**
@@ -108,6 +109,7 @@ export class WebKitWebViewUIImplementation implements UIImplementation {
       navigationBarButtonTintColor:
         this.options?.ios?.navigationBarButtonTintColor?.toString(16),
       modalPresentationStyle: this.options?.ios?.modalPresentationStyle,
+      iosIsInspectable: this.options?.ios?.isInspectable ? "true" : "false",
       actionBarBackgroundColor:
         this.options?.android?.actionBarBackgroundColor?.toString(16),
       actionBarButtonTintColor:

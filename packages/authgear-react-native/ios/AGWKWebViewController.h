@@ -21,7 +21,7 @@ typedef void(^AGWKWebViewControllerCompletionHandler)(NSURL *url, NSError *error
 
 @interface AGWKWebViewController : UIViewController <WKNavigationDelegate>
 
-- (instancetype)initWithURL:(NSURL *)url redirectURI:(NSURL *)redirectURI completionHandler:(AGWKWebViewControllerCompletionHandler) completionHandler;
+- (instancetype)initWithURL:(NSURL *)url redirectURI:(NSURL *)redirectURI isInspectable:(BOOL)isInspectable completionHandler:(AGWKWebViewControllerCompletionHandler) completionHandler;
 
 @property (nonatomic, weak) id<AGWKWebViewControllerPresentationContextProviding> presentationContextProvider;
 @property (nonatomic, copy) UIColor *navigationBarBackgroundColor;

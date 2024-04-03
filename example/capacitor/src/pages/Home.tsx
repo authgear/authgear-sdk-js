@@ -214,6 +214,7 @@ function AuthgearDemo() {
             ? new WebKitWebViewUIImplementation({
                 ios: {
                   modalPresentationStyle: "fullScreen",
+                  isInspectable: true,
                 },
               })
             : undefined,
