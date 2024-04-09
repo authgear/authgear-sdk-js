@@ -67,9 +67,11 @@ public class WebViewActivity extends AppCompatActivity {
         });
         WebSettings webSettings = this.webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setLoadWithOverviewMode(true);
         this.webView.loadUrl(url);
     }
-    
+
     @Override
     public void onBackPressed() {
         if (this.webView.canGoBack()) {

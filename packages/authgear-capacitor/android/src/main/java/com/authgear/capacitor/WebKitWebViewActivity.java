@@ -232,6 +232,8 @@ public class WebKitWebViewActivity extends AppCompatActivity {
         this.mWebView.setWebChromeClient(new MyWebChromeClient(this));
         WebSettings webSettings = this.mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setLoadWithOverviewMode(true);
 
         if (savedInstanceState == null) {
             this.mWebView.loadUrl(options.url.toString());
