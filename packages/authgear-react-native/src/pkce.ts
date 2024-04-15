@@ -3,17 +3,10 @@ import { _base64URLEncode } from "@authgear/core";
 
 import { randomBytes, sha256String } from "./nativemodule";
 
-function byteToHex(byte: number): string {
-  return ("0" + byte.toString(16)).substr(-2);
-}
-
 export async function generateCodeVerifier(): Promise<string> {
   const arr = await randomBytes(32);
-  let output = "";
-  for (let i = 0; i < arr.length; ++i) {
-    output += byteToHex(arr[i]);
-  }
-  return output;
+  const base64 = _base64URLEncode(new Uint8Array(arr));
+  return base64;
 }
 
 export async function computeCodeChallenge(
