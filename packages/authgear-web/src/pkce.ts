@@ -2,10 +2,6 @@
 
 import { _encodeUTF8, _base64URLEncode } from "@authgear/core";
 
-function byteToHex(byte: number): string {
-  return ("0" + byte.toString(16)).substr(-2);
-}
-
 // windowCryptoSubtleDigest is window.crypto.subtle.digest with IE 11 support.
 async function windowCryptoSubtleDigest(
   algorithm: string,
@@ -44,9 +40,6 @@ export async function computeCodeChallenge(
 export function generateCodeVerifier(): string {
   const arr = new Uint8Array(32);
   window.crypto.getRandomValues(arr);
-  let output = "";
-  for (let i = 0; i < arr.length; ++i) {
-    output += byteToHex(arr[i]);
-  }
-  return output;
+  const base64 = _base64URLEncode(arr);
+  return base64;
 }
