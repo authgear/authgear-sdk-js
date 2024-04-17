@@ -99,6 +99,7 @@ function AuthgearDemo() {
   const [endpoint, setEndpoint] = useState(() => {
     return readEndpoint();
   });
+  const [authenticationFlowGroup, setAuthenticationFlowGroup] = useState("");
   const [page, setPage] = useState("");
   const [colorScheme, setColorScheme] = useState("");
   const [useTransientTokenStorage, setUseTransientTokenStorage] =
@@ -252,6 +253,7 @@ function AuthgearDemo() {
           colorScheme:
             colorScheme === "" ? undefined : (colorScheme as ColorScheme),
           page: page === "" ? undefined : page,
+          authenticationFlowGroup,
         });
         showUserInfo(result.userInfo);
       }
@@ -261,7 +263,14 @@ function AuthgearDemo() {
       setLoading(false);
       await updateBiometricState();
     }
-  }, [colorScheme, page, showError, showUserInfo, updateBiometricState]);
+  }, [
+    authenticationFlowGroup,
+    colorScheme,
+    page,
+    showError,
+    showUserInfo,
+    updateBiometricState,
+  ]);
 
   const enableBiometric = useCallback(async () => {
     setLoading(true);
@@ -329,6 +338,7 @@ function AuthgearDemo() {
 
         authgearWeb.startReauthentication({
           redirectURI: REDIRECT_URI_WEB_REAUTH,
+          authenticationFlowGroup,
         });
       } else {
         await authgearCapacitor.refreshIDToken();
@@ -350,7 +360,7 @@ function AuthgearDemo() {
     } finally {
       setLoading(false);
     }
-  }, [showError, colorScheme, showAuthTime]);
+  }, [authenticationFlowGroup, showError, colorScheme, showAuthTime]);
 
   const reauthenticate = useCallback(async () => {
     setLoading(true);
@@ -365,6 +375,7 @@ function AuthgearDemo() {
 
         authgearWeb.startReauthentication({
           redirectURI: REDIRECT_URI_WEB_REAUTH,
+          authenticationFlowGroup,
         });
       } else {
         await authgearCapacitor.refreshIDToken();
@@ -389,7 +400,7 @@ function AuthgearDemo() {
     } finally {
       setLoading(false);
     }
-  }, [showError, colorScheme, showAuthTime]);
+  }, [authenticationFlowGroup, showError, colorScheme, showAuthTime]);
 
   const openSettings = useCallback(async () => {
     if (isPlatformWeb()) {
@@ -673,6 +684,12 @@ function AuthgearDemo() {
           placeholder="Enter Authgear endpoint"
           onIonInput={onChangeEndpoint}
           value={endpoint}
+        />
+        <IonInput
+          type="text"
+          label="Authentication Flow Group"
+          placeholder="Enter Authentication Flow Group"
+          onIonInput={(e) => setAuthenticationFlowGroup(e.detail.value!)}
         />
         <IonSelect label="Page" value={page} onIonChange={onChangePage}>
           <IonSelectOption value="">Unset</IonSelectOption>
