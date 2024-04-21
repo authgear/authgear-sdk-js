@@ -344,7 +344,7 @@ export enum SessionStateChangeReason {
  */
 export enum Page {
   Settings = "/settings",
-  Identities = "/settings/identities",
+  Identity = "/settings/identity",
 }
 
 /**
