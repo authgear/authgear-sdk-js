@@ -150,6 +150,7 @@ const HomeScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [clientID, setClientID] = useState('');
   const [endpoint, setEndpoint] = useState('');
+  const [authenticationFlowGroup, setAuthenticationflowGroup] = useState('');
   const [page, setPage] = useState('');
   const [explicitColorScheme, setExplicitColorScheme] =
     useState<ColorScheme | null>(null);
@@ -400,6 +401,7 @@ const HomeScreen: React.FC = () => {
         wechatRedirectURI,
         colorScheme: colorScheme as ColorScheme,
         page,
+        authenticationFlowGroup,
       })
       .then(({userInfo}) => {
         setUserInfo(userInfo);
@@ -412,7 +414,14 @@ const HomeScreen: React.FC = () => {
         setLoading(false);
         updateBiometricState();
       });
-  }, [page, updateBiometricState, showError, showUser, colorScheme]);
+  }, [
+    page,
+    authenticationFlowGroup,
+    updateBiometricState,
+    showError,
+    showUser,
+    colorScheme,
+  ]);
 
   const loginAnonymously = useCallback(() => {
     setLoading(true);
@@ -464,6 +473,7 @@ const HomeScreen: React.FC = () => {
           redirectURI,
           colorScheme: colorScheme as ColorScheme,
           wechatRedirectURI,
+          authenticationFlowGroup,
         },
         biometricOptions,
       );
@@ -480,7 +490,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [showError, showUser, colorScheme]);
+  }, [authenticationFlowGroup, showError, showUser, colorScheme]);
 
   const reauthenticateWebOnly = useCallback(() => {
     async function task() {
@@ -495,6 +505,7 @@ const HomeScreen: React.FC = () => {
         redirectURI,
         colorScheme: colorScheme as ColorScheme,
         wechatRedirectURI,
+        authenticationFlowGroup,
       });
 
       setUserInfo(userInfo);
@@ -509,7 +520,7 @@ const HomeScreen: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [showError, showUser, colorScheme]);
+  }, [authenticationFlowGroup, showError, showUser, colorScheme]);
 
   const enableBiometric = useCallback(() => {
     setLoading(true);
@@ -634,6 +645,17 @@ const HomeScreen: React.FC = () => {
             autoCapitalize="none"
             autoCorrect={false}
             placeholder="Enter endpoint"
+          />
+        </View>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>Authentication Flow Group</Text>
+          <TextInput
+            style={styles.inputField}
+            value={authenticationFlowGroup}
+            onChangeText={setAuthenticationflowGroup}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder="Enter flow group"
           />
         </View>
         <View style={styles.input}>

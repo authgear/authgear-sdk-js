@@ -90,6 +90,8 @@ function Root() {
   const [clientID, setClientID] = useState(initialClientID);
   const [endpoint, setEndpoint] = useState(initialEndpoint);
   const [isSSOEnabled, setIsSSOEnabled] = useState(initialIsSSOEnabled);
+  const [page, setPage] = useState<string>();
+  const [authenticationFlowGroup, setAuthenticationflowGroup] = useState<string>("");
 
   const [error, setError] = useState<unknown>(null);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -213,12 +215,14 @@ function Root() {
       .startAuthentication({
         redirectURI: makeRedirectURI(),
         state: "authenticate",
+        page,
+        authenticationFlowGroup,
       })
       .then(
         () => {},
         (err) => setError(err)
       );
-  }, []);
+  }, [page, authenticationFlowGroup]);
 
   const onClickSignInAnonymously = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
@@ -284,6 +288,7 @@ function Root() {
               .startReauthentication({
                 redirectURI: makeRedirectURI(),
                 state: "reauthenticate",
+                authenticationFlowGroup,
               })
               .then(
                 () => {},
@@ -300,7 +305,7 @@ function Root() {
         (err) => setError(err)
       );
     },
-    []
+    [authenticationFlowGroup]
   );
 
   const onClickPromoteAnonymousUser = useCallback(
@@ -381,6 +386,28 @@ function Root() {
           value={endpoint}
           onChange={onChangeEndpoint}
         />
+      </label>
+      <label className="label">
+        Authentication Flow Group
+        <input
+          className="input"
+          type="text"
+          placeholder="Enter Flow Group"
+          value={authenticationFlowGroup}
+          onChange={(e) => setAuthenticationflowGroup(e.currentTarget.value)}
+        />
+      </label>
+      <label className="label">
+        Page
+        <select
+          className="input"
+          value={page}
+          onChange={(e) => setPage(e.currentTarget.value)}
+        >
+          <option value={undefined}>Unset</option>
+          <option value="signup">Signup</option>
+          <option value="login">Login</option>
+        </select>
       </label>
       <label className="label">
         Is SSO Enabled

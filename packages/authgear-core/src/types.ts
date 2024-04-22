@@ -89,6 +89,7 @@ export interface _OIDCAuthenticationRequest {
   suppressIDPSessionCookie?: boolean;
   oauthProviderAlias?: string;
   xSettingsAction?: "change_password";
+  authenticationFlowGroup?: string;
 }
 
 /**

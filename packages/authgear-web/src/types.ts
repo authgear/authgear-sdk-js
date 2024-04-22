@@ -54,6 +54,10 @@ export interface ReauthenticateOptions {
    * OIDC max_age
    */
   maxAge?: number;
+  /**
+   * Authentication flow group
+   */
+  authenticationFlowGroup?: string;
 }
 
 /**
@@ -117,6 +121,10 @@ export interface AuthenticateOptions {
    * then set oauthProviderAlias to "google".
    */
   oauthProviderAlias?: string;
+  /**
+   * Authentication flow group
+   */
+  authenticationFlowGroup?: string;
 }
 
 /**
