@@ -52,9 +52,12 @@ docs:
 deploy-docs: docs
 	./scripts/deploy_docs.sh
 
+# NOTE(louis): For some unknown reason, if platfrom is set to linux/x86_64,
+# The npm run build will get stuck forever on my Apple Silicon MacBook.
+# So we have to build it on CI.
 .PHONY: build-image
 build-image:
-	docker build --platform linux/x86-64 --tag $(IMAGE) --file ./example/reactweb/Dockerfile .
+	docker build --tag $(IMAGE) --file ./example/reactweb/Dockerfile .
 
 .PHONY: push-image
 push-image:

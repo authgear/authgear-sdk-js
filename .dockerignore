@@ -1,2 +1,10 @@
+**/.git
+**/.DS_Store
 **/node_modules
 **/.parcel-cache
+website
+example/capacitor
+example/reactnative
+example/reactweb/dist
+packages/authgear-capacitor
+packages/authgear-react-native
