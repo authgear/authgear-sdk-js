@@ -30,6 +30,20 @@ jobs:
     - run: npm run bundle
       if: ${{ !cancelled() }}
 
+  webapp-image:
+    runs-on: ubuntu-22.04
+    needs: test
+    steps:
+    - uses: actions/checkout@v3
+    - run: make build-image
+    - uses: docker/login-action@v2
+      if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.event_name == 'push' }}
+      with:
+        registry: quay.io
+        username: ${{ secrets.QUAY_USERNAME }}
+        password: ${{ secrets.QUAY_ROBOT_TOKEN }}
+    - run: make push-image
+
   # react_native_ios cannot be built on simulator due to WeChat SDK
 
   test_react_native_android:
