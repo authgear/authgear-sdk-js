@@ -5,8 +5,6 @@ import json from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
 import replace from "@rollup/plugin-replace";
 
-const getBuiltins = require("builtins");
-
 const extensions = [".mjs", ".js", ".jsx", ".ts", ".tsx"];
 
 const plugins = [
