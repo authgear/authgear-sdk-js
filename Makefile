@@ -20,6 +20,7 @@ docs:
 		--name @authgear/web \
 		--entryPoints packages/authgear-web/index.d.ts \
 		--out ./temp/docs/web \
+		--plugin typedoc-plugin-markdown \
 		--namedAnchors \
 		--entryDocument index.md
 	npx typedoc \
@@ -28,6 +29,7 @@ docs:
 		--name @authgear/react-native \
 		--entryPoints packages/authgear-react-native/index.d.ts \
 		--out ./temp/docs/react-native \
+		--plugin typedoc-plugin-markdown \
 		--namedAnchors \
 		--entryDocument index.md
 	npx typedoc \
@@ -36,6 +38,7 @@ docs:
 		--name @authgear/capacitor \
 		--entryPoints packages/authgear-capacitor/index.d.ts \
 		--out ./temp/docs/capacitor \
+		--plugin typedoc-plugin-markdown \
 		--namedAnchors \
 		--entryDocument index.md
 	cp ./typedoc/index.md ./temp/docs/index.md
