@@ -49,7 +49,7 @@ docs:
 	rm -rf ./website/docs
 	cp -R ./temp/docs/. ./website/docs
 	cp ./temp/sidebars.js ./website
-	(cd website && yarn build)
+	(cd website && npm run build)
 
 .PHONY: deploy-docs
 deploy-docs: docs
