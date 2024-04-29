@@ -52,6 +52,7 @@ jobs:
         username: ${{ secrets.QUAY_USERNAME }}
         password: ${{ secrets.QUAY_ROBOT_TOKEN }}
     - run: make push-image
+      if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.event_name == 'push' }}
 
   # react_native_ios cannot be built on simulator due to WeChat SDK
 
