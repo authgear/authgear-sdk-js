@@ -19,6 +19,8 @@ jobs:
       with:
         node-version-file: "./.tool-versions"
     - run: npm ci
+    - run: npm audit
+      if: ${{ !cancelled() }}
     - run: npm run format
       if: ${{ !cancelled() }}
     - run: npm run lint
