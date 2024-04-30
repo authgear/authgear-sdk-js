@@ -19,6 +19,13 @@ jobs:
       with:
         node-version-file: "./.tool-versions"
     - run: npm ci
+    - run: npm ci
+      working-directory: ./website
+    - run: npm audit
+      if: ${{ !cancelled() }}
+    - run: npm audit
+      working-directory: ./website
+      if: ${{ !cancelled() }}
     - run: npm run format
       if: ${{ !cancelled() }}
     - run: npm run lint
@@ -28,6 +35,8 @@ jobs:
     - run: npm run test
       if: ${{ !cancelled() }}
     - run: npm run bundle
+      if: ${{ !cancelled() }}
+    - run: make docs
       if: ${{ !cancelled() }}
 
   webapp-image:
@@ -43,6 +52,7 @@ jobs:
         username: ${{ secrets.QUAY_USERNAME }}
         password: ${{ secrets.QUAY_ROBOT_TOKEN }}
     - run: make push-image
+      if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.event_name == 'push' }}
 
   # react_native_ios cannot be built on simulator due to WeChat SDK
 

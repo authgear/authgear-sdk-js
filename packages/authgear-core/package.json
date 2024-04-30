@@ -6,7 +6,7 @@
   "main": "src/index.ts",
   "devDependencies": {
     "base64-arraybuffer": "1.0.2",
-    "core-js-pure": "3.22.7",
+    "core-js-pure": "^3.37.0",
     "text-encoding-shim": "1.0.5"
   }
 }

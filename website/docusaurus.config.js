@@ -1,9 +1,6 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-const lightCodeTheme = require("prism-react-renderer/themes/github");
-const darkCodeTheme = require("prism-react-renderer/themes/dracula");
-
 /** @type {import("@docusaurus/types").DocusaurusConfig} */
 const config = {
   // Always append trailing slash so that relative link is predictable.
@@ -76,10 +73,6 @@ const config = {
         },
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Oursky, Ltd.`,
-    },
-    prism: {
-      theme: lightCodeTheme,
-      darkTheme: darkCodeTheme,
     },
   },
 };
