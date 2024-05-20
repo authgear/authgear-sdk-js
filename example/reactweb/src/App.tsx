@@ -491,7 +491,7 @@ function Root() {
         </div>
       )}
       {sessionState === SessionState.Authenticated && userInfo != null ? (
-        <pre>{JSON.stringify(userInfo, null, 2)}</pre>
+        <pre>{JSON.stringify(userInfo.raw, null, 2)}</pre>
       ) : null}
       <ShowError error={error} />
     </div>
