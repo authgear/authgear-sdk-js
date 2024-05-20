@@ -164,7 +164,7 @@ function AuthgearDemo() {
   }, []);
 
   const showUserInfo = useCallback((userInfo: UserInfo) => {
-    const message = JSON.stringify(userInfo, null, 2);
+    const message = JSON.stringify(userInfo.raw, null, 2);
     setIsAlertOpen(true);
     setAlertHeader("UserInfo");
     setAlertMessage(message);

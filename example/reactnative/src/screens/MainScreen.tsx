@@ -206,14 +206,7 @@ const HomeScreen: React.FC = () => {
   const colorScheme = explicitColorScheme ?? systemColorScheme;
 
   const showUser = useCallback((userInfo: UserInfo) => {
-    Alert.alert(
-      'User Info',
-      [
-        `User ID: ${userInfo.sub}`,
-        `Is Anonymous: ${userInfo.isAnonymous}`,
-        `Is Verified: ${userInfo.isVerified}`,
-      ].join('\n'),
-    );
+    Alert.alert('User Info', JSON.stringify(userInfo.raw, null, 2))
   }, []);
 
   const showError = useCallback((e: any) => {
