@@ -2,6 +2,22 @@
 
 This app is for demonstrating the usage of functions supportted by @authgear/react-native SDK.
 
+# How to resolve vulnerabilities in packages
+
+Yarn Classic is our package manager. It does not support `audit fix`.
+I tried to switch to npm, but then `npm start` will result in error `cannot find package @authgear/react-native`.
+So a React Native project cannot really use npm as package manager.
+
+To automate the fixing of vulnerabilities in packages. We can use the following workaround
+
+- `rm yarn.lock`
+- `npm i` to generate `package-lock.json`.
+- `npm audit fix` to fix vulnerabilities.
+- `git checkout -- yarn.lock` to bring back `yarn.lock`.
+- `npm i` to ask npm to update `yarn.lock` based on `package-lock.json`.
+- `yarn i` to ask Yarn to update `yarn.lock` according to its own flavor.
+- `rm package-lock.json` to remove residue.
+
 # Initial setup
 
 ## Prerequisite
