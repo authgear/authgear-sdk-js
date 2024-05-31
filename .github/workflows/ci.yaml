@@ -243,6 +243,8 @@ jobs:
     - working-directory: ./example/capacitor
       run: npm ci
     - working-directory: ./example/capacitor
+      run: npm audit
+    - working-directory: ./example/capacitor
       run: npm run build
     - working-directory: ./example/capacitor
       run: npx cap sync
@@ -301,6 +303,8 @@ jobs:
     - run: npm run build
     - working-directory: ./example/capacitor
       run: npm ci
+    - working-directory: ./example/capacitor
+      run: npm audit
     - working-directory: ./example/capacitor
       run: npm run build
     - working-directory: ./example/capacitor
