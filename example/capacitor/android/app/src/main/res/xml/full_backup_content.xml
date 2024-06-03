@@ -2,5 +2,5 @@
 <!-- NOTE(backup): Please search NOTE(backup) before you change this file -->
 <full-backup-content>
   <include domain="sharedpref" path="authgear_encrypted_shared_preferences.xml"/>
-  <include domain="device_sharedpref" path="authgear_encrypted_shared_preferences.xml"/>
+  <!-- <include domain="device_sharedpref" path="authgear_encrypted_shared_preferences.xml"/> -->
 </full-backup-content>
