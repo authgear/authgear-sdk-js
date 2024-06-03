@@ -1,6 +1,9 @@
 package com.authgear.reactnative;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -28,6 +31,7 @@ import android.provider.Settings;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
+import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ActivityEventListener;
@@ -41,6 +45,8 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
+import com.google.crypto.tink.shaded.protobuf.InvalidProtocolBufferException;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.biometric.BiometricManager;
@@ -53,6 +59,8 @@ import org.json.JSONObject;
 
 public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implements ActivityEventListener {
 
+    private static final String LOGTAG = "AuthgearReactNative";
+    private static final String ENCRYPTED_SHARED_PREFERENCES_NAME = "authgear_encrypted_shared_preferences";
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
     private static final int ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION = 1;
@@ -112,6 +120,15 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             String value = sharedPreferences.getString(key, null);
             promise.resolve(value);
         } catch (Exception e) {
+            // NOTE(backup): Please search NOTE(backup) to understand what is going on here.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                if (e instanceof GeneralSecurityException) {
+                    Log.w(LOGTAG, "try to recover from backup problem in storageGetItem", e);
+                    this.deleteSharedPreferences(getReactApplicationContext(), ENCRYPTED_SHARED_PREFERENCES_NAME);
+                    this.storageGetItem(key, promise);
+                    return;
+                }
+            }
             promise.reject(e.getClass().getName(), e.getMessage(), e);
         }
     }
@@ -123,6 +140,15 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             sharedPreferences.edit().putString(key, value).commit();
             promise.resolve(null);
         } catch (Exception e) {
+            // NOTE(backup): Please search NOTE(backup) to understand what is going on here.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                if (e instanceof GeneralSecurityException) {
+                    Log.w(LOGTAG, "try to recover from backup problem in storageSetItem", e);
+                    this.deleteSharedPreferences(getReactApplicationContext(), ENCRYPTED_SHARED_PREFERENCES_NAME);
+                    this.storageSetItem(key, value, promise);
+                    return;
+                }
+            }
             promise.reject(e.getClass().getName(), e.getMessage(), e);
         }
     }
@@ -134,7 +160,55 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             sharedPreferences.edit().remove(key).commit();
             promise.resolve(null);
         } catch (Exception e) {
+            // NOTE(backup): Please search NOTE(backup) to understand what is going on here.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                if (e instanceof GeneralSecurityException) {
+                    Log.w(LOGTAG, "try to recover from backup problem in storageDeleteItem", e);
+                    this.deleteSharedPreferences(getReactApplicationContext(), ENCRYPTED_SHARED_PREFERENCES_NAME);
+                    this.storageDeleteItem(key, promise);
+                    return;
+                }
+            }
             promise.reject(e.getClass().getName(), e.getMessage(), e);
+        }
+    }
+
+    private void deleteSharedPreferences(Context context, String name) {
+        // NOTE(backup): Explanation on the backup problem.
+        // EncryptedSharedPreferences depends on a master key stored in AndroidKeyStore.
+        // The master key is not backed up.
+        // However, the EncryptedSharedPreferences is backed up.
+        // When the app is re-installed, and restored from a backup.
+        // A new master key is created, but it cannot decrypt the restored EncryptedSharedPreferences.
+        // This problem is persistence until the EncryptedSharedPreferences is deleted.
+        //
+        // The official documentation of EncryptedSharedPreferences tell us to
+        // exclude the EncryptedSharedPreferences from a backup.
+        // But defining a backup rule is not very appropriate in a SDK.
+        // So we try to fix this in our code instead.
+        //
+        // This fix is tested against security-crypto@1.1.0-alpha06 and tink-android@1.8.0
+        // Upgrading to newer versions may result in the library throwing a different exception that we fail to catch,
+        // making this fix buggy.
+        //
+        // To reproduce the problem, you have to follow the steps here https://developer.android.com/identity/data/testingbackup#TestingBackup
+        // The example app has been configured to back up the EncryptedSharedPreferences and nothing else.
+        // One reason is to reproduce the problem, and another reason is that some platform, some Flutter,
+        // store large files in the data directory. That will prevent the backup from working.
+        //
+        // The fix is to observe what exception was thrown by the underlying library
+        // when the problem was re-produced.
+        // When we catch the exception, we delete the EncryptedSharedPreferences and re-create it.
+        //
+        // Some references on how other fixed the problem.
+        // https://github.com/stytchauth/stytch-android/blob/0.23.0/0.1.0/sdk/src/main/java/com/stytch/sdk/common/EncryptionManager.kt#L50
+        // https://github.com/tink-crypto/tink-java/issues/23
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            context.deleteSharedPreferences(name);
+        } else {
+            context.getSharedPreferences(name, Context.MODE_PRIVATE).edit().clear().apply();
+            File dir = new File(context.getApplicationInfo().dataDir, "shared_prefs");
+            new File(dir, name + ".xml").delete();
         }
     }
 
@@ -143,13 +217,30 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             MasterKey masterKey = new MasterKey.Builder(getReactApplicationContext())
                     .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
                     .build();
-            return EncryptedSharedPreferences.create(
-                    getReactApplicationContext(),
-                    "authgear_encrypted_shared_preferences",
-                    masterKey,
-                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            );
+            try {
+                return EncryptedSharedPreferences.create(
+                        getReactApplicationContext(),
+                        ENCRYPTED_SHARED_PREFERENCES_NAME,
+                        masterKey,
+                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                );
+            } catch (InvalidProtocolBufferException e) {
+                // NOTE(backup): Please search NOTE(backup) to understand what is going on here.
+                Log.w(LOGTAG, "try to recover from backup problem in EncryptedSharedPreferences.create: ", e);
+                this.deleteSharedPreferences(getReactApplicationContext(), ENCRYPTED_SHARED_PREFERENCES_NAME);
+                return this.getSharePreferences();
+            } catch (GeneralSecurityException e) {
+                // NOTE(backup): Please search NOTE(backup) to understand what is going on here.
+                Log.w(LOGTAG, "try to recover from backup problem in EncryptedSharedPreferences.create: ", e);
+                this.deleteSharedPreferences(getReactApplicationContext(), ENCRYPTED_SHARED_PREFERENCES_NAME);
+                return this.getSharePreferences();
+            } catch (IOException e) {
+                // NOTE(backup): Please search NOTE(backup) to understand what is going on here.
+                Log.w(LOGTAG, "try to recover from backup problem in EncryptedSharedPreferences.create: ", e);
+                this.deleteSharedPreferences(getReactApplicationContext(), ENCRYPTED_SHARED_PREFERENCES_NAME);
+                return this.getSharePreferences();
+            }
         }
         return getReactApplicationContext().getSharedPreferences("authgear_shared_preferences", Context.MODE_PRIVATE);
     }
