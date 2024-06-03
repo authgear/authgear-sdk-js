@@ -11,6 +11,7 @@ import android.provider.Settings;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,10 +22,15 @@ import androidx.biometric.BiometricPrompt;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
 
+import com.google.crypto.tink.shaded.protobuf.InvalidProtocolBufferException;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -40,22 +46,63 @@ import java.util.UUID;
 class Authgear {
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
+    private static final String LOGTAG = "Authgear";
+    private static final String ENCRYPTED_SHARED_PREFERENCES_NAME = "authgear_encrypted_shared_preferences";
+
 
     @Nullable
     String storageGetItem(Context ctx, String key) throws Exception {
-        SharedPreferences sharedPreferences = this.getSharedPreferences(ctx);
-        String value = sharedPreferences.getString(key, null);
-        return value;
+        try {
+            SharedPreferences sharedPreferences = this.getSharedPreferences(ctx);
+            String value = sharedPreferences.getString(key, null);
+            return value;
+        } catch (Exception e) {
+            // NOTE(backup): Please search NOTE(backup) to understand what is going on here.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                if (e instanceof GeneralSecurityException) {
+                    Log.w(LOGTAG, "try to recover from backup problem in storageGetItem", e);
+                    this.deleteSharedPreferences(ctx, ENCRYPTED_SHARED_PREFERENCES_NAME);
+                    return this.storageGetItem(ctx, key);
+                }
+            }
+            throw e;
+        }
     }
 
     void storageSetItem(Context ctx, String key, String value) throws Exception {
-        SharedPreferences sharedPreferences = this.getSharedPreferences(ctx);
-        sharedPreferences.edit().putString(key, value).commit();
+        try {
+            SharedPreferences sharedPreferences = this.getSharedPreferences(ctx);
+            sharedPreferences.edit().putString(key, value).commit();
+        } catch (Exception e) {
+            // NOTE(backup): Please search NOTE(backup) to understand what is going on here.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                if (e instanceof GeneralSecurityException) {
+                    Log.w(LOGTAG, "try to recover from backup problem in storageSetItem", e);
+                    this.deleteSharedPreferences(ctx, ENCRYPTED_SHARED_PREFERENCES_NAME);
+                    storageSetItem(ctx, key, value);
+                    return;
+                }
+            }
+            throw e;
+        }
     }
 
     void storageDeleteItem(Context ctx, String key) throws Exception {
-        SharedPreferences sharedPreferences = this.getSharedPreferences(ctx);
-        sharedPreferences.edit().remove(key).commit();
+        try {
+            SharedPreferences sharedPreferences = this.getSharedPreferences(ctx);
+            sharedPreferences.edit().remove(key).commit();
+        } catch (Exception e) {
+            // NOTE(backup): Please search NOTE(backup) to understand what is going on here.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                if (e instanceof GeneralSecurityException) {
+                    Log.w(LOGTAG, "try to recover from backup problem in storageDeleteItem", e);
+                    this.deleteSharedPreferences(ctx, ENCRYPTED_SHARED_PREFERENCES_NAME);
+                    storageDeleteItem(ctx, key);
+                    return;
+                }
+            }
+            throw e;
+        }
     }
 
     byte[] randomBytes(int length) {
@@ -431,18 +478,74 @@ class Authgear {
         return new Exception("Biometric authentication requires at least API Level 23");
     }
 
-    private SharedPreferences getSharedPreferences(Context ctx) throws Exception     {
+    private void deleteSharedPreferences(Context context, String name) {
+        // NOTE(backup): Explanation on the backup problem.
+        // EncryptedSharedPreferences depends on a master key stored in AndroidKeyStore.
+        // The master key is not backed up.
+        // However, the EncryptedSharedPreferences is backed up.
+        // When the app is re-installed, and restored from a backup.
+        // A new master key is created, but it cannot decrypt the restored EncryptedSharedPreferences.
+        // This problem is persistence until the EncryptedSharedPreferences is deleted.
+        //
+        // The official documentation of EncryptedSharedPreferences tell us to
+        // exclude the EncryptedSharedPreferences from a backup.
+        // But defining a backup rule is not very appropriate in a SDK.
+        // So we try to fix this in our code instead.
+        //
+        // This fix is tested against security-crypto@1.1.0-alpha06 and tink-android@1.8.0
+        // Upgrading to newer versions may result in the library throwing a different exception that we fail to catch,
+        // making this fix buggy.
+        //
+        // To reproduce the problem, you have to follow the steps here https://developer.android.com/identity/data/testingbackup#TestingBackup
+        // The example app has been configured to back up the EncryptedSharedPreferences and nothing else.
+        // One reason is to reproduce the problem, and another reason is that some platform, some Flutter,
+        // store large files in the data directory. That will prevent the backup from working.
+        //
+        // The fix is to observe what exception was thrown by the underlying library
+        // when the problem was re-produced.
+        // When we catch the exception, we delete the EncryptedSharedPreferences and re-create it.
+        //
+        // Some references on how other fixed the problem.
+        // https://github.com/stytchauth/stytch-android/blob/0.23.0/0.1.0/sdk/src/main/java/com/stytch/sdk/common/EncryptionManager.kt#L50
+        // https://github.com/tink-crypto/tink-java/issues/23
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            context.deleteSharedPreferences(name);
+        } else {
+            context.getSharedPreferences(name, Context.MODE_PRIVATE).edit().clear().apply();
+            File dir = new File(context.getApplicationInfo().dataDir, "shared_prefs");
+            new File(dir, name + ".xml").delete();
+        }
+    }
+
+    private SharedPreferences getSharedPreferences(Context ctx) throws Exception {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             MasterKey masterKey = new MasterKey.Builder(ctx)
                     .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
                     .build();
-            return EncryptedSharedPreferences.create(
-                    ctx,
-                    "authgear_encrypted_shared_preferences",
-                    masterKey,
-                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            );
+            try {
+                return EncryptedSharedPreferences.create(
+                        ctx,
+                        ENCRYPTED_SHARED_PREFERENCES_NAME,
+                        masterKey,
+                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                );
+            } catch (InvalidProtocolBufferException e) {
+                // NOTE(backup): Please search NOTE(backup) to understand what is going on here.
+                Log.w(LOGTAG, "try to recover from backup problem in EncryptedSharedPreferences.create: ", e);
+                this.deleteSharedPreferences(ctx, ENCRYPTED_SHARED_PREFERENCES_NAME);
+                return this.getSharedPreferences(ctx);
+            } catch (GeneralSecurityException e) {
+                // NOTE(backup): Please search NOTE(backup) to understand what is going on here.
+                Log.w(LOGTAG, "try to recover from backup problem in EncryptedSharedPreferences.create: ", e);
+                this.deleteSharedPreferences(ctx, ENCRYPTED_SHARED_PREFERENCES_NAME);
+                return this.getSharedPreferences(ctx);
+            } catch (IOException e) {
+                // NOTE(backup): Please search NOTE(backup) to understand what is going on here.
+                Log.w(LOGTAG, "try to recover from backup problem in EncryptedSharedPreferences.create: ", e);
+                this.deleteSharedPreferences(ctx, ENCRYPTED_SHARED_PREFERENCES_NAME);
+                return this.getSharedPreferences(ctx);
+            }
         }
         return ctx.getSharedPreferences("authgear_shared_preferences", Context.MODE_PRIVATE);
     }

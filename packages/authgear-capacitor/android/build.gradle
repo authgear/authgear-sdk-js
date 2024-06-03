@@ -54,7 +54,9 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
     implementation 'androidx.browser:browser:1.2.0'
     implementation "androidx.biometric:biometric:1.2.0-alpha05"
+    // NOTE(backup): Please search NOTE(backup) before you update security-crypto or tink-android.
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
+    implementation "com.google.crypto.tink:tink-android:1.8.0"
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
