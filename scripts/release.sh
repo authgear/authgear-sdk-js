@@ -45,8 +45,6 @@ git tag -a v"$VERSION" -s -m "Release v$VERSION"
 # git push git@github.com:authgear/authgear-sdk-js.git "$GIT_BRANCH"
 git push git@github.com:authgear/authgear-sdk-js.git v"$VERSION"
 
-github-release release -u authgear -r authgear-sdk-js --draft --tag v"$VERSION" --name v"$VERSION" --description "$(git-chglog v$VERSION)"
-
 (cd packages/authgear-web && npm publish --access public)
 (cd packages/authgear-react-native && npm publish --access public)
 (cd packages/authgear-capacitor && npm publish --access public)
