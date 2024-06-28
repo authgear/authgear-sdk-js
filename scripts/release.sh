@@ -32,8 +32,13 @@ npm run typecheck
 npm run test
 VERSION="$VERSION" npm run build
 
+# Update the lock files in example apps to match VERSION.
+(cd example/reactweb && npm install)
+(cd example/reactnative && yarn install)
+(cd example/capacitor && npm install)
+
 git-chglog --next-tag v"$VERSION" -o CHANGELOG.md
-git add CHANGELOG.md 'packages/*/package.json'
+git add CHANGELOG.md 'packages/' 'example/'
 git commit -m "Update CHANGELOG for v$VERSION"
 git tag -a v"$VERSION" -s -m "Release v$VERSION"
 git push git@github.com:authgear/authgear-sdk-js.git "$GIT_BRANCH"
