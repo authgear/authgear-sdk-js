@@ -417,7 +417,10 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     }
     query.append("x_sso_enabled", this.isSSOEnabled ? "true" : "false");
     if (options.authenticationFlowGroup != null) {
-      query.append("x_authentication_flow_group", options.authenticationFlowGroup);
+      query.append(
+        "x_authentication_flow_group",
+        options.authenticationFlowGroup
+      );
     }
 
     return `${config.authorization_endpoint}?${query.toString()}`;
