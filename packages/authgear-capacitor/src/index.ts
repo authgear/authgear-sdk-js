@@ -95,6 +95,12 @@ export interface ConfigureOptions {
    */
   isSSOEnabled?: boolean;
 
+  /**
+   * When isAppInitiatedSSOToWebEnabled is true, native apps can share session with a web browser.
+   * @defaultValue false
+   */
+  isAppInitiatedSSOToWebEnabled?: boolean;
+
   /*
    * The UIImplementation.
    */
@@ -192,6 +198,22 @@ export class CapacitorContainer {
 
   public set isSSOEnabled(isSSOEnabled: boolean) {
     this.baseContainer.isSSOEnabled = isSSOEnabled;
+  }
+
+  /**
+   * Is App Initiated SSO To Web enabled
+   *
+   * @public
+   */
+  public get isAppInitiatedSSOToWebEnabled(): boolean {
+    return this.baseContainer.isAppInitiatedSSOToWebEnabled;
+  }
+
+  public set isAppInitiatedSSOToWebEnabled(
+    isAppInitiatedSSOToWebEnabled: boolean
+  ) {
+    this.baseContainer.isAppInitiatedSSOToWebEnabled =
+      isAppInitiatedSSOToWebEnabled;
   }
 
   /**
@@ -300,6 +322,8 @@ export class CapacitorContainer {
    */
   async configure(options: ConfigureOptions): Promise<void> {
     this.isSSOEnabled = options.isSSOEnabled ?? false;
+    this.isAppInitiatedSSOToWebEnabled =
+      options.isAppInitiatedSSOToWebEnabled ?? false;
     if (options.tokenStorage != null) {
       this.tokenStorage = options.tokenStorage;
     } else {
@@ -646,15 +670,29 @@ export class CapacitorContainer {
   /**
    * @internal
    */
+  getScopes(): string[] {
+    const scopes = [
+      "openid",
+      "offline_access",
+      "https://authgear.com/scopes/full-access",
+    ];
+    if (this.isAppInitiatedSSOToWebEnabled) {
+      scopes.push(
+        "device_sso",
+        "https://authgear.com/scopes/app-initiated-sso-to-web"
+      );
+    }
+    return scopes;
+  }
+
+  /**
+   * @internal
+   */
   async authorizeEndpoint(options: AuthenticateOptions): Promise<string> {
     return this.baseContainer.authorizeEndpoint({
       ...options,
       responseType: "code",
-      scope: [
-        "openid",
-        "offline_access",
-        "https://authgear.com/scopes/full-access",
-      ],
+      scope: this.getScopes(),
     });
   }
 

@@ -113,6 +113,8 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
   isSSOEnabled: boolean;
 
+  isAppInitiatedSSOToWebEnabled: boolean;
+
   sessionState: SessionState;
 
   idToken?: string;
@@ -135,6 +137,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     this.name = options.name ?? "default";
     this.apiClient = apiClient;
     this.isSSOEnabled = false;
+    this.isAppInitiatedSSOToWebEnabled = false;
     this.sessionState = SessionState.Unknown;
     this._delegate = _delegate;
   }
@@ -417,7 +420,10 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     }
     query.append("x_sso_enabled", this.isSSOEnabled ? "true" : "false");
     if (options.authenticationFlowGroup != null) {
-      query.append("x_authentication_flow_group", options.authenticationFlowGroup);
+      query.append(
+        "x_authentication_flow_group",
+        options.authenticationFlowGroup
+      );
     }
 
     return `${config.authorization_endpoint}?${query.toString()}`;
