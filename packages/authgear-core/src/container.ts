@@ -166,7 +166,8 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     response: _OIDCTokenResponse,
     reason: SessionStateChangeReason
   ): Promise<void> {
-    const { id_token, access_token, refresh_token, expires_in } = response;
+    const { id_token, access_token, refresh_token, expires_in, device_secret } =
+      response;
 
     if (access_token == null || expires_in == null) {
       throw new AuthgearError(
@@ -176,6 +177,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
     if (id_token != null) {
       this.idToken = id_token;
+      await this._delegate.tokenStorage.setIDToken(this.name, id_token);
     }
     this.accessToken = access_token;
     if (refresh_token) {
@@ -192,10 +194,19 @@ export class _BaseContainer<T extends _BaseAPIClient> {
         refresh_token
       );
     }
+
+    if (device_secret != null) {
+      await this._delegate.tokenStorage.setDeviceSecret(
+        this.name,
+        device_secret
+      );
+    }
   }
 
   async _clearSession(reason: SessionStateChangeReason): Promise<void> {
     await this._delegate.tokenStorage.delRefreshToken(this.name);
+    await this._delegate.tokenStorage.delIDToken(this.name);
+    await this._delegate.tokenStorage.delDeviceSecret(this.name);
     this.idToken = undefined;
     this.accessToken = undefined;
     this.refreshToken = undefined;

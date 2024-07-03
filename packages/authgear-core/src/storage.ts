@@ -13,6 +13,14 @@ export class _KeyMaker {
     return `${this.scopedKey(name)}_refreshToken`;
   }
 
+  keyIDToken(name: string): string {
+    return `${this.scopedKey(name)}_idToken`;
+  }
+
+  keyDeviceSecret(name: string): string {
+    return `${this.scopedKey(name)}_deviceSecret`;
+  }
+
   keyOIDCCodeVerifier(name: string): string {
     return `${this.scopedKey(name)}_oidcCodeVerifier`;
   }
@@ -110,12 +118,36 @@ export class TransientTokenStorage implements TokenStorage {
       refreshToken
     );
   }
-
   async getRefreshToken(namespace: string): Promise<string | null> {
     return this.storageDriver.get(this.keyMaker.keyRefreshToken(namespace));
   }
-
   async delRefreshToken(namespace: string): Promise<void> {
     await this.storageDriver.del(this.keyMaker.keyRefreshToken(namespace));
+  }
+
+  async setIDToken(namespace: string, idToken: string): Promise<void> {
+    return this.storageDriver.set(this.keyMaker.keyIDToken(namespace), idToken);
+  }
+  async getIDToken(namespace: string): Promise<string | null> {
+    return this.storageDriver.get(this.keyMaker.keyIDToken(namespace));
+  }
+  async delIDToken(namespace: string): Promise<void> {
+    return this.storageDriver.del(this.keyMaker.keyIDToken(namespace));
+  }
+
+  async setDeviceSecret(
+    namespace: string,
+    deviceSecret: string
+  ): Promise<void> {
+    return this.storageDriver.set(
+      this.keyMaker.keyDeviceSecret(namespace),
+      deviceSecret
+    );
+  }
+  async getDeviceSecret(namespace: string): Promise<string | null> {
+    return this.storageDriver.get(this.keyMaker.keyDeviceSecret(namespace));
+  }
+  async delDeviceSecret(namespace: string): Promise<void> {
+    return this.storageDriver.del(this.keyMaker.keyDeviceSecret(namespace));
   }
 }
