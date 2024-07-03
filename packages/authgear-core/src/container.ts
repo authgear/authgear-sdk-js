@@ -352,7 +352,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   async authorizeEndpoint(
     options: _OIDCAuthenticationRequest
   ): Promise<string> {
-    const clientID = this.clientID;
+    const clientID = options.clientID ?? this.clientID;
     if (clientID == null) {
       throw new AuthgearError("missing client ID");
     }
@@ -377,7 +377,13 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       query.append("code_challenge", codeVerifier.challenge);
     }
 
-    query.append("scope", options.scope.join(" "));
+    if (options.responseMode != null) {
+      query.append("response_mode", options.responseMode);
+    }
+
+    if (options.scope != null) {
+      query.append("scope", options.scope.join(" "));
+    }
 
     query.append("client_id", clientID);
     query.append("redirect_uri", options.redirectURI);
@@ -423,6 +429,12 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     }
     if (options.xSettingsAction != null) {
       query.append("x_settings_action", options.xSettingsAction);
+    }
+    if (options.xAppInitiatedSSOToWebToken != null) {
+      query.append(
+        "x_app_initiated_sso_to_web_token",
+        options.xAppInitiatedSSOToWebToken
+      );
     }
     if (!this.isSSOEnabled) {
       // For backward compatibility

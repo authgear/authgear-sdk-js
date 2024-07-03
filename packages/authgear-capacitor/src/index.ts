@@ -870,9 +870,20 @@ export class CapacitorContainer {
       await this.tokenStorage.setDeviceSecret(this.name, newDeviceSecret);
     }
     if (newIDToken != null) {
+      idToken = newIDToken;
       await this.tokenStorage.setIDToken(this.name, newIDToken);
     }
-    // TODO(tung): Exchange for cookies
+    const url = await this.baseContainer.authorizeEndpoint({
+      responseType:
+        "urn:authgear:params:oauth:response-type:app_initiated_sso_to_web token",
+      responseMode: "cookie",
+      redirectURI: options.redirectURI,
+      clientID: options.clientID,
+      xAppInitiatedSSOToWebToken: appInitiatedSSOToWebToken,
+      idTokenHint: idToken,
+      prompt: PromptOption.None,
+    });
+    return url;
   }
 }
 

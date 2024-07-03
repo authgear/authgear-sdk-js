@@ -73,8 +73,10 @@ export interface _OIDCAuthenticationRequest {
   responseType:
     | "code"
     | "none"
-    | "urn:authgear:params:oauth:response-type:settings-action";
-  scope: string[];
+    | "urn:authgear:params:oauth:response-type:settings-action"
+    | "urn:authgear:params:oauth:response-type:app_initiated_sso_to_web token";
+  responseMode?: "cookie" | "query";
+  scope?: string[];
   state?: string;
   xState?: string;
   prompt?: PromptOption[] | PromptOption;
@@ -90,6 +92,8 @@ export interface _OIDCAuthenticationRequest {
   oauthProviderAlias?: string;
   xSettingsAction?: "change_password";
   authenticationFlowGroup?: string;
+  clientID?: string;
+  xAppInitiatedSSOToWebToken?: string;
 }
 
 /**
