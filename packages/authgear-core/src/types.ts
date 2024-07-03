@@ -268,7 +268,8 @@ export interface _OIDCTokenRequest {
     | "urn:authgear:params:oauth:grant-type:anonymous-request"
     | "urn:authgear:params:oauth:grant-type:biometric-request"
     | "urn:authgear:params:oauth:grant-type:id-token"
-    | "urn:authgear:params:oauth:grant-type:settings-action";
+    | "urn:authgear:params:oauth:grant-type:settings-action"
+    | "urn:ietf:params:oauth:grant-type:token-exchange";
   client_id: string;
   redirect_uri?: string;
   code?: string;
@@ -277,6 +278,13 @@ export interface _OIDCTokenRequest {
   jwt?: string;
   x_device_info?: string;
   access_token?: string;
+  scope?: string[];
+  requested_token_type?: "urn:authgear:params:oauth:token-type:app-initiated-sso-to-web-token";
+  subject_token_type?: "urn:ietf:params:oauth:token-type:id_token";
+  subject_token?: string;
+  actor_token_type?: "urn:x-oath:params:oauth:token-type:device-secret";
+  actor_token?: string;
+  audience?: string;
 }
 
 /**
@@ -297,6 +305,7 @@ export interface _OIDCTokenResponse {
   access_token?: string;
   expires_in?: number;
   refresh_token?: string;
+  device_secret?: string;
 }
 
 /**

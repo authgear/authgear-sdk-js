@@ -267,24 +267,37 @@ export abstract class _BaseAPIClient {
     const query = new URLSearchParams();
     query.append("grant_type", req.grant_type);
     query.append("client_id", req.client_id);
-    if (req.code) {
-      query.append("code", req.code);
+    const appendKeyAsString = (key: keyof _OIDCTokenRequest) => {
+      const value = req[key];
+      if (value) {
+        if (typeof value !== "string") {
+          throw new Error("value is not a string");
+        }
+        query.append(key, value);
+      }
+    };
+    for (const k of [
+      "code",
+      "redirect_uri",
+      "code_verifier",
+      "refresh_token",
+      "jwt",
+      "x_device_info",
+      "requested_token_type",
+      "subject_token",
+      "subject_token_type",
+      "actor_token",
+      "actor_token_type",
+      "audience",
+    ] as (keyof _OIDCTokenRequest)[]) {
+      appendKeyAsString(k);
     }
-    if (req.redirect_uri) {
-      query.append("redirect_uri", req.redirect_uri);
+    if (req.scope != null) {
+      query.append("scope", req.scope.join(" "));
     }
-    if (req.code_verifier) {
-      query.append("code_verifier", req.code_verifier);
-    }
-    if (req.refresh_token) {
-      query.append("refresh_token", req.refresh_token);
-    }
-    if (req.jwt) {
-      query.append("jwt", req.jwt);
-    }
-    if (req.x_device_info) {
-      query.append("x_device_info", req.x_device_info);
-    }
+    // if (req.requested_token_type) {
+    //   query.append("requested_token_type", req.requested_token_type);
+    // }
     const headers: Record<string, string> = {
       "content-type": "application/x-www-form-urlencoded",
     };
