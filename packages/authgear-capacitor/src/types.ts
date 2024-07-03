@@ -365,3 +365,23 @@ export interface BiometricPrivateKeyOptions extends BiometricOptions {
     device_info: unknown;
   };
 }
+
+/**
+ * AppInitiatedSSOToWebOptions is options for app-initiated-sso-to-web.
+ *
+ * @public
+ */
+export interface AppInitiatedSSOToWebOptions {
+  /**
+   * The client ID of the new authenticated session in web.
+   */
+  clientID: string;
+  /**
+   * The URI the browser should go to after successfully obtained a authenticated session.
+   */
+  redirectURI: string;
+  /**
+   * Any string that will be passed to redirectURI by the `state` query parameter.
+   */
+  state?: string;
+}

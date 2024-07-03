@@ -41,6 +41,7 @@ import {
   type SettingOptions,
   type BiometricOptions,
   type SettingsActionOptions,
+  AppInitiatedSSOToWebOptions,
 } from "./types";
 import { BiometricPrivateKeyNotFoundError } from "./error";
 
@@ -815,6 +816,63 @@ export class CapacitorContainer {
       }
       throw e;
     }
+  }
+
+  /**
+   * Share the current authenticated session to a web browser.
+   *
+   * `isAppInitiatedSSOToWebEnabled` must be set to true to use this method.
+   *
+   * @public
+   */
+  async makeAppInitiatedSSOToWebURL(
+    options: AppInitiatedSSOToWebOptions
+  ): Promise<string> {
+    const clientID = options.clientID;
+    if (!this.isAppInitiatedSSOToWebEnabled) {
+      throw new AuthgearError(
+        "makeAppInitiatedSSOToWebURL requires isAppInitiatedSSOToWebEnabled to be true"
+      );
+    }
+    if (this.sessionState !== SessionState.Authenticated) {
+      throw new AuthgearError(
+        "makeAppInitiatedSSOToWebURL requires authenticated user"
+      );
+    }
+    let idToken = await this.tokenStorage.getIDToken(this.name);
+    if (!idToken) {
+      throw new AuthgearError("id_token not found");
+    }
+    const deviceSecret = await this.tokenStorage.getDeviceSecret(this.name);
+    if (!deviceSecret) {
+      throw new AuthgearError("device_secret not found");
+    }
+    const tokenExchangeResult =
+      await this.baseContainer.apiClient._oidcTokenRequest({
+        client_id: clientID,
+        grant_type: "urn:ietf:params:oauth:grant-type:token-exchange",
+        requested_token_type:
+          "urn:authgear:params:oauth:token-type:app-initiated-sso-to-web-token",
+        audience: this.baseContainer.apiClient.endpoint,
+        subject_token_type: "urn:ietf:params:oauth:token-type:id_token",
+        subject_token: idToken,
+        actor_token_type: "urn:x-oath:params:oauth:token-type:device-secret",
+        actor_token: deviceSecret,
+      });
+    // Here access_token is app-initiated-sso-to-web-token
+    const appInitiatedSSOToWebToken = tokenExchangeResult.access_token;
+    const newDeviceSecret = tokenExchangeResult.device_secret;
+    const newIDToken = tokenExchangeResult.id_token;
+    if (appInitiatedSSOToWebToken == null) {
+      throw new AuthgearError("unexpected: access_token is not returned");
+    }
+    if (newDeviceSecret != null) {
+      await this.tokenStorage.setDeviceSecret(this.name, newDeviceSecret);
+    }
+    if (newIDToken != null) {
+      await this.tokenStorage.setIDToken(this.name, newIDToken);
+    }
+    // TODO(tung): Exchange for cookies
   }
 }
 
