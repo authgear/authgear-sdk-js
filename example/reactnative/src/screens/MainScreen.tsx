@@ -584,7 +584,7 @@ const HomeScreen: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [authgear, appInitiatedSSOToWebClientID]);
 
   const openSettings = useCallback(() => {
     authgear
