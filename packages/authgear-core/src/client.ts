@@ -295,9 +295,6 @@ export abstract class _BaseAPIClient {
     if (req.scope != null) {
       query.append("scope", req.scope.join(" "));
     }
-    // if (req.requested_token_type) {
-    //   query.append("requested_token_type", req.requested_token_type);
-    // }
     const headers: Record<string, string> = {
       "content-type": "application/x-www-form-urlencoded",
     };
