@@ -287,7 +287,6 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (clientID == null) {
       throw new AuthgearError("missing client ID");
     }
-
     const refreshToken = await this._delegate.tokenStorage.getRefreshToken(
       this.name
     );
@@ -297,14 +296,23 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       return;
     }
 
+    const deviceSecret = await this._delegate.tokenStorage.getDeviceSecret(
+      this.name
+    );
+
+    const request: _OIDCTokenRequest = {
+      ...tokenRequest,
+      grant_type: "refresh_token",
+      client_id: clientID,
+      refresh_token: refreshToken,
+    };
+    if (deviceSecret) {
+      request.device_secret = deviceSecret;
+    }
+
     let tokenResponse;
     try {
-      tokenResponse = await this.apiClient._oidcTokenRequest({
-        ...tokenRequest,
-        grant_type: "refresh_token",
-        client_id: clientID,
-        refresh_token: refreshToken,
-      });
+      tokenResponse = await this.apiClient._oidcTokenRequest(request);
     } catch (error: unknown) {
       await this._handleInvalidGrantError(error);
       if (error != null && (error as any).error === "invalid_grant") {
@@ -325,6 +333,9 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (clientID == null) {
       throw new AuthgearError("missing client ID");
     }
+    const deviceSecret = await this._delegate.tokenStorage.getDeviceSecret(
+      this.name
+    );
     await this.refreshAccessTokenIfNeeded();
     const accessToken = this.accessToken;
     const tokenRequest: _OIDCTokenRequest = {
@@ -332,10 +343,21 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       client_id: clientID,
       access_token: accessToken,
     };
+    if (deviceSecret) {
+      tokenRequest.device_secret = deviceSecret;
+    }
     try {
-      const { id_token } = await this.apiClient._oidcTokenRequest(tokenRequest);
+      const { id_token, device_secret } =
+        await this.apiClient._oidcTokenRequest(tokenRequest);
       if (id_token != null) {
         this.idToken = id_token;
+        await this._delegate.tokenStorage.setIDToken(this.name, id_token);
+      }
+      if (device_secret != null) {
+        await this._delegate.tokenStorage.setDeviceSecret(
+          this.name,
+          device_secret
+        );
       }
     } catch (error: unknown) {
       await this._handleInvalidGrantError(error);

@@ -297,6 +297,7 @@ export interface _OIDCTokenRequest {
   actor_token_type?: "urn:x-oath:params:oauth:token-type:device-secret";
   actor_token?: string;
   audience?: string;
+  device_secret?: string;
 }
 
 /**
