@@ -33,6 +33,7 @@ import authgear, {
   BiometricAccessConstraintAndroid,
   SessionState,
   WebKitWebViewUIImplementation,
+  DeviceBrowserUIImplementation,
 } from '@authgear/react-native';
 import RadioGroup, {RadioGroupItemProps} from '../RadioGroup';
 
@@ -159,6 +160,12 @@ const HomeScreen: React.FC = () => {
   const [isSSOEnabled, setIsSSOEnabled] = useState(false);
   const [useWebKitWebView, setUseWebKitWebView] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
+
+  const [isAppInitiatedSSOToWebEnabled, setIsAppInitiatedSSOToWebEnabled] =
+    useState(false);
+  const [appInitiatedSSOToWebClientID, setAppInitiatedSSOToWebClientID] =
+    useState('');
+
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [sessionState, setSessionState] = useState<SessionState | null>(
     authgear.sessionState,
@@ -206,7 +213,7 @@ const HomeScreen: React.FC = () => {
   const colorScheme = explicitColorScheme ?? systemColorScheme;
 
   const showUser = useCallback((userInfo: UserInfo) => {
-    Alert.alert('User Info', JSON.stringify(userInfo.raw, null, 2))
+    Alert.alert('User Info', JSON.stringify(userInfo.raw, null, 2));
   }, []);
 
   const showError = useCallback((e: any) => {
@@ -365,6 +372,7 @@ const HomeScreen: React.FC = () => {
             })
           : undefined,
         isSSOEnabled,
+        isAppInitiatedSSOToWebEnabled,
       })
       .then(() => {
         postConfigure();
@@ -381,6 +389,7 @@ const HomeScreen: React.FC = () => {
     endpoint,
     useTransientTokenStorage,
     isSSOEnabled,
+    isAppInitiatedSSOToWebEnabled,
     useWebKitWebView,
     postConfigure,
     showError,
@@ -556,6 +565,27 @@ const HomeScreen: React.FC = () => {
       });
   }, [showError, updateBiometricState]);
 
+  const startAppInitiatedSSOToWeb = useCallback(async () => {
+    setLoading(true);
+    try {
+      const url = await authgear.makeAppInitiatedSSOToWebURL({
+        clientID: appInitiatedSSOToWebClientID,
+        redirectURI: redirectURI,
+      });
+      const uiImpl = new DeviceBrowserUIImplementation();
+      // Use device browser to open the url and set the cookie
+      await uiImpl.openAuthorizationURL({
+        url: url,
+        redirectURI: redirectURI,
+        shareCookiesWithDeviceBrowser: true,
+      });
+    } catch (e: unknown) {
+      showError(e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const openSettings = useCallback(() => {
     authgear
       .open(Page.Settings, {
@@ -697,6 +727,29 @@ const HomeScreen: React.FC = () => {
           <Text style={styles.inputLabel}>SessionState</Text>
           <Text style={styles.textValue}>{sessionState}</Text>
         </View>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>
+            Is App Initiated SSO To Web Enabled
+          </Text>
+          <Switch
+            style={styles.checkbox}
+            value={isAppInitiatedSSOToWebEnabled}
+            onValueChange={setIsAppInitiatedSSOToWebEnabled}
+          />
+        </View>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>
+            App Initiated SSO To Web Client ID
+          </Text>
+          <TextInput
+            style={styles.inputField}
+            value={appInitiatedSSOToWebClientID}
+            onChangeText={setAppInitiatedSSOToWebClientID}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder="Enter Client ID"
+          />
+        </View>
         <View style={styles.configureAction}>
           <Button title="Configure" onPress={configure} disabled={loading} />
         </View>
@@ -768,6 +821,18 @@ const HomeScreen: React.FC = () => {
             title="Authenticate with biometric"
             onPress={authenticateBiometric}
             disabled={!initialized || loading || loggedIn || !biometricEnabled}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="App Initiated SSO To Web"
+            onPress={startAppInitiatedSSOToWeb}
+            disabled={
+              !initialized ||
+              loading ||
+              !loggedIn ||
+              !isAppInitiatedSSOToWebEnabled
+            }
           />
         </View>
         <View style={styles.button}>
