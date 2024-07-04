@@ -141,3 +141,10 @@ export function _decodeError(err: any): Error {
   // Otherwise cast it to string and use it as message.
   return new Error(String(err));
 }
+
+/**
+ * NotAllowedError
+ *
+ * @public
+ */
+export class NotAllowedError extends AuthgearError {}

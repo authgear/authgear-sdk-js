@@ -19,7 +19,7 @@ import {
 } from "./types";
 import { _base64URLDecode } from "./base64";
 import { _decodeUTF8 } from "./utf8";
-import { AuthgearError, OAuthError } from "./error";
+import { AuthgearError, NotAllowedError, OAuthError } from "./error";
 import { _BaseAPIClient } from "./client";
 
 /**
@@ -687,6 +687,35 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     }
   }
 
+  async _exchangeForAppInitiatedSSOToWebToken(options: {
+    clientID: string;
+    idToken: string;
+    deviceSecret: string;
+  }): Promise<_OIDCTokenResponse> {
+    const { clientID, idToken, deviceSecret } = options;
+    try {
+      const tokenExchangeResult = await this.apiClient._oidcTokenRequest({
+        client_id: clientID,
+        grant_type: "urn:ietf:params:oauth:grant-type:token-exchange",
+        requested_token_type:
+          "urn:authgear:params:oauth:token-type:app-initiated-sso-to-web-token",
+        audience: this.apiClient.endpoint,
+        subject_token_type: "urn:ietf:params:oauth:token-type:id_token",
+        subject_token: idToken,
+        actor_token_type: "urn:x-oath:params:oauth:token-type:device-secret",
+        actor_token: deviceSecret,
+      });
+      return tokenExchangeResult;
+    } catch (e: unknown) {
+      if (e instanceof OAuthError && e.error === "insufficient_scope") {
+        throw new NotAllowedError(
+          "Insufficient scope. isAppInitiatedSSOToWebEnabled must be true when the user was authenticated."
+        );
+      }
+      throw e;
+    }
+  }
+
   async _makeAppInitiatedSSOToWebURL(
     options: _AppInitiatedSSOToWebOptions
   ): Promise<string> {
@@ -703,25 +732,24 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     }
     let idToken = await this._delegate.tokenStorage.getIDToken(this.name);
     if (!idToken) {
-      throw new AuthgearError("id_token not found");
+      throw new NotAllowedError(
+        "id_token not found. isAppInitiatedSSOToWebEnabled must be true when the user was authenticated."
+      );
     }
     const deviceSecret = await this._delegate.tokenStorage.getDeviceSecret(
       this.name
     );
     if (!deviceSecret) {
-      throw new AuthgearError("device_secret not found");
+      throw new NotAllowedError(
+        "device_secret not found. isAppInitiatedSSOToWebEnabled must be true when the user was authenticated."
+      );
     }
-    const tokenExchangeResult = await this.apiClient._oidcTokenRequest({
-      client_id: clientID,
-      grant_type: "urn:ietf:params:oauth:grant-type:token-exchange",
-      requested_token_type:
-        "urn:authgear:params:oauth:token-type:app-initiated-sso-to-web-token",
-      audience: this.apiClient.endpoint,
-      subject_token_type: "urn:ietf:params:oauth:token-type:id_token",
-      subject_token: idToken,
-      actor_token_type: "urn:x-oath:params:oauth:token-type:device-secret",
-      actor_token: deviceSecret,
-    });
+    const tokenExchangeResult =
+      await this._exchangeForAppInitiatedSSOToWebToken({
+        deviceSecret,
+        idToken,
+        clientID,
+      });
     // Here access_token is app-initiated-sso-to-web-token
     const appInitiatedSSOToWebToken = tokenExchangeResult.access_token;
     const newDeviceSecret = tokenExchangeResult.device_secret;
