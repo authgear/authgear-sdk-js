@@ -33,13 +33,6 @@ export function readIsAppInitiatedSSOToWebEnabled(): boolean {
   return false;
 }
 
-export function readAppInitiatedSSOToWebRedirectURI(): string {
-  const str = window.localStorage.getItem(
-    "authgear.appInitiatedSSOToWebRedirectURI"
-  );
-  return str ?? "";
-}
-
 export function readUseWebKitWebView(): boolean {
   const str = window.localStorage.getItem("authgear.useWebKitWebView");
   if (str === "true") {
@@ -72,10 +65,6 @@ export function writeIsAppInitiatedSSOToWebEnabled(isEnabled: boolean) {
     "authgear.isAppInitiatedSSOToWebEnabled",
     String(isEnabled)
   );
-}
-
-export function writeAppInitiatedSSOToWebRedirectURI(uri: string) {
-  window.localStorage.setItem("authgear.appInitiatedSSOToWebRedirectURI", uri);
 }
 
 export function writeUseWebKitWebView(useWebKitWebView: boolean) {

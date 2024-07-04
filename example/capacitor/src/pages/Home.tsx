@@ -46,17 +46,16 @@ import authgearCapacitor, {
   BiometricLAPolicy,
   BiometricAccessConstraintAndroid,
   WebKitWebViewUIImplementation,
+  DeviceBrowserUIImplementation,
 } from "@authgear/capacitor";
 import {
   readAppInitiatedSSOToWebClientID,
-  readAppInitiatedSSOToWebRedirectURI,
   readClientID,
   readEndpoint,
   readIsAppInitiatedSSOToWebEnabled,
   readIsSSOEnabled,
   readUseWebKitWebView,
   writeAppInitiatedSSOToWebClientID,
-  writeAppInitiatedSSOToWebRedirectURI,
   writeClientID,
   writeEndpoint,
   writeIsAppInitiatedSSOToWebEnabled,
@@ -121,10 +120,6 @@ function AuthgearDemo() {
   const [isAppInitiatedSSOToWebEnabled, setIsAppInitiatedSSOToWebEnabled] =
     useState(() => {
       return readIsAppInitiatedSSOToWebEnabled();
-    });
-  const [appInitiatedSSOToWebRedirectURI, setAppInitiatedSSOToWebRedirectURI] =
-    useState(() => {
-      return readAppInitiatedSSOToWebRedirectURI();
     });
 
   const [appInitiatedSSOToWebClientID, setAppInitiatedSSOToWebClientID] =
@@ -217,7 +212,6 @@ function AuthgearDemo() {
       writeIsSSOEnabled(isSSOEnabled);
       writeUseWebKitWebView(useWebKitWebView);
       writeIsAppInitiatedSSOToWebEnabled(isAppInitiatedSSOToWebEnabled);
-      writeAppInitiatedSSOToWebRedirectURI(appInitiatedSSOToWebRedirectURI);
       writeAppInitiatedSSOToWebClientID(appInitiatedSSOToWebClientID);
 
       if (isPlatformWeb()) {
@@ -258,7 +252,6 @@ function AuthgearDemo() {
     isSSOEnabled,
     useWebKitWebView,
     isAppInitiatedSSOToWebEnabled,
-    appInitiatedSSOToWebRedirectURI,
     appInitiatedSSOToWebClientID,
     postConfigure,
     useTransientTokenStorage,
@@ -337,6 +330,27 @@ function AuthgearDemo() {
       await updateBiometricState();
     }
   }, [showError, updateBiometricState]);
+
+  const startAppInitiatedSSOToWeb = useCallback(async () => {
+    setLoading(true);
+    try {
+      const url = await authgearCapacitor.makeAppInitiatedSSOToWebURL({
+        clientID: appInitiatedSSOToWebClientID,
+        redirectURI: REDIRECT_URI_CAPACITOR,
+      });
+      const uiImpl = new DeviceBrowserUIImplementation();
+      // Use device browser to open the url and set the cookie
+      await uiImpl.openAuthorizationURL({
+        url: url,
+        redirectURI: REDIRECT_URI_CAPACITOR,
+        shareCookiesWithDeviceBrowser: true,
+      });
+    } catch (e: unknown) {
+      showError(e);
+    } finally {
+      setLoading(false);
+    }
+  }, [appInitiatedSSOToWebClientID, showError]);
 
   const showAuthTime = useCallback(() => {
     if (isPlatformWeb()) {
@@ -565,13 +579,6 @@ function AuthgearDemo() {
     []
   );
 
-  const onChangeAppInitiatedSSOToWebRedirectURI = useCallback(
-    (e: IonInputCustomEvent<InputInputEventDetail>) => {
-      setAppInitiatedSSOToWebRedirectURI(e.detail.value ?? "");
-    },
-    []
-  );
-
   const onChangeAppInitiatedSSOToWebClientID = useCallback(
     (e: IonInputCustomEvent<InputInputEventDetail>) => {
       setAppInitiatedSSOToWebClientID(e.detail.value ?? "");
@@ -646,6 +653,16 @@ function AuthgearDemo() {
     [authenticateBiometric]
   );
 
+  const onClickAppInitiatedSSOToWeb = useCallback(
+    (e: MouseEvent<HTMLIonButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      startAppInitiatedSSOToWeb();
+    },
+    [startAppInitiatedSSOToWeb]
+  );
+
   const onClickDisableBiometric = useCallback(
     (e: MouseEvent<HTMLIonButtonElement>) => {
       e.preventDefault();
@@ -705,6 +722,8 @@ function AuthgearDemo() {
     },
     [logout]
   );
+
+  const canUseAppInitiatedSSOToWeb = !isPlatformWeb();
 
   return (
     <>
@@ -778,27 +797,24 @@ function AuthgearDemo() {
           <IonLabel>Session State</IonLabel>
           <IonNote>{sessionState}</IonNote>
         </div>
-        <IonToggle
-          className="toggle"
-          checked={isAppInitiatedSSOToWebEnabled}
-          onIonChange={onChangeIsAppInitiatedSSOToWebEnabled}
-        >
-          Is App Initiated SSO To Web Enabled
-        </IonToggle>
-        <IonInput
-          type="text"
-          label="App Initiated SSO To Web Redirect URI"
-          placeholder="Enter App Initiated SSO To Web Redirect URI"
-          onIonInput={onChangeAppInitiatedSSOToWebRedirectURI}
-          value={endpoint}
-        />
-        <IonInput
-          type="text"
-          label="App Initiated SSO To Web Client ID"
-          placeholder="Enter App Initiated SSO To Web Client ID"
-          onIonInput={onChangeAppInitiatedSSOToWebClientID}
-          value={endpoint}
-        />
+        {!canUseAppInitiatedSSOToWeb ? null : (
+          <>
+            <IonToggle
+              className="toggle"
+              checked={isAppInitiatedSSOToWebEnabled}
+              onIonChange={onChangeIsAppInitiatedSSOToWebEnabled}
+            >
+              Is App Initiated SSO To Web Enabled
+            </IonToggle>
+            <IonInput
+              type="text"
+              label="App Initiated SSO To Web Client ID"
+              placeholder="Enter App Initiated SSO To Web Client ID"
+              onIonInput={onChangeAppInitiatedSSOToWebClientID}
+              value={endpoint}
+            />
+          </>
+        )}
         <IonButton
           className="button"
           disabled={loading}
@@ -850,6 +866,20 @@ function AuthgearDemo() {
         >
           Authenticate with biometric
         </IonButton>
+        {!canUseAppInitiatedSSOToWeb ? null : (
+          <IonButton
+            className="button"
+            disabled={
+              !initialized ||
+              loading ||
+              loggedIn ||
+              !isAppInitiatedSSOToWebEnabled
+            }
+            onClick={onClickAppInitiatedSSOToWeb}
+          >
+            App Initiated SSO To Web
+          </IonButton>
+        )}
         <IonButton
           className="button"
           disabled={!initialized || !loggedIn}
