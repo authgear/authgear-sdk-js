@@ -671,29 +671,11 @@ export class CapacitorContainer {
   /**
    * @internal
    */
-  getScopes(): string[] {
-    const scopes = [
-      "openid",
-      "offline_access",
-      "https://authgear.com/scopes/full-access",
-    ];
-    if (this.isAppInitiatedSSOToWebEnabled) {
-      scopes.push(
-        "device_sso",
-        "https://authgear.com/scopes/app-initiated-sso-to-web"
-      );
-    }
-    return scopes;
-  }
-
-  /**
-   * @internal
-   */
   async authorizeEndpoint(options: AuthenticateOptions): Promise<string> {
     return this.baseContainer.authorizeEndpoint({
       ...options,
       responseType: "code",
-      scope: this.getScopes(),
+      scope: this.baseContainer.getScopes(),
     });
   }
 

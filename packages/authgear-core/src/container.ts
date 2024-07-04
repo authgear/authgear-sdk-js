@@ -164,6 +164,21 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     return _getAuthTime(payload);
   }
 
+  getScopes(): string[] {
+    const scopes = [
+      "openid",
+      "offline_access",
+      "https://authgear.com/scopes/full-access",
+    ];
+    if (this.isAppInitiatedSSOToWebEnabled) {
+      scopes.push(
+        "device_sso",
+        "https://authgear.com/scopes/app-initiated-sso-to-web"
+      );
+    }
+    return scopes;
+  }
+
   async _persistTokenResponse(
     response: _OIDCTokenResponse,
     reason: SessionStateChangeReason

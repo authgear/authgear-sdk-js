@@ -40,6 +40,7 @@ import {
   AuthenticateResult,
   ReauthenticateResult,
   SettingsActionOptions,
+  AppInitiatedSSOToWebOptions,
 } from "./types";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 import { BiometricPrivateKeyNotFoundError } from "./error";
@@ -86,6 +87,12 @@ export interface ConfigureOptions {
    * @defaultValue false
    */
   isSSOEnabled?: boolean;
+
+  /**
+   * When isAppInitiatedSSOToWebEnabled is true, native apps can share session with a web browser.
+   * @defaultValue false
+   */
+  isAppInitiatedSSOToWebEnabled?: boolean;
 
   /*
    * The UIImplementation.
@@ -191,6 +198,22 @@ export class ReactNativeContainer {
 
   public set isSSOEnabled(isSSOEnabled: boolean) {
     this.baseContainer.isSSOEnabled = isSSOEnabled;
+  }
+
+  /**
+   * Is App Initiated SSO To Web enabled
+   *
+   * @public
+   */
+  public get isAppInitiatedSSOToWebEnabled(): boolean {
+    return this.baseContainer.isAppInitiatedSSOToWebEnabled;
+  }
+
+  public set isAppInitiatedSSOToWebEnabled(
+    isAppInitiatedSSOToWebEnabled: boolean
+  ) {
+    this.baseContainer.isAppInitiatedSSOToWebEnabled =
+      isAppInitiatedSSOToWebEnabled;
   }
 
   /**
@@ -326,6 +349,8 @@ export class ReactNativeContainer {
    */
   async configure(options: ConfigureOptions): Promise<void> {
     this.isSSOEnabled = options.isSSOEnabled ?? false;
+    this.isAppInitiatedSSOToWebEnabled =
+      options.isAppInitiatedSSOToWebEnabled ?? false;
     if (options.tokenStorage != null) {
       this.tokenStorage = options.tokenStorage;
     } else {
@@ -738,11 +763,7 @@ export class ReactNativeContainer {
     return this.baseContainer.authorizeEndpoint({
       ...options,
       responseType: "code",
-      scope: [
-        "openid",
-        "offline_access",
-        "https://authgear.com/scopes/full-access",
-      ],
+      scope: this.baseContainer.getScopes(),
     });
   }
 
@@ -931,6 +952,19 @@ export class ReactNativeContainer {
       }
       throw e;
     }
+  }
+
+  /**
+   * Share the current authenticated session to a web browser.
+   *
+   * `isAppInitiatedSSOToWebEnabled` must be set to true to use this method.
+   *
+   * @public
+   */
+  async makeAppInitiatedSSOToWebURL(
+    options: AppInitiatedSSOToWebOptions
+  ): Promise<string> {
+    return this.baseContainer._makeAppInitiatedSSOToWebURL({ ...options });
   }
 }
 
