@@ -765,6 +765,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     }
     if (newIDToken != null) {
       idToken = newIDToken;
+      this.idToken = newIDToken;
       await this._delegate.tokenStorage.setIDToken(this.name, newIDToken);
     }
     const url = await this.authorizeEndpoint({
