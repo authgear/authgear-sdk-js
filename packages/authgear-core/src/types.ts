@@ -376,3 +376,21 @@ export enum Page {
 export enum SettingsAction {
   ChangePassword = "change_password",
 }
+
+/**
+ * @internal
+ */
+export interface _AppInitiatedSSOToWebOptions {
+  /**
+   * The client ID of the new authenticated session in web.
+   */
+  clientID: string;
+  /**
+   * The URI the browser should go to after successfully obtained a authenticated session.
+   */
+  redirectURI: string;
+  /**
+   * Any string that will be passed to redirectURI by the `state` query parameter.
+   */
+  state?: string;
+}
