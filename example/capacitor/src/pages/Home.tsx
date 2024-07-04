@@ -48,12 +48,18 @@ import authgearCapacitor, {
   WebKitWebViewUIImplementation,
 } from "@authgear/capacitor";
 import {
+  readAppInitiatedSSOToWebClientID,
+  readAppInitiatedSSOToWebRedirectURI,
   readClientID,
   readEndpoint,
+  readIsAppInitiatedSSOToWebEnabled,
   readIsSSOEnabled,
   readUseWebKitWebView,
+  writeAppInitiatedSSOToWebClientID,
+  writeAppInitiatedSSOToWebRedirectURI,
   writeClientID,
   writeEndpoint,
+  writeIsAppInitiatedSSOToWebEnabled,
   writeIsSSOEnabled,
   writeUseWebKitWebView,
 } from "../storage";
@@ -111,6 +117,20 @@ function AuthgearDemo() {
     return readUseWebKitWebView();
   });
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
+
+  const [isAppInitiatedSSOToWebEnabled, setIsAppInitiatedSSOToWebEnabled] =
+    useState(() => {
+      return readIsAppInitiatedSSOToWebEnabled();
+    });
+  const [appInitiatedSSOToWebRedirectURI, setAppInitiatedSSOToWebRedirectURI] =
+    useState(() => {
+      return readAppInitiatedSSOToWebRedirectURI();
+    });
+
+  const [appInitiatedSSOToWebClientID, setAppInitiatedSSOToWebClientID] =
+    useState(() => {
+      return readAppInitiatedSSOToWebClientID();
+    });
 
   const [sessionState, setSessionState] = useState<SessionState | null>(() => {
     if (isPlatformWeb()) {
@@ -196,6 +216,9 @@ function AuthgearDemo() {
       writeEndpoint(endpoint);
       writeIsSSOEnabled(isSSOEnabled);
       writeUseWebKitWebView(useWebKitWebView);
+      writeIsAppInitiatedSSOToWebEnabled(isAppInitiatedSSOToWebEnabled);
+      writeAppInitiatedSSOToWebRedirectURI(appInitiatedSSOToWebRedirectURI);
+      writeAppInitiatedSSOToWebClientID(appInitiatedSSOToWebClientID);
 
       if (isPlatformWeb()) {
         await authgearWeb.configure({
@@ -220,6 +243,7 @@ function AuthgearDemo() {
               })
             : undefined,
           isSSOEnabled,
+          isAppInitiatedSSOToWebEnabled,
         });
       }
       await postConfigure();
@@ -233,8 +257,11 @@ function AuthgearDemo() {
     endpoint,
     isSSOEnabled,
     useWebKitWebView,
-    useTransientTokenStorage,
+    isAppInitiatedSSOToWebEnabled,
+    appInitiatedSSOToWebRedirectURI,
+    appInitiatedSSOToWebClientID,
     postConfigure,
+    useTransientTokenStorage,
     showError,
   ]);
 
@@ -531,6 +558,27 @@ function AuthgearDemo() {
     []
   );
 
+  const onChangeIsAppInitiatedSSOToWebEnabled = useCallback(
+    (e: IonToggleCustomEvent<ToggleChangeEventDetail<unknown>>) => {
+      setIsAppInitiatedSSOToWebEnabled(e.detail.checked);
+    },
+    []
+  );
+
+  const onChangeAppInitiatedSSOToWebRedirectURI = useCallback(
+    (e: IonInputCustomEvent<InputInputEventDetail>) => {
+      setAppInitiatedSSOToWebRedirectURI(e.detail.value ?? "");
+    },
+    []
+  );
+
+  const onChangeAppInitiatedSSOToWebClientID = useCallback(
+    (e: IonInputCustomEvent<InputInputEventDetail>) => {
+      setAppInitiatedSSOToWebClientID(e.detail.value ?? "");
+    },
+    []
+  );
+
   const onChangeUseWebKitWebView = useCallback(
     (e: IonToggleCustomEvent<ToggleChangeEventDetail<unknown>>) => {
       setUseWebKitWebView(e.detail.checked);
@@ -730,6 +778,27 @@ function AuthgearDemo() {
           <IonLabel>Session State</IonLabel>
           <IonNote>{sessionState}</IonNote>
         </div>
+        <IonToggle
+          className="toggle"
+          checked={isAppInitiatedSSOToWebEnabled}
+          onIonChange={onChangeIsAppInitiatedSSOToWebEnabled}
+        >
+          Is App Initiated SSO To Web Enabled
+        </IonToggle>
+        <IonInput
+          type="text"
+          label="App Initiated SSO To Web Redirect URI"
+          placeholder="Enter App Initiated SSO To Web Redirect URI"
+          onIonInput={onChangeAppInitiatedSSOToWebRedirectURI}
+          value={endpoint}
+        />
+        <IonInput
+          type="text"
+          label="App Initiated SSO To Web Client ID"
+          placeholder="Enter App Initiated SSO To Web Client ID"
+          onIonInput={onChangeAppInitiatedSSOToWebClientID}
+          value={endpoint}
+        />
         <IonButton
           className="button"
           disabled={loading}

@@ -16,6 +16,30 @@ export function readIsSSOEnabled(): boolean {
   return false;
 }
 
+export function readAppInitiatedSSOToWebClientID(): string {
+  const str = window.localStorage.getItem(
+    "authgear.appInitiatedSSOToWebClientID"
+  );
+  return str ?? "";
+}
+
+export function readIsAppInitiatedSSOToWebEnabled(): boolean {
+  const str = window.localStorage.getItem(
+    "authgear.isAppInitiatedSSOToWebEnabled"
+  );
+  if (str === "true") {
+    return true;
+  }
+  return false;
+}
+
+export function readAppInitiatedSSOToWebRedirectURI(): string {
+  const str = window.localStorage.getItem(
+    "authgear.appInitiatedSSOToWebRedirectURI"
+  );
+  return str ?? "";
+}
+
 export function readUseWebKitWebView(): boolean {
   const str = window.localStorage.getItem("authgear.useWebKitWebView");
   if (str === "true") {
@@ -34,6 +58,24 @@ export function writeEndpoint(endpoint: string) {
 
 export function writeIsSSOEnabled(isSSOEnabled: boolean) {
   window.localStorage.setItem("authgear.isSSOEnabled", String(isSSOEnabled));
+}
+
+export function writeAppInitiatedSSOToWebClientID(clientID: string) {
+  window.localStorage.setItem(
+    "authgear.appInitiatedSSOToWebClientID",
+    clientID
+  );
+}
+
+export function writeIsAppInitiatedSSOToWebEnabled(isEnabled: boolean) {
+  window.localStorage.setItem(
+    "authgear.isAppInitiatedSSOToWebEnabled",
+    String(isEnabled)
+  );
+}
+
+export function writeAppInitiatedSSOToWebRedirectURI(uri: string) {
+  window.localStorage.setItem("authgear.appInitiatedSSOToWebRedirectURI", uri);
 }
 
 export function writeUseWebKitWebView(useWebKitWebView: boolean) {
