@@ -809,7 +809,7 @@ function AuthgearDemo() {
             <IonInput
               type="text"
               label="App Initiated SSO To Web Client ID"
-              placeholder="Enter App Initiated SSO To Web Client ID"
+              placeholder="Enter Client ID"
               onIonInput={onChangeAppInitiatedSSOToWebClientID}
               value={endpoint}
             />
