@@ -811,7 +811,7 @@ function AuthgearDemo() {
               label="App Initiated SSO To Web Client ID"
               placeholder="Enter Client ID"
               onIonInput={onChangeAppInitiatedSSOToWebClientID}
-              value={endpoint}
+              value={appInitiatedSSOToWebClientID}
             />
           </>
         )}
@@ -872,7 +872,7 @@ function AuthgearDemo() {
             disabled={
               !initialized ||
               loading ||
-              loggedIn ||
+              !loggedIn ||
               !isAppInitiatedSSOToWebEnabled
             }
             onClick={onClickAppInitiatedSSOToWeb}
