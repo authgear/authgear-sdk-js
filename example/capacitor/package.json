@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test.unit": "vitest",
     "lint": "eslint",
+    "sync": "cap sync",
     "run-ios": "cap run ios",
     "run-android": "cap run android"
   },
