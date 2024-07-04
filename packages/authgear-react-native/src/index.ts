@@ -929,6 +929,7 @@ export class ReactNativeContainer {
           grant_type: "urn:authgear:params:oauth:grant-type:biometric-request",
           client_id: clientID,
           jwt,
+          scope: this.baseContainer.getScopes(),
         });
 
       const userInfo = await this.baseContainer.apiClient._oidcUserInfoRequest(
