@@ -469,7 +469,7 @@ export class ReactNativeContainer {
       loginHint,
       idTokenHint: idToken,
       responseType: "urn:authgear:params:oauth:response-type:settings-action",
-      scope: ["openid", "https://authgear.com/scopes/full-access"],
+      scope: this.baseContainer.getSettingsActionScopes(),
       xSettingsAction: action,
     });
     if (options.wechatRedirectURI != null) {
@@ -526,7 +526,7 @@ export class ReactNativeContainer {
       maxAge,
       idTokenHint: idToken,
       responseType: "code",
-      scope: ["openid", "https://authgear.com/scopes/full-access"],
+      scope: this.baseContainer.getReauthenticateScopes(),
     });
 
     if (options.wechatRedirectURI != null) {
@@ -763,7 +763,9 @@ export class ReactNativeContainer {
     return this.baseContainer.authorizeEndpoint({
       ...options,
       responseType: "code",
-      scope: this.baseContainer.getScopes(),
+      scope: this.baseContainer.getAuthenticateScopes({
+        requestOfflineAccess: true,
+      }),
     });
   }
 
@@ -929,7 +931,9 @@ export class ReactNativeContainer {
           grant_type: "urn:authgear:params:oauth:grant-type:biometric-request",
           client_id: clientID,
           jwt,
-          scope: this.baseContainer.getScopes(),
+          scope: this.baseContainer.getAuthenticateScopes({
+            requestOfflineAccess: true,
+          }),
         });
 
       const userInfo = await this.baseContainer.apiClient._oidcUserInfoRequest(

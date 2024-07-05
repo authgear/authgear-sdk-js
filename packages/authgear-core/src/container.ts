@@ -170,12 +170,12 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     return _getAuthTime(payload);
   }
 
-  getScopes(): string[] {
-    const scopes = [
-      "openid",
-      "offline_access",
-      "https://authgear.com/scopes/full-access",
-    ];
+  getAuthenticateScopes(options: { requestOfflineAccess: boolean }): string[] {
+    const { requestOfflineAccess } = options;
+    const scopes = ["openid", "https://authgear.com/scopes/full-access"];
+    if (requestOfflineAccess) {
+      scopes.push("offline_access");
+    }
     if (this.isAppInitiatedSSOToWebEnabled) {
       scopes.push(
         "device_sso",
@@ -183,6 +183,22 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       );
     }
     return scopes;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getReauthenticateScopes(): string[] {
+    // offline_access is not needed because we don't want a new refresh token to be generated
+    // device_sso and app-initiated-sso-to-web is also not needed,
+    // because no new session should be generated so the scopes are not important.
+    return ["openid", "https://authgear.com/scopes/full-access"];
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getSettingsActionScopes(): string[] {
+    // offline_access is not needed because we don't want a new refresh token to be generated
+    // device_sso and app-initiated-sso-to-web is also not needed,
+    // because session for settings should not be used to perform SSO.
+    return ["openid", "https://authgear.com/scopes/full-access"];
   }
 
   async _persistTokenResponse(
