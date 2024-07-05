@@ -19,7 +19,13 @@ import {
 } from "./types";
 import { _base64URLDecode } from "./base64";
 import { _decodeUTF8 } from "./utf8";
-import { AuthgearError, NotAllowedError, OAuthError } from "./error";
+import {
+  AuthgearError,
+  AppInitiatedSSOToWebIDTokenNotFoundError,
+  AppInitiatedSSOToWebDeviceSecretNotFoundError,
+  AppInitiatedSSOToWebInsufficientScopeError,
+  OAuthError,
+} from "./error";
 import { _BaseAPIClient } from "./client";
 
 /**
@@ -709,9 +715,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       return tokenExchangeResult;
     } catch (e: unknown) {
       if (e instanceof OAuthError && e.error === "insufficient_scope") {
-        throw new NotAllowedError(
-          "Insufficient scope. isAppInitiatedSSOToWebEnabled must be true when the user was authenticated."
-        );
+        throw new AppInitiatedSSOToWebInsufficientScopeError();
       }
       throw e;
     }
@@ -733,17 +737,13 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     }
     let idToken = await this._delegate.tokenStorage.getIDToken(this.name);
     if (!idToken) {
-      throw new NotAllowedError(
-        "id_token not found. isAppInitiatedSSOToWebEnabled must be true when the user was authenticated."
-      );
+      throw new AppInitiatedSSOToWebIDTokenNotFoundError();
     }
     const deviceSecret = await this._delegate.tokenStorage.getDeviceSecret(
       this.name
     );
     if (!deviceSecret) {
-      throw new NotAllowedError(
-        "device_secret not found. isAppInitiatedSSOToWebEnabled must be true when the user was authenticated."
-      );
+      throw new AppInitiatedSSOToWebDeviceSecretNotFoundError();
     }
     const tokenExchangeResult =
       await this._exchangeForAppInitiatedSSOToWebToken({
