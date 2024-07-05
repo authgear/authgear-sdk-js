@@ -23,6 +23,13 @@ export function readAppInitiatedSSOToWebClientID(): string {
   return str ?? "";
 }
 
+export function readAppInitiatedSSOToWebRedirectURI(): string {
+  const str = window.localStorage.getItem(
+    "authgear.appInitiatedSSOToWebRedirectURI"
+  );
+  return str ?? "";
+}
+
 export function readIsAppInitiatedSSOToWebEnabled(): boolean {
   const str = window.localStorage.getItem(
     "authgear.isAppInitiatedSSOToWebEnabled"
@@ -58,6 +65,10 @@ export function writeAppInitiatedSSOToWebClientID(clientID: string) {
     "authgear.appInitiatedSSOToWebClientID",
     clientID
   );
+}
+
+export function writeAppInitiatedSSOToWebRedirectURI(uri: string) {
+  window.localStorage.setItem("authgear.appInitiatedSSOToWebRedirectURI", uri);
 }
 
 export function writeIsAppInitiatedSSOToWebEnabled(isEnabled: boolean) {

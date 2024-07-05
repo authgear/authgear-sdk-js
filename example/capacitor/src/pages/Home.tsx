@@ -50,12 +50,14 @@ import authgearCapacitor, {
 } from "@authgear/capacitor";
 import {
   readAppInitiatedSSOToWebClientID,
+  readAppInitiatedSSOToWebRedirectURI,
   readClientID,
   readEndpoint,
   readIsAppInitiatedSSOToWebEnabled,
   readIsSSOEnabled,
   readUseWebKitWebView,
   writeAppInitiatedSSOToWebClientID,
+  writeAppInitiatedSSOToWebRedirectURI,
   writeClientID,
   writeEndpoint,
   writeIsAppInitiatedSSOToWebEnabled,
@@ -125,6 +127,11 @@ function AuthgearDemo() {
   const [appInitiatedSSOToWebClientID, setAppInitiatedSSOToWebClientID] =
     useState(() => {
       return readAppInitiatedSSOToWebClientID();
+    });
+
+  const [appInitiatedSSOToWebRedirectURI, setAppInitiatedSSOToWebRedirectURI] =
+    useState(() => {
+      return readAppInitiatedSSOToWebRedirectURI();
     });
 
   const [sessionState, setSessionState] = useState<SessionState | null>(() => {
@@ -213,6 +220,7 @@ function AuthgearDemo() {
       writeUseWebKitWebView(useWebKitWebView);
       writeIsAppInitiatedSSOToWebEnabled(isAppInitiatedSSOToWebEnabled);
       writeAppInitiatedSSOToWebClientID(appInitiatedSSOToWebClientID);
+      writeAppInitiatedSSOToWebRedirectURI(appInitiatedSSOToWebRedirectURI);
 
       if (isPlatformWeb()) {
         await authgearWeb.configure({
@@ -253,6 +261,7 @@ function AuthgearDemo() {
     useWebKitWebView,
     isAppInitiatedSSOToWebEnabled,
     appInitiatedSSOToWebClientID,
+    appInitiatedSSOToWebRedirectURI,
     postConfigure,
     useTransientTokenStorage,
     showError,
@@ -332,25 +341,70 @@ function AuthgearDemo() {
   }, [showError, updateBiometricState]);
 
   const startAppInitiatedSSOToWeb = useCallback(async () => {
+    const shouldUseAnotherBrowser = appInitiatedSSOToWebRedirectURI !== "";
+    let targetRedirectURI = REDIRECT_URI_CAPACITOR;
+    let targetClientID = clientID;
+    if (appInitiatedSSOToWebRedirectURI !== "") {
+      targetRedirectURI = appInitiatedSSOToWebRedirectURI;
+    }
+    if (appInitiatedSSOToWebClientID !== "") {
+      targetClientID = appInitiatedSSOToWebClientID;
+    }
     setLoading(true);
     try {
       const url = await authgearCapacitor.makeAppInitiatedSSOToWebURL({
-        clientID: appInitiatedSSOToWebClientID,
-        redirectURI: REDIRECT_URI_CAPACITOR,
+        clientID: targetClientID,
+        redirectURI: targetRedirectURI,
       });
-      const uiImpl = new DeviceBrowserUIImplementation();
-      // Use device browser to open the url and set the cookie
-      await uiImpl.openAuthorizationURL({
-        url: url,
-        redirectURI: REDIRECT_URI_CAPACITOR,
-        shareCookiesWithDeviceBrowser: true,
-      });
+      const uiImpl = new WebKitWebViewUIImplementation();
+      if (!shouldUseAnotherBrowser) {
+        // Use device browser to open the url and set the cookie
+        await uiImpl.openAuthorizationURL({
+          url: url,
+          redirectURI: REDIRECT_URI_CAPACITOR,
+          shareCookiesWithDeviceBrowser: true,
+        });
+        // Then start a auth to prove it is working
+        const newContainer = new CapacitorContainer({
+          name: "appInitiatedSSOToWeb",
+        });
+        await newContainer.configure({
+          endpoint: endpoint,
+          tokenStorage: new TransientTokenStorage(),
+          isSSOEnabled: true,
+          clientID: targetClientID,
+          uiImplementation: uiImpl,
+        });
+        await newContainer.authenticate({
+          redirectURI: REDIRECT_URI_CAPACITOR,
+        });
+        const userInfo = await newContainer.fetchUserInfo();
+        showUserInfo(userInfo);
+      } else {
+        // This willbe redirected to appInitiatedSSOToWebRedirectURI and never close,
+        // so we do not await
+        uiImpl
+          .openAuthorizationURL({
+            url: url,
+            redirectURI: REDIRECT_URI_CAPACITOR,
+            shareCookiesWithDeviceBrowser: true,
+          })
+          .then(() => {})
+          .catch(() => {});
+      }
     } catch (e: unknown) {
       showError(e);
     } finally {
       setLoading(false);
     }
-  }, [appInitiatedSSOToWebClientID, showError]);
+  }, [
+    appInitiatedSSOToWebClientID,
+    appInitiatedSSOToWebRedirectURI,
+    clientID,
+    endpoint,
+    showError,
+    showUserInfo,
+  ]);
 
   const showAuthTime = useCallback(() => {
     if (isPlatformWeb()) {
@@ -586,6 +640,13 @@ function AuthgearDemo() {
     []
   );
 
+  const onChangeAppInitiatedSSOToWebRedirectURI = useCallback(
+    (e: IonInputCustomEvent<InputInputEventDetail>) => {
+      setAppInitiatedSSOToWebRedirectURI(e.detail.value ?? "");
+    },
+    []
+  );
+
   const onChangeUseWebKitWebView = useCallback(
     (e: IonToggleCustomEvent<ToggleChangeEventDetail<unknown>>) => {
       setUseWebKitWebView(e.detail.checked);
@@ -812,6 +873,13 @@ function AuthgearDemo() {
               placeholder="Enter Client ID"
               onIonInput={onChangeAppInitiatedSSOToWebClientID}
               value={appInitiatedSSOToWebClientID}
+            />
+            <IonInput
+              type="text"
+              label="App Initiated SSO To Web Redirect URI"
+              placeholder="Enter URI"
+              onIonInput={onChangeAppInitiatedSSOToWebRedirectURI}
+              value={appInitiatedSSOToWebRedirectURI}
             />
           </>
         )}
