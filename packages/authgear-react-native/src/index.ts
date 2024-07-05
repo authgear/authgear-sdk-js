@@ -16,9 +16,14 @@ import {
   Page,
   PromptOption,
   SettingsAction,
+  SharedStorage,
 } from "@authgear/core";
 import { Platform } from "react-native";
-import { PersistentContainerStorage, PersistentTokenStorage } from "./storage";
+import {
+  PersistentContainerStorage,
+  PersistentSharedStorage,
+  PersistentTokenStorage,
+} from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
   registerWechatRedirectURI,
@@ -145,6 +150,13 @@ export class ReactNativeContainer {
   tokenStorage: TokenStorage;
 
   /**
+   * implements _BaseContainerDelegate
+   *
+   * @internal
+   */
+  sharedStorage: SharedStorage;
+
+  /**
    * @internal
    */
   uiImplementation: UIImplementation;
@@ -256,6 +268,7 @@ export class ReactNativeContainer {
 
     this.storage = new PersistentContainerStorage();
     this.tokenStorage = new PersistentTokenStorage();
+    this.sharedStorage = new PersistentSharedStorage();
     this.uiImplementation = new DeviceBrowserUIImplementation();
 
     this.wechatRedirectDeepLinkListener = (url: string) => {

@@ -214,7 +214,12 @@ export interface TokenStorage {
   setRefreshToken(namespace: string, refreshToken: string): Promise<void>;
   getRefreshToken(namespace: string): Promise<string | null>;
   delRefreshToken(namespace: string): Promise<void>;
+}
 
+/**
+ * @internal
+ */
+export interface SharedStorage {
   setIDToken(namespace: string, idToken: string): Promise<void>;
   getIDToken(namespace: string): Promise<string | null>;
   delIDToken(namespace: string): Promise<void>;

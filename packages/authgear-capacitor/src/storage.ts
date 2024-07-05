@@ -4,6 +4,7 @@ import {
   _ContainerStorage,
   _KeyMaker,
   _SafeStorageDriver,
+  SharedStorage,
 } from "@authgear/core";
 import { storageGetItem, storageSetItem, storageDeleteItem } from "./plugin";
 
@@ -54,6 +55,19 @@ export class PersistentTokenStorage implements TokenStorage {
   }
   async delRefreshToken(namespace: string): Promise<void> {
     await this.storageDriver.del(this.keyMaker.keyRefreshToken(namespace));
+  }
+}
+
+/**
+ * @internal
+ */
+export class PersistentSharedStorage implements SharedStorage {
+  private keyMaker: _KeyMaker;
+  private storageDriver: _StorageDriver;
+
+  constructor() {
+    this.keyMaker = new _KeyMaker();
+    this.storageDriver = new _SafeStorageDriver(new _PlatformStorageDriver());
   }
 
   async setIDToken(namespace: string, idToken: string): Promise<void> {

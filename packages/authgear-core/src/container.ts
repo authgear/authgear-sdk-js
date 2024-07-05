@@ -16,6 +16,7 @@ import {
   UserInfo,
   _AppInitiatedSSOToWebOptions,
   PromptOption,
+  SharedStorage,
 } from "./types";
 import { _base64URLDecode } from "./base64";
 import { _decodeUTF8 } from "./utf8";
@@ -49,6 +50,7 @@ const EXPIRE_IN_PERCENTAGE = 0.9;
 export interface _BaseContainerDelegate {
   storage: _ContainerStorage;
   tokenStorage: TokenStorage;
+  sharedStorage: SharedStorage;
   _setupCodeVerifier(): Promise<{
     verifier: string;
     challenge: string;
@@ -216,7 +218,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
     if (id_token != null) {
       this.idToken = id_token;
-      await this._delegate.tokenStorage.setIDToken(this.name, id_token);
+      await this._delegate.sharedStorage.setIDToken(this.name, id_token);
     }
     this.accessToken = access_token;
     if (refresh_token) {
@@ -235,7 +237,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     }
 
     if (device_secret != null) {
-      await this._delegate.tokenStorage.setDeviceSecret(
+      await this._delegate.sharedStorage.setDeviceSecret(
         this.name,
         device_secret
       );
@@ -244,8 +246,8 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
   async _clearSession(reason: SessionStateChangeReason): Promise<void> {
     await this._delegate.tokenStorage.delRefreshToken(this.name);
-    await this._delegate.tokenStorage.delIDToken(this.name);
-    await this._delegate.tokenStorage.delDeviceSecret(this.name);
+    await this._delegate.sharedStorage.delIDToken(this.name);
+    await this._delegate.sharedStorage.delDeviceSecret(this.name);
     this.idToken = undefined;
     this.accessToken = undefined;
     this.refreshToken = undefined;
@@ -335,7 +337,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       return;
     }
 
-    const deviceSecret = await this._delegate.tokenStorage.getDeviceSecret(
+    const deviceSecret = await this._delegate.sharedStorage.getDeviceSecret(
       this.name
     );
 
@@ -372,7 +374,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (clientID == null) {
       throw new AuthgearError("missing client ID");
     }
-    const deviceSecret = await this._delegate.tokenStorage.getDeviceSecret(
+    const deviceSecret = await this._delegate.sharedStorage.getDeviceSecret(
       this.name
     );
     await this.refreshAccessTokenIfNeeded();
@@ -390,10 +392,10 @@ export class _BaseContainer<T extends _BaseAPIClient> {
         await this.apiClient._oidcTokenRequest(tokenRequest);
       if (id_token != null) {
         this.idToken = id_token;
-        await this._delegate.tokenStorage.setIDToken(this.name, id_token);
+        await this._delegate.sharedStorage.setIDToken(this.name, id_token);
       }
       if (device_secret != null) {
-        await this._delegate.tokenStorage.setDeviceSecret(
+        await this._delegate.sharedStorage.setDeviceSecret(
           this.name,
           device_secret
         );
@@ -751,11 +753,11 @@ export class _BaseContainer<T extends _BaseAPIClient> {
         "makeAppInitiatedSSOToWebURL requires authenticated user"
       );
     }
-    let idToken = await this._delegate.tokenStorage.getIDToken(this.name);
+    let idToken = await this._delegate.sharedStorage.getIDToken(this.name);
     if (!idToken) {
       throw new AppInitiatedSSOToWebIDTokenNotFoundError();
     }
-    const deviceSecret = await this._delegate.tokenStorage.getDeviceSecret(
+    const deviceSecret = await this._delegate.sharedStorage.getDeviceSecret(
       this.name
     );
     if (!deviceSecret) {
@@ -775,7 +777,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       throw new AuthgearError("unexpected: access_token is not returned");
     }
     if (newDeviceSecret != null) {
-      await this._delegate.tokenStorage.setDeviceSecret(
+      await this._delegate.sharedStorage.setDeviceSecret(
         this.name,
         newDeviceSecret
       );
@@ -783,7 +785,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (newIDToken != null) {
       idToken = newIDToken;
       this.idToken = newIDToken;
-      await this._delegate.tokenStorage.setIDToken(this.name, newIDToken);
+      await this._delegate.sharedStorage.setIDToken(this.name, newIDToken);
     }
     const url = await this.authorizeEndpoint({
       responseType:
