@@ -694,12 +694,13 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   }): Promise<_OIDCTokenResponse> {
     const { clientID, idToken, deviceSecret } = options;
     try {
+      const audience = await this.apiClient.getEndpointOrigin();
       const tokenExchangeResult = await this.apiClient._oidcTokenRequest({
         client_id: clientID,
         grant_type: "urn:ietf:params:oauth:grant-type:token-exchange",
         requested_token_type:
           "urn:authgear:params:oauth:token-type:app-initiated-sso-to-web-token",
-        audience: this.apiClient.endpoint,
+        audience: audience,
         subject_token_type: "urn:ietf:params:oauth:token-type:id_token",
         subject_token: idToken,
         actor_token_type: "urn:x-oath:params:oauth:token-type:device-secret",

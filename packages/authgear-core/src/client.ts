@@ -384,6 +384,11 @@ export abstract class _BaseAPIClient {
     });
   }
 
+  async getEndpointOrigin(): Promise<string> {
+    const config = await this._fetchOIDCConfiguration();
+    return new URL(config.authorization_endpoint).origin;
+  }
+
   async appSessionToken(
     refreshToken: string
   ): Promise<_AppSessionTokenResponse> {
