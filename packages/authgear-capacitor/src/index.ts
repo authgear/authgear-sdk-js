@@ -41,7 +41,7 @@ import {
   type SettingOptions,
   type BiometricOptions,
   type SettingsActionOptions,
-  AppInitiatedSSOToWebOptions,
+  type AppInitiatedSSOToWebOptions,
 } from "./types";
 import { BiometricPrivateKeyNotFoundError } from "./error";
 
