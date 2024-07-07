@@ -165,6 +165,8 @@ const HomeScreen: React.FC = () => {
     useState(false);
   const [appInitiatedSSOToWebClientID, setAppInitiatedSSOToWebClientID] =
     useState('');
+  const [appInitiatedSSOToWebRedirectURI, setAppInitiatedSSOToWebRedirectURI] =
+    useState('');
 
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [sessionState, setSessionState] = useState<SessionState | null>(
@@ -567,24 +569,62 @@ const HomeScreen: React.FC = () => {
 
   const startAppInitiatedSSOToWeb = useCallback(async () => {
     setLoading(true);
+    const shouldUseAnotherBrowser = appInitiatedSSOToWebRedirectURI !== '';
+    let targetRedirectURI = redirectURI;
+    let targetClientID = clientID;
+    if (appInitiatedSSOToWebRedirectURI !== '') {
+      targetRedirectURI = appInitiatedSSOToWebRedirectURI;
+    }
+    if (appInitiatedSSOToWebClientID !== '') {
+      targetClientID = appInitiatedSSOToWebClientID;
+    }
     try {
       const url = await authgear.makeAppInitiatedSSOToWebURL({
-        clientID: appInitiatedSSOToWebClientID,
-        redirectURI: redirectURI,
+        clientID: targetClientID,
+        redirectURI: targetRedirectURI,
       });
-      const uiImpl = new DeviceBrowserUIImplementation();
-      // Use device browser to open the url and set the cookie
-      await uiImpl.openAuthorizationURL({
-        url: url,
-        redirectURI: redirectURI,
-        shareCookiesWithDeviceBrowser: true,
-      });
+      const uiImpl = new WebKitWebViewUIImplementation();
+      if (!shouldUseAnotherBrowser) {
+        // Use device browser to open the url and set the cookie
+        await uiImpl.openAuthorizationURL({
+          url: url,
+          redirectURI: redirectURI,
+          shareCookiesWithDeviceBrowser: true,
+        });
+        // Then start a auth to prove it is working
+        const newContainer = new ReactNativeContainer({
+          name: 'appInitiatedSSOToWeb',
+        });
+        await newContainer.configure({
+          endpoint: endpoint,
+          tokenStorage: new TransientTokenStorage(),
+          isSSOEnabled: true,
+          clientID: targetClientID,
+          uiImplementation: uiImpl,
+        });
+        await newContainer.authenticate({
+          redirectURI: redirectURI,
+        });
+        const userInfo = await newContainer.fetchUserInfo();
+        showUser(userInfo);
+      } else {
+        // This willbe redirected to appInitiatedSSOToWebRedirectURI and never close,
+        // so we do not await
+        uiImpl
+          .openAuthorizationURL({
+            url: url,
+            redirectURI: redirectURI,
+            shareCookiesWithDeviceBrowser: true,
+          })
+          .then(() => {})
+          .catch(() => {});
+      }
     } catch (e: unknown) {
       showError(e);
     } finally {
       setLoading(false);
     }
-  }, [authgear, appInitiatedSSOToWebClientID]);
+  }, [authgear, appInitiatedSSOToWebRedirectURI, appInitiatedSSOToWebClientID]);
 
   const openSettings = useCallback(() => {
     authgear
@@ -748,6 +788,19 @@ const HomeScreen: React.FC = () => {
             autoCapitalize="none"
             autoCorrect={false}
             placeholder="Enter Client ID"
+          />
+        </View>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>
+            App Initiated SSO To Web Redirect URI
+          </Text>
+          <TextInput
+            style={styles.inputField}
+            value={appInitiatedSSOToWebRedirectURI}
+            onChangeText={setAppInitiatedSSOToWebRedirectURI}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder="Enter Redirect URI"
           />
         </View>
         <View style={styles.configureAction}>
