@@ -585,7 +585,7 @@ const HomeScreen: React.FC = () => {
       });
       const uiImpl = new WebKitWebViewUIImplementation();
       if (!shouldUseAnotherBrowser) {
-        // Use device browser to open the url and set the cookie
+        // Use webkit webview to open the url and set the cookie
         await uiImpl.openAuthorizationURL({
           url: url,
           redirectURI: redirectURI,
