@@ -796,6 +796,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       xAppInitiatedSSOToWebToken: appInitiatedSSOToWebToken,
       idTokenHint: idToken,
       prompt: PromptOption.None,
+      state: options.state,
     });
     return url;
   }
