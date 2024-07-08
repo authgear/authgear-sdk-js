@@ -16,11 +16,11 @@ import {
   _ContainerStorage,
   _base64URLEncode,
   _encodeUTF8,
-  SharedStorage,
+  InterAppSharedStorage,
 } from "@authgear/core";
 import {
   PersistentContainerStorage,
-  PersistentSharedStorage,
+  PersistentInterAppSharedStorage,
   PersistentTokenStorage,
 } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
@@ -158,7 +158,7 @@ export class CapacitorContainer {
   /**
    * @internal
    */
-  sharedStorage: SharedStorage;
+  sharedStorage: InterAppSharedStorage;
 
   /**
    * @internal
@@ -259,7 +259,7 @@ export class CapacitorContainer {
 
     this.storage = new PersistentContainerStorage();
     this.tokenStorage = new PersistentTokenStorage();
-    this.sharedStorage = new PersistentSharedStorage();
+    this.sharedStorage = new PersistentInterAppSharedStorage();
     this.uiImplementation = new DeviceBrowserUIImplementation();
   }
 

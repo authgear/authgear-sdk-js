@@ -4,7 +4,7 @@ import {
   _ContainerStorage,
   _KeyMaker,
   _SafeStorageDriver,
-  SharedStorage,
+  InterAppSharedStorage,
 } from "@authgear/core";
 import {
   storageGetItem,
@@ -65,7 +65,7 @@ export class PersistentTokenStorage implements TokenStorage {
 /**
  * @internal
  */
-export class PersistentSharedStorage implements SharedStorage {
+export class PersistentInterAppSharedStorage implements InterAppSharedStorage {
   private keyMaker: _KeyMaker;
   private storageDriver: _StorageDriver;
 

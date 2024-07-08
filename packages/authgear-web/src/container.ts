@@ -12,13 +12,13 @@ import {
   Page,
   PromptOption,
   SettingsAction,
-  SharedStorage,
+  InterAppSharedStorage,
 } from "@authgear/core";
 import { _WebAPIClient } from "./client";
 import {
   PersistentTokenStorage,
   PersistentContainerStorage,
-  PersistentSharedStorage,
+  PersistentInterAppSharedStorage,
 } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
@@ -102,7 +102,7 @@ export class WebContainer {
   /**
    * @internal
    */
-  sharedStorage: SharedStorage;
+  sharedStorage: InterAppSharedStorage;
 
   /**
    * @public
@@ -191,7 +191,7 @@ export class WebContainer {
 
     this.storage = new PersistentContainerStorage();
     this.tokenStorage = new PersistentTokenStorage();
-    this.sharedStorage = new PersistentSharedStorage();
+    this.sharedStorage = new PersistentInterAppSharedStorage();
 
     this.sessionType = "refresh_token";
   }

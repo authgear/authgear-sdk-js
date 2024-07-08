@@ -219,7 +219,7 @@ export interface TokenStorage {
 /**
  * @internal
  */
-export interface SharedStorage {
+export interface InterAppSharedStorage {
   setIDToken(namespace: string, idToken: string): Promise<void>;
   getIDToken(namespace: string): Promise<string | null>;
   delIDToken(namespace: string): Promise<void>;

@@ -16,12 +16,12 @@ import {
   Page,
   PromptOption,
   SettingsAction,
-  SharedStorage,
+  InterAppSharedStorage,
 } from "@authgear/core";
 import { Platform } from "react-native";
 import {
   PersistentContainerStorage,
-  PersistentSharedStorage,
+  PersistentInterAppSharedStorage,
   PersistentTokenStorage,
 } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
@@ -154,7 +154,7 @@ export class ReactNativeContainer {
    *
    * @internal
    */
-  sharedStorage: SharedStorage;
+  sharedStorage: InterAppSharedStorage;
 
   /**
    * @internal
@@ -268,7 +268,7 @@ export class ReactNativeContainer {
 
     this.storage = new PersistentContainerStorage();
     this.tokenStorage = new PersistentTokenStorage();
-    this.sharedStorage = new PersistentSharedStorage();
+    this.sharedStorage = new PersistentInterAppSharedStorage();
     this.uiImplementation = new DeviceBrowserUIImplementation();
 
     this.wechatRedirectDeepLinkListener = (url: string) => {

@@ -16,7 +16,7 @@ import {
   UserInfo,
   _AppInitiatedSSOToWebOptions,
   PromptOption,
-  SharedStorage,
+  InterAppSharedStorage,
 } from "./types";
 import { _base64URLDecode } from "./base64";
 import { _decodeUTF8 } from "./utf8";
@@ -50,7 +50,7 @@ const EXPIRE_IN_PERCENTAGE = 0.9;
 export interface _BaseContainerDelegate {
   storage: _ContainerStorage;
   tokenStorage: TokenStorage;
-  sharedStorage: SharedStorage;
+  sharedStorage: InterAppSharedStorage;
   _setupCodeVerifier(): Promise<{
     verifier: string;
     challenge: string;
