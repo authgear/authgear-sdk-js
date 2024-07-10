@@ -32,7 +32,7 @@ export function readAppInitiatedSSOToWebRedirectURI(): string {
 
 export function readIsAppInitiatedSSOToWebEnabled(): boolean {
   const str = window.localStorage.getItem(
-    "authgear.isAppInitiatedSSOToWebEnabled"
+    "authgear.preAuthenticatedURLEnabled"
   );
   if (str === "true") {
     return true;
@@ -73,7 +73,7 @@ export function writeAppInitiatedSSOToWebRedirectURI(uri: string) {
 
 export function writeIsAppInitiatedSSOToWebEnabled(isEnabled: boolean) {
   window.localStorage.setItem(
-    "authgear.isAppInitiatedSSOToWebEnabled",
+    "authgear.preAuthenticatedURLEnabled",
     String(isEnabled)
   );
 }

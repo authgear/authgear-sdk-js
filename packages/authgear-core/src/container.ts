@@ -123,7 +123,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
   isSSOEnabled: boolean;
 
-  isAppInitiatedSSOToWebEnabled: boolean;
+  preAuthenticatedURLEnabled: boolean;
 
   sessionState: SessionState;
 
@@ -147,7 +147,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     this.name = options.name ?? "default";
     this.apiClient = apiClient;
     this.isSSOEnabled = false;
-    this.isAppInitiatedSSOToWebEnabled = false;
+    this.preAuthenticatedURLEnabled = false;
     this.sessionState = SessionState.Unknown;
     this._delegate = _delegate;
   }
@@ -178,7 +178,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (requestOfflineAccess) {
       scopes.push("offline_access");
     }
-    if (this.isAppInitiatedSSOToWebEnabled) {
+    if (this.preAuthenticatedURLEnabled) {
       scopes.push(
         "device_sso",
         "https://authgear.com/scopes/app-initiated-sso-to-web"
@@ -743,9 +743,9 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     options: _AppInitiatedSSOToWebOptions
   ): Promise<string> {
     const clientID = options.clientID;
-    if (!this.isAppInitiatedSSOToWebEnabled) {
+    if (!this.preAuthenticatedURLEnabled) {
       throw new AuthgearError(
-        "makeAppInitiatedSSOToWebURL requires isAppInitiatedSSOToWebEnabled to be true"
+        "makeAppInitiatedSSOToWebURL requires preAuthenticatedURLEnabled to be true"
       );
     }
     if (this.sessionState !== SessionState.Authenticated) {

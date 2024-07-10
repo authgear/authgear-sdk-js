@@ -161,7 +161,7 @@ const HomeScreen: React.FC = () => {
   const [useWebKitWebView, setUseWebKitWebView] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
 
-  const [isAppInitiatedSSOToWebEnabled, setIsAppInitiatedSSOToWebEnabled] =
+  const [preAuthenticatedURLEnabled, setIsAppInitiatedSSOToWebEnabled] =
     useState(false);
   const [appInitiatedSSOToWebClientID, setAppInitiatedSSOToWebClientID] =
     useState('');
@@ -374,7 +374,7 @@ const HomeScreen: React.FC = () => {
             })
           : undefined,
         isSSOEnabled,
-        isAppInitiatedSSOToWebEnabled,
+        preAuthenticatedURLEnabled,
       })
       .then(() => {
         postConfigure();
@@ -391,7 +391,7 @@ const HomeScreen: React.FC = () => {
     endpoint,
     useTransientTokenStorage,
     isSSOEnabled,
-    isAppInitiatedSSOToWebEnabled,
+    preAuthenticatedURLEnabled,
     useWebKitWebView,
     postConfigure,
     showError,
@@ -773,7 +773,7 @@ const HomeScreen: React.FC = () => {
           </Text>
           <Switch
             style={styles.checkbox}
-            value={isAppInitiatedSSOToWebEnabled}
+            value={preAuthenticatedURLEnabled}
             onValueChange={setIsAppInitiatedSSOToWebEnabled}
           />
         </View>
@@ -884,7 +884,7 @@ const HomeScreen: React.FC = () => {
               !initialized ||
               loading ||
               !loggedIn ||
-              !isAppInitiatedSSOToWebEnabled
+              !preAuthenticatedURLEnabled
             }
           />
         </View>

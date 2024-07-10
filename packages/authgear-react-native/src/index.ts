@@ -94,10 +94,10 @@ export interface ConfigureOptions {
   isSSOEnabled?: boolean;
 
   /**
-   * When isAppInitiatedSSOToWebEnabled is true, native apps can share session with a web browser.
+   * When preAuthenticatedURLEnabled is true, native apps can share session with a web browser.
    * @defaultValue false
    */
-  isAppInitiatedSSOToWebEnabled?: boolean;
+  preAuthenticatedURLEnabled?: boolean;
 
   /*
    * The UIImplementation.
@@ -217,15 +217,12 @@ export class ReactNativeContainer {
    *
    * @public
    */
-  public get isAppInitiatedSSOToWebEnabled(): boolean {
-    return this.baseContainer.isAppInitiatedSSOToWebEnabled;
+  public get preAuthenticatedURLEnabled(): boolean {
+    return this.baseContainer.preAuthenticatedURLEnabled;
   }
 
-  public set isAppInitiatedSSOToWebEnabled(
-    isAppInitiatedSSOToWebEnabled: boolean
-  ) {
-    this.baseContainer.isAppInitiatedSSOToWebEnabled =
-      isAppInitiatedSSOToWebEnabled;
+  public set preAuthenticatedURLEnabled(preAuthenticatedURLEnabled: boolean) {
+    this.baseContainer.preAuthenticatedURLEnabled = preAuthenticatedURLEnabled;
   }
 
   /**
@@ -362,8 +359,8 @@ export class ReactNativeContainer {
    */
   async configure(options: ConfigureOptions): Promise<void> {
     this.isSSOEnabled = options.isSSOEnabled ?? false;
-    this.isAppInitiatedSSOToWebEnabled =
-      options.isAppInitiatedSSOToWebEnabled ?? false;
+    this.preAuthenticatedURLEnabled =
+      options.preAuthenticatedURLEnabled ?? false;
     if (options.tokenStorage != null) {
       this.tokenStorage = options.tokenStorage;
     } else {
@@ -975,7 +972,7 @@ export class ReactNativeContainer {
   /**
    * Share the current authenticated session to a web browser.
    *
-   * `isAppInitiatedSSOToWebEnabled` must be set to true to use this method.
+   * `preAuthenticatedURLEnabled` must be set to true to use this method.
    *
    * @public
    */

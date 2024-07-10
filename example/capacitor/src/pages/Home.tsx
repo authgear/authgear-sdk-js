@@ -119,7 +119,7 @@ function AuthgearDemo() {
   });
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
 
-  const [isAppInitiatedSSOToWebEnabled, setIsAppInitiatedSSOToWebEnabled] =
+  const [preAuthenticatedURLEnabled, setIsAppInitiatedSSOToWebEnabled] =
     useState(() => {
       return readIsAppInitiatedSSOToWebEnabled();
     });
@@ -218,7 +218,7 @@ function AuthgearDemo() {
       writeEndpoint(endpoint);
       writeIsSSOEnabled(isSSOEnabled);
       writeUseWebKitWebView(useWebKitWebView);
-      writeIsAppInitiatedSSOToWebEnabled(isAppInitiatedSSOToWebEnabled);
+      writeIsAppInitiatedSSOToWebEnabled(preAuthenticatedURLEnabled);
       writeAppInitiatedSSOToWebClientID(appInitiatedSSOToWebClientID);
       writeAppInitiatedSSOToWebRedirectURI(appInitiatedSSOToWebRedirectURI);
 
@@ -245,7 +245,7 @@ function AuthgearDemo() {
               })
             : undefined,
           isSSOEnabled,
-          isAppInitiatedSSOToWebEnabled,
+          preAuthenticatedURLEnabled,
         });
       }
       await postConfigure();
@@ -259,7 +259,7 @@ function AuthgearDemo() {
     endpoint,
     isSSOEnabled,
     useWebKitWebView,
-    isAppInitiatedSSOToWebEnabled,
+    preAuthenticatedURLEnabled,
     appInitiatedSSOToWebClientID,
     appInitiatedSSOToWebRedirectURI,
     postConfigure,
@@ -862,7 +862,7 @@ function AuthgearDemo() {
           <>
             <IonToggle
               className="toggle"
-              checked={isAppInitiatedSSOToWebEnabled}
+              checked={preAuthenticatedURLEnabled}
               onIonChange={onChangeIsAppInitiatedSSOToWebEnabled}
             >
               Is App Initiated SSO To Web Enabled
@@ -941,7 +941,7 @@ function AuthgearDemo() {
               !initialized ||
               loading ||
               !loggedIn ||
-              !isAppInitiatedSSOToWebEnabled
+              !preAuthenticatedURLEnabled
             }
             onClick={onClickAppInitiatedSSOToWeb}
           >
