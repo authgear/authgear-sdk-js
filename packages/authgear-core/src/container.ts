@@ -493,10 +493,10 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (options.xSettingsAction != null) {
       query.append("x_settings_action", options.xSettingsAction);
     }
-    if (options.xAppInitiatedSSOToWebToken != null) {
+    if (options.xPreAuthenticatedURLToken != null) {
       query.append(
-        "x_app_initiated_sso_to_web_token",
-        options.xAppInitiatedSSOToWebToken
+        "x_pre_authenticated_url_token",
+        options.xPreAuthenticatedURLToken
       );
     }
     if (!this.isSSOEnabled) {
@@ -793,7 +793,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       responseMode: "cookie",
       redirectURI: options.redirectURI,
       clientID: options.clientID,
-      xAppInitiatedSSOToWebToken: appInitiatedSSOToWebToken,
+      xPreAuthenticatedURLToken: appInitiatedSSOToWebToken,
       idTokenHint: idToken,
       prompt: PromptOption.None,
       state: options.state,

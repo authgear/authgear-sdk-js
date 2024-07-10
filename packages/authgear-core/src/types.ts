@@ -93,7 +93,7 @@ export interface _OIDCAuthenticationRequest {
   xSettingsAction?: "change_password";
   authenticationFlowGroup?: string;
   clientID?: string;
-  xAppInitiatedSSOToWebToken?: string;
+  xPreAuthenticatedURLToken?: string;
 }
 
 /**
