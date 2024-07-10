@@ -353,8 +353,8 @@ function AuthgearDemo() {
     setLoading(true);
     try {
       const url = await authgearCapacitor.makePreAuthenticatedURL({
-        clientID: targetClientID,
-        redirectURI: targetRedirectURI,
+        webApplicationClientID: targetClientID,
+        webApplicationURI: targetRedirectURI,
       });
       const uiImpl = new WebKitWebViewUIImplementation();
       if (!shouldUseAnotherBrowser) {

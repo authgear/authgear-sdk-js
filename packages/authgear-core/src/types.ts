@@ -386,16 +386,7 @@ export enum SettingsAction {
  * @internal
  */
 export interface _PreAuthenticatedURLOptions {
-  /**
-   * The client ID of the new authenticated session in web.
-   */
-  clientID: string;
-  /**
-   * The URI the browser should go to after successfully obtained a authenticated session.
-   */
-  redirectURI: string;
-  /**
-   * Any string that will be passed to redirectURI by the `state` query parameter.
-   */
+  webApplicationClientID: string;
+  webApplicationURI: string;
   state?: string;
 }

@@ -433,15 +433,15 @@ export interface BiometricPrivateKeyOptions extends BiometricOptions {
  */
 export interface PreAuthenticatedURLOptions {
   /**
-   * The client ID of the new authenticated session in web.
+   * The client ID of the web application.
    */
-  clientID: string;
+  webApplicationClientID: string;
   /**
    * The URI the browser should go to after successfully obtained a authenticated session.
    */
-  redirectURI: string;
+  webApplicationURI: string;
   /**
-   * Any string that will be passed to redirectURI by the `state` query parameter.
+   * Any string that will be passed to webApplicationURI by the `state` query parameter.
    */
   state?: string;
 }

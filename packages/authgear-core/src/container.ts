@@ -742,7 +742,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   async _makePreAuthenticatedURL(
     options: _PreAuthenticatedURLOptions
   ): Promise<string> {
-    const clientID = options.clientID;
+    const clientID = options.webApplicationClientID;
     if (!this.preAuthenticatedURLEnabled) {
       throw new AuthgearError(
         "makePreAuthenticatedURL requires preAuthenticatedURLEnabled to be true"
@@ -792,8 +792,8 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       responseType:
         "urn:authgear:params:oauth:response-type:pre-authenticated-url token",
       responseMode: "cookie",
-      redirectURI: options.redirectURI,
-      clientID: options.clientID,
+      redirectURI: options.webApplicationURI,
+      clientID: options.webApplicationClientID,
       xPreAuthenticatedURLToken: preAuthenticatedURLToken,
       idTokenHint: idToken,
       prompt: PromptOption.None,

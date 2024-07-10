@@ -579,8 +579,8 @@ const HomeScreen: React.FC = () => {
     }
     try {
       const url = await authgear.makePreAuthenticatedURL({
-        clientID: targetClientID,
-        redirectURI: targetRedirectURI,
+        webApplicationClientID: targetClientID,
+        webApplicationURI: targetRedirectURI,
       });
       const uiImpl = new WebKitWebViewUIImplementation();
       if (!shouldUseAnotherBrowser) {
@@ -623,7 +623,14 @@ const HomeScreen: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [authgear, preAuthenticatedURLRedirectURI, preAuthenticatedURLClientID]);
+  }, [
+    preAuthenticatedURLRedirectURI,
+    clientID,
+    preAuthenticatedURLClientID,
+    endpoint,
+    showUser,
+    showError,
+  ]);
 
   const openSettings = useCallback(() => {
     authgear
