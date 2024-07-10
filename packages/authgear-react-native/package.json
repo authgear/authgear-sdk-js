@@ -17,5 +17,15 @@
   },
   "peerDependencies": {
     "react-native": ">=0.60.0 <1.0.0"
-  }
+  },
+  "keywords": [
+    "Authgear",
+    "user authentication",
+    "login",
+    "PKCE",
+    "Authorization Code Grant Flow",
+    "Biometric Login",
+    "React Native",
+    "React Native authentication"
+  ]
 }

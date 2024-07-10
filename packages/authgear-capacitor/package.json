@@ -35,5 +35,15 @@
     "android": {
       "src": "android"
     }
-  }
+  },
+  "keywords": [
+    "Authgear",
+    "user authentication",
+    "login",
+    "PKCE",
+    "Authorization Code Grant Flow",
+    "Biometric Login",
+    "Ionic",
+    "Ionic authentication"
+  ]
 }
