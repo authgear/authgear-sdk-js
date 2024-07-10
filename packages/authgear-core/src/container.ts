@@ -14,7 +14,7 @@ import {
   SessionStateChangeReason,
   SessionState,
   UserInfo,
-  _AppInitiatedSSOToWebOptions,
+  _PreAuthenticatedURLOptions,
   PromptOption,
   InterAppSharedStorage,
 } from "./types";
@@ -22,9 +22,9 @@ import { _base64URLDecode } from "./base64";
 import { _decodeUTF8 } from "./utf8";
 import {
   AuthgearError,
-  AppInitiatedSSOToWebIDTokenNotFoundError,
-  AppInitiatedSSOToWebDeviceSecretNotFoundError,
-  AppInitiatedSSOToWebInsufficientScopeError,
+  PreAuthenticatedURLIDTokenNotFoundError,
+  PreAuthenticatedURLDeviceSecretNotFoundError,
+  PreAuthenticatedURLInsufficientScopeError,
   OAuthError,
 } from "./error";
 import { _BaseAPIClient } from "./client";
@@ -190,7 +190,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   // eslint-disable-next-line class-methods-use-this
   getReauthenticateScopes(): string[] {
     // offline_access is not needed because we don't want a new refresh token to be generated
-    // device_sso and app-initiated-sso-to-web is also not needed,
+    // device_sso and pre-authenticated-url is also not needed,
     // because no new session should be generated so the scopes are not important.
     return ["openid", "https://authgear.com/scopes/full-access"];
   }
@@ -198,7 +198,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
   // eslint-disable-next-line class-methods-use-this
   getSettingsActionScopes(): string[] {
     // offline_access is not needed because we don't want a new refresh token to be generated
-    // device_sso and app-initiated-sso-to-web is also not needed,
+    // device_sso and pre-authenticated-url is also not needed,
     // because session for settings should not be used to perform SSO.
     return ["openid", "https://authgear.com/scopes/full-access"];
   }
@@ -711,7 +711,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     }
   }
 
-  async _exchangeForAppInitiatedSSOToWebToken(options: {
+  async _exchangeForPreAuthenticatedURLToken(options: {
     clientID: string;
     idToken: string;
     deviceSecret: string;
@@ -723,7 +723,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
         client_id: clientID,
         grant_type: "urn:ietf:params:oauth:grant-type:token-exchange",
         requested_token_type:
-          "urn:authgear:params:oauth:token-type:app-initiated-sso-to-web-token",
+          "urn:authgear:params:oauth:token-type:pre-authenticated-url-token",
         audience: audience,
         subject_token_type: "urn:ietf:params:oauth:token-type:id_token",
         subject_token: idToken,
@@ -733,14 +733,14 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       return tokenExchangeResult;
     } catch (e: unknown) {
       if (e instanceof OAuthError && e.error === "insufficient_scope") {
-        throw new AppInitiatedSSOToWebInsufficientScopeError();
+        throw new PreAuthenticatedURLInsufficientScopeError();
       }
       throw e;
     }
   }
 
   async _makePreAuthenticatedURL(
-    options: _AppInitiatedSSOToWebOptions
+    options: _PreAuthenticatedURLOptions
   ): Promise<string> {
     const clientID = options.clientID;
     if (!this.preAuthenticatedURLEnabled) {
@@ -755,25 +755,26 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     }
     let idToken = await this._delegate.sharedStorage.getIDToken(this.name);
     if (!idToken) {
-      throw new AppInitiatedSSOToWebIDTokenNotFoundError();
+      throw new PreAuthenticatedURLIDTokenNotFoundError();
     }
     const deviceSecret = await this._delegate.sharedStorage.getDeviceSecret(
       this.name
     );
     if (!deviceSecret) {
-      throw new AppInitiatedSSOToWebDeviceSecretNotFoundError();
+      throw new PreAuthenticatedURLDeviceSecretNotFoundError();
     }
-    const tokenExchangeResult =
-      await this._exchangeForAppInitiatedSSOToWebToken({
+    const tokenExchangeResult = await this._exchangeForPreAuthenticatedURLToken(
+      {
         deviceSecret,
         idToken,
         clientID,
-      });
-    // Here access_token is app-initiated-sso-to-web-token
-    const appInitiatedSSOToWebToken = tokenExchangeResult.access_token;
+      }
+    );
+    // Here access_token is pre-authenticated-url-token
+    const preAuthenticatedURLToken = tokenExchangeResult.access_token;
     const newDeviceSecret = tokenExchangeResult.device_secret;
     const newIDToken = tokenExchangeResult.id_token;
-    if (appInitiatedSSOToWebToken == null) {
+    if (preAuthenticatedURLToken == null) {
       throw new AuthgearError("unexpected: access_token is not returned");
     }
     if (newDeviceSecret != null) {
@@ -789,11 +790,11 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     }
     const url = await this.authorizeEndpoint({
       responseType:
-        "urn:authgear:params:oauth:response-type:app_initiated_sso_to_web token",
+        "urn:authgear:params:oauth:response-type:pre-authenticated-url token",
       responseMode: "cookie",
       redirectURI: options.redirectURI,
       clientID: options.clientID,
-      xPreAuthenticatedURLToken: appInitiatedSSOToWebToken,
+      xPreAuthenticatedURLToken: preAuthenticatedURLToken,
       idTokenHint: idToken,
       prompt: PromptOption.None,
       state: options.state,

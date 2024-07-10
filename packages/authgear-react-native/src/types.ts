@@ -427,11 +427,11 @@ export interface BiometricPrivateKeyOptions extends BiometricOptions {
 }
 
 /**
- * AppInitiatedSSOToWebOptions is options for app-initiated-sso-to-web.
+ * PreAuthenticatedURLOptions is options for pre-authenticated-url.
  *
  * @public
  */
-export interface AppInitiatedSSOToWebOptions {
+export interface PreAuthenticatedURLOptions {
   /**
    * The client ID of the new authenticated session in web.
    */

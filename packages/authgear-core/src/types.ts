@@ -74,7 +74,7 @@ export interface _OIDCAuthenticationRequest {
     | "code"
     | "none"
     | "urn:authgear:params:oauth:response-type:settings-action"
-    | "urn:authgear:params:oauth:response-type:app_initiated_sso_to_web token";
+    | "urn:authgear:params:oauth:response-type:pre-authenticated-url token";
   responseMode?: "cookie" | "query";
   scope?: string[];
   state?: string;
@@ -296,7 +296,7 @@ export interface _OIDCTokenRequest {
   x_device_info?: string;
   access_token?: string;
   scope?: string[];
-  requested_token_type?: "urn:authgear:params:oauth:token-type:app-initiated-sso-to-web-token";
+  requested_token_type?: "urn:authgear:params:oauth:token-type:pre-authenticated-url-token";
   subject_token_type?: "urn:ietf:params:oauth:token-type:id_token";
   subject_token?: string;
   actor_token_type?: "urn:x-oath:params:oauth:token-type:device-secret";
@@ -385,7 +385,7 @@ export enum SettingsAction {
 /**
  * @internal
  */
-export interface _AppInitiatedSSOToWebOptions {
+export interface _PreAuthenticatedURLOptions {
   /**
    * The client ID of the new authenticated session in web.
    */

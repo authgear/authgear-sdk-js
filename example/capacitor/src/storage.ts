@@ -16,21 +16,21 @@ export function readIsSSOEnabled(): boolean {
   return false;
 }
 
-export function readAppInitiatedSSOToWebClientID(): string {
+export function readPreAuthenticatedURLClientID(): string {
   const str = window.localStorage.getItem(
-    "authgear.appInitiatedSSOToWebClientID"
+    "authgear.preAuthenticatedURLClientID"
   );
   return str ?? "";
 }
 
-export function readAppInitiatedSSOToWebRedirectURI(): string {
+export function readPreAuthenticatedURLRedirectURI(): string {
   const str = window.localStorage.getItem(
-    "authgear.appInitiatedSSOToWebRedirectURI"
+    "authgear.preAuthenticatedURLRedirectURI"
   );
   return str ?? "";
 }
 
-export function readIsAppInitiatedSSOToWebEnabled(): boolean {
+export function readIsPreAuthenticatedURLEnabled(): boolean {
   const str = window.localStorage.getItem(
     "authgear.preAuthenticatedURLEnabled"
   );
@@ -60,18 +60,15 @@ export function writeIsSSOEnabled(isSSOEnabled: boolean) {
   window.localStorage.setItem("authgear.isSSOEnabled", String(isSSOEnabled));
 }
 
-export function writeAppInitiatedSSOToWebClientID(clientID: string) {
-  window.localStorage.setItem(
-    "authgear.appInitiatedSSOToWebClientID",
-    clientID
-  );
+export function writePreAuthenticatedURLClientID(clientID: string) {
+  window.localStorage.setItem("authgear.preAuthenticatedURLClientID", clientID);
 }
 
-export function writeAppInitiatedSSOToWebRedirectURI(uri: string) {
-  window.localStorage.setItem("authgear.appInitiatedSSOToWebRedirectURI", uri);
+export function writePreAuthenticatedURLRedirectURI(uri: string) {
+  window.localStorage.setItem("authgear.preAuthenticatedURLRedirectURI", uri);
 }
 
-export function writeIsAppInitiatedSSOToWebEnabled(isEnabled: boolean) {
+export function writeIsPreAuthenticatedURLEnabled(isEnabled: boolean) {
   window.localStorage.setItem(
     "authgear.preAuthenticatedURLEnabled",
     String(isEnabled)

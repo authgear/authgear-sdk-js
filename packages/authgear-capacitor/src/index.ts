@@ -46,7 +46,7 @@ import {
   type SettingOptions,
   type BiometricOptions,
   type SettingsActionOptions,
-  type AppInitiatedSSOToWebOptions,
+  type PreAuthenticatedURLOptions,
 } from "./types";
 import { BiometricPrivateKeyNotFoundError } from "./error";
 
@@ -212,7 +212,7 @@ export class CapacitorContainer {
   }
 
   /**
-   * Is App Initiated SSO To Web enabled
+   * Is Pre Authenticated URL enabled
    *
    * @public
    */
@@ -821,7 +821,7 @@ export class CapacitorContainer {
    * @public
    */
   async makePreAuthenticatedURL(
-    options: AppInitiatedSSOToWebOptions
+    options: PreAuthenticatedURLOptions
   ): Promise<string> {
     return this.baseContainer._makePreAuthenticatedURL({ ...options });
   }

@@ -45,7 +45,7 @@ import {
   AuthenticateResult,
   ReauthenticateResult,
   SettingsActionOptions,
-  AppInitiatedSSOToWebOptions,
+  PreAuthenticatedURLOptions,
 } from "./types";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 import { BiometricPrivateKeyNotFoundError } from "./error";
@@ -213,7 +213,7 @@ export class ReactNativeContainer {
   }
 
   /**
-   * Is App Initiated SSO To Web enabled
+   * Is Pre Authenticated URL enabled
    *
    * @public
    */
@@ -977,7 +977,7 @@ export class ReactNativeContainer {
    * @public
    */
   async makePreAuthenticatedURL(
-    options: AppInitiatedSSOToWebOptions
+    options: PreAuthenticatedURLOptions
   ): Promise<string> {
     return this.baseContainer._makePreAuthenticatedURL({ ...options });
   }

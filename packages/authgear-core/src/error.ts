@@ -143,29 +143,29 @@ export function _decodeError(err: any): Error {
 }
 
 /**
- * AppInitiatedSSOToWebNotAllowedError
+ * PreAuthenticatedURLNotAllowedError
  *
  * @public
  */
-export class AppInitiatedSSOToWebNotAllowedError extends AuthgearError {}
+export class PreAuthenticatedURLNotAllowedError extends AuthgearError {}
 
 /**
- * AppInitiatedSSOToWebInsufficientScopeError
+ * PreAuthenticatedURLInsufficientScopeError
  *
  * @public
  */
-export class AppInitiatedSSOToWebInsufficientScopeError extends AppInitiatedSSOToWebNotAllowedError {}
+export class PreAuthenticatedURLInsufficientScopeError extends PreAuthenticatedURLNotAllowedError {}
 
 /**
- * AppInitiatedSSOToWebIDTokenNotFoundError
+ * PreAuthenticatedURLIDTokenNotFoundError
  *
  * @public
  */
-export class AppInitiatedSSOToWebIDTokenNotFoundError extends AppInitiatedSSOToWebNotAllowedError {}
+export class PreAuthenticatedURLIDTokenNotFoundError extends PreAuthenticatedURLNotAllowedError {}
 
 /**
- * AppInitiatedSSOToWebDeviceSecretNotFoundError
+ * PreAuthenticatedURLDeviceSecretNotFoundError
  *
  * @public
  */
-export class AppInitiatedSSOToWebDeviceSecretNotFoundError extends AppInitiatedSSOToWebNotAllowedError {}
+export class PreAuthenticatedURLDeviceSecretNotFoundError extends PreAuthenticatedURLNotAllowedError {}

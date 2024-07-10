@@ -33,7 +33,6 @@ import authgear, {
   BiometricAccessConstraintAndroid,
   SessionState,
   WebKitWebViewUIImplementation,
-  DeviceBrowserUIImplementation,
 } from '@authgear/react-native';
 import RadioGroup, {RadioGroupItemProps} from '../RadioGroup';
 
@@ -161,11 +160,11 @@ const HomeScreen: React.FC = () => {
   const [useWebKitWebView, setUseWebKitWebView] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
 
-  const [preAuthenticatedURLEnabled, setIsAppInitiatedSSOToWebEnabled] =
+  const [preAuthenticatedURLEnabled, setIsPreAuthenticatedURLEnabled] =
     useState(false);
-  const [appInitiatedSSOToWebClientID, setAppInitiatedSSOToWebClientID] =
+  const [preAuthenticatedURLClientID, setPreAuthenticatedURLClientID] =
     useState('');
-  const [appInitiatedSSOToWebRedirectURI, setAppInitiatedSSOToWebRedirectURI] =
+  const [preAuthenticatedURLRedirectURI, setPreAuthenticatedURLRedirectURI] =
     useState('');
 
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -567,16 +566,16 @@ const HomeScreen: React.FC = () => {
       });
   }, [showError, updateBiometricState]);
 
-  const startAppInitiatedSSOToWeb = useCallback(async () => {
+  const startPreAuthenticatedURL = useCallback(async () => {
     setLoading(true);
-    const shouldUseAnotherBrowser = appInitiatedSSOToWebRedirectURI !== '';
+    const shouldUseAnotherBrowser = preAuthenticatedURLRedirectURI !== '';
     let targetRedirectURI = redirectURI;
     let targetClientID = clientID;
-    if (appInitiatedSSOToWebRedirectURI !== '') {
-      targetRedirectURI = appInitiatedSSOToWebRedirectURI;
+    if (preAuthenticatedURLRedirectURI !== '') {
+      targetRedirectURI = preAuthenticatedURLRedirectURI;
     }
-    if (appInitiatedSSOToWebClientID !== '') {
-      targetClientID = appInitiatedSSOToWebClientID;
+    if (preAuthenticatedURLClientID !== '') {
+      targetClientID = preAuthenticatedURLClientID;
     }
     try {
       const url = await authgear.makePreAuthenticatedURL({
@@ -593,7 +592,7 @@ const HomeScreen: React.FC = () => {
         });
         // Then start a auth to prove it is working
         const newContainer = new ReactNativeContainer({
-          name: 'appInitiatedSSOToWeb',
+          name: 'preAuthenticatedURL',
         });
         await newContainer.configure({
           endpoint: endpoint,
@@ -608,7 +607,7 @@ const HomeScreen: React.FC = () => {
         const userInfo = await newContainer.fetchUserInfo();
         showUser(userInfo);
       } else {
-        // This willbe redirected to appInitiatedSSOToWebRedirectURI and never close,
+        // This willbe redirected to preAuthenticatedURLRedirectURI and never close,
         // so we do not await
         uiImpl
           .openAuthorizationURL({
@@ -624,7 +623,7 @@ const HomeScreen: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [authgear, appInitiatedSSOToWebRedirectURI, appInitiatedSSOToWebClientID]);
+  }, [authgear, preAuthenticatedURLRedirectURI, preAuthenticatedURLClientID]);
 
   const openSettings = useCallback(() => {
     authgear
@@ -769,22 +768,20 @@ const HomeScreen: React.FC = () => {
         </View>
         <View style={styles.input}>
           <Text style={styles.inputLabel}>
-            Is App Initiated SSO To Web Enabled
+            Is Pre Authenticated URL Enabled
           </Text>
           <Switch
             style={styles.checkbox}
             value={preAuthenticatedURLEnabled}
-            onValueChange={setIsAppInitiatedSSOToWebEnabled}
+            onValueChange={setIsPreAuthenticatedURLEnabled}
           />
         </View>
         <View style={styles.input}>
-          <Text style={styles.inputLabel}>
-            App Initiated SSO To Web Client ID
-          </Text>
+          <Text style={styles.inputLabel}>Pre Authenticated URL Client ID</Text>
           <TextInput
             style={styles.inputField}
-            value={appInitiatedSSOToWebClientID}
-            onChangeText={setAppInitiatedSSOToWebClientID}
+            value={preAuthenticatedURLClientID}
+            onChangeText={setPreAuthenticatedURLClientID}
             autoCapitalize="none"
             autoCorrect={false}
             placeholder="Enter Client ID"
@@ -792,12 +789,12 @@ const HomeScreen: React.FC = () => {
         </View>
         <View style={styles.input}>
           <Text style={styles.inputLabel}>
-            App Initiated SSO To Web Redirect URI
+            Pre Authenticated URL Redirect URI
           </Text>
           <TextInput
             style={styles.inputField}
-            value={appInitiatedSSOToWebRedirectURI}
-            onChangeText={setAppInitiatedSSOToWebRedirectURI}
+            value={preAuthenticatedURLRedirectURI}
+            onChangeText={setPreAuthenticatedURLRedirectURI}
             autoCapitalize="none"
             autoCorrect={false}
             placeholder="Enter Redirect URI"
@@ -878,8 +875,8 @@ const HomeScreen: React.FC = () => {
         </View>
         <View style={styles.button}>
           <Button
-            title="App Initiated SSO To Web"
-            onPress={startAppInitiatedSSOToWeb}
+            title="Pre Authenticated URL"
+            onPress={startPreAuthenticatedURL}
             disabled={
               !initialized ||
               loading ||
