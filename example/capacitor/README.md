@@ -28,6 +28,8 @@ Then, in this directory, run the exmaple app.
 ```sh
 cd example/capacitor
 npm i
+# Build the example app
+npm run build
 # Run it in ios device
 npm run run-ios
 # OR, run it in android device

@@ -141,3 +141,31 @@ export function _decodeError(err: any): Error {
   // Otherwise cast it to string and use it as message.
   return new Error(String(err));
 }
+
+/**
+ * PreAuthenticatedURLNotAllowedError
+ *
+ * @public
+ */
+export class PreAuthenticatedURLNotAllowedError extends AuthgearError {}
+
+/**
+ * PreAuthenticatedURLInsufficientScopeError
+ *
+ * @public
+ */
+export class PreAuthenticatedURLInsufficientScopeError extends PreAuthenticatedURLNotAllowedError {}
+
+/**
+ * PreAuthenticatedURLIDTokenNotFoundError
+ *
+ * @public
+ */
+export class PreAuthenticatedURLIDTokenNotFoundError extends PreAuthenticatedURLNotAllowedError {}
+
+/**
+ * PreAuthenticatedURLDeviceSecretNotFoundError
+ *
+ * @public
+ */
+export class PreAuthenticatedURLDeviceSecretNotFoundError extends PreAuthenticatedURLNotAllowedError {}

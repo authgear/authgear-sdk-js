@@ -73,8 +73,10 @@ export interface _OIDCAuthenticationRequest {
   responseType:
     | "code"
     | "none"
-    | "urn:authgear:params:oauth:response-type:settings-action";
-  scope: string[];
+    | "urn:authgear:params:oauth:response-type:settings-action"
+    | "urn:authgear:params:oauth:response-type:pre-authenticated-url token";
+  responseMode?: "cookie" | "query";
+  scope?: string[];
   state?: string;
   xState?: string;
   prompt?: PromptOption[] | PromptOption;
@@ -90,6 +92,8 @@ export interface _OIDCAuthenticationRequest {
   oauthProviderAlias?: string;
   xSettingsAction?: "change_password";
   authenticationFlowGroup?: string;
+  clientID?: string;
+  xPreAuthenticatedURLToken?: string;
 }
 
 /**
@@ -215,6 +219,19 @@ export interface TokenStorage {
 /**
  * @internal
  */
+export interface InterAppSharedStorage {
+  setIDToken(namespace: string, idToken: string): Promise<void>;
+  getIDToken(namespace: string): Promise<string | null>;
+  delIDToken(namespace: string): Promise<void>;
+
+  setDeviceSecret(namespace: string, deviceSecret: string): Promise<void>;
+  getDeviceSecret(namespace: string): Promise<string | null>;
+  delDeviceSecret(namespace: string): Promise<void>;
+}
+
+/**
+ * @internal
+ */
 export interface _ContainerStorage {
   setOIDCCodeVerifier(namespace: string, code: string): Promise<void>;
   setAnonymousKeyID(namespace: string, kid: string): Promise<void>;
@@ -268,7 +285,8 @@ export interface _OIDCTokenRequest {
     | "urn:authgear:params:oauth:grant-type:anonymous-request"
     | "urn:authgear:params:oauth:grant-type:biometric-request"
     | "urn:authgear:params:oauth:grant-type:id-token"
-    | "urn:authgear:params:oauth:grant-type:settings-action";
+    | "urn:authgear:params:oauth:grant-type:settings-action"
+    | "urn:ietf:params:oauth:grant-type:token-exchange";
   client_id: string;
   redirect_uri?: string;
   code?: string;
@@ -277,6 +295,14 @@ export interface _OIDCTokenRequest {
   jwt?: string;
   x_device_info?: string;
   access_token?: string;
+  scope?: string[];
+  requested_token_type?: "urn:authgear:params:oauth:token-type:pre-authenticated-url-token";
+  subject_token_type?: "urn:ietf:params:oauth:token-type:id_token";
+  subject_token?: string;
+  actor_token_type?: "urn:x-oath:params:oauth:token-type:device-secret";
+  actor_token?: string;
+  audience?: string;
+  device_secret?: string;
 }
 
 /**
@@ -297,6 +323,7 @@ export interface _OIDCTokenResponse {
   access_token?: string;
   expires_in?: number;
   refresh_token?: string;
+  device_secret?: string;
 }
 
 /**
@@ -353,4 +380,13 @@ export enum Page {
  */
 export enum SettingsAction {
   ChangePassword = "change_password",
+}
+
+/**
+ * @internal
+ */
+export interface _PreAuthenticatedURLOptions {
+  webApplicationClientID: string;
+  webApplicationURI: string;
+  state?: string;
 }

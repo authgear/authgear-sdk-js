@@ -12,9 +12,14 @@ import {
   Page,
   PromptOption,
   SettingsAction,
+  InterAppSharedStorage,
 } from "@authgear/core";
 import { _WebAPIClient } from "./client";
-import { PersistentTokenStorage, PersistentContainerStorage } from "./storage";
+import {
+  PersistentTokenStorage,
+  PersistentContainerStorage,
+  PersistentInterAppSharedStorage,
+} from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
   WebContainerDelegate,
@@ -93,6 +98,11 @@ export class WebContainer {
    * @internal
    */
   tokenStorage: TokenStorage;
+
+  /**
+   * @internal
+   */
+  sharedStorage: InterAppSharedStorage;
 
   /**
    * @public
@@ -181,6 +191,7 @@ export class WebContainer {
 
     this.storage = new PersistentContainerStorage();
     this.tokenStorage = new PersistentTokenStorage();
+    this.sharedStorage = new PersistentInterAppSharedStorage();
 
     this.sessionType = "refresh_token";
   }
@@ -363,7 +374,7 @@ export class WebContainer {
         loginHint,
         idTokenHint: idToken,
         responseType: "urn:authgear:params:oauth:response-type:settings-action",
-        scope: ["openid", "https://authgear.com/scopes/full-access"],
+        scope: this.baseContainer.getSettingsActionScopes(),
         xSettingsAction: action,
       });
       window.location.href = endpoint;
@@ -396,7 +407,7 @@ export class WebContainer {
       maxAge,
       idTokenHint: idToken,
       responseType: "code",
-      scope: ["openid", "https://authgear.com/scopes/full-access"],
+      scope: this.baseContainer.getReauthenticateScopes(),
     });
     window.location.href = endpoint;
   }
@@ -683,14 +694,9 @@ export class WebContainer {
     // Use shared session cookie by default for first-party web apps.
     const responseType =
       options.responseType ?? this.sessionType === "cookie" ? "none" : "code";
-    const scope =
-      this.sessionType === "cookie"
-        ? ["openid", "https://authgear.com/scopes/full-access"]
-        : [
-            "openid",
-            "offline_access",
-            "https://authgear.com/scopes/full-access",
-          ];
+    const scope = this.baseContainer.getAuthenticateScopes({
+      requestOfflineAccess: this.sessionType === "refresh_token",
+    });
 
     const suppressIDPSessionCookie = this.sessionType === "refresh_token";
 

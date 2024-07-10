@@ -159,6 +159,14 @@ const HomeScreen: React.FC = () => {
   const [isSSOEnabled, setIsSSOEnabled] = useState(false);
   const [useWebKitWebView, setUseWebKitWebView] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
+
+  const [preAuthenticatedURLEnabled, setIsPreAuthenticatedURLEnabled] =
+    useState(false);
+  const [preAuthenticatedURLClientID, setPreAuthenticatedURLClientID] =
+    useState('');
+  const [preAuthenticatedURLRedirectURI, setPreAuthenticatedURLRedirectURI] =
+    useState('');
+
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [sessionState, setSessionState] = useState<SessionState | null>(
     authgear.sessionState,
@@ -206,7 +214,7 @@ const HomeScreen: React.FC = () => {
   const colorScheme = explicitColorScheme ?? systemColorScheme;
 
   const showUser = useCallback((userInfo: UserInfo) => {
-    Alert.alert('User Info', JSON.stringify(userInfo.raw, null, 2))
+    Alert.alert('User Info', JSON.stringify(userInfo.raw, null, 2));
   }, []);
 
   const showError = useCallback((e: any) => {
@@ -365,6 +373,7 @@ const HomeScreen: React.FC = () => {
             })
           : undefined,
         isSSOEnabled,
+        preAuthenticatedURLEnabled,
       })
       .then(() => {
         postConfigure();
@@ -381,6 +390,7 @@ const HomeScreen: React.FC = () => {
     endpoint,
     useTransientTokenStorage,
     isSSOEnabled,
+    preAuthenticatedURLEnabled,
     useWebKitWebView,
     postConfigure,
     showError,
@@ -556,6 +566,72 @@ const HomeScreen: React.FC = () => {
       });
   }, [showError, updateBiometricState]);
 
+  const startPreAuthenticatedURL = useCallback(async () => {
+    setLoading(true);
+    const shouldUseAnotherBrowser = preAuthenticatedURLRedirectURI !== '';
+    let targetRedirectURI = redirectURI;
+    let targetClientID = clientID;
+    if (preAuthenticatedURLRedirectURI !== '') {
+      targetRedirectURI = preAuthenticatedURLRedirectURI;
+    }
+    if (preAuthenticatedURLClientID !== '') {
+      targetClientID = preAuthenticatedURLClientID;
+    }
+    try {
+      const url = await authgear.makePreAuthenticatedURL({
+        webApplicationClientID: targetClientID,
+        webApplicationURI: targetRedirectURI,
+      });
+      const uiImpl = new WebKitWebViewUIImplementation();
+      if (!shouldUseAnotherBrowser) {
+        // Use webkit webview to open the url and set the cookie
+        await uiImpl.openAuthorizationURL({
+          url: url,
+          redirectURI: redirectURI,
+          shareCookiesWithDeviceBrowser: true,
+        });
+        // Then start a auth to prove it is working
+        const newContainer = new ReactNativeContainer({
+          name: 'preAuthenticatedURL',
+        });
+        await newContainer.configure({
+          endpoint: endpoint,
+          tokenStorage: new TransientTokenStorage(),
+          isSSOEnabled: true,
+          clientID: targetClientID,
+          uiImplementation: uiImpl,
+        });
+        await newContainer.authenticate({
+          redirectURI: redirectURI,
+        });
+        const userInfo = await newContainer.fetchUserInfo();
+        showUser(userInfo);
+      } else {
+        // This willbe redirected to preAuthenticatedURLRedirectURI and never close,
+        // so we do not await
+        uiImpl
+          .openAuthorizationURL({
+            url: url,
+            redirectURI: redirectURI,
+            shareCookiesWithDeviceBrowser: true,
+          })
+          .then(() => {})
+          .catch(() => {});
+      }
+    } catch (e: unknown) {
+      showError(e);
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    preAuthenticatedURLRedirectURI,
+    clientID,
+    preAuthenticatedURLClientID,
+    endpoint,
+    showUser,
+    showError,
+  ]);
+
   const openSettings = useCallback(() => {
     authgear
       .open(Page.Settings, {
@@ -697,6 +773,40 @@ const HomeScreen: React.FC = () => {
           <Text style={styles.inputLabel}>SessionState</Text>
           <Text style={styles.textValue}>{sessionState}</Text>
         </View>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>
+            Is Pre Authenticated URL Enabled
+          </Text>
+          <Switch
+            style={styles.checkbox}
+            value={preAuthenticatedURLEnabled}
+            onValueChange={setIsPreAuthenticatedURLEnabled}
+          />
+        </View>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>Pre Authenticated URL Client ID</Text>
+          <TextInput
+            style={styles.inputField}
+            value={preAuthenticatedURLClientID}
+            onChangeText={setPreAuthenticatedURLClientID}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder="Enter Client ID"
+          />
+        </View>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>
+            Pre Authenticated URL Redirect URI
+          </Text>
+          <TextInput
+            style={styles.inputField}
+            value={preAuthenticatedURLRedirectURI}
+            onChangeText={setPreAuthenticatedURLRedirectURI}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder="Enter Redirect URI"
+          />
+        </View>
         <View style={styles.configureAction}>
           <Button title="Configure" onPress={configure} disabled={loading} />
         </View>
@@ -768,6 +878,18 @@ const HomeScreen: React.FC = () => {
             title="Authenticate with biometric"
             onPress={authenticateBiometric}
             disabled={!initialized || loading || loggedIn || !biometricEnabled}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Pre Authenticated URL"
+            onPress={startPreAuthenticatedURL}
+            disabled={
+              !initialized ||
+              loading ||
+              !loggedIn ||
+              !preAuthenticatedURLEnabled
+            }
           />
         </View>
         <View style={styles.button}>

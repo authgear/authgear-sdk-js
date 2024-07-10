@@ -16,9 +16,14 @@ import {
   Page,
   PromptOption,
   SettingsAction,
+  InterAppSharedStorage,
 } from "@authgear/core";
 import { Platform } from "react-native";
-import { PersistentContainerStorage, PersistentTokenStorage } from "./storage";
+import {
+  PersistentContainerStorage,
+  PersistentInterAppSharedStorage,
+  PersistentTokenStorage,
+} from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
   registerWechatRedirectURI,
@@ -40,6 +45,7 @@ import {
   AuthenticateResult,
   ReauthenticateResult,
   SettingsActionOptions,
+  PreAuthenticatedURLOptions,
 } from "./types";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 import { BiometricPrivateKeyNotFoundError } from "./error";
@@ -86,6 +92,12 @@ export interface ConfigureOptions {
    * @defaultValue false
    */
   isSSOEnabled?: boolean;
+
+  /**
+   * When preAuthenticatedURLEnabled is true, native apps can share session with a web browser.
+   * @defaultValue false
+   */
+  preAuthenticatedURLEnabled?: boolean;
 
   /*
    * The UIImplementation.
@@ -136,6 +148,13 @@ export class ReactNativeContainer {
    * @internal
    */
   tokenStorage: TokenStorage;
+
+  /**
+   * implements _BaseContainerDelegate
+   *
+   * @internal
+   */
+  sharedStorage: InterAppSharedStorage;
 
   /**
    * @internal
@@ -194,6 +213,19 @@ export class ReactNativeContainer {
   }
 
   /**
+   * Is Pre Authenticated URL enabled
+   *
+   * @public
+   */
+  public get preAuthenticatedURLEnabled(): boolean {
+    return this.baseContainer.preAuthenticatedURLEnabled;
+  }
+
+  public set preAuthenticatedURLEnabled(preAuthenticatedURLEnabled: boolean) {
+    this.baseContainer.preAuthenticatedURLEnabled = preAuthenticatedURLEnabled;
+  }
+
+  /**
    *
    * @public
    */
@@ -233,6 +265,7 @@ export class ReactNativeContainer {
 
     this.storage = new PersistentContainerStorage();
     this.tokenStorage = new PersistentTokenStorage();
+    this.sharedStorage = new PersistentInterAppSharedStorage();
     this.uiImplementation = new DeviceBrowserUIImplementation();
 
     this.wechatRedirectDeepLinkListener = (url: string) => {
@@ -326,6 +359,8 @@ export class ReactNativeContainer {
    */
   async configure(options: ConfigureOptions): Promise<void> {
     this.isSSOEnabled = options.isSSOEnabled ?? false;
+    this.preAuthenticatedURLEnabled =
+      options.preAuthenticatedURLEnabled ?? false;
     if (options.tokenStorage != null) {
       this.tokenStorage = options.tokenStorage;
     } else {
@@ -444,7 +479,7 @@ export class ReactNativeContainer {
       loginHint,
       idTokenHint: idToken,
       responseType: "urn:authgear:params:oauth:response-type:settings-action",
-      scope: ["openid", "https://authgear.com/scopes/full-access"],
+      scope: this.baseContainer.getSettingsActionScopes(),
       xSettingsAction: action,
     });
     if (options.wechatRedirectURI != null) {
@@ -501,7 +536,7 @@ export class ReactNativeContainer {
       maxAge,
       idTokenHint: idToken,
       responseType: "code",
-      scope: ["openid", "https://authgear.com/scopes/full-access"],
+      scope: this.baseContainer.getReauthenticateScopes(),
     });
 
     if (options.wechatRedirectURI != null) {
@@ -738,11 +773,9 @@ export class ReactNativeContainer {
     return this.baseContainer.authorizeEndpoint({
       ...options,
       responseType: "code",
-      scope: [
-        "openid",
-        "offline_access",
-        "https://authgear.com/scopes/full-access",
-      ],
+      scope: this.baseContainer.getAuthenticateScopes({
+        requestOfflineAccess: true,
+      }),
     });
   }
 
@@ -908,6 +941,9 @@ export class ReactNativeContainer {
           grant_type: "urn:authgear:params:oauth:grant-type:biometric-request",
           client_id: clientID,
           jwt,
+          scope: this.baseContainer.getAuthenticateScopes({
+            requestOfflineAccess: true,
+          }),
         });
 
       const userInfo = await this.baseContainer.apiClient._oidcUserInfoRequest(
@@ -931,6 +967,19 @@ export class ReactNativeContainer {
       }
       throw e;
     }
+  }
+
+  /**
+   * Share the current authenticated session to a web browser.
+   *
+   * `preAuthenticatedURLEnabled` must be set to true to use this method.
+   *
+   * @public
+   */
+  async makePreAuthenticatedURL(
+    options: PreAuthenticatedURLOptions
+  ): Promise<string> {
+    return this.baseContainer._makePreAuthenticatedURL({ ...options });
   }
 }
 

@@ -46,14 +46,21 @@ import authgearCapacitor, {
   BiometricLAPolicy,
   BiometricAccessConstraintAndroid,
   WebKitWebViewUIImplementation,
+  DeviceBrowserUIImplementation,
 } from "@authgear/capacitor";
 import {
+  readPreAuthenticatedURLClientID,
+  readPreAuthenticatedURLRedirectURI,
   readClientID,
   readEndpoint,
+  readIsPreAuthenticatedURLEnabled,
   readIsSSOEnabled,
   readUseWebKitWebView,
+  writePreAuthenticatedURLClientID,
+  writePreAuthenticatedURLRedirectURI,
   writeClientID,
   writeEndpoint,
+  writeIsPreAuthenticatedURLEnabled,
   writeIsSSOEnabled,
   writeUseWebKitWebView,
 } from "../storage";
@@ -111,6 +118,21 @@ function AuthgearDemo() {
     return readUseWebKitWebView();
   });
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
+
+  const [preAuthenticatedURLEnabled, setIsPreAuthenticatedURLEnabled] =
+    useState(() => {
+      return readIsPreAuthenticatedURLEnabled();
+    });
+
+  const [preAuthenticatedURLClientID, setPreAuthenticatedURLClientID] =
+    useState(() => {
+      return readPreAuthenticatedURLClientID();
+    });
+
+  const [preAuthenticatedURLRedirectURI, setPreAuthenticatedURLRedirectURI] =
+    useState(() => {
+      return readPreAuthenticatedURLRedirectURI();
+    });
 
   const [sessionState, setSessionState] = useState<SessionState | null>(() => {
     if (isPlatformWeb()) {
@@ -196,6 +218,9 @@ function AuthgearDemo() {
       writeEndpoint(endpoint);
       writeIsSSOEnabled(isSSOEnabled);
       writeUseWebKitWebView(useWebKitWebView);
+      writeIsPreAuthenticatedURLEnabled(preAuthenticatedURLEnabled);
+      writePreAuthenticatedURLClientID(preAuthenticatedURLClientID);
+      writePreAuthenticatedURLRedirectURI(preAuthenticatedURLRedirectURI);
 
       if (isPlatformWeb()) {
         await authgearWeb.configure({
@@ -220,6 +245,7 @@ function AuthgearDemo() {
               })
             : undefined,
           isSSOEnabled,
+          preAuthenticatedURLEnabled,
         });
       }
       await postConfigure();
@@ -233,8 +259,11 @@ function AuthgearDemo() {
     endpoint,
     isSSOEnabled,
     useWebKitWebView,
-    useTransientTokenStorage,
+    preAuthenticatedURLEnabled,
+    preAuthenticatedURLClientID,
+    preAuthenticatedURLRedirectURI,
     postConfigure,
+    useTransientTokenStorage,
     showError,
   ]);
 
@@ -310,6 +339,72 @@ function AuthgearDemo() {
       await updateBiometricState();
     }
   }, [showError, updateBiometricState]);
+
+  const startPreAuthenticatedURL = useCallback(async () => {
+    const shouldUseAnotherBrowser = preAuthenticatedURLRedirectURI !== "";
+    let targetRedirectURI = REDIRECT_URI_CAPACITOR;
+    let targetClientID = clientID;
+    if (preAuthenticatedURLRedirectURI !== "") {
+      targetRedirectURI = preAuthenticatedURLRedirectURI;
+    }
+    if (preAuthenticatedURLClientID !== "") {
+      targetClientID = preAuthenticatedURLClientID;
+    }
+    setLoading(true);
+    try {
+      const url = await authgearCapacitor.makePreAuthenticatedURL({
+        webApplicationClientID: targetClientID,
+        webApplicationURI: targetRedirectURI,
+      });
+      const uiImpl = new WebKitWebViewUIImplementation();
+      if (!shouldUseAnotherBrowser) {
+        // Use webkit webview to open the url and set the cookie
+        await uiImpl.openAuthorizationURL({
+          url: url,
+          redirectURI: REDIRECT_URI_CAPACITOR,
+          shareCookiesWithDeviceBrowser: true,
+        });
+        // Then start a auth to prove it is working
+        const newContainer = new CapacitorContainer({
+          name: "preAuthenticatedURL",
+        });
+        await newContainer.configure({
+          endpoint: endpoint,
+          tokenStorage: new TransientTokenStorage(),
+          isSSOEnabled: true,
+          clientID: targetClientID,
+          uiImplementation: uiImpl,
+        });
+        await newContainer.authenticate({
+          redirectURI: REDIRECT_URI_CAPACITOR,
+        });
+        const userInfo = await newContainer.fetchUserInfo();
+        showUserInfo(userInfo);
+      } else {
+        // This willbe redirected to preAuthenticatedURLRedirectURI and never close,
+        // so we do not await
+        uiImpl
+          .openAuthorizationURL({
+            url: url,
+            redirectURI: REDIRECT_URI_CAPACITOR,
+            shareCookiesWithDeviceBrowser: true,
+          })
+          .then(() => {})
+          .catch(() => {});
+      }
+    } catch (e: unknown) {
+      showError(e);
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    preAuthenticatedURLClientID,
+    preAuthenticatedURLRedirectURI,
+    clientID,
+    endpoint,
+    showError,
+    showUserInfo,
+  ]);
 
   const showAuthTime = useCallback(() => {
     if (isPlatformWeb()) {
@@ -531,6 +626,27 @@ function AuthgearDemo() {
     []
   );
 
+  const onChangeIsPreAuthenticatedURLEnabled = useCallback(
+    (e: IonToggleCustomEvent<ToggleChangeEventDetail<unknown>>) => {
+      setIsPreAuthenticatedURLEnabled(e.detail.checked);
+    },
+    []
+  );
+
+  const onChangePreAuthenticatedURLClientID = useCallback(
+    (e: IonInputCustomEvent<InputInputEventDetail>) => {
+      setPreAuthenticatedURLClientID(e.detail.value ?? "");
+    },
+    []
+  );
+
+  const onChangePreAuthenticatedURLRedirectURI = useCallback(
+    (e: IonInputCustomEvent<InputInputEventDetail>) => {
+      setPreAuthenticatedURLRedirectURI(e.detail.value ?? "");
+    },
+    []
+  );
+
   const onChangeUseWebKitWebView = useCallback(
     (e: IonToggleCustomEvent<ToggleChangeEventDetail<unknown>>) => {
       setUseWebKitWebView(e.detail.checked);
@@ -598,6 +714,16 @@ function AuthgearDemo() {
     [authenticateBiometric]
   );
 
+  const onClickPreAuthenticatedURL = useCallback(
+    (e: MouseEvent<HTMLIonButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      startPreAuthenticatedURL();
+    },
+    [startPreAuthenticatedURL]
+  );
+
   const onClickDisableBiometric = useCallback(
     (e: MouseEvent<HTMLIonButtonElement>) => {
       e.preventDefault();
@@ -657,6 +783,8 @@ function AuthgearDemo() {
     },
     [logout]
   );
+
+  const canUsePreAuthenticatedURL = !isPlatformWeb();
 
   return (
     <>
@@ -730,6 +858,31 @@ function AuthgearDemo() {
           <IonLabel>Session State</IonLabel>
           <IonNote>{sessionState}</IonNote>
         </div>
+        {!canUsePreAuthenticatedURL ? null : (
+          <>
+            <IonToggle
+              className="toggle"
+              checked={preAuthenticatedURLEnabled}
+              onIonChange={onChangeIsPreAuthenticatedURLEnabled}
+            >
+              Is Pre Authenticated URL Enabled
+            </IonToggle>
+            <IonInput
+              type="text"
+              label="Pre Authenticated URL Client ID"
+              placeholder="Enter Client ID"
+              onIonInput={onChangePreAuthenticatedURLClientID}
+              value={preAuthenticatedURLClientID}
+            />
+            <IonInput
+              type="text"
+              label="Pre Authenticated URL Redirect URI"
+              placeholder="Enter URI"
+              onIonInput={onChangePreAuthenticatedURLRedirectURI}
+              value={preAuthenticatedURLRedirectURI}
+            />
+          </>
+        )}
         <IonButton
           className="button"
           disabled={loading}
@@ -781,6 +934,20 @@ function AuthgearDemo() {
         >
           Authenticate with biometric
         </IonButton>
+        {!canUsePreAuthenticatedURL ? null : (
+          <IonButton
+            className="button"
+            disabled={
+              !initialized ||
+              loading ||
+              !loggedIn ||
+              !preAuthenticatedURLEnabled
+            }
+            onClick={onClickPreAuthenticatedURL}
+          >
+            Pre Authenticated URL
+          </IonButton>
+        )}
         <IonButton
           className="button"
           disabled={!initialized || !loggedIn}

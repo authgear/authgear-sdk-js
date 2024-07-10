@@ -4,6 +4,7 @@ import {
   _ContainerStorage,
   _KeyMaker,
   _SafeStorageDriver,
+  InterAppSharedStorage,
 } from "@authgear/core";
 import {
   storageGetItem,
@@ -53,13 +54,50 @@ export class PersistentTokenStorage implements TokenStorage {
       refreshToken
     );
   }
-
   async getRefreshToken(namespace: string): Promise<string | null> {
     return this.storageDriver.get(this.keyMaker.keyRefreshToken(namespace));
   }
-
   async delRefreshToken(namespace: string): Promise<void> {
     await this.storageDriver.del(this.keyMaker.keyRefreshToken(namespace));
+  }
+}
+
+/**
+ * @internal
+ */
+export class PersistentInterAppSharedStorage implements InterAppSharedStorage {
+  private keyMaker: _KeyMaker;
+  private storageDriver: _StorageDriver;
+
+  constructor() {
+    this.keyMaker = new _KeyMaker();
+    this.storageDriver = new _SafeStorageDriver(new _PlatformStorageDriver());
+  }
+
+  async setIDToken(namespace: string, idToken: string): Promise<void> {
+    return this.storageDriver.set(this.keyMaker.keyIDToken(namespace), idToken);
+  }
+  async getIDToken(namespace: string): Promise<string | null> {
+    return this.storageDriver.get(this.keyMaker.keyIDToken(namespace));
+  }
+  async delIDToken(namespace: string): Promise<void> {
+    return this.storageDriver.del(this.keyMaker.keyIDToken(namespace));
+  }
+
+  async setDeviceSecret(
+    namespace: string,
+    deviceSecret: string
+  ): Promise<void> {
+    return this.storageDriver.set(
+      this.keyMaker.keyDeviceSecret(namespace),
+      deviceSecret
+    );
+  }
+  async getDeviceSecret(namespace: string): Promise<string | null> {
+    return this.storageDriver.get(this.keyMaker.keyDeviceSecret(namespace));
+  }
+  async delDeviceSecret(namespace: string): Promise<void> {
+    return this.storageDriver.del(this.keyMaker.keyDeviceSecret(namespace));
   }
 }
 

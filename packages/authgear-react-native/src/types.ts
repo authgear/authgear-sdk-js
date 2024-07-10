@@ -425,3 +425,23 @@ export interface BiometricPrivateKeyOptions extends BiometricOptions {
     device_info: unknown;
   };
 }
+
+/**
+ * PreAuthenticatedURLOptions is options for pre-authenticated-url.
+ *
+ * @public
+ */
+export interface PreAuthenticatedURLOptions {
+  /**
+   * The client ID of the web application.
+   */
+  webApplicationClientID: string;
+  /**
+   * The URI the browser should go to after successfully obtained a authenticated session.
+   */
+  webApplicationURI: string;
+  /**
+   * Any string that will be passed to webApplicationURI by the `state` query parameter.
+   */
+  state?: string;
+}
