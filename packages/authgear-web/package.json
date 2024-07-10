@@ -13,5 +13,16 @@
   "devDependencies": {
     "@authgear/core": "2.10.0",
     "core-js-pure": "^3.37.0"
-  }
+  },
+  "keywords": [
+    "Authgear",
+    "user authentication",
+    "login",
+    "PKCE",
+    "Authorization Code Grant Flow",
+    "Single Page Application authentication",
+    "SPA authentication",
+    "React",
+    "React authentication"
+  ]
 }
