@@ -181,7 +181,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (this.preAuthenticatedURLEnabled) {
       scopes.push(
         "device_sso",
-        "https://authgear.com/scopes/app-initiated-sso-to-web"
+        "https://authgear.com/scopes/pre-authenticated-url"
       );
     }
     return scopes;
