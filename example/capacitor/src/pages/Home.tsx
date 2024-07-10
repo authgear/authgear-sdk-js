@@ -352,7 +352,7 @@ function AuthgearDemo() {
     }
     setLoading(true);
     try {
-      const url = await authgearCapacitor.makeAppInitiatedSSOToWebURL({
+      const url = await authgearCapacitor.makePreAuthenticatedURL({
         clientID: targetClientID,
         redirectURI: targetRedirectURI,
       });

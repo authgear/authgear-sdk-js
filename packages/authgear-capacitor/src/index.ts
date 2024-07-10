@@ -820,10 +820,10 @@ export class CapacitorContainer {
    *
    * @public
    */
-  async makeAppInitiatedSSOToWebURL(
+  async makePreAuthenticatedURL(
     options: AppInitiatedSSOToWebOptions
   ): Promise<string> {
-    return this.baseContainer._makeAppInitiatedSSOToWebURL({ ...options });
+    return this.baseContainer._makePreAuthenticatedURL({ ...options });
   }
 }
 

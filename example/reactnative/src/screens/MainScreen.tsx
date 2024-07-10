@@ -579,7 +579,7 @@ const HomeScreen: React.FC = () => {
       targetClientID = appInitiatedSSOToWebClientID;
     }
     try {
-      const url = await authgear.makeAppInitiatedSSOToWebURL({
+      const url = await authgear.makePreAuthenticatedURL({
         clientID: targetClientID,
         redirectURI: targetRedirectURI,
       });

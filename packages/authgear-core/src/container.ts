@@ -739,18 +739,18 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     }
   }
 
-  async _makeAppInitiatedSSOToWebURL(
+  async _makePreAuthenticatedURL(
     options: _AppInitiatedSSOToWebOptions
   ): Promise<string> {
     const clientID = options.clientID;
     if (!this.preAuthenticatedURLEnabled) {
       throw new AuthgearError(
-        "makeAppInitiatedSSOToWebURL requires preAuthenticatedURLEnabled to be true"
+        "makePreAuthenticatedURL requires preAuthenticatedURLEnabled to be true"
       );
     }
     if (this.sessionState !== SessionState.Authenticated) {
       throw new AuthgearError(
-        "makeAppInitiatedSSOToWebURL requires authenticated user"
+        "makePreAuthenticatedURL requires authenticated user"
       );
     }
     let idToken = await this._delegate.sharedStorage.getIDToken(this.name);
