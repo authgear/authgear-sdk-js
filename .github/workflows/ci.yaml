@@ -57,7 +57,6 @@ jobs:
   # react_native_ios cannot be built on simulator due to WeChat SDK
 
   test_react_native_android:
-    if: ${{ github.event_name == 'pull_request' }}
     # When we change the runner image, the available Android build tools versions will also change.
     # We need to update build.gradle too.
     # See https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
@@ -76,7 +75,6 @@ jobs:
       run: ./gradlew :app:assembleRelease
 
   test_capacitor_ios:
-    if: ${{ github.event_name == 'pull_request' }}
     runs-on: macos-13
     steps:
     - uses: actions/checkout@v3
@@ -96,7 +94,6 @@ jobs:
       working-directory: ./example/capacitor/ios/App
       run: xcodebuild -quiet -workspace App.xcworkspace -scheme App -sdk iphonesimulator build
   test_capacitor_android:
-    if: ${{ github.event_name == 'pull_request' }}
     runs-on: macos-13
     steps:
     - uses: actions/checkout@v3
