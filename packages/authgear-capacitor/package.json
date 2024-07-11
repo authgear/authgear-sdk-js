@@ -1,6 +1,6 @@
 {
   "name": "@authgear/capacitor",
-  "version": "2.10.0",
+  "version": "2.11.0-rc.0",
   "license": "Apache-2.0",
   "main": "dist/plugin.cjs.js",
   "module": "dist/plugin.module.js",
@@ -20,7 +20,7 @@
     "build": "tsc && rollup -c rollup.config.js"
   },
   "devDependencies": {
-    "@authgear/core": "2.10.0",
+    "@authgear/core": "2.11.0-rc.0",
     "@capacitor/android": "^5.0.0",
     "@capacitor/core": "^5.0.0",
     "@capacitor/ios": "^5.0.0"
