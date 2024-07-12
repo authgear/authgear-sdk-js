@@ -57,7 +57,6 @@ jobs:
   # react_native_ios cannot be built on simulator due to WeChat SDK
 
   test_react_native_android:
-    if: ${{ github.event_name == 'pull_request' }}
     # When we change the runner image, the available Android build tools versions will also change.
     # We need to update build.gradle too.
     # See https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
@@ -76,7 +75,6 @@ jobs:
       run: ./gradlew :app:assembleRelease
 
   test_capacitor_ios:
-    if: ${{ github.event_name == 'pull_request' }}
     runs-on: macos-13
     steps:
     - uses: actions/checkout@v3
@@ -96,7 +94,6 @@ jobs:
       working-directory: ./example/capacitor/ios/App
       run: xcodebuild -quiet -workspace App.xcworkspace -scheme App -sdk iphonesimulator build
   test_capacitor_android:
-    if: ${{ github.event_name == 'pull_request' }}
     runs-on: macos-13
     steps:
     - uses: actions/checkout@v3
@@ -116,7 +113,7 @@ jobs:
       run: ./gradlew :app:assembleRelease
 
   react_native_ios:
-    if: github.ref == 'refs/heads/master'
+    if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.ref == 'refs/heads/master' && github.event_name == 'push' }}
     needs: test
     runs-on: macos-13
     steps:
@@ -178,7 +175,7 @@ jobs:
         security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
         rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
   react_native_android:
-    if: github.ref == 'refs/heads/master'
+    if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.ref == 'refs/heads/master' && github.event_name == 'push' }}
     needs: test
     # When we change the runner image, the available Android build tools versions will also change.
     # We need to update build.gradle too.
@@ -228,7 +225,7 @@ jobs:
         APPCENTER_ACCESS_TOKEN: ${{ secrets.REACT_NATIVE_ANDROID_APPCENTER_ACCESS_TOKEN }}
       run: appcenter distribute release --debug --silent --file ./example/reactnative/android/app/build/outputs/apk/release/app-release-signed.apk --group "Collaborators" --app "Oursky/Authgear-demo-RN-Android" --release-notes "no release notes"
   capacitor_ios:
-    if: github.ref == 'refs/heads/master'
+    if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.ref == 'refs/heads/master' && github.event_name == 'push' }}
     needs: test
     runs-on: macos-13
     steps:
@@ -290,7 +287,7 @@ jobs:
         security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
         rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
   capacitor_android:
-    if: github.ref == 'refs/heads/master'
+    if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.ref == 'refs/heads/master' && github.event_name == 'push' }}
     needs: test
     runs-on: macos-13
     steps:
