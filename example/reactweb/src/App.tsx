@@ -52,6 +52,8 @@ function getOAuthState(): OAuthState | undefined {
       return "promote";
     case "change_password":
       return "change_password";
+    case "delete_account":
+      return "delete_account";
   }
   return undefined;
 }
@@ -60,7 +62,8 @@ type OAuthState =
   | "authenticate"
   | "reauthenticate"
   | "promote"
-  | "change_password";
+  | "change_password"
+  | "delete_account";
 
 function ShowError(props: { error: unknown }) {
   const { error } = props;
@@ -187,6 +190,20 @@ function Root() {
         .startChangePassword({
           redirectURI: makeRedirectURI(),
           state: "change_password",
+        })
+        .catch((err) => setError(err));
+    },
+    []
+  );
+
+  const onClickDeleteAccount = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      authgear
+        .startDeleteAccount({
+          redirectURI: makeRedirectURI(),
+          state: "delete_account",
         })
         .catch((err) => setError(err));
     },
@@ -472,6 +489,13 @@ function Root() {
           >
             Change Password
           </button>
+          <button
+            className="button"
+            type="button"
+            onClick={onClickDeleteAccount}
+          >
+            Delete Account
+          </button>
           <button className="button" type="button" onClick={onClickSignOut}>
             Sign out
           </button>
@@ -546,6 +570,14 @@ function AuthRedirect() {
               break;
             case "change_password":
               authgear.finishChangePassword().then(
+                (_) => {
+                  navigate("/");
+                },
+                (err) => setError(err)
+              );
+              break;
+            case "delete_account":
+              authgear.finishDeleteAccount().then(
                 (_) => {
                   navigate("/");
                 },
