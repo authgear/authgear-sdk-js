@@ -504,6 +504,14 @@ export class ReactNativeContainer {
   }
 
   /**
+   * @public
+   */
+  async deleteAccount(options: SettingsActionOptions): Promise<void> {
+    await this._openSettingsAction(SettingsAction.DeleteAccount, options);
+    await this.baseContainer._clearSession(SessionStateChangeReason.Invalid);
+  }
+
+  /**
    * Reauthenticate the end user via biometric or the web.
    *
    * If biometricOptions is given, biometric is used when possible.
