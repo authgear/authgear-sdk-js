@@ -90,7 +90,7 @@ export interface _OIDCAuthenticationRequest {
   page?: string;
   suppressIDPSessionCookie?: boolean;
   oauthProviderAlias?: string;
-  xSettingsAction?: "change_password";
+  xSettingsAction?: "change_password" | "delete_account";
   authenticationFlowGroup?: string;
   clientID?: string;
   xPreAuthenticatedURLToken?: string;
@@ -380,6 +380,7 @@ export enum Page {
  */
 export enum SettingsAction {
   ChangePassword = "change_password",
+  DeleteAccount = "delete_account",
 }
 
 /**
