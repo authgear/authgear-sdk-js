@@ -515,6 +515,23 @@ function AuthgearDemo() {
     }
   }, []);
 
+  const deleteAccount = useCallback(async () => {
+    if (isPlatformWeb()) {
+      // Not implemented.
+    } else {
+      setLoading(true);
+      try {
+        await authgearCapacitor.deleteAccount({
+          redirectURI: REDIRECT_URI_CAPACITOR,
+        });
+      } catch (e) {
+        showError(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+  }, [showError]);
+
   const fetchUserInfo = useCallback(async () => {
     setLoading(true);
     try {
@@ -754,6 +771,16 @@ function AuthgearDemo() {
     [changePassword]
   );
 
+  const onClickDeleteAccount = useCallback(
+    (e: MouseEvent<HTMLIonButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      deleteAccount();
+    },
+    [deleteAccount]
+  );
+
   const onClickFetchUserInfo = useCallback(
     (e: MouseEvent<HTMLIonButtonElement>) => {
       e.preventDefault();
@@ -962,6 +989,15 @@ function AuthgearDemo() {
             onClick={onClickChangePassword}
           >
             Change password
+          </IonButton>
+        )}
+        {isPlatformWeb() ? null : (
+          <IonButton
+            className="button"
+            disabled={!initialized || !loggedIn}
+            onClick={onClickDeleteAccount}
+          >
+            Delete Account
           </IonButton>
         )}
         <IonButton
