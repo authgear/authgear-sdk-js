@@ -640,6 +640,14 @@ export class CapacitorContainer {
   }
 
   /**
+   * @public
+   */
+  async deleteAccount(options: SettingsActionOptions): Promise<void> {
+    await this._openSettingsAction(SettingsAction.DeleteAccount, options);
+    return this.baseContainer._clearSession(SessionStateChangeReason.Invalid);
+  }
+
+  /**
    * implements _BaseContainerDelegate
    *
    * @internal
