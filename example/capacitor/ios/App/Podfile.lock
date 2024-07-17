@@ -14,7 +14,7 @@ PODS:
     - Capacitor
 
 DEPENDENCIES:
-  - "AuthgearCapacitor (from `../../node_modules/@authgear/capacitor`)"
+  - AuthgearCapacitor (from `../../../../packages/authgear-capacitor`)
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
@@ -24,7 +24,7 @@ DEPENDENCIES:
 
 EXTERNAL SOURCES:
   AuthgearCapacitor:
-    :path: "../../node_modules/@authgear/capacitor"
+    :path: "../../../../packages/authgear-capacitor"
   Capacitor:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorApp:
@@ -47,6 +47,6 @@ SPEC CHECKSUMS:
   CapacitorKeyboard: b978154b024a5f65e044908e37d15b7de58b9d12
   CapacitorStatusBar: 565c0a1ebd79bb40d797606a8992b4a105885309
 
-PODFILE CHECKSUM: 8e05d9999d1036f01ebded8efd56a72e869ce056
+PODFILE CHECKSUM: a539d41cba947136121a5fa89cd9506a49f45a31
 
 COCOAPODS: 1.15.2
