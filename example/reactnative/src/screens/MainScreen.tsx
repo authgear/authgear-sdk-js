@@ -652,6 +652,17 @@ const HomeScreen: React.FC = () => {
       .catch(err => showError(err));
   }, [showError, colorScheme]);
 
+  const deleteAccount = useCallback(async () => {
+    await authgear.refreshIDToken();
+    authgear
+      .deleteAccount({
+        redirectURI: redirectURI,
+        colorScheme: colorScheme as ColorScheme,
+        wechatRedirectURI,
+      })
+      .catch(err => showError(err));
+  }, [showError, colorScheme]);
+
   const fetchUserInfo = useCallback(() => {
     setLoading(true);
     authgear
@@ -903,6 +914,13 @@ const HomeScreen: React.FC = () => {
           <Button
             title="Change Password"
             onPress={changePassword}
+            disabled={!initialized || !loggedIn}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Delete Account"
+            onPress={deleteAccount}
             disabled={!initialized || !loggedIn}
           />
         </View>

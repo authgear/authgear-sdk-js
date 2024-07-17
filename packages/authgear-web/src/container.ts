@@ -391,6 +391,15 @@ export class WebContainer {
   }
 
   /**
+   * Start settings action "delete_account" by redirecting to the authorization endpoint.
+   *
+   * @public
+   */
+  async startDeleteAccount(options: SettingsActionOptions): Promise<void> {
+    await this.startSettingsAction(SettingsAction.DeleteAccount, options);
+  }
+
+  /**
    * Start reauthentication by redirecting to the authorization endpoint.
    */
   async startReauthentication(options: ReauthenticateOptions): Promise<void> {
@@ -482,6 +491,18 @@ export class WebContainer {
    */
   async finishChangePassword(): Promise<void> {
     return this.finishSettingsAction();
+  }
+
+  /**
+   * Finish settings action "delete_account".
+   *
+   * It may reject with OAuthError.
+   *
+   * @public
+   */
+  async finishDeleteAccount(): Promise<void> {
+    await this.finishSettingsAction();
+    return this.baseContainer._clearSession(SessionStateChangeReason.Invalid);
   }
 
   /**

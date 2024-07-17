@@ -1,5 +1,5 @@
 PODS:
-  - AuthgearCapacitor (2.9.0):
+  - AuthgearCapacitor (2.11.0-rc.0):
     - Capacitor
   - Capacitor (5.6.0):
     - CapacitorCordova
@@ -39,7 +39,7 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/status-bar"
 
 SPEC CHECKSUMS:
-  AuthgearCapacitor: f49cb5a509f8d7c5fa16a3256daf0ed85e6c7c8c
+  AuthgearCapacitor: 9d4abf34029e03e76048e58207886cc4893eddf2
   Capacitor: ebfc16cdb8116d04c101686b080342872da42d43
   CapacitorApp: 024e1b1bea5f883d79f6330d309bc441c88ad04a
   CapacitorCordova: 931b48fcdbc9bc985fc2f16cec9f77c794a27729
