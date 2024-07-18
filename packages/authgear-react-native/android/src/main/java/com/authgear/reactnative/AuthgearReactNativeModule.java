@@ -1,7 +1,10 @@
 package com.authgear.reactnative;
 
+import static java.lang.Math.ceil;
+
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -583,14 +586,23 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
         jwk.putString("alg", "RS256");
         jwk.putString("kty", "RSA");
-        jwk.putString("n", this.base64URLEncode(rsaPublicKey.getModulus().toByteArray()));
-        jwk.putString("e", this.base64URLEncode(rsaPublicKey.getPublicExponent().toByteArray()));
+        jwk.putString("n", this.base64URLEncode(bigIntegerToUnsignedByteArray(rsaPublicKey.getModulus())));
+        jwk.putString("e", this.base64URLEncode(bigIntegerToUnsignedByteArray(rsaPublicKey.getPublicExponent())));
         return jwk;
     }
 
     private WritableMap makeBiometricJWTHeader(WritableMap jwk) {
         WritableMap header = Arguments.createMap();
         header.putString("typ", "vnd.authgear.biometric-request");
+        header.putString("kid", jwk.getString("kid"));
+        header.putString("alg", jwk.getString("alg"));
+        header.putMap("jwk", jwk);
+        return header;
+    }
+
+    private WritableMap makeDPoPJWTHeader(WritableMap jwk) {
+        WritableMap header = Arguments.createMap();
+        header.putString("typ", "dpop+jwt");
         header.putString("kid", jwk.getString("kid"));
         header.putString("alg", jwk.getString("alg"));
         header.putMap("jwk", jwk);
@@ -919,6 +931,88 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
+    @ReactMethod
+    public void createDPoPPrivateKey(ReadableMap options, Promise promise) {
+        String kid = options.getString("kid");
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            promise.resolve(Arguments.createMap());
+            return;
+        }
+        String alias = this.formatDPoPKeyAlias(kid);
+        try {
+            this.generateKey(alias);
+            promise.resolve("");
+        } catch (Exception e) {
+            promise.reject(e);
+        }
+    }
+
+    @ReactMethod
+    public void signWithDPoPPrivateKey(ReadableMap options, Promise promise) {
+        String kid = options.getString("kid");
+        ReadableMap payload = options.getMap("payload");
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            promise.resolve("");
+            return;
+        }
+        String alias = this.formatDPoPKeyAlias(kid);
+        try {
+            KeyPair keyPair = this.getPrivateKey(alias);
+            WritableMap jwk = this.getJWK(keyPair, kid);
+            final WritableMap header = this.makeDPoPJWTHeader(jwk);
+            Signature signature = this.makeSignature(keyPair.getPrivate());
+            String jwt = this.signJWT(signature, header, payload);
+            promise.resolve(jwt);
+        } catch (Exception e) {
+            promise.reject(e);
+        }
+    }
+
+    @ReactMethod
+    public void checkDPoPPrivateKey(ReadableMap options, Promise promise) {
+        String kid = options.getString("kid");
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            promise.resolve(true);
+            return;
+        }
+        String alias = this.formatDPoPKeyAlias(kid);
+        try {
+            this.getPrivateKey(alias);
+            promise.resolve(true);
+        } catch (Exception e) {
+            promise.resolve(false);
+        }
+    }
+
+    @ReactMethod
+    public void computeDPoPJKT(ReadableMap options, Promise promise) {
+        String kid = options.getString("kid");
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            promise.resolve("");
+            return;
+        }
+        String alias = this.formatDPoPKeyAlias(kid);
+        try {
+            KeyPair keyPair = this.getPrivateKey(alias);
+            WritableMap jwk = this.getJWK(keyPair, kid);
+            JSONObject params = new JSONObject();
+            params.put("e", jwk.getString("e"));
+            params.put("kty", jwk.getString("kty"));
+            params.put("n", jwk.getString("n"));
+            byte[] jsonBytes = params.toString().getBytes();
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(jsonBytes);
+            String jkt = this.base64URLEncode(hashBytes);
+            promise.resolve(jkt);
+        } catch (Exception e) {
+            promise.reject(e);
+        }
+    }
+
+    private String formatDPoPKeyAlias(String kid) {
+        return "com.authgear.keys.dpop." + kid;
+    }
+
     @Override
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
         final StartActivityHandle<Promise> handle = this.mHandles.pop(requestCode);
@@ -989,6 +1083,20 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         );
         KeyPair kp = kpg.generateKeyPair();
         return kp;
+    }
+
+    private byte[] bigIntegerToUnsignedByteArray(BigInteger bigint) {
+        // BigInteger always include a bit to represent the sign
+        // So the array length is ceil((this.bitLength() + 1)/8)
+        // This sign bit causes an extra byte to be added to the ByteArray when bitLength is just divisible by 8
+        // We want to exclude that extra byte in some cases, such as sending the bytes in a JWK as Base64urlUInt
+        int expectedLength = (int)ceil(bigint.bitLength() / 8.0);
+        byte[] bytes = bigint.toByteArray();
+        int startIdx = bytes.length - expectedLength;
+        int endIdx = bytes.length - 1;
+        byte[] slicedBytes = new byte[endIdx - startIdx + 1];
+        System.arraycopy(bytes, startIdx, slicedBytes, 0, slicedBytes.length);
+        return slicedBytes;
     }
 
     private static String getURLWithoutQuery(Uri uri) {
