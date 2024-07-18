@@ -1,5 +1,7 @@
 package com.authgear.capacitor;
 
+import static java.lang.Math.ceil;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -29,6 +31,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -41,6 +44,8 @@ import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.interfaces.RSAPublicKey;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 class Authgear {
@@ -244,7 +249,7 @@ class Authgear {
             // Further test if the key pair generator can be initialized.
             // https://issuetracker.google.com/issues/147374428#comment9
             try {
-                this.createKeyPairGenerator(this.makeGenerateKeyPairSpec("__test__", flags, true));
+                this.createKeyPairGenerator(this.makeGenerateKeyPairSpec("__test__", true, flags, true));
             } catch (Exception e) {
                 // This branch is reachable only when there is a weak face and no strong fingerprints.
                 // So we treat this situation as BIOMETRIC_ERROR_NONE_ENROLLED.
@@ -264,6 +269,7 @@ class Authgear {
         BiometricPrompt.PromptInfo promptInfo = this.buildPromptInfo(options);
         KeyGenParameterSpec spec = this.makeGenerateKeyPairSpec(
                 options.alias,
+                true,
                 this.authenticatorTypesToKeyProperties(options.flags),
                 options.invalidatedByBiometricEnrollment
         );
@@ -301,20 +307,82 @@ class Authgear {
         keyStore.deleteEntry(alias);
     }
 
+    void createDPoPPrivateKey(String kid) throws Exception {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return;
+        }
+        String alias = this.formatDPoPKeyAlias(kid);
+
+        KeyGenParameterSpec spec = this.makeGenerateKeyPairSpec(
+                alias,
+                false,
+                0,
+                false
+        );
+        KeyPair keyPair = this.createKeyPair(spec);
+    }
+
+    String signWithDPoPPrivateKey(String kid, JSONObject payload) throws Exception {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return "";
+        }
+        String alias = this.formatDPoPKeyAlias(kid);
+        KeyPair keyPair = this.getPrivateKey(alias);
+        return this.signDPoPJWT(
+                keyPair,
+                kid,
+                payload
+        );
+    }
+
+    boolean checkDPoPPrivateKey(String kid) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true;
+        }
+        try {
+            String alias = this.formatDPoPKeyAlias(kid);
+            this.getPrivateKey(alias);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    String computeDPoPJKT(String kid) throws Exception {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return "";
+        }
+        String alias = this.formatDPoPKeyAlias(kid);
+        KeyPair keyPair = this.getPrivateKey(alias);
+        JSONObject jwk = this.makeJWK(keyPair, kid);
+        JSONObject params = new JSONObject();
+        params.put("e", jwk.getString("e"));
+        params.put("kty", jwk.getString("kty"));
+        params.put("n", jwk.getString("n"));
+        byte[] jsonBytes = params.toString().getBytes();
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hashBytes = digest.digest(jsonBytes);
+        return this.base64URLEncode(hashBytes);
+    }
+
     @RequiresApi(Build.VERSION_CODES.M)
-    private KeyGenParameterSpec makeGenerateKeyPairSpec(String alias, int flags, boolean invalidatedByBiometricEnrollment) {
+    private KeyGenParameterSpec makeGenerateKeyPairSpec(
+            String alias,
+            boolean userAuthenticationRequired,
+            int authenticationFlags,
+            boolean invalidatedByBiometricEnrollment) {
         KeyGenParameterSpec.Builder builder = new KeyGenParameterSpec.Builder(
                 alias, KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY
         );
         builder.setKeySize(2048);
         builder.setDigests(KeyProperties.DIGEST_SHA256);
         builder.setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1);
-        builder.setUserAuthenticationRequired(true);
+        builder.setUserAuthenticationRequired(userAuthenticationRequired);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && userAuthenticationRequired) {
             builder.setUserAuthenticationParameters(
                     0,
-                    flags
+                    authenticationFlags
             );
         }
 
@@ -432,6 +500,13 @@ class Authgear {
         handler.post(() -> prompt.authenticate(promptInfo, cryptoObject));
     }
 
+    private String signDPoPJWT(KeyPair keyPair, String kid, JSONObject payload) throws Exception {
+        JSONObject jwk = this.makeJWK(keyPair, kid);
+        JSONObject header = this.makeDPoPJWTHeader(jwk);
+        Signature signature = this.makeSignature(keyPair.getPrivate());
+        return this.signJWT(signature, header, payload);
+    }
+
     private JSONObject makeJWK(KeyPair keyPair, String kid) throws JSONException {
         JSONObject jwk = new JSONObject();
         jwk.put("kid", kid);
@@ -439,14 +514,23 @@ class Authgear {
         RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
         jwk.put("alg", "RS256");
         jwk.put("kty", "RSA");
-        jwk.put("n", this.base64URLEncode(rsaPublicKey.getModulus().toByteArray()));
-        jwk.put("e", this.base64URLEncode(rsaPublicKey.getPublicExponent().toByteArray()));
+        jwk.put("n", this.base64URLEncode(bigIntegerToUnsignedByteArray(rsaPublicKey.getModulus())));
+        jwk.put("e", this.base64URLEncode(bigIntegerToUnsignedByteArray(rsaPublicKey.getPublicExponent())));
         return jwk;
     }
 
     private JSONObject makeBiometricJWTHeader(JSONObject jwk) throws JSONException {
         JSONObject header = new JSONObject();
         header.put("typ", "vnd.authgear.biometric-request");
+        header.put("kid", jwk.getString("kid"));
+        header.put("alg", jwk.getString("alg"));
+        header.put("jwk", jwk);
+        return header;
+    }
+
+    private JSONObject makeDPoPJWTHeader(JSONObject jwk) throws JSONException {
+        JSONObject header = new JSONObject();
+        header.put("typ", "dpop+jwt");
         header.put("kid", jwk.getString("kid"));
         header.put("alg", jwk.getString("alg"));
         header.put("jwk", jwk);
@@ -476,6 +560,10 @@ class Authgear {
 
     private Exception makeBiometricMinimumAPILevelException() {
         return new Exception("Biometric authentication requires at least API Level 23");
+    }
+
+    private String formatDPoPKeyAlias(String kid) {
+        return "com.authgear.keys.dpop." + kid;
     }
 
     private void deleteSharedPreferences(Context context, String name) {
@@ -548,5 +636,19 @@ class Authgear {
             }
         }
         return ctx.getSharedPreferences("authgear_shared_preferences", Context.MODE_PRIVATE);
+    }
+
+    private byte[] bigIntegerToUnsignedByteArray(BigInteger bigint) {
+        // BigInteger always include a bit to represent the sign
+        // So the array length is ceil((this.bitLength() + 1)/8)
+        // This sign bit causes an extra byte to be added to the ByteArray when bitLength is just divisible by 8
+        // We want to exclude that extra byte in some cases, such as sending the bytes in a JWK as Base64urlUInt
+        int expectedLength = (int)ceil(bigint.bitLength() / 8.0);
+        byte[] bytes = bigint.toByteArray();
+        int startIdx = bytes.length - expectedLength;
+        int endIdx = bytes.length - 1;
+        byte[] slicedBytes = new byte[endIdx - startIdx + 1];
+        System.arraycopy(bytes, startIdx, slicedBytes, 0, slicedBytes.length);
+        return slicedBytes;
     }
 }
