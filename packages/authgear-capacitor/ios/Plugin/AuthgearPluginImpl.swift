@@ -364,6 +364,49 @@ import Capacitor
         }
     }
 
+    @objc func createDPoPPrivateKey(kid: String) throws {
+        var cfError: Unmanaged<CFError>?
+        let attributes: NSDictionary = [
+            kSecAttrKeyType: kSecAttrKeyTypeECSECPrimeRandom,
+            kSecAttrKeySizeInBits: 256,
+            kSecAttrTokenID: kSecAttrTokenIDSecureEnclave,
+            kSecPrivateKeyAttrs: [
+                kSecAttrIsPermanent: true,
+                kSecAttrApplicationTag: formatDPoPKeyTag(kid: kid)
+            ]
+        ]
+        guard let privateKey = SecKeyCreateRandomKey(attributes, &cfError) else {
+            throw cfError!.takeRetainedValue() as Error
+        }
+    }
+
+    @objc func signWithDPoPPrivateKey(kid: String, payload: [String: Any]) throws -> String {
+        guard let privatekey = try getDPoPPrivateKey(kid: kid) else {
+            throw AuthgearError.runtimeError(AuthgearRuntimeError(message: "dpop key does not exist"))
+        }
+        let jwt = try signDPoPJWT(privateKey: privatekey, kid: kid, payload: payload)
+        return jwt
+    }
+
+    @objc func checkDPoPPrivateKey(kid: String) -> Bool {
+        do {
+            if let privatekey = try getDPoPPrivateKey(kid: kid) {
+                return true
+            }
+            return false
+        } catch {
+            return false
+        }
+    }
+
+    @objc func computeDPoPJKT(kid: String) throws -> String {
+        guard let privatekey = try getDPoPPrivateKey(kid: kid) else {
+            throw AuthgearError.runtimeError(AuthgearRuntimeError(message: "dpop key does not exist"))
+        }
+        let jwk = try self.getJWKFromPrivateKey(privateKey: privatekey, kid: kid)
+        return try jwk.computeThumbprint(algorithm: .SHA256)
+    }
+
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
         let window = self.asWebAuthenticationSessionHandles[session]!
         return window
@@ -455,10 +498,46 @@ import Capacitor
         return privateKey
     }
 
+    private func getDPoPPrivateKey(kid: String) throws -> SecKey? {
+        let tag = formatDPoPKeyTag(kid: kid)
+        let query: NSDictionary = [
+            kSecClass: kSecClassKey,
+            kSecMatchLimit: kSecMatchLimitOne,
+            kSecAttrApplicationTag: tag,
+            kSecReturnRef: true
+        ]
+
+        var item: CFTypeRef?
+        let status = SecItemCopyMatching(query, &item)
+
+        guard status != errSecItemNotFound else {
+            return nil
+        }
+
+        guard status == errSecSuccess else {
+            throw NSError(domain: NSOSStatusErrorDomain, code: Int(status))
+        }
+
+        let privateKey = item as! SecKey
+        return privateKey
+    }
+
     private func signBiometricJWT(privateKey: SecKey, kid: String, payload: [String: Any]) throws -> String {
         let jwk = try self.getJWKFromPrivateKey(privateKey: privateKey, kid: kid)
         let header = [
             "typ": "vnd.authgear.biometric-request",
+            "kid": jwk["kid"],
+            "alg": jwk["alg"],
+            "jwk": jwk
+        ]
+        let jwt = try self.signJWT(privateKey: privateKey, header: header as [String: Any], payload: payload)
+        return jwt
+    }
+
+    private func signDPoPJWT(privateKey: SecKey, kid: String, payload: [String: Any]) throws -> String {
+        let jwk = try self.getJWKFromPrivateKey(privateKey: privateKey, kid: kid)
+        let header = [
+            "typ": "dpop+jwt",
             "kid": jwk["kid"],
             "alg": jwk["alg"],
             "jwk": jwk
@@ -570,6 +649,10 @@ import Capacitor
 
         let fixedSignature = (fixlenR + fixlenS)
         return fixedSignature
+    }
+
+    private func formatDPoPKeyTag(kid: String) -> String {
+        return "com.authgear.keys.dpop.\(kid)"
     }
 }
 
@@ -700,7 +783,7 @@ private enum KeyType {
     }
 }
 
-private extension Data {
+internal extension Data {
     func base64urlEncodedString() -> String {
         base64EncodedString()
             .replacingOccurrences(of: "+", with: "-")

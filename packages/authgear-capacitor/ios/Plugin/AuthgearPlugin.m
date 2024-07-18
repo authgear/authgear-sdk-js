@@ -18,4 +18,8 @@ CAP_PLUGIN(AuthgearPlugin, "Authgear",
            CAP_PLUGIN_METHOD(createBiometricPrivateKey, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(signWithBiometricPrivateKey, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(removeBiometricPrivateKey, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(createDPoPPrivateKey, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(signWithDPoPPrivateKey, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(checkDPoPPrivateKey, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(computeDPoPJKT, CAPPluginReturnPromise);
 )

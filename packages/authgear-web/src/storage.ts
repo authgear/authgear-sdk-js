@@ -5,7 +5,7 @@ import {
   _ContainerStorage,
   _KeyMaker,
   _SafeStorageDriver,
-  InterAppSharedStorage,
+  type InterAppSharedStorage,
 } from "@authgear/core";
 
 const _localStorageStorageDriver: _StorageDriver = {

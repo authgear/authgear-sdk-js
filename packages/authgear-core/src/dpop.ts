@@ -1,10 +1,25 @@
-import { InterAppSharedStorage } from "./types";
+import { type InterAppSharedStorage } from "./types";
 
+/**
+ * We will get an internal error if we use InterAppSharedStorage directly:
+ * InternalError: Internal Error: Unable to analyze the export "InterAppSharedStorage" in
+ * /Users/tung/repo/authgear-sdk-js/packages/authgear-core/src/types.d.ts
+ * So added this interface to workaround the error
+ * @internal
+ */
+export interface DPopInterAppSharedStorage extends InterAppSharedStorage {}
+
+/**
+ * @internal
+ */
 export interface DPoPProvider {
   generateDPoPProof(htm: string, htu: string): Promise<string>;
   computeJKT(): Promise<string>;
 }
 
+/**
+ * @internal
+ */
 export interface InternalDPoPPlugin {
   generateUUID(): Promise<string>;
   createDPoPPrivateKey(kid: string): Promise<void>;
@@ -16,9 +31,12 @@ export interface InternalDPoPPlugin {
   computeDPoPJKT(kid: string): Promise<string>;
 }
 
+/**
+ * @internal
+ */
 export class DefaultDPoPProvider implements DPoPProvider {
   private getNamespace: () => string;
-  private sharedStorage: InterAppSharedStorage;
+  private sharedStorage: DPopInterAppSharedStorage;
   private plugin: InternalDPoPPlugin;
 
   constructor({
@@ -27,7 +45,7 @@ export class DefaultDPoPProvider implements DPoPProvider {
     plugin,
   }: {
     getNamespace: () => string;
-    sharedStorage: InterAppSharedStorage;
+    sharedStorage: DPopInterAppSharedStorage;
     plugin: InternalDPoPPlugin;
   }) {
     this.getNamespace = getNamespace;

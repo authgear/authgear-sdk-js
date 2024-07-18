@@ -58,13 +58,7 @@ export abstract class _BaseAPIClient {
     this.dpopProvider = dpopProvider;
   }
 
-  protected async _prepareHeaders({
-    method,
-    url,
-  }: {
-    method: string;
-    url: string;
-  }): Promise<Record<string, string>> {
+  protected async _prepareHeaders(): Promise<Record<string, string>> {
     const headers: Record<string, string> = {};
     const accessToken = this._delegate?.getAccessToken();
     if (accessToken != null) {
@@ -73,32 +67,39 @@ export abstract class _BaseAPIClient {
     if (this.userAgent != null) {
       headers["user-agent"] = this.userAgent;
     }
-    if (this.dpopProvider != null) {
-      headers["DPoP"] = await this.dpopProvider.generateDPoPProof(method, url);
-    }
     return headers;
+  }
+
+  async _doFetch(request: Request): Promise<Response> {
+    if (!this._fetchFunction) {
+      throw new AuthgearError("missing fetchFunction in api client");
+    }
+
+    if (this.dpopProvider != null) {
+      const dpopJWT = await this.dpopProvider.generateDPoPProof(
+        request.method,
+        request.url
+      );
+      if (dpopJWT) {
+        request.headers.set("DPoP", dpopJWT);
+      }
+    }
+
+    return this._fetchFunction(request);
   }
 
   async _fetchWithoutRefresh(
     url: string,
     init?: RequestInit
   ): Promise<Response> {
-    if (!this._fetchFunction) {
-      throw new AuthgearError("missing fetchFunction in api client");
-    }
-
     if (!this._requestClass) {
       throw new AuthgearError("missing requestClass in api client");
     }
     const request = new this._requestClass(url, init);
-    return this._fetchFunction(request);
+    return this._doFetch(request);
   }
 
   async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
-    if (this._fetchFunction == null) {
-      throw new AuthgearError("missing fetchFunction in api client");
-    }
-
     if (this._requestClass == null) {
       throw new AuthgearError("missing requestClass in api client");
     }
@@ -114,15 +115,12 @@ export abstract class _BaseAPIClient {
 
     const request = new this._requestClass(input, init);
 
-    const headers = await this._prepareHeaders({
-      method: request.method,
-      url: request.url,
-    });
+    const headers = await this._prepareHeaders();
     for (const key of Object.keys(headers)) {
       request.headers.set(key, headers[key]);
     }
 
-    return this._fetchFunction(request);
+    return this._doFetch(request);
   }
 
   protected async _requestJSON(

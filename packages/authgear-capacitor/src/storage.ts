@@ -4,7 +4,7 @@ import {
   _ContainerStorage,
   _KeyMaker,
   _SafeStorageDriver,
-  InterAppSharedStorage,
+  type InterAppSharedStorage,
 } from "@authgear/core";
 import { storageGetItem, storageSetItem, storageDeleteItem } from "./plugin";
 

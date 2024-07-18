@@ -16,7 +16,7 @@ import {
   UserInfo,
   _PreAuthenticatedURLOptions,
   PromptOption,
-  InterAppSharedStorage,
+  type InterAppSharedStorage,
 } from "./types";
 import { _base64URLDecode } from "./base64";
 import { _decodeUTF8 } from "./utf8";

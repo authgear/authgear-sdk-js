@@ -229,4 +229,53 @@ public class AuthgearPlugin: CAPPlugin {
             }
         }
     }
+
+    @objc func createDPoPPrivateKey(_ call: CAPPluginCall) {
+        let kid = call.getString("kid")!
+
+        DispatchQueue.main.async {
+            do {
+                try self.impl.createDPoPPrivateKey(kid: kid)
+                call.resolve()
+            } catch {
+                error.reject(call)
+            }
+        }
+    }
+
+    @objc func signWithDPoPPrivateKey(_ call: CAPPluginCall) {
+        let kid = call.getString("kid")!
+        let payload = call.getObject("payload")!
+
+        DispatchQueue.main.async {
+            do {
+                let jwt = try self.impl.signWithDPoPPrivateKey(kid: kid, payload: payload)
+                call.resolve(["jwt": jwt])
+            } catch {
+                error.reject(call)
+            }
+        }
+    }
+
+    @objc func checkDPoPPrivateKey(_ call: CAPPluginCall) {
+        let kid = call.getString("kid")!
+
+        DispatchQueue.main.async {
+            let ok = self.impl.checkDPoPPrivateKey(kid: kid)
+            call.resolve(["ok": ok])
+        }
+    }
+
+    @objc func computeDPoPJKT(_ call: CAPPluginCall) {
+        let kid = call.getString("kid")!
+
+        DispatchQueue.main.async {
+            do {
+                let jkt = try self.impl.computeDPoPJKT(kid: kid)
+                call.resolve(["jkt": jkt])
+            } catch {
+                error.reject(call)
+            }
+        }
+    }
 }

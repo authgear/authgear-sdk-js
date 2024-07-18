@@ -16,7 +16,7 @@ import {
   Page,
   PromptOption,
   SettingsAction,
-  InterAppSharedStorage,
+  type InterAppSharedStorage,
   _OIDCAuthenticationRequest,
   DPoPProvider,
   DefaultDPoPProvider,

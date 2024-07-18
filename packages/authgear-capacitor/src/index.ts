@@ -16,7 +16,7 @@ import {
   _ContainerStorage,
   _base64URLEncode,
   _encodeUTF8,
-  InterAppSharedStorage,
+  type InterAppSharedStorage,
   DefaultDPoPProvider,
   DPoPProvider,
   _OIDCAuthenticationRequest,
