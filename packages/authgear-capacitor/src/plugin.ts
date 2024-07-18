@@ -34,6 +34,13 @@ export interface AuthgearPlugin {
     options: BiometricPrivateKeyOptions
   ): Promise<{ jwt: string }>;
   removeBiometricPrivateKey(options: { kid: string }): Promise<void>;
+  createDPoPPrivateKey(options: { kid: string }): Promise<void>;
+  signWithDPoPPrivateKey(options: {
+    kid: string;
+    payload: Record<string, unknown>;
+  }): Promise<{ jwt: string }>;
+  checkDPoPPrivateKey(options: { kid: string }): Promise<{ ok: boolean }>;
+  computeDPoPJKT(options: { kid: string }): Promise<{ jkt: string }>;
 }
 
 const Authgear = registerPlugin<AuthgearPlugin>("Authgear", {});
@@ -176,6 +183,44 @@ export async function signWithBiometricPrivateKey(
 export async function removeBiometricPrivateKey(kid: string): Promise<void> {
   try {
     await Authgear.removeBiometricPrivateKey({ kid });
+  } catch (e: unknown) {
+    throw _wrapError(e);
+  }
+}
+
+export async function createDPoPPrivateKey(kid: string): Promise<void> {
+  try {
+    await Authgear.createDPoPPrivateKey({ kid });
+  } catch (e: unknown) {
+    throw _wrapError(e);
+  }
+}
+
+export async function signWithDPoPPrivateKey(
+  kid: string,
+  payload: Record<string, unknown>
+): Promise<string> {
+  try {
+    const { jwt } = await Authgear.signWithDPoPPrivateKey({ kid, payload });
+    return jwt;
+  } catch (e: unknown) {
+    throw _wrapError(e);
+  }
+}
+
+export async function checkDPoPPrivateKey(kid: string): Promise<boolean> {
+  try {
+    const { ok } = await Authgear.checkDPoPPrivateKey({ kid });
+    return ok;
+  } catch (e: unknown) {
+    throw _wrapError(e);
+  }
+}
+
+export async function computeDPoPJKT(kid: string): Promise<string> {
+  try {
+    const { jkt } = await Authgear.computeDPoPJKT({ kid });
+    return jkt;
   } catch (e: unknown) {
     throw _wrapError(e);
   }

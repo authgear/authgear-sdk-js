@@ -35,6 +35,10 @@ import {
   checkBiometricSupported,
   removeBiometricPrivateKey,
   signWithBiometricPrivateKey,
+  createDPoPPrivateKey,
+  signWithDPoPPrivateKey,
+  checkDPoPPrivateKey,
+  computeDPoPJKT,
 } from "./plugin";
 import {
   UIImplementation,
@@ -255,7 +259,13 @@ export class CapacitorContainer {
     const dpopProvider = new DefaultDPoPProvider({
       getNamespace: namespaceGetter,
       sharedStorage,
-      plugin: {},
+      plugin: {
+        generateUUID,
+        createDPoPPrivateKey,
+        signWithDPoPPrivateKey,
+        checkDPoPPrivateKey,
+        computeDPoPJKT,
+      },
     });
     this.dpopProvider = dpopProvider;
     const apiClient = new _CapacitorAPIClient(dpopProvider);

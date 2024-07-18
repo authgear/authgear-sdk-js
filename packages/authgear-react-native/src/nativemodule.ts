@@ -133,3 +133,24 @@ export async function checkBiometricSupported(
 ): Promise<void> {
   return _wrapPromise(AuthgearReactNative.checkBiometricSupported(options));
 }
+
+export async function createDPoPPrivateKey(kid: string): Promise<void> {
+  return _wrapPromise(AuthgearReactNative.createDPoPPrivateKey({ kid }));
+}
+
+export async function signWithDPoPPrivateKey(
+  kid: string,
+  payload: Record<string, unknown>
+): Promise<string> {
+  return _wrapPromise(
+    AuthgearReactNative.signWithDPoPPrivateKey({ kid, payload })
+  );
+}
+
+export async function checkDPoPPrivateKey(kid: string): Promise<boolean> {
+  return _wrapPromise(AuthgearReactNative.checkDPoPPrivateKey({ kid }));
+}
+
+export async function computeDPoPJKT(kid: string): Promise<string> {
+  return _wrapPromise(AuthgearReactNative.computeDPoPJKT({ kid }));
+}

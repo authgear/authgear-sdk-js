@@ -37,6 +37,10 @@ import {
   signWithBiometricPrivateKey,
   generateUUID,
   getDeviceInfo,
+  createDPoPPrivateKey,
+  signWithDPoPPrivateKey,
+  checkDPoPPrivateKey,
+  computeDPoPJKT,
 } from "./nativemodule";
 import {
   BiometricOptions,
@@ -264,9 +268,16 @@ export class ReactNativeContainer {
     const dpopProvider = new DefaultDPoPProvider({
       getNamespace: namespaceGetter,
       sharedStorage,
-      plugin: {},
+      plugin: {
+        generateUUID,
+        createDPoPPrivateKey,
+        signWithDPoPPrivateKey,
+        checkDPoPPrivateKey,
+        computeDPoPJKT,
+      },
     });
 
+    this.dpopProvider = dpopProvider;
     const apiClient = new _ReactNativeAPIClient(dpopProvider);
 
     this.baseContainer = new _BaseContainer<_ReactNativeAPIClient>(
