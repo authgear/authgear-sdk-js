@@ -32,6 +32,10 @@ export class _KeyMaker {
   keyBiometricKeyID(name: string): string {
     return `${this.scopedKey(name)}_biometricKeyID`;
   }
+
+  keyDPoPKeyID(name: string): string {
+    return `${this.scopedKey(name)}_dpopKeyID`;
+  }
 }
 
 /**

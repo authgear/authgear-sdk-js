@@ -227,6 +227,10 @@ export interface InterAppSharedStorage {
   setDeviceSecret(namespace: string, deviceSecret: string): Promise<void>;
   getDeviceSecret(namespace: string): Promise<string | null>;
   delDeviceSecret(namespace: string): Promise<void>;
+
+  setDPoPKeyID(namespace: string, kid: string): Promise<void>;
+  getDPoPKeyID(namespace: string): Promise<string | null>;
+  delDPoPKeyID(namespace: string): Promise<void>;
 }
 
 /**
