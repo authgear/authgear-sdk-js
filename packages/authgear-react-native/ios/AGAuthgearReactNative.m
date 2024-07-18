@@ -7,6 +7,7 @@
 #import <sys/utsname.h>
 #import "AGAuthgearReactNative.h"
 #import "AGWKWebViewController.h"
+#import <CommonCrypto/CommonDigest.h>
 
 static NSString *currentWechatRedirectURI = nil;
 static void postOpenWechatRedirectURINotification(NSURL *URL, id sender)
@@ -525,6 +526,101 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
         });
     }];
 }
+    
+RCT_EXPORT_METHOD(createDPoPPrivateKey:(NSDictionary *)options
+  resolver:(RCTPromiseResolveBlock)resolve
+  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    NSString *kid = options[@"kid"];
+    NSString *tag = [NSString stringWithFormat:@"com.authgear.keys.dpop.%@", kid];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSError *error = NULL;
+        SecKeyRef privateKey = [self generateDPoPPrivateKey:&error];
+        if (error) {
+            reject([@(error.code) stringValue], error.localizedDescription, error);
+            return;
+        }
+
+        [self addDPoPPrivateKey:privateKey tag:tag error:&error];
+        if (error) {
+            CFRelease(privateKey);
+            reject([@(error.code) stringValue], error.localizedDescription, error);
+            return;
+        }
+
+        resolve(nil);
+    });
+}
+    
+RCT_EXPORT_METHOD(signWithDPoPPrivateKey:(NSDictionary *)options
+  resolver:(RCTPromiseResolveBlock)resolve
+  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    NSString *kid = options[@"kid"];
+    NSDictionary *payload = options[@"payload"];
+    NSString *tag = [NSString stringWithFormat:@"com.authgear.keys.dpop.%@", kid];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSError *error = NULL;
+        SecKeyRef privateKey = [self getDPoPPrivateKey:tag error:&error];
+        if (error) {
+            reject([@(error.code) stringValue], error.localizedDescription, error);
+            return;
+        }
+
+        NSString *jwt = [self signDPoPJWT:privateKey kid:kid payload:payload error:&error];
+        CFRelease(privateKey);
+        if (error) {
+            reject([@(error.code) stringValue], error.localizedDescription, error);
+            return;
+        }
+
+        resolve(jwt);
+    });
+}
+    
+RCT_EXPORT_METHOD(checkDPoPPrivateKey:(NSDictionary *)options
+  resolver:(RCTPromiseResolveBlock)resolve
+  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    NSString *kid = options[@"kid"];
+    NSString *tag = [NSString stringWithFormat:@"com.authgear.keys.dpop.%@", kid];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSError *error = NULL;
+        SecKeyRef privateKey = [self getDPoPPrivateKey:tag error:&error];
+        if (error) {
+            resolve(@"false");
+            return;
+        }
+
+        resolve(@"true");
+    });
+}
+    
+RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
+  resolver:(RCTPromiseResolveBlock)resolve
+  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    NSString *kid = options[@"kid"];
+    NSString *tag = [NSString stringWithFormat:@"com.authgear.keys.dpop.%@", kid];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSError *error = NULL;
+        SecKeyRef privateKey = [self getDPoPPrivateKey:tag error:&error];
+        if (error) {
+            reject([@(error.code) stringValue], error.localizedDescription, error);
+            return;
+        }
+        
+        NSMutableDictionary *jwk = [[NSMutableDictionary alloc] init];
+        jwk[@"kid"] = kid;
+        [self getJWKFromPrivateKey:privateKey jwk:jwk error:&error];
+        NSDictionary *jwkParams = [self makeDPoPJWKRequiredParams:jwk];
+        NSData *jwkParamsJSON = [self serializeToJSON:jwkParams];
+        NSMutableData *hashBytes = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];
+        CC_SHA256(jwkParamsJSON.bytes, jwkParamsJSON.length, hashBytes.mutableBytes);
+        NSString *jkt = [self base64URLEncode:hashBytes];
+        resolve(jkt);
+    });
+}
 
 -(NSString *)signBiometricJWT:(SecKeyRef)privateKey kid:(NSString *)kid payload:(NSDictionary *)payload error:(out NSError **)error
 {
@@ -535,6 +631,22 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
         return nil;
     }
     NSDictionary *header = [self makeBiometricJWTHeader:jwk];
+    NSString *jwt = [self signJWT:privateKey header:header payload:payload error:error];
+    if (*error) {
+        return nil;
+    }
+    return jwt;
+}
+    
+-(NSString *)signDPoPJWT:(SecKeyRef)privateKey kid:(NSString *)kid payload:(NSDictionary *)payload error:(out NSError **)error
+{
+    NSMutableDictionary *jwk = [[NSMutableDictionary alloc] init];
+    jwk[@"kid"] = kid;
+    [self getJWKFromPrivateKey:privateKey jwk:jwk error:error];
+    if (*error) {
+        return nil;
+    }
+    NSDictionary *header = [self makeDPoPJWTHeader:jwk];
     NSString *jwt = [self signJWT:privateKey header:header payload:payload error:error];
     if (*error) {
         return nil;
@@ -560,6 +672,24 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
     }
     return (SecKeyRef)item;
 }
+    
+- (SecKeyRef)getDPoPPrivateKey:(NSString *)tag error:(out NSError **)error
+{
+    NSDictionary *query = @{
+        (id)kSecClass: (id)kSecClassKey,
+        (id)kSecMatchLimit: (id)kSecMatchLimitOne,
+        (id)kSecAttrKeyType: (id)kSecAttrKeyTypeRSA,
+        (id)kSecAttrApplicationTag: tag,
+        (id)kSecReturnRef: @YES,
+    };
+    CFTypeRef item = NULL;
+    OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, &item);
+    if (status != errSecSuccess) {
+        *error = [[NSError alloc] initWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
+        return NULL;
+    }
+    return (SecKeyRef)item;
+}
 
 - (SecKeyRef)generateBiometricPrivateKey:(out NSError **)error
 {
@@ -574,6 +704,40 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
         return NULL;
     }
     return privateKey;
+}
+    
+- (SecKeyRef)generateDPoPPrivateKey:(out NSError **)error
+{
+    CFErrorRef cfError = NULL;
+    NSDictionary *query = @{
+        (id)kSecAttrKeyType: (id)kSecAttrKeyTypeRSA,
+        (id)kSecAttrKeySizeInBits: @2048,
+    };
+    SecKeyRef privateKey = SecKeyCreateRandomKey((__bridge CFDictionaryRef)query, &cfError);
+    if (cfError) {
+        *error = CFBridgingRelease(cfError);
+        return NULL;
+    }
+    return privateKey;
+}
+    
+    
+- (void)addDPoPPrivateKey:(SecKeyRef)privateKey tag:(NSString *)tag error:(out NSError **)error
+{
+    CFErrorRef cfError = NULL;
+
+    NSDictionary *query = @{
+        (id)kSecValueRef: (__bridge id)privateKey,
+        (id)kSecClass: (id)kSecClassKey,
+        (id)kSecAttrApplicationTag: tag,
+    };
+
+    OSStatus status = SecItemAdd((__bridge CFDictionaryRef)query, NULL);
+
+    if (status != errSecSuccess) {
+        *error = [[NSError alloc] initWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
+        return;
+    }
 }
 
 - (void)addBiometricPrivateKey:(SecKeyRef)privateKey tag:(NSString *)tag constraint:(NSString *)constraint laContext:(LAContext *)context error:(out NSError **)error
@@ -768,10 +932,30 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
         @"jwk": jwk,
     };
 }
+    
+-(NSDictionary *)makeDPoPJWTHeader:(NSDictionary *)jwk
+{
+    return @{
+        @"typ": @"dpop+jwt",
+        @"kid": jwk[@"kid"],
+        @"alg": jwk[@"alg"],
+        @"jwk": jwk,
+    };
+}
+    
+-(NSDictionary *)makeDPoPJWKRequiredParams:(NSDictionary *)jwk
+{
+    return @{
+        @"e": jwk[@"e"],
+        @"kty": jwk[@"kty"],
+        @"n": jwk[@"n"],
+    };
+}
+
 
 -(NSData *)serializeToJSON:(id)anything
 {
-    return [NSJSONSerialization dataWithJSONObject:anything options:0 error:nil];
+    return [NSJSONSerialization dataWithJSONObject:anything options:NSJSONWritingSortedKeys error:nil];
 }
 
 -(NSString *)signJWT:(SecKeyRef)privateKey header:(NSDictionary *)header payload:(NSDictionary *)payload error:(out NSError **)error

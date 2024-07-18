@@ -972,15 +972,15 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     public void checkDPoPPrivateKey(ReadableMap options, Promise promise) {
         String kid = options.getString("kid");
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            promise.resolve(true);
+            promise.resolve("true");
             return;
         }
         String alias = this.formatDPoPKeyAlias(kid);
         try {
             this.getPrivateKey(alias);
-            promise.resolve(true);
+            promise.resolve("true");
         } catch (Exception e) {
-            promise.resolve(false);
+            promise.resolve("false");
         }
     }
 

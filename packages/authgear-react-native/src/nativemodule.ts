@@ -148,7 +148,10 @@ export async function signWithDPoPPrivateKey(
 }
 
 export async function checkDPoPPrivateKey(kid: string): Promise<boolean> {
-  return _wrapPromise(AuthgearReactNative.checkDPoPPrivateKey({ kid }));
+  const result = await _wrapPromise(
+    AuthgearReactNative.checkDPoPPrivateKey({ kid })
+  );
+  return result === "true";
 }
 
 export async function computeDPoPJKT(kid: string): Promise<string> {
