@@ -14,6 +14,7 @@ import {
   _AnonymousUserPromotionCodeResponse,
 } from "./types";
 import { _decodeError, AuthgearError, ServerError, OAuthError } from "./error";
+import { DPoPProvider } from "./dpop";
 
 /**
  * @internal
@@ -26,6 +27,7 @@ export function _removeTrailingSlash(s: string): string {
  * @internal
  */
 export abstract class _BaseAPIClient {
+  private dpopProvider: DPoPProvider | null;
   userAgent?: string;
 
   _delegate?: _APIClientDelegate;
@@ -52,7 +54,17 @@ export abstract class _BaseAPIClient {
 
   _config?: _OIDCConfiguration;
 
-  protected async _prepareHeaders(): Promise<Record<string, string>> {
+  constructor(dpopProvider: DPoPProvider | null) {
+    this.dpopProvider = dpopProvider;
+  }
+
+  protected async _prepareHeaders({
+    method,
+    url,
+  }: {
+    method: string;
+    url: string;
+  }): Promise<Record<string, string>> {
     const headers: Record<string, string> = {};
     const accessToken = this._delegate?.getAccessToken();
     if (accessToken != null) {
@@ -60,6 +72,9 @@ export abstract class _BaseAPIClient {
     }
     if (this.userAgent != null) {
       headers["user-agent"] = this.userAgent;
+    }
+    if (this.dpopProvider != null) {
+      headers["DPoP"] = await this.dpopProvider.generateDPoPProof(method, url);
     }
     return headers;
   }
@@ -99,7 +114,10 @@ export abstract class _BaseAPIClient {
 
     const request = new this._requestClass(input, init);
 
-    const headers = await this._prepareHeaders();
+    const headers = await this._prepareHeaders({
+      method: request.method,
+      url: request.url,
+    });
     for (const key of Object.keys(headers)) {
       request.headers.set(key, headers[key]);
     }

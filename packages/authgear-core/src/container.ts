@@ -28,6 +28,7 @@ import {
   OAuthError,
 } from "./error";
 import { _BaseAPIClient } from "./client";
+import { DPoPProvider } from "./dpop";
 
 /**
  * To prevent user from using expired access token, we have to check in advance
@@ -139,10 +140,13 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
   private refreshAccessTokenTask: Promise<void> | null = null;
 
+  private dpopProvider: DPoPProvider | null;
+
   constructor(
     options: ContainerOptions,
     apiClient: T,
-    _delegate: _BaseContainerDelegate
+    _delegate: _BaseContainerDelegate,
+    dpopProvider: DPoPProvider | null
   ) {
     this.name = options.name ?? "default";
     this.apiClient = apiClient;
@@ -150,6 +154,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     this.preAuthenticatedURLEnabled = false;
     this.sessionState = SessionState.Unknown;
     this._delegate = _delegate;
+    this.dpopProvider = dpopProvider;
   }
 
   getIDTokenHint(): string | undefined {
