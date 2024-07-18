@@ -94,6 +94,7 @@ export interface _OIDCAuthenticationRequest {
   authenticationFlowGroup?: string;
   clientID?: string;
   xPreAuthenticatedURLToken?: string;
+  dpopJKT?: string;
 }
 
 /**

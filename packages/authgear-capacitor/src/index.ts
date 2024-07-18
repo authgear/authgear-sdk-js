@@ -17,6 +17,9 @@ import {
   _base64URLEncode,
   _encodeUTF8,
   InterAppSharedStorage,
+  DefaultDPoPProvider,
+  DPoPProvider,
+  _OIDCAuthenticationRequest,
 } from "@authgear/core";
 import {
   PersistentContainerStorage,
@@ -165,6 +168,8 @@ export class CapacitorContainer {
    */
   uiImplementation: UIImplementation;
 
+  private dpopProvider: DPoPProvider;
+
   /**
    * @public
    */
@@ -245,7 +250,15 @@ export class CapacitorContainer {
       ...options,
     } as ContainerOptions;
 
-    const apiClient = new _CapacitorAPIClient();
+    const sharedStorage = new PersistentInterAppSharedStorage();
+    const namespaceGetter = () => this.baseContainer.name;
+    const dpopProvider = new DefaultDPoPProvider({
+      getNamespace: namespaceGetter,
+      sharedStorage,
+      plugin: {},
+    });
+    this.dpopProvider = dpopProvider;
+    const apiClient = new _CapacitorAPIClient(dpopProvider);
 
     this.baseContainer = new _BaseContainer<_CapacitorAPIClient>(
       o,
@@ -256,7 +269,7 @@ export class CapacitorContainer {
 
     this.storage = new PersistentContainerStorage();
     this.tokenStorage = new PersistentTokenStorage();
-    this.sharedStorage = new PersistentInterAppSharedStorage();
+    this.sharedStorage = sharedStorage;
     this.uiImplementation = new DeviceBrowserUIImplementation();
   }
 
@@ -688,13 +701,18 @@ export class CapacitorContainer {
    * @internal
    */
   async authorizeEndpoint(options: AuthenticateOptions): Promise<string> {
-    return this.baseContainer.authorizeEndpoint({
+    const oidcRequest: _OIDCAuthenticationRequest = {
       ...options,
       responseType: "code",
       scope: this.baseContainer.getAuthenticateScopes({
         requestOfflineAccess: true,
       }),
-    });
+    };
+    const dpopJKT = await this.dpopProvider.computeJKT();
+    if (dpopJKT) {
+      oidcRequest.dpopJKT = dpopJKT;
+    }
+    return this.baseContainer.authorizeEndpoint(oidcRequest);
   }
 
   /**

@@ -17,29 +17,35 @@ export interface InternalDPoPPlugin {
 }
 
 export class DefaultDPoPProvider implements DPoPProvider {
-  private namespace: string;
+  private getNamespace: () => string;
   private sharedStorage: InterAppSharedStorage;
   private plugin: InternalDPoPPlugin;
 
-  constructor(
-    namespace: string,
-    sharedStorage: InterAppSharedStorage,
-    plugin: InternalDPoPPlugin
-  ) {
-    this.namespace = namespace;
+  constructor({
+    getNamespace,
+    sharedStorage,
+    plugin,
+  }: {
+    getNamespace: () => string;
+    sharedStorage: InterAppSharedStorage;
+    plugin: InternalDPoPPlugin;
+  }) {
+    this.getNamespace = getNamespace;
     this.sharedStorage = sharedStorage;
     this.plugin = plugin;
   }
 
   async generateDPoPProof(htm: string, htu: string): Promise<string> {
-    const existingKeyId = await this.sharedStorage.getDPoPKeyID(this.namespace);
+    const existingKeyId = await this.sharedStorage.getDPoPKeyID(
+      this.getNamespace()
+    );
     let kid: string;
     if (existingKeyId != null) {
       kid = existingKeyId;
     } else {
       kid = await this.plugin.generateUUID();
       await this.plugin.createDPoPPrivateKey(kid);
-      await this.sharedStorage.setDPoPKeyID(this.namespace, kid);
+      await this.sharedStorage.setDPoPKeyID(this.getNamespace(), kid);
     }
     const now = Math.floor(+new Date() / 1000);
     const payload = {
@@ -56,14 +62,16 @@ export class DefaultDPoPProvider implements DPoPProvider {
       // Generate a new key if the original key cannot be used for any reason
       kid = await this.plugin.generateUUID();
       await this.plugin.createDPoPPrivateKey(kid);
-      await this.sharedStorage.setDPoPKeyID(this.namespace, kid);
+      await this.sharedStorage.setDPoPKeyID(this.getNamespace(), kid);
       const jwt = await this.plugin.signWithDPoPPrivateKey(kid, payload);
       return jwt;
     }
   }
 
   async computeJKT(): Promise<string> {
-    const existingKeyId = await this.sharedStorage.getDPoPKeyID(this.namespace);
+    const existingKeyId = await this.sharedStorage.getDPoPKeyID(
+      this.getNamespace()
+    );
     let kid: string | null = null;
     if (existingKeyId != null) {
       const existingKeyOK = await this.plugin.checkDPoPPrivateKey(
@@ -76,7 +84,7 @@ export class DefaultDPoPProvider implements DPoPProvider {
     if (kid == null) {
       kid = await this.plugin.generateUUID();
       await this.plugin.createDPoPPrivateKey(kid);
-      await this.sharedStorage.setDPoPKeyID(this.namespace, kid);
+      await this.sharedStorage.setDPoPKeyID(this.getNamespace(), kid);
     }
     const jkt = await this.plugin.computeDPoPJKT(kid);
     return jkt;

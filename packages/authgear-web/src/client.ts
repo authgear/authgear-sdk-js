@@ -12,4 +12,8 @@ export class _WebAPIClient extends _BaseAPIClient {
   // To prevent this, we bind window to the fetch function
   _fetchFunction = window.fetch.bind(window);
   _requestClass = Request;
+
+  constructor() {
+    super(null);
+  }
 }
