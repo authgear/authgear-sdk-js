@@ -109,6 +109,12 @@ export class PersistentInterAppSharedStorage implements InterAppSharedStorage {
   async delDPoPKeyID(namespace: string): Promise<void> {
     return this.storageDriver.del(this.keyMaker.keyDPoPKeyID(namespace));
   }
+
+  async onLogout(namespace: string): Promise<void> {
+    await this.delDPoPKeyID(namespace);
+    await this.delDeviceSecret(namespace);
+    await this.delIDToken(namespace);
+  }
 }
 
 /**

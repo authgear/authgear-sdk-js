@@ -232,6 +232,8 @@ export interface InterAppSharedStorage {
   setDPoPKeyID(namespace: string, kid: string): Promise<void>;
   getDPoPKeyID(namespace: string): Promise<string | null>;
   delDPoPKeyID(namespace: string): Promise<void>;
+
+  onLogout(namespace: string): Promise<void>;
 }
 
 /**
