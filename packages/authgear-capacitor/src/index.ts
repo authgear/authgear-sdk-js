@@ -39,6 +39,7 @@ import {
   signWithDPoPPrivateKey,
   checkDPoPPrivateKey,
   computeDPoPJKT,
+  checkDPoPSupported,
 } from "./plugin";
 import {
   UIImplementation,
@@ -261,6 +262,7 @@ export class CapacitorContainer {
       sharedStorage,
       plugin: {
         generateUUID,
+        checkDPoPSupported,
         createDPoPPrivateKey,
         signWithDPoPPrivateKey,
         checkDPoPPrivateKey,

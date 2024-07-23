@@ -34,6 +34,7 @@ export interface AuthgearPlugin {
     options: BiometricPrivateKeyOptions
   ): Promise<{ jwt: string }>;
   removeBiometricPrivateKey(options: { kid: string }): Promise<void>;
+  checkDPoPSupported(): Promise<{ ok: boolean }>;
   createDPoPPrivateKey(options: { kid: string }): Promise<void>;
   signWithDPoPPrivateKey(options: {
     kid: string;
@@ -183,6 +184,15 @@ export async function signWithBiometricPrivateKey(
 export async function removeBiometricPrivateKey(kid: string): Promise<void> {
   try {
     await Authgear.removeBiometricPrivateKey({ kid });
+  } catch (e: unknown) {
+    throw _wrapError(e);
+  }
+}
+
+export async function checkDPoPSupported(): Promise<boolean> {
+  try {
+    const result = await Authgear.checkDPoPSupported();
+    return result.ok;
   } catch (e: unknown) {
     throw _wrapError(e);
   }

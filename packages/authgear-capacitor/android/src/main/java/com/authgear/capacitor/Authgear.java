@@ -307,10 +307,12 @@ class Authgear {
         keyStore.deleteEntry(alias);
     }
 
+    boolean checkDPoPSupported() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
     void createDPoPPrivateKey(String kid) throws Exception {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return;
-        }
         String alias = this.formatDPoPKeyAlias(kid);
 
         KeyGenParameterSpec spec = this.makeGenerateKeyPairSpec(
@@ -323,9 +325,6 @@ class Authgear {
     }
 
     String signWithDPoPPrivateKey(String kid, JSONObject payload) throws Exception {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return "";
-        }
         String alias = this.formatDPoPKeyAlias(kid);
         KeyPair keyPair = this.getPrivateKey(alias);
         return this.signDPoPJWT(
@@ -336,9 +335,6 @@ class Authgear {
     }
 
     boolean checkDPoPPrivateKey(String kid) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
         try {
             String alias = this.formatDPoPKeyAlias(kid);
             this.getPrivateKey(alias);
@@ -349,9 +345,6 @@ class Authgear {
     }
 
     String computeDPoPJKT(String kid) throws Exception {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return "";
-        }
         String alias = this.formatDPoPKeyAlias(kid);
         KeyPair keyPair = this.getPrivateKey(alias);
         JSONObject jwk = this.makeJWK(keyPair, kid);

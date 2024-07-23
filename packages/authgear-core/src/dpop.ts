@@ -13,14 +13,15 @@ export interface DPopInterAppSharedStorage extends InterAppSharedStorage {}
  * @internal
  */
 export interface DPoPProvider {
-  generateDPoPProof(htm: string, htu: string): Promise<string>;
-  computeJKT(): Promise<string>;
+  generateDPoPProof(htm: string, htu: string): Promise<string | null>;
+  computeJKT(): Promise<string | null>;
 }
 
 /**
  * @internal
  */
 export interface InternalDPoPPlugin {
+  checkDPoPSupported(): Promise<boolean>;
   generateUUID(): Promise<string>;
   createDPoPPrivateKey(kid: string): Promise<void>;
   signWithDPoPPrivateKey(
@@ -53,7 +54,10 @@ export class DefaultDPoPProvider implements DPoPProvider {
     this.plugin = plugin;
   }
 
-  async generateDPoPProof(htm: string, htu: string): Promise<string> {
+  async generateDPoPProof(htm: string, htu: string): Promise<string | null> {
+    if (!(await this.plugin.checkDPoPSupported())) {
+      return null;
+    }
     const existingKeyId = await this.sharedStorage.getDPoPKeyID(
       this.getNamespace()
     );
@@ -86,7 +90,10 @@ export class DefaultDPoPProvider implements DPoPProvider {
     }
   }
 
-  async computeJKT(): Promise<string> {
+  async computeJKT(): Promise<string | null> {
+    if (!(await this.plugin.checkDPoPSupported())) {
+      return null;
+    }
     const existingKeyId = await this.sharedStorage.getDPoPKeyID(
       this.getNamespace()
     );

@@ -932,16 +932,22 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     }
 
     @ReactMethod
-    public void createDPoPPrivateKey(ReadableMap options, Promise promise) {
-        String kid = options.getString("kid");
+    public void checkDPoPSupported(ReadableMap options, Promise promise) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            promise.resolve(Arguments.createMap());
+            promise.resolve("false");
             return;
         }
+        promise.resolve("true");
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    @ReactMethod
+    public void createDPoPPrivateKey(ReadableMap options, Promise promise) {
+        String kid = options.getString("kid");
         String alias = this.formatDPoPKeyAlias(kid);
         try {
             this.generateKey(alias);
-            promise.resolve("");
+            promise.resolve(null);
         } catch (Exception e) {
             promise.reject(e);
         }
@@ -951,10 +957,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     public void signWithDPoPPrivateKey(ReadableMap options, Promise promise) {
         String kid = options.getString("kid");
         ReadableMap payload = options.getMap("payload");
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            promise.resolve("");
-            return;
-        }
         String alias = this.formatDPoPKeyAlias(kid);
         try {
             KeyPair keyPair = this.getPrivateKey(alias);
@@ -971,10 +973,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     @ReactMethod
     public void checkDPoPPrivateKey(ReadableMap options, Promise promise) {
         String kid = options.getString("kid");
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            promise.resolve("true");
-            return;
-        }
         String alias = this.formatDPoPKeyAlias(kid);
         try {
             this.getPrivateKey(alias);
@@ -987,10 +985,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     @ReactMethod
     public void computeDPoPJKT(ReadableMap options, Promise promise) {
         String kid = options.getString("kid");
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            promise.resolve("");
-            return;
-        }
         String alias = this.formatDPoPKeyAlias(kid);
         try {
             KeyPair keyPair = this.getPrivateKey(alias);

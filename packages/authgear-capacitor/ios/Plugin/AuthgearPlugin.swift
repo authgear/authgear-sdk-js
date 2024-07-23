@@ -230,6 +230,13 @@ public class AuthgearPlugin: CAPPlugin {
         }
     }
 
+    @objc func checkDPoPSupported(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            let ok = self.impl.checkDPoPSupported()
+            call.resolve(["ok": ok])
+        }
+    }
+
     @objc func createDPoPPrivateKey(_ call: CAPPluginCall) {
         let kid = call.getString("kid")!
 

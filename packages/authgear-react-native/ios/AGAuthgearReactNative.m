@@ -527,6 +527,17 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
     }];
 }
     
+RCT_EXPORT_METHOD(checkDPoPSupported:(NSDictionary *)options
+  resolver:(RCTPromiseResolveBlock)resolve
+  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    if (@available(iOS 11.3, *)) {
+        resolve(@"true");
+        return;
+    }
+    resolve(@"false");
+}
+    
 RCT_EXPORT_METHOD(createDPoPPrivateKey:(NSDictionary *)options
   resolver:(RCTPromiseResolveBlock)resolve
   rejecter:(RCTPromiseRejectBlock)reject)

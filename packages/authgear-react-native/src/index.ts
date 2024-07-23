@@ -41,6 +41,7 @@ import {
   signWithDPoPPrivateKey,
   checkDPoPPrivateKey,
   computeDPoPJKT,
+  checkDPoPSupported,
 } from "./nativemodule";
 import {
   BiometricOptions,
@@ -270,6 +271,7 @@ export class ReactNativeContainer {
       sharedStorage,
       plugin: {
         generateUUID,
+        checkDPoPSupported,
         createDPoPPrivateKey,
         signWithDPoPPrivateKey,
         checkDPoPPrivateKey,

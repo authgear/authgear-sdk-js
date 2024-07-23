@@ -364,6 +364,13 @@ import Capacitor
         }
     }
 
+    @objc func checkDPoPSupported() -> Bool {
+        if #available(iOS 11.3, *) {
+            return true
+        }
+        return false
+    }
+
     @objc func createDPoPPrivateKey(kid: String) throws {
         var cfError: Unmanaged<CFError>?
         let attributes: NSDictionary = [
