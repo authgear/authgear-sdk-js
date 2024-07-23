@@ -350,6 +350,76 @@ public class AuthgearPlugin extends Plugin {
         }
     }
 
+    @PluginMethod
+    public void checkDPoPSupported(PluginCall call) {
+        try {
+            boolean ok = this.implementation.checkDPoPSupported();
+            JSObject obj = new JSObject();
+            obj.put("ok", ok);
+            call.resolve(obj);
+            call.resolve();
+        } catch (Exception e) {
+            this.reject(call, e);
+        }
+    }
+
+    @PluginMethod
+    public void createDPoPPrivateKey(PluginCall call) {
+        String kid = call.getString("kid");
+
+        try {
+            this.implementation.createDPoPPrivateKey(kid);
+            call.resolve();
+        } catch (Exception e) {
+            this.reject(call, e);
+        }
+    }
+
+    @PluginMethod
+    public void signWithDPoPPrivateKey(PluginCall call) {
+        String kid = call.getString("kid");
+        JSObject payload = call.getObject("payload");
+
+        try {
+            String jwt = this.implementation.signWithDPoPPrivateKey(kid, payload);
+            JSObject obj = new JSObject();
+            obj.put("jwt", jwt);
+            call.resolve(obj);
+        } catch (Exception e) {
+            this.reject(call, e);
+        }
+    }
+
+    @PluginMethod
+    public void checkDPoPPrivateKey(PluginCall call) {
+        String kid = call.getString("kid");
+
+        try {
+            boolean ok = this.implementation.checkDPoPPrivateKey(kid);
+            JSObject obj = new JSObject();
+            obj.put("ok", ok);
+            call.resolve(obj);
+            call.resolve();
+        } catch (Exception e) {
+            this.reject(call, e);
+        }
+    }
+
+    @PluginMethod
+    public void computeDPoPJKT(PluginCall call) {
+        String kid = call.getString("kid");
+
+        try {
+            String jkt = this.implementation.computeDPoPJKT(kid);
+            JSObject obj = new JSObject();
+            obj.put("jkt", jkt);
+            call.resolve(obj);
+            call.resolve();
+        } catch (Exception e) {
+            this.reject(call, e);
+        }
+    }
+
     private JSONArray jsObjectGetArray(JSObject obj, String key) {
         try {
             return obj.getJSONArray(key);

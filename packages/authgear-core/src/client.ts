@@ -14,6 +14,7 @@ import {
   _AnonymousUserPromotionCodeResponse,
 } from "./types";
 import { _decodeError, AuthgearError, ServerError, OAuthError } from "./error";
+import { DPoPProvider } from "./dpop";
 
 /**
  * @internal
@@ -26,6 +27,7 @@ export function _removeTrailingSlash(s: string): string {
  * @internal
  */
 export abstract class _BaseAPIClient {
+  private dpopProvider: DPoPProvider | null;
   userAgent?: string;
 
   _delegate?: _APIClientDelegate;
@@ -52,6 +54,10 @@ export abstract class _BaseAPIClient {
 
   _config?: _OIDCConfiguration;
 
+  constructor(dpopProvider: DPoPProvider | null) {
+    this.dpopProvider = dpopProvider;
+  }
+
   protected async _prepareHeaders(): Promise<Record<string, string>> {
     const headers: Record<string, string> = {};
     const accessToken = this._delegate?.getAccessToken();
@@ -64,26 +70,36 @@ export abstract class _BaseAPIClient {
     return headers;
   }
 
-  async _fetchWithoutRefresh(
-    url: string,
-    init?: RequestInit
-  ): Promise<Response> {
+  async _doFetch(request: Request): Promise<Response> {
     if (!this._fetchFunction) {
       throw new AuthgearError("missing fetchFunction in api client");
     }
 
+    if (this.dpopProvider != null) {
+      const dpopJWT = await this.dpopProvider.generateDPoPProof({
+        htm: request.method,
+        htu: request.url,
+      });
+      if (dpopJWT) {
+        request.headers.set("DPoP", dpopJWT);
+      }
+    }
+
+    return this._fetchFunction(request);
+  }
+
+  async _fetchWithoutRefresh(
+    url: string,
+    init?: RequestInit
+  ): Promise<Response> {
     if (!this._requestClass) {
       throw new AuthgearError("missing requestClass in api client");
     }
     const request = new this._requestClass(url, init);
-    return this._fetchFunction(request);
+    return this._doFetch(request);
   }
 
   async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
-    if (this._fetchFunction == null) {
-      throw new AuthgearError("missing fetchFunction in api client");
-    }
-
     if (this._requestClass == null) {
       throw new AuthgearError("missing requestClass in api client");
     }
@@ -104,7 +120,7 @@ export abstract class _BaseAPIClient {
       request.headers.set(key, headers[key]);
     }
 
-    return this._fetchFunction(request);
+    return this._doFetch(request);
   }
 
   protected async _requestJSON(

@@ -4,7 +4,7 @@ import {
   _ContainerStorage,
   _KeyMaker,
   _SafeStorageDriver,
-  InterAppSharedStorage,
+  type InterAppSharedStorage,
 } from "@authgear/core";
 import { storageGetItem, storageSetItem, storageDeleteItem } from "./plugin";
 
@@ -94,6 +94,22 @@ export class PersistentInterAppSharedStorage implements InterAppSharedStorage {
   }
   async delDeviceSecret(namespace: string): Promise<void> {
     return this.storageDriver.del(this.keyMaker.keyDeviceSecret(namespace));
+  }
+
+  async setDPoPKeyID(namespace: string, kid: string): Promise<void> {
+    return this.storageDriver.set(this.keyMaker.keyDPoPKeyID(namespace), kid);
+  }
+  async getDPoPKeyID(namespace: string): Promise<string | null> {
+    return this.storageDriver.get(this.keyMaker.keyDPoPKeyID(namespace));
+  }
+  async delDPoPKeyID(namespace: string): Promise<void> {
+    return this.storageDriver.del(this.keyMaker.keyDPoPKeyID(namespace));
+  }
+
+  async onLogout(namespace: string): Promise<void> {
+    await this.delDPoPKeyID(namespace);
+    await this.delDeviceSecret(namespace);
+    await this.delIDToken(namespace);
   }
 }
 

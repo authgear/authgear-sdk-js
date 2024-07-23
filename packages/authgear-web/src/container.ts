@@ -12,7 +12,7 @@ import {
   Page,
   PromptOption,
   SettingsAction,
-  InterAppSharedStorage,
+  type InterAppSharedStorage,
 } from "@authgear/core";
 import { _WebAPIClient } from "./client";
 import {

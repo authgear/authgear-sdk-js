@@ -16,7 +16,7 @@ import {
   UserInfo,
   _PreAuthenticatedURLOptions,
   PromptOption,
-  InterAppSharedStorage,
+  type InterAppSharedStorage,
 } from "./types";
 import { _base64URLDecode } from "./base64";
 import { _decodeUTF8 } from "./utf8";
@@ -246,8 +246,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
   async _clearSession(reason: SessionStateChangeReason): Promise<void> {
     await this._delegate.tokenStorage.delRefreshToken(this.name);
-    await this._delegate.sharedStorage.delIDToken(this.name);
-    await this._delegate.sharedStorage.delDeviceSecret(this.name);
+    await this._delegate.sharedStorage.onLogout(this.name);
     this.idToken = undefined;
     this.accessToken = undefined;
     this.refreshToken = undefined;
@@ -499,6 +498,10 @@ export class _BaseContainer<T extends _BaseAPIClient> {
         options.xPreAuthenticatedURLToken
       );
     }
+    if (options.dpopJKT != null) {
+      query.append("dpop_jkt", options.dpopJKT);
+    }
+
     if (!this.isSSOEnabled) {
       // For backward compatibility
       // If the developer updates the SDK but not the server

@@ -17,6 +17,11 @@ async function _wrapPromise<T>(p: Promise<T>): Promise<T> {
   }
 }
 
+// Objective-C cannot return a correct boolean. Use string to represent a boolean.
+function parseBooleanString(str: unknown): boolean {
+  return str === "true";
+}
+
 export async function storageGetItem(key: string): Promise<string | null> {
   return _wrapPromise(AuthgearReactNative.storageGetItem(key));
 }
@@ -132,4 +137,35 @@ export async function checkBiometricSupported(
   options: BiometricOptions
 ): Promise<void> {
   return _wrapPromise(AuthgearReactNative.checkBiometricSupported(options));
+}
+
+export async function checkDPoPSupported(): Promise<boolean> {
+  // Call with empty object,
+  // because it seems there is some problem in objc if we call a method without arguments.
+  const result = await _wrapPromise(AuthgearReactNative.checkDPoPSupported({}));
+  return parseBooleanString(result);
+}
+
+export async function createDPoPPrivateKey(kid: string): Promise<void> {
+  return _wrapPromise(AuthgearReactNative.createDPoPPrivateKey({ kid }));
+}
+
+export async function signWithDPoPPrivateKey(
+  kid: string,
+  payload: Record<string, unknown>
+): Promise<string> {
+  return _wrapPromise(
+    AuthgearReactNative.signWithDPoPPrivateKey({ kid, payload })
+  );
+}
+
+export async function checkDPoPPrivateKey(kid: string): Promise<boolean> {
+  const result = await _wrapPromise(
+    AuthgearReactNative.checkDPoPPrivateKey({ kid })
+  );
+  return parseBooleanString(result);
+}
+
+export async function computeDPoPJKT(kid: string): Promise<string> {
+  return _wrapPromise(AuthgearReactNative.computeDPoPJKT({ kid }));
 }

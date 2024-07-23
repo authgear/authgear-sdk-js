@@ -16,7 +16,10 @@ import {
   Page,
   PromptOption,
   SettingsAction,
-  InterAppSharedStorage,
+  type InterAppSharedStorage,
+  _OIDCAuthenticationRequest,
+  DPoPProvider,
+  DefaultDPoPProvider,
 } from "@authgear/core";
 import { Platform } from "react-native";
 import {
@@ -34,6 +37,11 @@ import {
   signWithBiometricPrivateKey,
   generateUUID,
   getDeviceInfo,
+  createDPoPPrivateKey,
+  signWithDPoPPrivateKey,
+  checkDPoPPrivateKey,
+  computeDPoPJKT,
+  checkDPoPSupported,
 } from "./nativemodule";
 import {
   BiometricOptions,
@@ -161,6 +169,8 @@ export class ReactNativeContainer {
    */
   uiImplementation: UIImplementation;
 
+  private dpopProvider: DPoPProvider;
+
   /**
    * @internal
    */
@@ -254,7 +264,23 @@ export class ReactNativeContainer {
       ...options,
     } as ContainerOptions;
 
-    const apiClient = new _ReactNativeAPIClient();
+    const sharedStorage = new PersistentInterAppSharedStorage();
+    const namespaceGetter = () => this.baseContainer.name;
+    const dpopProvider = new DefaultDPoPProvider({
+      getNamespace: namespaceGetter,
+      sharedStorage,
+      plugin: {
+        generateUUID,
+        checkDPoPSupported,
+        createDPoPPrivateKey,
+        signWithDPoPPrivateKey,
+        checkDPoPPrivateKey,
+        computeDPoPJKT,
+      },
+    });
+
+    this.dpopProvider = dpopProvider;
+    const apiClient = new _ReactNativeAPIClient(dpopProvider);
 
     this.baseContainer = new _BaseContainer<_ReactNativeAPIClient>(
       o,
@@ -265,7 +291,7 @@ export class ReactNativeContainer {
 
     this.storage = new PersistentContainerStorage();
     this.tokenStorage = new PersistentTokenStorage();
-    this.sharedStorage = new PersistentInterAppSharedStorage();
+    this.sharedStorage = sharedStorage;
     this.uiImplementation = new DeviceBrowserUIImplementation();
 
     this.wechatRedirectDeepLinkListener = (url: string) => {
@@ -778,13 +804,18 @@ export class ReactNativeContainer {
    * @internal
    */
   async authorizeEndpoint(options: AuthenticateOptions): Promise<string> {
-    return this.baseContainer.authorizeEndpoint({
+    const oidcRequest: _OIDCAuthenticationRequest = {
       ...options,
       responseType: "code",
       scope: this.baseContainer.getAuthenticateScopes({
         requestOfflineAccess: true,
       }),
-    });
+    };
+    const dpopJKT = await this.dpopProvider.computeJKT();
+    if (dpopJKT) {
+      oidcRequest.dpopJKT = dpopJKT;
+    }
+    return this.baseContainer.authorizeEndpoint(oidcRequest);
   }
 
   /**

@@ -18,6 +18,8 @@
 		7774CCB12B302A7F007420F2 /* AuthgearPluginImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7774CCB02B302A7F007420F2 /* AuthgearPluginImpl.swift */; };
 		77F8B4232B4FDFB700A6F088 /* Asn1IntegerConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77F8B4222B4FDFB700A6F088 /* Asn1IntegerConversion.swift */; };
 		77F8B4252B4FE08700A6F088 /* ASN1DERParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77F8B4242B4FE08700A6F088 /* ASN1DERParsing.swift */; };
+		A64E474D2C4907F400D599B2 /* Thumbprint.swift in Sources */ = {isa = PBXBuildFile; fileRef = A64E474C2C4907F400D599B2 /* Thumbprint.swift */; };
+		A64E474F2C4909FA00D599B2 /* AuthgearError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A64E474E2C4909FA00D599B2 /* AuthgearError.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +49,8 @@
 		77F8B4242B4FE08700A6F088 /* ASN1DERParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASN1DERParsing.swift; sourceTree = "<group>"; };
 		91781294A431A2A7CC6EB714 /* Pods-Plugin.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Plugin.release.xcconfig"; path = "Pods/Target Support Files/Pods-Plugin/Pods-Plugin.release.xcconfig"; sourceTree = "<group>"; };
 		96ED1B6440D6672E406C8D19 /* Pods-PluginTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PluginTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-PluginTests/Pods-PluginTests.debug.xcconfig"; sourceTree = "<group>"; };
+		A64E474C2C4907F400D599B2 /* Thumbprint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Thumbprint.swift; sourceTree = "<group>"; };
+		A64E474E2C4909FA00D599B2 /* AuthgearError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthgearError.swift; sourceTree = "<group>"; };
 		F65BB2953ECE002E1EF3E424 /* Pods-PluginTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PluginTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-PluginTests/Pods-PluginTests.release.xcconfig"; sourceTree = "<group>"; };
 		F6753A823D3815DB436415E3 /* Pods_PluginTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PluginTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -103,6 +107,8 @@
 				775CFBB62B70B618002938DF /* AGWKWebViewController.swift */,
 				50ADFF8C201F53D600D50D53 /* Info.plist */,
 				77F8B4222B4FDFB700A6F088 /* Asn1IntegerConversion.swift */,
+				A64E474C2C4907F400D599B2 /* Thumbprint.swift */,
+				A64E474E2C4909FA00D599B2 /* AuthgearError.swift */,
 				77F8B4242B4FE08700A6F088 /* ASN1DERParsing.swift */,
 			);
 			path = Plugin;
@@ -313,10 +319,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				77F8B4252B4FE08700A6F088 /* ASN1DERParsing.swift in Sources */,
+				A64E474F2C4909FA00D599B2 /* AuthgearError.swift in Sources */,
 				50E1A94820377CB70090CE1A /* AuthgearPlugin.swift in Sources */,
 				77F8B4232B4FDFB700A6F088 /* Asn1IntegerConversion.swift in Sources */,
 				50ADFFA82020EE4F00D50D53 /* AuthgearPlugin.m in Sources */,
 				7774CCB12B302A7F007420F2 /* AuthgearPluginImpl.swift in Sources */,
+				A64E474D2C4907F400D599B2 /* Thumbprint.swift in Sources */,
 				775CFBB72B70B618002938DF /* AGWKWebViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
