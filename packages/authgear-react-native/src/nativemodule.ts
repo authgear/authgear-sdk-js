@@ -151,6 +151,7 @@ export async function checkDPoPPrivateKey(kid: string): Promise<boolean> {
   const result = await _wrapPromise(
     AuthgearReactNative.checkDPoPPrivateKey({ kid })
   );
+  // Objective-C cannot return a correct boolean. Use string to represent a boolean.
   return result === "true";
 }
 
