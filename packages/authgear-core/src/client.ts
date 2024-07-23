@@ -76,10 +76,10 @@ export abstract class _BaseAPIClient {
     }
 
     if (this.dpopProvider != null) {
-      const dpopJWT = await this.dpopProvider.generateDPoPProof(
-        request.method,
-        request.url
-      );
+      const dpopJWT = await this.dpopProvider.generateDPoPProof({
+        htm: request.method,
+        htu: request.url,
+      });
       if (dpopJWT) {
         request.headers.set("DPoP", dpopJWT);
       }

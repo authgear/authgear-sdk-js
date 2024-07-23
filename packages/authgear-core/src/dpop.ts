@@ -13,7 +13,10 @@ export interface DPopInterAppSharedStorage extends InterAppSharedStorage {}
  * @internal
  */
 export interface DPoPProvider {
-  generateDPoPProof(htm: string, htu: string): Promise<string | null>;
+  generateDPoPProof(options: {
+    htm: string;
+    htu: string;
+  }): Promise<string | null>;
   computeJKT(): Promise<string | null>;
 }
 
@@ -54,7 +57,13 @@ export class DefaultDPoPProvider implements DPoPProvider {
     this.plugin = plugin;
   }
 
-  async generateDPoPProof(htm: string, htu: string): Promise<string | null> {
+  async generateDPoPProof({
+    htm,
+    htu,
+  }: {
+    htm: string;
+    htu: string;
+  }): Promise<string | null> {
     if (!(await this.plugin.checkDPoPSupported())) {
       return null;
     }
