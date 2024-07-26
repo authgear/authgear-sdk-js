@@ -38,7 +38,9 @@ export interface ReauthenticateOptions {
    */
   state?: string;
   /**
-   * Custom state.
+   * Custom state. Use this parameter to provide parameters from the client application to Custom UI. The string in xState can be accessed by the Custom UI. 
+   * 
+   * Ignore this parameter if default AuthUI is used.
    */
   xState?: string;
   /**
@@ -76,7 +78,9 @@ export interface AuthenticateOptions {
    */
   state?: string;
   /**
-   * Custom state.
+   * Custom state. Use this parameter to provide parameters from the client application to Custom UI. The string in xState can be accessed by the Custom UI. 
+   * 
+   * Ignore this parameter if default AuthUI is used.
    */
   xState?: string;
   /**
@@ -93,6 +97,7 @@ export interface AuthenticateOptions {
    */
   prompt?: PromptOption[] | PromptOption;
   /**
+   * @internal
    * OIDC login hint parameter
    */
   loginHint?: string;
@@ -106,6 +111,7 @@ export interface AuthenticateOptions {
    */
   uiLocales?: string[];
   /**
+   * @internal
    * OAuth response type
    */
   responseType?: "code" | "none";
@@ -163,7 +169,9 @@ export interface SettingsActionOptions {
    */
   state?: string;
   /**
-   * Custom state.
+   * Custom state. Use this parameter to provide parameters from the client application to Custom UI. The string in xState can be accessed by the Custom UI.
+   * 
+   * Ignore this parameter if default AuthUI is used.
    */
   xState?: string;
   /**
@@ -194,7 +202,9 @@ export interface PromoteOptions {
    */
   state?: string;
   /**
-   * Custom state.
+   * Custom state. Use this parameter to provide parameters from the client application to Custom UI. The string in xState can be accessed by the Custom UI. 
+   * 
+   * Ignore this parameter if default AuthUI is used.
    */
   xState?: string;
   /**
@@ -207,6 +217,7 @@ export interface PromoteOptions {
    */
   uiLocales?: string[];
   /**
+   * @internal
    * OAuth response type
    */
   responseType?: "code" | "none";
