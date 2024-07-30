@@ -49,8 +49,8 @@ export interface AuthenticateOptions {
    */
   prompt?: PromptOption[] | PromptOption;
   /**
-   * @internal
    * OIDC login hint parameter
+   * @internal
    */
   loginHint?: string;
   /**
@@ -69,8 +69,8 @@ export interface AuthenticateOptions {
   colorScheme?: ColorScheme;
 
   /**
-   * @internal
    * OAuth response type
+   * @internal
    */
   responseType?: "code" | "none";
 
