@@ -11,7 +11,7 @@
     "@jridgewell/trace-mapping" "^0.3.24"
 
 "@authgear/react-native@../../packages/authgear-react-native":
-  version "2.11.0-rc.0"
+  version "2.11.0"
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.24.7":
   version "7.24.7"
@@ -3367,9 +3367,9 @@ fast-levenshtein@^2.0.6:
   integrity sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==
 
 fast-xml-parser@^4.0.12:
-  version "4.4.0"
-  resolved "https://registry.npmjs.org/fast-xml-parser/-/fast-xml-parser-4.4.0.tgz"
-  integrity sha512-kLY3jFlwIYwBNDojclKsNAC12sfD6NwW74QB2CoNGPvtVxjliYehVunB3HYyNi+n4Tt1dAcgwYvmKF/Z18flqg==
+  version "4.4.1"
+  resolved "https://registry.npmjs.org/fast-xml-parser/-/fast-xml-parser-4.4.1.tgz"
+  integrity sha512-xkjOecfnKGkSsOwtZ5Pz7Us/T6mrbPQrq0nh+aCO5V9nk5NLWmasAHumTKjiPJPWANe+kAZ84Jc8ooJkzZ88Sw==
   dependencies:
     strnum "^1.0.5"
 
@@ -5022,9 +5022,9 @@ metro@0.76.9, metro@^0.76.9:
     yargs "^17.6.2"
 
 micromatch@^4.0.4:
-  version "4.0.7"
-  resolved "https://registry.npmjs.org/micromatch/-/micromatch-4.0.7.tgz"
-  integrity sha512-LPP/3KorzCwBxfeUuZmaR6bG2kdeHSbe0P2tY3FLRU4vYrjYz5hI4QZwV0njUx3jeuKe67YukQ1LSPZBKDqO/Q==
+  version "4.0.8"
+  resolved "https://registry.npmjs.org/micromatch/-/micromatch-4.0.8.tgz"
+  integrity sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==
   dependencies:
     braces "^3.0.3"
     picomatch "^2.3.1"
@@ -5551,7 +5551,7 @@ react-is@^17.0.1:
 
 react-native@0.72.15:
   version "0.72.15"
-  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.72.15.tgz#9b74b0c39ec42befb70d494b535f863c4229ef55"
+  resolved "https://registry.npmjs.org/react-native/-/react-native-0.72.15.tgz"
   integrity sha512-UDxOZwCxhwb0dGuvcB/04uWzhDJ8etqW3fMOq6bv35WwEXMgKXXqZpshhMo64UVWm/m2ZmM32ckn5sf1EIqD9Q==
   dependencies:
     "@jest/create-cache-key-function" "^29.2.1"
