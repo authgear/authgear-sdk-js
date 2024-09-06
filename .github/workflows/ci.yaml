@@ -113,7 +113,7 @@ jobs:
       run: ./gradlew :app:assembleRelease
 
   react_native_ios:
-    if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.ref == 'refs/heads/master' && github.event_name == 'push' }}
+    if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.ref == 'refs/heads/test-ios-build' && github.event_name == 'push' }}
     needs: test
     # When we change the runner image, the ruby version will change too.
     # We need to update .tool-versions to make them the same.
