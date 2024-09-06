@@ -1,4 +1,5 @@
 nodejs 20.9.0
 yarn 1.22.22
 kubectl 1.21.8
-ruby 3.3.3
+# https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md?plain=1#L31
+ruby 3.0.7
