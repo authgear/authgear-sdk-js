@@ -30,7 +30,13 @@ export declare class CancelError extends AuthgearError {}
  * @public
  */
 export declare enum ColorScheme {
+  /**
+   * Use the light color scheme.
+   */
   Light = "light",
+  /**
+   * Use the dark color scheme.
+   */
   Dark = "dark",
 }
 
