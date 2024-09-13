@@ -55,14 +55,50 @@ export declare interface ContainerOptions {
  * @public
  */
 export declare enum ErrorName {
+  /**
+   * Indicates that the server does not understand the request (i.e. syntactic error).
+   * Status code: 400
+   */
   BadRequest = "BadRequest",
+  /**
+   * Indicates that the server understands the request, but refuse to process it (i.e. semantic error).
+   * Status code: 400
+   */
   Invalid = "Invalid",
+  /**
+   * Indicates that the client does not have valid credentials (i.e. authentication error).
+   * Status code: 401
+   */
   Unauthorized = "Unauthorized",
+  /**
+   * Indicates that the client's credentials are not allowed for the request (i.e. authorization error).
+   * Status code: 403
+   */
   Forbidden = "Forbidden",
+  /**
+   * Indicates that the server cannot find the requested resource.
+   * Status code: 404
+   */
   NotFound = "NotFound",
+  /**
+   * Indicates that the resource is already exists on the server.
+   * Status code: 409
+   */
   AlreadyExists = "AlreadyExists",
+  /**
+   * Indicates that the client has sent too many requests in a given amount of time.
+   * Status code: 429
+   */
   TooManyRequest = "TooManyRequest",
+  /**
+   * Indicates that the server encountered an unexpected condition and unable to process the request.
+   * Status code: 500
+   */
   InternalError = "InternalError",
+  /**
+   * Indicates that the server is not ready to handle the request.
+   * Status code: 503
+   */
   ServiceUnavailable = "ServiceUnavailable",
 }
 
