@@ -176,9 +176,23 @@ export declare class PreAuthenticatedURLNotAllowedError extends AuthgearError {}
  * @public
  */
 export declare enum PromptOption {
+  /**
+   * The `none` prompt is used to sliently authenticate the user without prompting for any action.
+   * This prompt bypasses the need for `login` and `consent` prompts
+   * only when the user has previously given consent to the application and has an active session.
+   */
   None = "none",
+  /**
+   * The `login` prompt requires the user to log in to the authentication provider which forces the user to re-authenticate.
+   */
   Login = "login",
+  /**
+   * The `consent` prompt asks the user to consent to the scopes.
+   */
   Consent = "consent",
+  /**
+   * The `select_account` prompt allows the user to select from multiple accounts associated with the authentication provider.
+   */
   SelectAccount = "select_account",
 }
 
