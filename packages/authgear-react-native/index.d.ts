@@ -127,10 +127,18 @@ export declare class OAuthError extends AuthgearError {
 }
 
 /**
+ * The path of the page in Authgear.
+ *
  * @public
  */
 export declare enum Page {
+  /**
+   * The path of the settings page in Authgear.
+   */
   Settings = "/settings",
+  /**
+   * The path of the indenties page in Authgear.
+   */
   Identities = "/settings/identities",
 }
 
