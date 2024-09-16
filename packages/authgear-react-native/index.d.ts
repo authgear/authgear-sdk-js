@@ -274,10 +274,18 @@ export declare enum SessionStateChangeReason {
 }
 
 /**
+ * The actions that can be performed in Authgear settings page.
+ *
  * @public
  */
 export declare enum SettingsAction {
+  /**
+   * Change password in Authgear settings page.
+   */
   ChangePassword = "change_password",
+  /**
+   * Delete account in Authgear settings page.
+   */
   DeleteAccount = "delete_account",
 }
 
