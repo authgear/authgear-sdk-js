@@ -254,7 +254,7 @@ export declare enum SessionState {
  * These reasons can be thought of as the transition of a SessionState, which is described as follows:
  *
  * ```
- *                                                          LOGOUT / INVALID
+ *                                                      LOGOUT / INVALID / CLEAR
  *                                           +----------------------------------------------+
  *                                           v                                              |
  *    State: UNKNOWN ----- NO_TOKEN ----> State: NO_SESSION ---- AUTHENTICATED -----> State: AUTHENTICATED
