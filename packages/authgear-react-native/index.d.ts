@@ -1041,7 +1041,7 @@ export declare interface ReauthenticateOptions {
  */
 export declare interface ReauthenticateResult {
   /**
-   * UserInfo.
+   * The user info after reauthenticated.
    */
   userInfo: UserInfo;
 }
