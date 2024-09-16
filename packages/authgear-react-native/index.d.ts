@@ -238,6 +238,8 @@ export declare class ServerError extends AuthgearError {
  * After a call to configure, the session state would become "AUTHENTICATED" if a previous session was found,
  * or "NO_SESSION" if such session was not found.
  *
+ * Please refer to {@link SessionStateChangeReason} for more information.
+ *
  * @public
  */
 export declare enum SessionState {
