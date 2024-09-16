@@ -333,7 +333,11 @@ export declare class TransientTokenStorage implements TokenStorage {
 /**
  * UserInfo is the result of fetchUserInfo.
  * It contains `sub` which is the User ID,
- * as well OIDC standard claims like `email`.
+ * as well OIDC standard claims like `email`,
+ * see https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims.
+ *
+ * In addition to these standard claims, it may include custom claims
+ * defined by Authgear to support additional functionality like `isVerified`.
  *
  * @public
  */
