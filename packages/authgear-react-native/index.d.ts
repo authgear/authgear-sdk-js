@@ -143,28 +143,28 @@ export declare enum Page {
 }
 
 /**
- * PreAuthenticatedURLDeviceSecretNotFoundError
+ * PreAuthenticatedURLDeviceSecretNotFoundError occured when device secret is not found in the storage.
  *
  * @public
  */
 export declare class PreAuthenticatedURLDeviceSecretNotFoundError extends PreAuthenticatedURLNotAllowedError {}
 
 /**
- * PreAuthenticatedURLIDTokenNotFoundError
+ * PreAuthenticatedURLIDTokenNotFoundError occured when id token is not found in the storage.
  *
  * @public
  */
 export declare class PreAuthenticatedURLIDTokenNotFoundError extends PreAuthenticatedURLNotAllowedError {}
 
 /**
- * PreAuthenticatedURLInsufficientScopeError
+ * PreAuthenticatedURLInsufficientScopeError occured when the client does not have enough scopes for pre-authenticated URL.
  *
  * @public
  */
 export declare class PreAuthenticatedURLInsufficientScopeError extends PreAuthenticatedURLNotAllowedError {}
 
 /**
- * PreAuthenticatedURLNotAllowedError
+ * PreAuthenticatedURLNotAllowedError is the root class of errors related to pre-authenticated URL.
  *
  * @public
  */
