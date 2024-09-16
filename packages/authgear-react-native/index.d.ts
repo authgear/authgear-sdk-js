@@ -1133,6 +1133,9 @@ export declare class WebKitWebViewUIImplementation implements UIImplementation {
 }
 
 /**
+ * WebKitWebViewUIImplementationOptions specifies options for configuring the user interface of a WebKit WebView.
+ * It allows platform-specific customization for iOS and Android.
+ *
  * @public
  */
 export declare interface WebKitWebViewUIImplementationOptions {
@@ -1141,24 +1144,45 @@ export declare interface WebKitWebViewUIImplementationOptions {
 }
 
 /**
- * Color is an integer according to this encoding https://developer.android.com/reference/android/graphics/Color#encoding
+ * Color is an integer according to this encoding https://developer.android.com/reference/android/graphics/Color#encoding.
  *
  * @public
  */
 export declare interface WebKitWebViewUIImplementationOptionsAndroid {
+  /**
+   * The color is in decimal format representing the argb, for example, blue is 0xff0000ff, then the color is 4278190335.
+   */
   actionBarBackgroundColor?: number;
+  /**
+   * The color is in decimal format representing the argb, for example, blue is 0xff0000ff, then the color is 4278190335.
+   */
   actionBarButtonTintColor?: number;
 }
 
 /**
- * Color is an integer according to this encoding https://developer.android.com/reference/android/graphics/Color#encoding
+ * Color is an integer according to this encoding https://developer.android.com/reference/android/graphics/Color#encoding.
+ * Yes, it is still from Android such that the color encoding method in iOS is the same that used in Android.
  *
  * @public
  */
 export declare interface WebKitWebViewUIImplementationOptionsIOS {
+  /**
+   * The color is in decimal format representing the argb, for example, blue is 0xff0000ff, then the color is 4278190335.
+   */
   navigationBarBackgroundColor?: number;
+  /**
+   * The color is in decimal format representing the argb, for example, blue is 0xff0000ff, then the color is 4278190335.
+   */
   navigationBarButtonTintColor?: number;
+  /**
+   * Styles for the modal.
+   * See https://developer.apple.com/documentation/uikit/uimodalpresentationstyle.
+   */
   modalPresentationStyle?: "automatic" | "fullScreen" | "pageSheet";
+  /**
+   * Indicates whether you can inspect the view with Safari Web Inspector.
+   * See https://developer.apple.com/documentation/webkit/wkwebview/4111163-isinspectable.
+   */
   isInspectable?: boolean;
 }
 
