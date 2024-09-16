@@ -1047,6 +1047,9 @@ export declare interface ReauthenticateResult {
 }
 
 /**
+ * Options that used by {@link ReactNativeContainer.open}.
+ * It allows you to configure the UI of the opened settings page.
+ *
  * @public
  */
 export declare interface SettingOptions {
