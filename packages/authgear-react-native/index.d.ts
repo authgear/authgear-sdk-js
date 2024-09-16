@@ -297,8 +297,17 @@ export declare enum SettingsAction {
  * @public
  */
 export declare interface TokenStorage {
+  /**
+   * Stores a refresh token for a give namespace to the storage.
+   */
   setRefreshToken(namespace: string, refreshToken: string): Promise<void>;
+  /**
+   * Retrieves the refresh token associated with a specific namespace in the storage.
+   */
   getRefreshToken(namespace: string): Promise<string | null>;
+  /**
+   * Deletes the refresh token for the specified namespace in the storage.
+   */
   delRefreshToken(namespace: string): Promise<void>;
 }
 
