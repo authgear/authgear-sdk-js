@@ -1074,6 +1074,9 @@ export declare interface SettingOptions {
 }
 
 /**
+ * It is similar to {@link SettingOptions}, but it is used for configuring
+ * the UI of the opened settings page for specific action like {@link SettingsAction.ChangePassword}.
+ *
  * @public
  */
 export declare interface SettingsActionOptions {
