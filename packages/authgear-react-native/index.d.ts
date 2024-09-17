@@ -697,11 +697,24 @@ export declare class DeviceBrowserUIImplementation implements UIImplementation {
 }
 
 /**
+ * OpenAuthorizationURLOptions is options for {@link UIImplementation.openAuthorizationURL}.
+ *
  * @public
  */
 export declare interface OpenAuthorizationURLOptions {
+  /**
+   * The target authorization URL.
+   */
   url: string;
+  /**
+   * The value should be a valid Redirect URI to which the response will be sent after authentication.
+   * You must also add a Redirect URI in Authgear Poral via the Redirect URI section of your Authgear Application.
+   */
   redirectURI: string;
+  /**
+   * A flag to some implementations that can share cookies with the device browser.
+   * When it is set to true, cookies will be shared with the device browser.
+   */
   shareCookiesWithDeviceBrowser: boolean;
 }
 
