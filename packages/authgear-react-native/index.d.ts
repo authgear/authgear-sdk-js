@@ -1175,7 +1175,10 @@ export declare interface UIImplementation {
 }
 
 /**
- * WebKitWebViewUIImplementation is WKWebView on iOS, android.webkit.WebView on Android.
+ * WebKitWebViewUIImplementation provides more customization options other than {@link DeviceBrowserUIImplementation}.
+ *
+ * For iOS, it is using WKWebView (see https://developer.apple.com/documentation/webkit/wkwebview).
+ * For Android, it is using android.webkit.WebView (see https://developer.android.com/reference/android/webkit/WebView).
  *
  * @public
  */
