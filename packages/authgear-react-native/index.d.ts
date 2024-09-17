@@ -1150,11 +1150,11 @@ export declare interface WebKitWebViewUIImplementationOptions {
  */
 export declare interface WebKitWebViewUIImplementationOptionsAndroid {
   /**
-   * The color is in decimal format representing the argb, for example, blue is 0xff0000ff, then the color is 4278190335.
+   * The color is in hexadecimal format representing the argb, for example, blue is 0xff0000ff.
    */
   actionBarBackgroundColor?: number;
   /**
-   * The color is in decimal format representing the argb, for example, blue is 0xff0000ff, then the color is 4278190335.
+   * The color is in hexadecimal format representing the argb, for example, blue is 0xff0000ff.
    */
   actionBarButtonTintColor?: number;
 }
@@ -1167,11 +1167,11 @@ export declare interface WebKitWebViewUIImplementationOptionsAndroid {
  */
 export declare interface WebKitWebViewUIImplementationOptionsIOS {
   /**
-   * The color is in decimal format representing the argb, for example, blue is 0xff0000ff, then the color is 4278190335.
+   * The color is in hexadecimal format representing the argb, for example, blue is 0xff0000ff.
    */
   navigationBarBackgroundColor?: number;
   /**
-   * The color is in decimal format representing the argb, for example, blue is 0xff0000ff, then the color is 4278190335.
+   * The color is in hexadecimal format representing the argb, for example, blue is 0xff0000ff.
    */
   navigationBarButtonTintColor?: number;
   /**
