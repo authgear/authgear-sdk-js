@@ -46,6 +46,10 @@ export declare enum ColorScheme {
  * @public
  */
 export declare interface ContainerOptions {
+  /**
+   * The unique ID of the container. It is generally used as the namespace of {@link TokenStorage}.
+   * @defaultValue "default"
+   */
   name?: string;
 }
 
