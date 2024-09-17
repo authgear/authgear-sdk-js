@@ -455,7 +455,7 @@ export declare interface AuthenticateOptions {
  */
 export declare interface AuthenticateResult {
   /**
-   * UserInfo.
+   * The updated user info after authentication.
    */
   userInfo: UserInfo;
 }
