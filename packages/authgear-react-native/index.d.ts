@@ -575,6 +575,7 @@ export declare class BiometricNotSupportedOrPermissionDeniedError extends Authge
 
 /**
  * BiometricOptions is options for biometric authentication.
+ * It allows platform-specific customization for iOS and Android.
  *
  * @public
  */
@@ -613,6 +614,13 @@ export declare interface BiometricOptionsAndroid {
    * @public
    */
   negativeButtonText: string;
+  /**
+   * Set the contraint for the authenticator to be used for biometric authentication.
+   *
+   * See {@link BiometricAccessConstraintAndroid}
+   *
+   * @public
+   */
   constraint: BiometricAccessConstraintAndroid[];
   /**
    * The user needs to set up biometric again when a new biometric is enrolled or all enrolled biometrics are removed.
@@ -636,7 +644,21 @@ export declare interface BiometricOptionsIOS {
    * @public
    */
   localizedReason: string;
+  /**
+   * Set the contraint for the authenticator to be used for biometric authentication.
+   *
+   * See {@link BiometricAccessConstraintIOS}
+   *
+   * @public
+   */
   constraint: BiometricAccessConstraintIOS;
+  /**
+   * Set the local authentication policy for biometric authentication.
+   *
+   * See {@link BiometricLAPolicy}
+   *
+   * @public
+   */
   policy: BiometricLAPolicy;
 }
 
