@@ -31,11 +31,11 @@ export declare class CancelError extends AuthgearError {}
  */
 export declare enum ColorScheme {
   /**
-   * Use the light color scheme.
+   * Force to use the light color scheme in the AuthUI when the project config is "Auto".
    */
   Light = "light",
   /**
-   * Use the dark color scheme.
+   * Force to use the dark color scheme in the AuthUI when the project config is "Auto".
    */
   Dark = "dark",
 }
