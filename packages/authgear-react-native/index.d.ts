@@ -649,15 +649,17 @@ export declare interface BiometricOptionsIOS {
 export declare class BiometricPrivateKeyNotFoundError extends AuthgearError {}
 
 /**
+ * ConfigureOptions is options for configuring the Authgear SDK container.
+ *
  * @public
  */
 export declare interface ConfigureOptions {
   /**
-   * The OAuth client ID.
+   * The OAuth client ID. You may find this value in Authgear Portal (Your project \> Applications).
    */
   clientID: string;
   /**
-   * The endpoint.
+   * The endpoint. You may find this value in Authgear Portal (Your project \> Applications).
    */
   endpoint: string;
   /**
@@ -677,6 +679,9 @@ export declare interface ConfigureOptions {
    * @defaultValue false
    */
   preAuthenticatedURLEnabled?: boolean;
+  /**
+   * The implementation of UIImplementation.
+   */
   uiImplementation?: UIImplementation;
 }
 
