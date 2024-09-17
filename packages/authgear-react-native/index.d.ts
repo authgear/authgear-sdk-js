@@ -724,7 +724,10 @@ declare const defaultContainer: ReactNativeContainer;
 export default defaultContainer;
 
 /**
- * DeviceBrowserUIImplementation is ASWebAuthenticationSession on iOS, and Custom Tabs on Android.
+ * DeviceBrowserUIImplementation is the default {@link UIImplementation}.
+ *
+ * For iOS, it is using ASWebAuthenticationSession (see https://developer.apple.com/documentation/authenticationservices/aswebauthenticationsession).
+ * For Android, it is using Custom Tabs (see https://developer.chrome.com/docs/android/custom-tabs).
  *
  * @public
  */
