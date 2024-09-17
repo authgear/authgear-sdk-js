@@ -191,7 +191,8 @@ export declare enum PromptOption {
    */
   Consent = "consent",
   /**
-   * The `select_account` prompt allows the user to select from multiple accounts associated with the authentication provider.
+   * The select_account prompt present a "Continue" screen to for the user to choose
+   * to continue with the session in the cookies or login to another account.
    */
   SelectAccount = "select_account",
 }
