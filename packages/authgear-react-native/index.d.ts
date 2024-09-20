@@ -840,6 +840,9 @@ export declare interface PromoteOptions {
 export declare class ReactNativeContainer {
   private dpopProvider;
   /**
+   * Delegation for customizing the behavior of your application.
+   * You can implement your own delegation and the container will evaluate them if needed.
+   *
    * @public
    */
   delegate?: ReactNativeContainerDelegate;
@@ -874,12 +877,14 @@ export declare class ReactNativeContainer {
   get preAuthenticatedURLEnabled(): boolean;
   set preAuthenticatedURLEnabled(preAuthenticatedURLEnabled: boolean);
   /**
+   * The current SessionState of this container.
    *
    * @public
    */
   get sessionState(): SessionState;
   set sessionState(sessionState: SessionState);
   /**
+   * The access token of this container.
    *
    * @public
    */
@@ -928,23 +933,38 @@ export declare class ReactNativeContainer {
    */
   configure(options: ConfigureOptions): Promise<void>;
   /**
-   * Authenticate the end user via the web.
+   * authenticate() starts the authentication process in a webview.
+   * After authentication, the webview will be closed and the user is logged in.
+   *
+   * You can refer to {@link AuthenticateOptions} for more customization.
    *
    * @public
    */
   authenticate(options: AuthenticateOptions): Promise<AuthenticateResult>;
   /**
+   * changePassword() opens the settings page in a webview for the user to change their password.
+   * After changing the password, the webview will be closed.
+   *
+   * You can refer to {@link SettingsActionOptions} for more customization.
+   *
    * @public
    */
   changePassword(options: SettingsActionOptions): Promise<void>;
   /**
+   * deleteAccount() opens the settings page in a webview for the user to delete their account.
+   * After deletion, the webview will be closed and the user is logged out.
+   *
+   * You can refer to {@link SettingsActionOptions} for more customization.
+   *
    * @public
    */
   deleteAccount(options: SettingsActionOptions): Promise<void>;
   /**
-   * Reauthenticate the end user via biometric or the web.
+   * reauthenticate() starts the reauthentication process via biometric or in the webview.
    *
    * If biometricOptions is given, biometric is used when possible.
+   *
+   * You can refer to {@link ReauthenticateOptions} and {@link BiometricOptions} for more customization.
    *
    * @public
    */
@@ -952,32 +972,55 @@ export declare class ReactNativeContainer {
     options: ReauthenticateOptions,
     biometricOptions?: BiometricOptions
   ): Promise<ReauthenticateResult>;
+  /**
+   * Open Authgear pages. Currently only settings pages are available.
+   *
+   * You can refer to {@link SettingOptions} for more customization.
+   *
+   * @public
+   */
   open(page: Page, options?: SettingOptions): Promise<void>;
   /**
-   * Logout.
+   * logout() starts the logout process in the background.
+   * After logging out, the access token will be revoked and cleared from the token storage.
    *
    * @remarks
    * If `force` parameter is set to `true`, all potential errors (e.g. network
    * error) would be ignored.
    *
    * @param options - Logout options
+   *
+   * @public
    */
   logout(options?: { force?: boolean }): Promise<void>;
   /**
-   * Authenticate as an anonymous user.
+   * authenticateAnonymously() starts the authentication process as an anonymous user.
+   * You may first enable Anonymous Users in Authgear Portal (Your project \> Authentication \> Anonymous Users \> Enable anonymous users).
+   *
+   * @public
    */
   authenticateAnonymously(): Promise<AuthenticateResult>;
   /**
-   * Open promote anonymous user page
+   * promoteAnonymousUser() opens the anonymous user promotion page in the webview and the user has to authenticate.
+   * The flow is similar to authenticate(), the webview will be closed and the user is logged in after authentication.
+   * After promotion from anonymous user, biometric authentication will be disabled for the new user
+   * and the may need to enable it manually again.
    *
-   * @param options - promote options
+   * You can refer to {@link PromoteOptions} for more customization.
+   *
+   * @public
    */
   promoteAnonymousUser(options: PromoteOptions): Promise<AuthenticateResult>;
   /**
-   * Fetch user info.
+   * fetchUserInfo() fetches the up-to-date user info from Authgear.
+   *
+   * @public
    */
   fetchUserInfo(): Promise<UserInfo>;
   /**
+   * refreshAccessTokenIfNeeded() refreshes the access token if needed.
+   * After the task has completed, the updated access token will be stored in this.accessToken.
+   *
    * @public
    */
   refreshAccessTokenIfNeeded(): Promise<void>;
@@ -995,24 +1038,56 @@ export declare class ReactNativeContainer {
    *
    * @param code - WeChat Authorization code.
    * @param state - WeChat Authorization state.
+   *
+   * @public
    */
   wechatAuthCallback(code: string, state: string): Promise<void>;
   /**
    * Check whether biometric is supported on the current device.
    * If biometric is not supported, then a platform specific error is thrown.
+   *
+   * @public
    */
   checkBiometricSupported(options: BiometricOptions): Promise<void>;
   /**
    * Check whether biometric was enabled for the last logged in user.
+   *
+   * @public
    */
   isBiometricEnabled(): Promise<boolean>;
+  /**
+   * Disable biometric authentication for the last logged in user.
+   * After disabling, the user may not be able to authenticate with biometric until it is enabled again.
+   *
+   * @public
+   */
   disableBiometric(): Promise<void>;
+  /**
+   * Enable biometric authentication for the last logged in user.
+   * Platform specific biometric authenticator will be prompted and it is enabled only if the verification is successful.
+   * You may first enable biometric authentication in Authgear Portal (Your Project \> Authentication \> Biometric \> Enable biometric authentication).
+   *
+   * You can refer to {@link BiometricOptions} for more customization.
+   *
+   * @public
+   */
   enableBiometric(options: BiometricOptions): Promise<void>;
+  /**
+   * Authenticate with biometric authenticator.
+   * Platform specific biometric authenticator will be prompted and user will be logged in after successful verification.
+   * You may first enable biometric authentication in Authgear Portal (Your Project \> Authentication \> Biometric \> Enable biometric authentication).
+   *
+   * You can refer to {@link BiometricOptions} for more customization.
+   *
+   * @public
+   */
   authenticateBiometric(options: BiometricOptions): Promise<AuthenticateResult>;
   /**
    * Share the current authenticated session to a web browser.
    *
-   * `preAuthenticatedURLEnabled` must be set to true to use this method.
+   * `{@link ConfigureOptions.preAuthenticatedURLEnabled}` must be set to true to use this method.
+   *
+   * You can refer to {@link PreAuthenticatedURLOptions} for more customization.
    *
    * @public
    */
@@ -1020,6 +1095,10 @@ export declare class ReactNativeContainer {
 }
 
 /**
+ * ReactNativeContainerDelegate defines a set of functions that the SDK container will use.
+ *
+ * You can implement these functions to customize the behavior of your application.
+ *
  * @public
  */
 export declare interface ReactNativeContainerDelegate {
