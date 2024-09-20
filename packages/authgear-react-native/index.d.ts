@@ -192,11 +192,15 @@ export declare enum PromptOption {
   Login = "login",
   /**
    * The `consent` prompt asks the user to consent to the scopes.
+   *
+   * @internal
    */
   Consent = "consent",
   /**
    * The select_account prompt present a "Continue" screen to for the user to choose
    * to continue with the session in the cookies or login to another account.
+   *
+   * @internal
    */
   SelectAccount = "select_account",
 }
