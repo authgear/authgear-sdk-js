@@ -20,14 +20,50 @@ export class AuthgearError extends Error {
  * @public
  */
 export enum ErrorName {
+  /**
+   * Indicates that the server does not understand the request (i.e. syntactic error).
+   * Status code: 400
+   */
   BadRequest = "BadRequest",
+  /**
+   * Indicates that the server understands the request, but refuse to process it (i.e. semantic error).
+   * Status code: 400
+   */
   Invalid = "Invalid",
+  /**
+   * Indicates that the client does not have valid credentials (i.e. authentication error).
+   * Status code: 401
+   */
   Unauthorized = "Unauthorized",
+  /**
+   * Indicates that the client's credentials are not allowed for the request (i.e. authorization error).
+   * Status code: 403
+   */
   Forbidden = "Forbidden",
+  /**
+   * Indicates that the server cannot find the requested resource.
+   * Status code: 404
+   */
   NotFound = "NotFound",
+  /**
+   * Indicates that the resource is already exists on the server.
+   * Status code: 409
+   */
   AlreadyExists = "AlreadyExists",
+  /**
+   * Indicates that the client has sent too many requests in a given amount of time.
+   * Status code: 429
+   */
   TooManyRequest = "TooManyRequest",
+  /**
+   * Indicates that the server encountered an unexpected condition and unable to process the request.
+   * Status code: 500
+   */
   InternalError = "InternalError",
+  /**
+   * Indicates that the server is not ready to handle the request.
+   * Status code: 503
+   */
   ServiceUnavailable = "ServiceUnavailable",
 }
 
@@ -143,28 +179,31 @@ export function _decodeError(err: any): Error {
 }
 
 /**
- * PreAuthenticatedURLNotAllowedError
+ * PreAuthenticatedURLNotAllowedError is the root class of errors related to pre-authenticated URL.
  *
  * @public
  */
 export class PreAuthenticatedURLNotAllowedError extends AuthgearError {}
 
 /**
- * PreAuthenticatedURLInsufficientScopeError
+ * This may happen if the "Pre-authenticated URL" feature was not enabled when the user logged in during this session.
+ * Ask the user to log in again to enable this feature.
  *
  * @public
  */
 export class PreAuthenticatedURLInsufficientScopeError extends PreAuthenticatedURLNotAllowedError {}
 
 /**
- * PreAuthenticatedURLIDTokenNotFoundError
+ * The user logged in from an older SDK version that does not support the pre-authenticated URL.
+ * Ask the user to log in again to resolve the problem.
  *
  * @public
  */
 export class PreAuthenticatedURLIDTokenNotFoundError extends PreAuthenticatedURLNotAllowedError {}
 
 /**
- * PreAuthenticatedURLDeviceSecretNotFoundError
+ * The device secret is not found. This may happen if the "Pre-authenticated URL" feature was not enabled when the user logged in during this session.
+ * Ask the user to log in again to enable this feature.
  *
  * @public
  */

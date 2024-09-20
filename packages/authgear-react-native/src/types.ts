@@ -7,6 +7,10 @@ import {
 import { ReactNativeContainer } from ".";
 
 /**
+ * ReactNativeContainerDelegate defines a set of functions that the SDK container will use.
+ *
+ * You can implement these functions to customize the behavior of your application.
+ *
  * @public
  */
 export interface ReactNativeContainerDelegate {
@@ -196,7 +200,7 @@ export interface PromoteOptions {
  */
 export interface AuthenticateResult {
   /**
-   * UserInfo.
+   * The updated user info after authentication.
    */
   userInfo: UserInfo;
 }
@@ -208,12 +212,15 @@ export interface AuthenticateResult {
  */
 export interface ReauthenticateResult {
   /**
-   * UserInfo.
+   * The updated user info after reauthentication.
    */
   userInfo: UserInfo;
 }
 
 /**
+ * Options that used by {@link ReactNativeContainer.open}.
+ * It allows you to configure the UI of the opened settings page.
+ *
  * @public
  */
 export interface SettingOptions {
@@ -238,6 +245,9 @@ export interface SettingOptions {
 }
 
 /**
+ * It is similar to {@link SettingOptions}, but it is used for configuring
+ * the UI of the opened settings page for specific action like `SettingsAction.ChangePassword`.
+ *
  * @public
  */
 export interface SettingsActionOptions {
@@ -335,7 +345,21 @@ export interface BiometricOptionsIOS {
    * @public
    */
   localizedReason: string;
+  /**
+   * Set the contraint for the authenticator to be used for biometric authentication.
+   *
+   * See {@link BiometricAccessConstraintIOS}
+   *
+   * @public
+   */
   constraint: BiometricAccessConstraintIOS;
+  /**
+   * Set the local authentication policy for biometric authentication.
+   *
+   * See {@link BiometricLAPolicy}
+   *
+   * @public
+   */
   policy: BiometricLAPolicy;
 }
 
@@ -393,6 +417,13 @@ export interface BiometricOptionsAndroid {
    * @public
    */
   negativeButtonText: string;
+  /**
+   * Set the contraint for the authenticator to be used for biometric authentication.
+   *
+   * See {@link BiometricAccessConstraintAndroid}
+   *
+   * @public
+   */
   constraint: BiometricAccessConstraintAndroid[];
   /**
    * The user needs to set up biometric again when a new biometric is enrolled or all enrolled biometrics are removed.
@@ -406,6 +437,7 @@ export interface BiometricOptionsAndroid {
 
 /**
  * BiometricOptions is options for biometric authentication.
+ * It allows platform-specific customization for iOS and Android.
  *
  * @public
  */
