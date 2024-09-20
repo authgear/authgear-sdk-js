@@ -994,7 +994,7 @@ export declare class ReactNativeContainer {
    */
   logout(options?: { force?: boolean }): Promise<void>;
   /**
-   * authenticateAnonymously() starts the authentication process as an anonymous user.
+   * authenticateAnonymously() creates an anonymous user without showing any UI.
    * You may first enable Anonymous Users in Authgear Portal (Your project \> Authentication \> Anonymous Users \> Enable anonymous users).
    *
    * @public
