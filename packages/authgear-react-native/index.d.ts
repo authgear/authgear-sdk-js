@@ -935,6 +935,8 @@ export declare class ReactNativeContainer {
   /**
    * authenticate() starts the authentication process in a {@link UIImplementation}.
    * After authentication, the {@link UIImplementation} will be closed and the user is logged in.
+   * After this method resolves, biometric authentication is disabled.
+   * Call enableBiometric() again to enable biometric authentication for the new signed in user.
    *
    * You can refer to {@link AuthenticateOptions} for more customization.
    *
