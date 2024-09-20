@@ -981,8 +981,8 @@ export declare class ReactNativeContainer {
    */
   open(page: Page, options?: SettingOptions): Promise<void>;
   /**
-   * logout() starts the logout process in the background.
-   * After logging out, the access token will be revoked and cleared from the token storage.
+   * logout() signs out the user without showing any UI. The refresh token will be cleared.
+   * The biometric authentication is kept, so the user can authenticateBiometric again.
    *
    * @remarks
    * If `force` parameter is set to `true`, all potential errors (e.g. network
