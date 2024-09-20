@@ -1014,7 +1014,7 @@ export declare class ReactNativeContainer {
    */
   promoteAnonymousUser(options: PromoteOptions): Promise<AuthenticateResult>;
   /**
-   * fetchUserInfo() fetches the up-to-date user info from Authgear.
+   * fetchUserInfo() fetches the up-to-date user info.
    *
    * @public
    */
