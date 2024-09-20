@@ -47,7 +47,7 @@ export declare enum ColorScheme {
  */
 export declare interface ContainerOptions {
   /**
-   * The name of the container. The name is used as the namespace of {@link TokenStorage}.
+   * The name of the container. The name is used as the namespace of `TokenStorage`.
    * One use case is to use multiple containers with different names to support signing in multiple accounts.
    * @defaultValue "default"
    */
@@ -163,6 +163,7 @@ export declare class PreAuthenticatedURLIDTokenNotFoundError extends PreAuthenti
 
 /**
  * PreAuthenticatedURLInsufficientScopeError occured when the client does not have enough scopes for pre-authenticated URL.
+ * `ConfigureOptions.preAuthenticatedURLEnabled` must be set to true to avoid this error.
  *
  * @public
  */
@@ -191,19 +192,6 @@ export declare enum PromptOption {
    * The `login` prompt requires the user to log in to the authentication provider which forces the user to re-authenticate.
    */
   Login = "login",
-  /**
-   * The `consent` prompt asks the user to consent to the scopes.
-   *
-   * @internal
-   */
-  Consent = "consent",
-  /**
-   * The select_account prompt present a "Continue" screen to for the user to choose
-   * to continue with the session in the cookies or login to another account.
-   *
-   * @internal
-   */
-  SelectAccount = "select_account",
 }
 
 /**
@@ -847,7 +835,7 @@ export declare class ReactNativeContainer {
    */
   delegate?: ReactNativeContainerDelegate;
   /**
-   * The name of the container. The name is used as the namespace of {@link TokenStorage}.
+   * The name of the container. The name is used as the namespace of `TokenStorage`.
    * One use case is to use multiple containers with different names to support signing in multiple accounts.
    * @defaultValue "default"
    *
@@ -1089,7 +1077,7 @@ export declare class ReactNativeContainer {
   /**
    * Share the current authenticated session to a web browser.
    *
-   * `{@link ConfigureOptions.preAuthenticatedURLEnabled}` must be set to true to use this method.
+   * `ConfigureOptions.preAuthenticatedURLEnabled` must be set to true to use this method.
    *
    * You can refer to {@link PreAuthenticatedURLOptions} for more customization.
    *
@@ -1211,7 +1199,7 @@ export declare interface SettingOptions {
 
 /**
  * It is similar to {@link SettingOptions}, but it is used for configuring
- * the UI of the opened settings page for specific action like {@link SettingsAction.ChangePassword}.
+ * the UI of the opened settings page for specific action like `SettingsAction.ChangePassword`.
  *
  * @public
  */
