@@ -47,7 +47,8 @@ export declare enum ColorScheme {
  */
 export declare interface ContainerOptions {
   /**
-   * The unique ID of the container. It is generally used as the namespace of {@link TokenStorage}.
+   * The name of the container. The name is used as the namespace of {@link TokenStorage}.
+   * One use case is to use multiple containers with different names to support signing in multiple accounts.
    * @defaultValue "default"
    */
   name?: string;
