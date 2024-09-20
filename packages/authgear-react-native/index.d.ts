@@ -847,8 +847,8 @@ export declare class ReactNativeContainer {
    */
   delegate?: ReactNativeContainerDelegate;
   /**
-   *
-   * Unique ID for this container.
+   * The name of the container. The name is used as the namespace of {@link TokenStorage}.
+   * One use case is to use multiple containers with different names to support signing in multiple accounts.
    * @defaultValue "default"
    *
    * @public
