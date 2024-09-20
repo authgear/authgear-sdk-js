@@ -1066,8 +1066,9 @@ export declare class ReactNativeContainer {
   disableBiometric(): Promise<void>;
   /**
    * Enable biometric authentication for the signed in user.
-   * Platform specific biometric authenticator will be prompted and it is enabled only if the verification is successful.
+   * Platform specific biometric authentication UI will be shown.
    * You may first enable biometric authentication in Authgear Portal (Your Project \> Authentication \> Biometric \> Enable biometric authentication).
+   * Otherwise, `BiometricDisallowed` error will be thrown.
    *
    * You can refer to {@link BiometricOptions} for more customization.
    *
@@ -1075,9 +1076,10 @@ export declare class ReactNativeContainer {
    */
   enableBiometric(options: BiometricOptions): Promise<void>;
   /**
-   * Authenticate with biometric authenticator.
-   * Platform specific biometric authenticator will be prompted and user will be logged in after successful verification.
+   * Authenticate with biometric authentication.
+   * Platform specific biometric authentication UI will be shown.
    * You may first enable biometric authentication in Authgear Portal (Your Project \> Authentication \> Biometric \> Enable biometric authentication).
+   * Otherwise, `BiometricDisallowed` error will be thrown.
    *
    * You can refer to {@link BiometricOptions} for more customization.
    *
