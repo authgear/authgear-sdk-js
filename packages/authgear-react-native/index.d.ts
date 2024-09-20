@@ -1005,8 +1005,8 @@ export declare class ReactNativeContainer {
   /**
    * promoteAnonymousUser() opens the anonymous user promotion page in the {@link UIImplementation} and the user has to authenticate.
    * The flow is similar to authenticate(), the {@link UIImplementation} will be closed and the user is logged in after authentication.
-   * After promotion from anonymous user, biometric authentication will be disabled for the new user
-   * and the may need to enable it manually again.
+   * After this method resolves, biometric authentication is disabled.
+   * Call enableBiometric() again to enable biometric authentication for the new signed in user.
    *
    * You can refer to {@link PromoteOptions} for more customization.
    *
