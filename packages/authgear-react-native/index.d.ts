@@ -933,8 +933,8 @@ export declare class ReactNativeContainer {
    */
   configure(options: ConfigureOptions): Promise<void>;
   /**
-   * authenticate() starts the authentication process in a webview.
-   * After authentication, the webview will be closed and the user is logged in.
+   * authenticate() starts the authentication process in a {@link UIImplementation}.
+   * After authentication, the {@link UIImplementation} will be closed and the user is logged in.
    *
    * You can refer to {@link AuthenticateOptions} for more customization.
    *
@@ -942,8 +942,8 @@ export declare class ReactNativeContainer {
    */
   authenticate(options: AuthenticateOptions): Promise<AuthenticateResult>;
   /**
-   * changePassword() opens the settings page in a webview for the user to change their password.
-   * After changing the password, the webview will be closed.
+   * changePassword() opens the settings page in a {@link UIImplementation} for the user to change their password.
+   * After changing the password, the {@link UIImplementation} will be closed.
    *
    * You can refer to {@link SettingsActionOptions} for more customization.
    *
@@ -951,8 +951,8 @@ export declare class ReactNativeContainer {
    */
   changePassword(options: SettingsActionOptions): Promise<void>;
   /**
-   * deleteAccount() opens the settings page in a webview for the user to delete their account.
-   * After deletion, the webview will be closed and the user is logged out.
+   * deleteAccount() opens the settings page in a {@link UIImplementation} for the user to delete their account.
+   * After deletion, the {@link UIImplementation} will be closed and the user is logged out.
    *
    * You can refer to {@link SettingsActionOptions} for more customization.
    *
@@ -960,7 +960,7 @@ export declare class ReactNativeContainer {
    */
   deleteAccount(options: SettingsActionOptions): Promise<void>;
   /**
-   * reauthenticate() starts the reauthentication process via biometric or in the webview.
+   * reauthenticate() starts the reauthentication process via biometric or in the {@link UIImplementation}.
    *
    * If biometricOptions is given, biometric is used when possible.
    *
@@ -1001,8 +1001,8 @@ export declare class ReactNativeContainer {
    */
   authenticateAnonymously(): Promise<AuthenticateResult>;
   /**
-   * promoteAnonymousUser() opens the anonymous user promotion page in the webview and the user has to authenticate.
-   * The flow is similar to authenticate(), the webview will be closed and the user is logged in after authentication.
+   * promoteAnonymousUser() opens the anonymous user promotion page in the {@link UIImplementation} and the user has to authenticate.
+   * The flow is similar to authenticate(), the {@link UIImplementation} will be closed and the user is logged in after authentication.
    * After promotion from anonymous user, biometric authentication will be disabled for the new user
    * and the may need to enable it manually again.
    *
