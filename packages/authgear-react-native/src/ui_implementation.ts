@@ -7,17 +7,18 @@ import { openAuthorizeURL, openAuthorizeURLWithWebView } from "./nativemodule";
  */
 export interface OpenAuthorizationURLOptions {
   /**
-   * The target authorization URL.
+   * The URL to be opened by the UIImplementation.
    */
   url: string;
   /**
-   * The value should be a valid Redirect URI to which the response will be sent after authentication.
-   * You must also add a Redirect URI in Authgear Poral via the Redirect URI section of your Authgear Application.
+   * The URL to be detected by the UIImplementation.
+   * When this URL is detected, the UIImplementation MUST return this URL, and close itself.
    */
   redirectURI: string;
   /**
-   * A flag to some implementations that can share cookies with the device browser.
-   * When it is set to true, cookies will be shared with the device browser.
+   * A flag to tell the UIImplementation that cookies should be shared with the device browser.
+   * This flag is only useful to UIImplementation that can share cookies with the device browser,
+   * such as those underlying implementations are based ASWebAuthenticationSession, or CustomTabs.
    */
   shareCookiesWithDeviceBrowser: boolean;
 }
