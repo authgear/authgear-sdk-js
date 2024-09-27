@@ -971,7 +971,6 @@ export class ReactNativeContainer {
    * Enable biometric authentication for the signed in user.
    * Platform specific biometric authentication UI will be shown.
    * You may first enable biometric authentication in Authgear Portal (Your Project \> Authentication \> Biometric \> Enable biometric authentication).
-   * Otherwise, `BiometricDisallowed` error will be thrown.
    *
    * You can refer to {@link BiometricOptions} for more customization.
    *
@@ -1018,7 +1017,6 @@ export class ReactNativeContainer {
    * Authenticate with biometric authentication.
    * Platform specific biometric authentication UI will be shown.
    * You may first enable biometric authentication in Authgear Portal (Your Project \> Authentication \> Biometric \> Enable biometric authentication).
-   * Otherwise, `BiometricDisallowed` error will be thrown.
    *
    * You can refer to {@link BiometricOptions} for more customization.
    *
