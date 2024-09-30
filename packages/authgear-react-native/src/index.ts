@@ -75,15 +75,17 @@ export {
 export * from "./ui_implementation";
 
 /**
+ * ConfigureOptions is options for configuring the Authgear SDK container.
+ *
  * @public
  */
 export interface ConfigureOptions {
   /**
-   * The OAuth client ID.
+   * The OAuth client ID. You may find this value in Authgear Portal (Your project \> Applications).
    */
   clientID: string;
   /**
-   * The endpoint.
+   * The endpoint. You may find this value in Authgear Portal (Your project \> Applications).
    */
   endpoint: string;
 
@@ -107,8 +109,8 @@ export interface ConfigureOptions {
    */
   preAuthenticatedURLEnabled?: boolean;
 
-  /*
-   * The UIImplementation.
+  /**
+   * The implementation of UIImplementation.
    */
   uiImplementation?: UIImplementation;
 }
@@ -177,13 +179,16 @@ export class ReactNativeContainer {
   wechatRedirectDeepLinkListener: (url: string) => void;
 
   /**
+   * Delegation for customizing the behavior of your application.
+   * You can implement your own delegation and the container will evaluate them if needed.
+   *
    * @public
    */
   delegate?: ReactNativeContainerDelegate;
 
   /**
-   *
-   * Unique ID for this container.
+   * The name of the container. The name is used as the namespace of `TokenStorage`.
+   * One use case is to use multiple containers with different names to support signing in multiple accounts.
    * @defaultValue "default"
    *
    * @public
@@ -236,6 +241,7 @@ export class ReactNativeContainer {
   }
 
   /**
+   * The current SessionState of this container.
    *
    * @public
    */
@@ -248,6 +254,7 @@ export class ReactNativeContainer {
   }
 
   /**
+   * The access token of this container.
    *
    * @public
    */
@@ -436,7 +443,12 @@ export class ReactNativeContainer {
   }
 
   /**
-   * Authenticate the end user via the web.
+   * authenticate() starts the authentication process in a {@link UIImplementation}.
+   * After authentication, the {@link UIImplementation} will be closed and the user is logged in.
+   * After this method resolves, biometric authentication is disabled.
+   * Call enableBiometric() again to enable biometric authentication for the new signed in user.
+   *
+   * You can refer to {@link AuthenticateOptions} for more customization.
    *
    * @public
    */
@@ -523,6 +535,11 @@ export class ReactNativeContainer {
   }
 
   /**
+   * changePassword() opens the settings page in a {@link UIImplementation} for the user to change their password.
+   * After changing the password, the {@link UIImplementation} will be closed.
+   *
+   * You can refer to {@link SettingsActionOptions} for more customization.
+   *
    * @public
    */
   async changePassword(options: SettingsActionOptions): Promise<void> {
@@ -530,6 +547,11 @@ export class ReactNativeContainer {
   }
 
   /**
+   * deleteAccount() opens the settings page in a {@link UIImplementation} for the user to delete their account.
+   * After deletion, the {@link UIImplementation} will be closed and the user is logged out.
+   *
+   * You can refer to {@link SettingsActionOptions} for more customization.
+   *
    * @public
    */
   async deleteAccount(options: SettingsActionOptions): Promise<void> {
@@ -538,9 +560,11 @@ export class ReactNativeContainer {
   }
 
   /**
-   * Reauthenticate the end user via biometric or the web.
+   * reauthenticate() starts the reauthentication process via biometric or in the {@link UIImplementation}.
    *
    * If biometricOptions is given, biometric is used when possible.
+   *
+   * You can refer to {@link ReauthenticateOptions} and {@link BiometricOptions} for more customization.
    *
    * @public
    */
@@ -658,18 +682,28 @@ export class ReactNativeContainer {
     await this.openURL(`${endpoint.origin}${path}`, options);
   }
 
+  /**
+   * Open Authgear pages. Currently only settings pages are available.
+   *
+   * You can refer to {@link SettingOptions} for more customization.
+   *
+   * @public
+   */
   async open(page: Page, options?: SettingOptions): Promise<void> {
     await this.openAuthgearURL(page, options);
   }
 
   /**
-   * Logout.
+   * logout() signs out the user without showing any UI. The refresh token will be cleared.
+   * The biometric authentication is kept, so the user can authenticateBiometric again.
    *
    * @remarks
    * If `force` parameter is set to `true`, all potential errors (e.g. network
    * error) would be ignored.
    *
    * @param options - Logout options
+   *
+   * @public
    */
   async logout(
     options: {
@@ -691,7 +725,10 @@ export class ReactNativeContainer {
   }
 
   /**
-   * Authenticate as an anonymous user.
+   * authenticateAnonymously() creates an anonymous user without showing any UI.
+   * You may first enable Anonymous Users in Authgear Portal (Your project \> Authentication \> Anonymous Users \> Enable anonymous users).
+   *
+   * @public
    */
   async authenticateAnonymously(): Promise<AuthenticateResult> {
     const clientID = this.clientID;
@@ -736,9 +773,14 @@ export class ReactNativeContainer {
   }
 
   /**
-   * Open promote anonymous user page
+   * promoteAnonymousUser() opens the anonymous user promotion page in the {@link UIImplementation} and the user has to authenticate.
+   * The flow is similar to authenticate(), the {@link UIImplementation} will be closed and the user is logged in after authentication.
+   * After this method resolves, biometric authentication is disabled.
+   * Call enableBiometric() again to enable biometric authentication for the new signed in user.
    *
-   * @param options - promote options
+   * You can refer to {@link PromoteOptions} for more customization.
+   *
+   * @public
    */
   async promoteAnonymousUser(
     options: PromoteOptions
@@ -819,7 +861,9 @@ export class ReactNativeContainer {
   }
 
   /**
-   * Fetch user info.
+   * fetchUserInfo() fetches the up-to-date user info.
+   *
+   * @public
    */
   async fetchUserInfo(): Promise<UserInfo> {
     await this.refreshAccessTokenIfNeeded();
@@ -839,6 +883,9 @@ export class ReactNativeContainer {
   }
 
   /**
+   * refreshAccessTokenIfNeeded() refreshes the access token if needed.
+   * After the task has completed, the updated access token will be stored in this.accessToken.
+   *
    * @public
    */
   async refreshAccessTokenIfNeeded(): Promise<void> {
@@ -862,6 +909,8 @@ export class ReactNativeContainer {
    *
    * @param code - WeChat Authorization code.
    * @param state - WeChat Authorization state.
+   *
+   * @public
    */
   async wechatAuthCallback(code: string, state: string): Promise<void> {
     return this.baseContainer.apiClient._wechatAuthCallbackRequest(
@@ -886,6 +935,8 @@ export class ReactNativeContainer {
   /**
    * Check whether biometric is supported on the current device.
    * If biometric is not supported, then a platform specific error is thrown.
+   *
+   * @public
    */
   // eslint-disable-next-line class-methods-use-this
   async checkBiometricSupported(options: BiometricOptions): Promise<void> {
@@ -893,13 +944,21 @@ export class ReactNativeContainer {
   }
 
   /**
-   * Check whether biometric was enabled for the last logged in user.
+   * Check whether biometric was enabled for the signed in user.
+   *
+   * @public
    */
   async isBiometricEnabled(): Promise<boolean> {
     const keyID = await this.storage.getBiometricKeyID(this.name);
     return keyID != null;
   }
 
+  /**
+   * Disable biometric authentication for the signed in user.
+   * After disabling, the user may not be able to authenticate with biometric until it is enabled again.
+   *
+   * @public
+   */
   async disableBiometric(): Promise<void> {
     const keyID = await this.storage.getBiometricKeyID(this.name);
     if (keyID != null) {
@@ -908,6 +967,15 @@ export class ReactNativeContainer {
     }
   }
 
+  /**
+   * Enable biometric authentication for the signed in user.
+   * Platform specific biometric authentication UI will be shown.
+   * You may first enable biometric authentication in Authgear Portal (Your Project \> Authentication \> Biometric \> Enable biometric authentication).
+   *
+   * You can refer to {@link BiometricOptions} for more customization.
+   *
+   * @public
+   */
   async enableBiometric(options: BiometricOptions): Promise<void> {
     const clientID = this.clientID;
     if (clientID == null) {
@@ -945,6 +1013,15 @@ export class ReactNativeContainer {
     await this.storage.setBiometricKeyID(this.name, kid);
   }
 
+  /**
+   * Authenticate with biometric authentication.
+   * Platform specific biometric authentication UI will be shown.
+   * You may first enable biometric authentication in Authgear Portal (Your Project \> Authentication \> Biometric \> Enable biometric authentication).
+   *
+   * You can refer to {@link BiometricOptions} for more customization.
+   *
+   * @public
+   */
   async authenticateBiometric(
     options: BiometricOptions
   ): Promise<AuthenticateResult> {
@@ -1011,7 +1088,9 @@ export class ReactNativeContainer {
   /**
    * Share the current authenticated session to a web browser.
    *
-   * `preAuthenticatedURLEnabled` must be set to true to use this method.
+   * `ConfigureOptions.preAuthenticatedURLEnabled` must be set to true to use this method.
+   *
+   * You can refer to {@link PreAuthenticatedURLOptions} for more customization.
    *
    * @public
    */

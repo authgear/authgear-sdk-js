@@ -1,7 +1,11 @@
 /**
  * UserInfo is the result of fetchUserInfo.
  * It contains `sub` which is the User ID,
- * as well OIDC standard claims like `email`.
+ * as well as OIDC standard claims like `email`,
+ * see https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims.
+ *
+ * In addition to these standard claims, it may include custom claims
+ * defined by Authgear to support additional functionality like `isVerified`.
  *
  * @public
  */
@@ -49,7 +53,13 @@ export interface UserInfo {
  * @public
  */
 export enum ColorScheme {
+  /**
+   * Force to use the light color scheme in the AuthUI when the project config is "Auto".
+   */
   Light = "light",
+  /**
+   * Force to use the dark color scheme in the AuthUI when the project config is "Auto".
+   */
   Dark = "dark",
 }
 
@@ -59,9 +69,28 @@ export enum ColorScheme {
  * @public
  */
 export enum PromptOption {
+  /**
+   * The `none` prompt is used to sliently authenticate the user without prompting for any action.
+   * This prompt bypasses the need for `login` and `consent` prompts
+   * only when the user has previously given consent to the application and has an active session.
+   */
   None = "none",
+  /**
+   * The `login` prompt requires the user to log in to the authentication provider which forces the user to re-authenticate.
+   */
   Login = "login",
+  /**
+   * The `consent` prompt asks the user to consent to the scopes.
+   *
+   * @internal
+   */
   Consent = "consent",
+  /**
+   * The select_account prompt present a "Continue" screen to for the user to choose
+   * to continue with the session in the cookies or login to another account.
+   *
+   * @internal
+   */
   SelectAccount = "select_account",
 }
 
@@ -212,8 +241,17 @@ export interface _AnonymousUserPromotionCodeResponse {
  * @public
  */
 export interface TokenStorage {
+  /**
+   * Stores a refresh token for a give namespace to the storage.
+   */
   setRefreshToken(namespace: string, refreshToken: string): Promise<void>;
+  /**
+   * Retrieves the refresh token associated with a specific namespace in the storage.
+   */
   getRefreshToken(namespace: string): Promise<string | null>;
+  /**
+   * Deletes the refresh token for the specified namespace in the storage.
+   */
   delRefreshToken(namespace: string): Promise<void>;
 }
 
@@ -268,6 +306,11 @@ export interface _StorageDriver {
  * @public
  */
 export interface ContainerOptions {
+  /**
+   * The name of the container. The name is used as the namespace of `TokenStorage`.
+   * One use case is to use multiple containers with different names to support signing in multiple accounts.
+   * @defaultValue "default"
+   */
   name?: string;
 }
 
@@ -341,6 +384,8 @@ export interface _OIDCTokenResponse {
  * After a call to configure, the session state would become "AUTHENTICATED" if a previous session was found,
  * or "NO_SESSION" if such session was not found.
  *
+ * Please refer to {@link SessionStateChangeReason} for more information.
+ *
  * @public
  */
 export enum SessionState {
@@ -355,7 +400,7 @@ export enum SessionState {
  * These reasons can be thought of as the transition of a SessionState, which is described as follows:
  *
  * ```
- *                                                          LOGOUT / INVALID
+ *                                                      LOGOUT / INVALID / CLEAR
  *                                           +----------------------------------------------+
  *                                           v                                              |
  *    State: UNKNOWN ----- NO_TOKEN ----> State: NO_SESSION ---- AUTHENTICATED -----> State: AUTHENTICATED
@@ -375,18 +420,34 @@ export enum SessionStateChangeReason {
 }
 
 /**
+ * The path of the page in Authgear.
+ *
  * @public
  */
 export enum Page {
+  /**
+   * The path of the settings page in Authgear.
+   */
   Settings = "/settings",
+  /**
+   * The path of the indenties page in Authgear.
+   */
   Identities = "/settings/identities",
 }
 
 /**
+ * The actions that can be performed in Authgear settings page.
+ *
  * @public
  */
 export enum SettingsAction {
+  /**
+   * Change password in Authgear settings page.
+   */
   ChangePassword = "change_password",
+  /**
+   * Delete account in Authgear settings page.
+   */
   DeleteAccount = "delete_account",
 }
 
