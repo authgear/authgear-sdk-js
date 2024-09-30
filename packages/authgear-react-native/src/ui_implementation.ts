@@ -18,7 +18,7 @@ export interface OpenAuthorizationURLOptions {
   /**
    * A flag to tell the UIImplementation that cookies should be shared with the device browser.
    * This flag is only useful to UIImplementation that can share cookies with the device browser,
-   * such as those underlying implementations are based ASWebAuthenticationSession, or CustomTabs.
+   * such as those underlying implementations are based on ASWebAuthenticationSession, or CustomTabs.
    */
   shareCookiesWithDeviceBrowser: boolean;
 }
