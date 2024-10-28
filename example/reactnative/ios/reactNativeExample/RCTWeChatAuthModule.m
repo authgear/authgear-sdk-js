@@ -1,7 +1,7 @@
 #import "RCTWechatAuthModule.h"
 
 #import <React/RCTUtils.h>
-#import "WXApi.h"
+#import <WXApi.h>
 
 @interface RCTWechatAuthModule()
 @property (nonatomic, strong) RCTPromiseResolveBlock sendWechatAuthResolve;

@@ -428,7 +428,7 @@ PODS:
     - React-logger (= 0.72.15)
     - React-perflogger (= 0.72.15)
   - SocketRocket (0.6.1)
-  - WechatOpenSDK (2.0.4)
+  - WechatOpenSDK-XCFramework (2.0.4)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -473,7 +473,7 @@ DEPENDENCIES:
   - React-runtimescheduler (from `../node_modules/react-native/ReactCommon/react/renderer/runtimescheduler`)
   - React-utils (from `../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
-  - WechatOpenSDK (~> 2.0.4)
+  - WechatOpenSDK-XCFramework (~> 2.0.4)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -481,7 +481,7 @@ SPEC REPOS:
     - fmt
     - libevent
     - SocketRocket
-    - WechatOpenSDK
+    - WechatOpenSDK-XCFramework
 
 EXTERNAL SOURCES:
   authgear-react-native:
@@ -573,7 +573,7 @@ SPEC CHECKSUMS:
   FBReactNativeSpec: e03b22fbf7017a6f76641ea4472e73c915dcdda7
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
-  hermes-engine: b213bace5f31766ad1434d2d9b2cbf04cf92a2b6
+  hermes-engine: 5b340c6a5affbf3aba22185be41563bbb2426654
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   RCT-Folly: 424b8c9a7a0b9ab2886ffe9c3b041ef628fd4fb1
   RCTRequired: fb207f74935626041e7308c9e88dcdda680f1073
@@ -608,9 +608,9 @@ SPEC CHECKSUMS:
   React-utils: 8eb3c12fd4a4da6df3824f7d9a961d73a6ed6e5d
   ReactCommon: d2de36ed3eebe700d7169b9e80f7d1a4b98e178d
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
-  WechatOpenSDK: 290989072e87b79d52225a01bb4e5e58f6f88593
+  WechatOpenSDK-XCFramework: 36fb2bea0754266c17184adf4963d7e6ff98b69f
   Yoga: 6f5ab94cd8b1ecd04b6e973d0bc583ede2a598cc
 
-PODFILE CHECKSUM: bcf5c372799802016bc3855cf2d2bd83a3d1b246
+PODFILE CHECKSUM: e44a8b0a78596595a0a8e0e284c522da68edaec0
 
 COCOAPODS: 1.15.2

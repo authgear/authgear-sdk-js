@@ -45,7 +45,9 @@ target 'reactNativeExample' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
-  pod 'WechatOpenSDK', '~> 2.0.4'
+  # Use WechatOpenSDK-XCFramework instead of WechatOpenSDK
+  # See https://developers.weixin.qq.com/community/develop/doc/000c62b9b0ccf8c1d65fa90b751001?blockType=1
+  pod 'WechatOpenSDK-XCFramework', '~> 2.0.4'
 
   target 'reactNativeExampleTests' do
     inherit! :complete
@@ -60,9 +62,5 @@ target 'reactNativeExample' do
       :mac_catalyst_enabled => false
     )
     __apply_Xcode_12_5_M1_post_install_workaround(installer)
-
-    installer.pods_project.build_configurations.each do |config|
-      config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
-    end
   end
 end
