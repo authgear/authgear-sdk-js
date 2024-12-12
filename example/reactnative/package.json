@@ -8,7 +8,8 @@
     "start": "react-native start",
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "yarnauditfix": "rm yarn.lock && npm install && npm audit fix && git checkout -- yarn.lock && npm install && yarn install && rm package-lock.json"
   },
   "dependencies": {
     "@authgear/react-native": "../../packages/authgear-react-native",
