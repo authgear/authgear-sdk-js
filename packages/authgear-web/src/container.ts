@@ -277,10 +277,6 @@ export class WebContainer {
    * @public
    */
   async configure(options: ConfigureOptions): Promise<void> {
-    // TODO: verify if we need to support configure for second time
-    // and guard if initialized
-    const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
-
     this.clientID = options.clientID;
     this.baseContainer.apiClient.endpoint = options.endpoint;
     if (options.sessionType != null) {
@@ -294,8 +290,6 @@ export class WebContainer {
       this.isSSOEnabled = options.isSSOEnabled ?? false;
     }
 
-    this.baseContainer.refreshToken = refreshToken ?? undefined;
-
     switch (this.sessionType) {
       case "cookie":
         this.baseContainer._updateSessionState(
@@ -303,7 +297,13 @@ export class WebContainer {
           SessionStateChangeReason.NoToken
         );
         break;
-      case "refresh_token":
+      case "refresh_token": {
+        // Only load refresh token when the session type is refresh_token.
+        // This prevents a very rare situation that session type is changed from refresh_token to cookie,
+        // and the previously stored refresh token is loaded.
+        const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
+        this.baseContainer.refreshToken = refreshToken ?? undefined;
+
         if (this.baseContainer.refreshToken != null) {
           // consider user as logged in if refresh token is available
           this.baseContainer._updateSessionState(
@@ -317,6 +317,7 @@ export class WebContainer {
           );
         }
         break;
+      }
     }
   }
 
