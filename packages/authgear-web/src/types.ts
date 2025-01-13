@@ -38,8 +38,8 @@ export interface ReauthenticateOptions {
    */
   state?: string;
   /**
-   * Custom state. Use this parameter to provide parameters from the client application to Custom UI. The string in xState can be accessed by the Custom UI. 
-   * 
+   * Custom state. Use this parameter to provide parameters from the client application to Custom UI. The string in xState can be accessed by the Custom UI.
+   *
    * Ignore this parameter if default AuthUI is used.
    */
   xState?: string;
@@ -78,8 +78,8 @@ export interface AuthenticateOptions {
    */
   state?: string;
   /**
-   * Custom state. Use this parameter to provide parameters from the client application to Custom UI. The string in xState can be accessed by the Custom UI. 
-   * 
+   * Custom state. Use this parameter to provide parameters from the client application to Custom UI. The string in xState can be accessed by the Custom UI.
+   *
    * Ignore this parameter if default AuthUI is used.
    */
   xState?: string;
@@ -170,7 +170,7 @@ export interface SettingsActionOptions {
   state?: string;
   /**
    * Custom state. Use this parameter to provide parameters from the client application to Custom UI. The string in xState can be accessed by the Custom UI.
-   * 
+   *
    * Ignore this parameter if default AuthUI is used.
    */
   xState?: string;
@@ -202,8 +202,8 @@ export interface PromoteOptions {
    */
   state?: string;
   /**
-   * Custom state. Use this parameter to provide parameters from the client application to Custom UI. The string in xState can be accessed by the Custom UI. 
-   * 
+   * Custom state. Use this parameter to provide parameters from the client application to Custom UI. The string in xState can be accessed by the Custom UI.
+   *
    * Ignore this parameter if default AuthUI is used.
    */
   xState?: string;
