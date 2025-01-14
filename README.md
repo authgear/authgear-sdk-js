@@ -70,13 +70,8 @@ $ (cd website && yarn install --frozen-lockfile)
 
 ## Releasing
 
-First, ensure these tools are installed:
-- `yarn`
-- [`github-release`](https://github.com/github-release/github-release)
-- [`git-chglog`](https://github.com/git-chglog/git-chglog)
-
-Also, Git should be configured to be able to sign using GPG keys,
-and npm should be logged in as appropriate user.
+- Ensure you have `node`, `npm`, and `yarn` in your `PATH`.
+- Sign in as appropriate user in npm.
 
 ```sh
 # VERSION should be in format like "0.1.0"

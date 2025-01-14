@@ -37,9 +37,6 @@ VERSION="$VERSION" npm run build
 (cd example/reactnative && yarn install)
 (cd example/capacitor && npm install)
 
-git-chglog --next-tag v"$VERSION" -o CHANGELOG.md
-git add CHANGELOG.md 'packages/' 'example/'
-git commit -m "Update CHANGELOG for v$VERSION"
 git tag -a v"$VERSION" -s -m "Release v$VERSION"
 # The main branch is now protected. We cannot push to it directly.
 # git push git@github.com:authgear/authgear-sdk-js.git "$GIT_BRANCH"
