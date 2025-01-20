@@ -412,6 +412,7 @@ export class ReactNativeContainer {
     this.clientID = options.clientID;
     this.baseContainer.apiClient.endpoint = options.endpoint;
     this.baseContainer.refreshToken = refreshToken ?? undefined;
+    this.baseContainer.accessToken = undefined;
 
     if (this.baseContainer.refreshToken != null) {
       // consider user as logged in if refresh token is available
