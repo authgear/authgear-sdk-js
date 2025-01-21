@@ -303,6 +303,7 @@ export class WebContainer {
         // and the previously stored refresh token is loaded.
         const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
         this.baseContainer.refreshToken = refreshToken ?? undefined;
+        this.baseContainer.accessToken = undefined;
 
         if (this.baseContainer.refreshToken != null) {
           // consider user as logged in if refresh token is available
