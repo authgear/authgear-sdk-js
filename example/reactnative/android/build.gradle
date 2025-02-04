@@ -3,7 +3,7 @@ buildscript {
         // buildToolsVersion depends on the available build tools on the Github runner.
         // See https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
         buildToolsVersion = "33.0.2"
-        minSdkVersion = 23
+        minSdkVersion = 24
         compileSdkVersion = 33
         targetSdkVersion = 33
         ndkVersion = "26.1.10909125"
