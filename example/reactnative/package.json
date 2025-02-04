@@ -14,7 +14,7 @@
   "dependencies": {
     "@authgear/react-native": "../../packages/authgear-react-native",
     "react": "18.2.0",
-    "react-native": "0.72.15"
+    "react-native": "0.72.17"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

@@ -11,7 +11,7 @@
     "@jridgewell/trace-mapping" "^0.3.24"
 
 "@authgear/react-native@../../packages/authgear-react-native":
-  version "2.11.0"
+  version "2.13.0"
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.24.7":
   version "7.24.7"
@@ -5522,10 +5522,10 @@ react-is@^17.0.1:
   resolved "https://registry.npmjs.org/react-is/-/react-is-17.0.2.tgz"
   integrity sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==
 
-react-native@0.72.15:
-  version "0.72.15"
-  resolved "https://registry.npmjs.org/react-native/-/react-native-0.72.15.tgz"
-  integrity sha512-UDxOZwCxhwb0dGuvcB/04uWzhDJ8etqW3fMOq6bv35WwEXMgKXXqZpshhMo64UVWm/m2ZmM32ckn5sf1EIqD9Q==
+react-native@0.72.17:
+  version "0.72.17"
+  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.72.17.tgz#54d6de38adf6e56fdde1a6b83ef9b138abae7384"
+  integrity sha512-k3dNe0XqoYCGGWTenbupWSj+ljW3GIfmYS5P4s3if4j0csx2YbenKgH1aJNWLp+UP7ONwfId6G+uBoUJfyMxXg==
   dependencies:
     "@jest/create-cache-key-function" "^29.2.1"
     "@react-native-community/cli" "^11.4.1"
