@@ -16,20 +16,12 @@ Pod::Spec.new do |s|
 
   s.source_files = "ios/**/*.{h,m,mm}"
 
+  # The iOS native module is compatible with the Interop layer.
+  # But it is itself not a TurboModule.
+  # Converting to a TurboModule requires
+  # 1. Figure out how to emit events in the old way and the new way.
+  # 2. Write the codegen spec javascript file.
+  # 3. Configure codegenConfig in package.json (Once we do this, the codegen config in build.gradle should be removed)
+  # 4. Make necessary changes to the native code to conform to the spec.
   s.dependency "React-Core"
-
-  # Don't install the dependencies when we run `pod install` in the old architecture.
-  if ENV['RCT_NEW_ARCH_ENABLED'] == '1' then
-    s.compiler_flags = folly_compiler_flags + " -DRCT_NEW_ARCH_ENABLED=1"
-    s.pod_target_xcconfig    = {
-        "HEADER_SEARCH_PATHS" => "\"$(PODS_ROOT)/boost\"",
-        "CLANG_CXX_LANGUAGE_STANDARD" => "c++17"
-    }
-
-    s.dependency "React-Codegen"
-    s.dependency "RCT-Folly", folly_version
-    s.dependency "RCTRequired"
-    s.dependency "RCTTypeSafety"
-    s.dependency "ReactCommon/turbomodule/core"
-  end
 end
