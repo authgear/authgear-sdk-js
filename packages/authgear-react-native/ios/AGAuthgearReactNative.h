@@ -7,7 +7,7 @@
 
 static NSString * _Nonnull const kOpenWechatRedirectURINotification = @"AGAuthgearReactNativeOpenWechatRedirectURINotification";
 
-@interface AGAuthgearReactNative : NSObject <RCTBridgeModule>
+@interface AGAuthgearReactNative : RCTEventEmitter <RCTBridgeModule>
 
 + (BOOL)application:(nonnull UIApplication *)app
             openURL:(nonnull NSURL *)URL

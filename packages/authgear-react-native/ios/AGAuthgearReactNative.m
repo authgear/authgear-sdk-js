@@ -46,6 +46,29 @@ RCT_EXPORT_MODULE(AuthgearReactNative)
   return dispatch_get_main_queue();
 }
 
+- (void)startObserving
+{
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleOpenURLNotification:)
+                                                 name:kOpenWechatRedirectURINotification
+                                               object:nil];
+}
+
+- (void)stopObserving
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (NSArray<NSString *> *)supportedEvents
+{
+    return @[@"onAuthgearOpenWechatRedirectURI"];
+}
+
+- (void)handleOpenURLNotification:(NSNotification *)notification
+{
+    [self sendEventWithName:@"onAuthgearOpenWechatRedirectURI" body:notification.userInfo[@"url"]];
+}
+
 + (BOOL)application:(UIApplication *)app
             openURL:(NSURL *)URL
             options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
