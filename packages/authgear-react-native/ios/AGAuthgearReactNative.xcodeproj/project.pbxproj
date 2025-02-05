@@ -10,7 +10,6 @@
 		77E2D5A02B6B530700BAC8D5 /* AGWKWebViewController.h in Sources */ = {isa = PBXBuildFile; fileRef = 77E2D59F2B6B530700BAC8D5 /* AGWKWebViewController.h */; };
 		77E2D5A22B6B546C00BAC8D5 /* AGWKWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 77E2D5A12B6B546C00BAC8D5 /* AGWKWebViewController.m */; };
 		B3E7B58A1CC2AC0600A0062D /* AGAuthgearReactNative.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* AGAuthgearReactNative.m */; };
-		CC51B5F325AEF72A0037D3E9 /* RCTAuthgearManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CC51B5F225AEF72A0037D3E9 /* RCTAuthgearManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -31,8 +30,6 @@
 		77E2D5A12B6B546C00BAC8D5 /* AGWKWebViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AGWKWebViewController.m; sourceTree = "<group>"; };
 		B3E7B5881CC2AC0600A0062D /* AGAuthgearReactNative.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGAuthgearReactNative.h; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* AGAuthgearReactNative.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGAuthgearReactNative.m; sourceTree = "<group>"; };
-		CC51B5F125AEF72A0037D3E9 /* RCTAuthgearManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTAuthgearManager.h; sourceTree = "<group>"; };
-		CC51B5F225AEF72A0037D3E9 /* RCTAuthgearManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RCTAuthgearManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,8 +56,6 @@
 			children = (
 				77E2D59F2B6B530700BAC8D5 /* AGWKWebViewController.h */,
 				77E2D5A12B6B546C00BAC8D5 /* AGWKWebViewController.m */,
-				CC51B5F125AEF72A0037D3E9 /* RCTAuthgearManager.h */,
-				CC51B5F225AEF72A0037D3E9 /* RCTAuthgearManager.m */,
 				B3E7B5881CC2AC0600A0062D /* AGAuthgearReactNative.h */,
 				B3E7B5891CC2AC0600A0062D /* AGAuthgearReactNative.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
@@ -125,7 +120,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CC51B5F325AEF72A0037D3E9 /* RCTAuthgearManager.m in Sources */,
 				77E2D5A02B6B530700BAC8D5 /* AGWKWebViewController.h in Sources */,
 				B3E7B58A1CC2AC0600A0062D /* AGAuthgearReactNative.m in Sources */,
 				77E2D5A22B6B546C00BAC8D5 /* AGWKWebViewController.m in Sources */,

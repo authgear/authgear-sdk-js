@@ -1039,11 +1039,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         // no-op
     }
 
-    @Override
-    public void onCatalystInstanceDestroy() {
-        super.onCatalystInstanceDestroy();
-    }
-
     private WritableArray bytesToArray(byte[] bytes) {
         WritableArray arr = Arguments.createArray();
         for (int i = 0; i < bytes.length; i++) {
