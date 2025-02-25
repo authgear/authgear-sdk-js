@@ -27,6 +27,8 @@ jobs:
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: false
+    - run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+    - run: bundle install
     - run: npm ci
     - run: npm ci
       working-directory: ./website
@@ -42,6 +44,8 @@ jobs:
     - run: npm run typecheck
       if: ${{ !cancelled() }}
     - run: npm run test
+      if: ${{ !cancelled() }}
+    - run: npm run verify
       if: ${{ !cancelled() }}
     - run: npm run bundle
       if: ${{ !cancelled() }}
