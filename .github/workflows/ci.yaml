@@ -333,14 +333,14 @@ jobs:
         echo -n "$ANDROID_KEYSTORE_BASE64" | base64 --decode -o $KEYSTORE_PATH
     - name: Run zipalign
       run: |
-        "$ANDROID_HOME/build-tools/34.0.0/zipalign" -c -v 4 ./example/capacitor/android/app/build/outputs/apk/release/app-release-unsigned.apk
+        "$ANDROID_HOME/build-tools/35.0.1/zipalign" -c -v 4 ./example/capacitor/android/app/build/outputs/apk/release/app-release-unsigned.apk
     - name: Run apksigner
       env:
         ANDROID_KEYSTORE_PASSWORD: ${{ secrets.CAPACITOR_ANDROID_KEYSTORE_PASSWORD }}
         ANDROID_KEY_ALIAS: ${{ secrets.CAPACITOR_ANDROID_KEY_ALIAS }}
         ANDROID_KEY_PASSWORD: ${{ secrets.CAPACITOR_ANDROID_KEY_PASSWORD }}
       run: |
-        "$ANDROID_HOME/build-tools/34.0.0/apksigner" sign \
+        "$ANDROID_HOME/build-tools/35.0.1/apksigner" sign \
           --ks $RUNNER_TEMP/keystore.jks \
           --ks-key-alias "$ANDROID_KEY_ALIAS" \
           --ks-pass "pass:$ANDROID_KEYSTORE_PASSWORD" \
