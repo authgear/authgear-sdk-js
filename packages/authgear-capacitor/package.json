@@ -16,8 +16,7 @@
   "scripts": {
     "verify": "npm run verify:ios && npm run verify:android",
     "verify:ios": "cd ios && pod install && xcodebuild -workspace Plugin.xcworkspace -scheme Plugin -destination generic/platform=iOS && cd ..",
-    "verify:android": "cd android && ./gradlew clean build test && cd ..",
-    "build": "tsc && rollup -c rollup.config.js"
+    "verify:android": "cd android && ./gradlew clean build test && cd .."
   },
   "devDependencies": {
     "@authgear/core": "2.14.0",
