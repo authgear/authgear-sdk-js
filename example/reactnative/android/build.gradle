@@ -1,8 +1,8 @@
 buildscript {
     ext {
         // buildToolsVersion depends on the available build tools on the Github runner.
-        // See https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
-        buildToolsVersion = "33.0.2"
+        // See https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
+        buildToolsVersion = "33.0.3"
         minSdkVersion = 24
         compileSdkVersion = 33
         targetSdkVersion = 33
