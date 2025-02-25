@@ -14,3 +14,6 @@ dist/
 xcuserdata/
 xcshareddata/
 temp/
+
+# Ruby
+vendor/bundle/
