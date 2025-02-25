@@ -1,3 +1,5 @@
+import Foundation
+
 public enum AuthgearError: LocalizedError {
     case runtimeError(Error)
 
