@@ -1,3 +1,7 @@
+## NOTE(louis): This file exists because the React Native template includes this file.
+## We also have a Gemfile at the project root.
+## That Gemfile is intended for packages/authgear-capacitor, example/capacitor.
+
 source 'https://rubygems.org'
 
 # You may use http://rbenv.org/ or https://rvm.io/ to install and use this version

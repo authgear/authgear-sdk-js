@@ -13,20 +13,14 @@
     "ios/Plugin/",
     "AuthgearCapacitor.podspec"
   ],
-  "scripts": {
-    "verify": "npm run verify:ios && npm run verify:android",
-    "verify:ios": "cd ios && pod install && xcodebuild -workspace Plugin.xcworkspace -scheme Plugin -destination generic/platform=iOS && cd ..",
-    "verify:android": "cd android && ./gradlew clean build test && cd ..",
-    "build": "tsc && rollup -c rollup.config.js"
-  },
   "devDependencies": {
     "@authgear/core": "2.14.0",
-    "@capacitor/android": "^5.0.0",
-    "@capacitor/core": "^5.0.0",
-    "@capacitor/ios": "^5.0.0"
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.0.0"
   },
   "peerDependencies": {
-    "@capacitor/core": "^5.0.0"
+    "@capacitor/core": "^5.0.0 || ^6.0.0 || ^7.0.0"
   },
   "capacitor": {
     "ios": {

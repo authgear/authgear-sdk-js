@@ -2,9 +2,9 @@ apply plugin: 'com.android.application'
 
 android {
     namespace "com.authgear.sdk.exampleapp.capacitor"
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        buildToolsVersion "33.0.2"
+        buildToolsVersion rootProject.ext.buildToolsVersion
         applicationId "com.authgear.sdk.exampleapp.capacitor"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion

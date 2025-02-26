@@ -2,9 +2,7 @@
   "nodes": {
     "flake-utils": {
       "inputs": {
-        "systems": [
-          "systems"
-        ]
+        "systems": "systems"
       },
       "locked": {
         "lastModified": 1731533236,
@@ -22,16 +20,16 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1737525964,
-        "narHash": "sha256-3wFonKmNRWKq1himW9N3TllbeGIHFACI5vmLpk6moF8=",
+        "lastModified": 1740339700,
+        "narHash": "sha256-cbrw7EgQhcdFnu6iS3vane53bEagZQy/xyIkDWpCgVE=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "5757bbb8bd7c0630a0cc4bb19c47e588db30b97c",
+        "rev": "04ef94c4c1582fd485bbfdb8c4a8ba250e359195",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixpkgs-unstable",
+        "ref": "nixos-24.11",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -39,8 +37,7 @@
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs",
-        "systems": "systems"
+        "nixpkgs": "nixpkgs"
       }
     },
     "systems": {
