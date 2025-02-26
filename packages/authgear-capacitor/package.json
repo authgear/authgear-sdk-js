@@ -1,6 +1,6 @@
 {
   "name": "@authgear/capacitor",
-  "version": "2.14.0",
+  "version": "2.15.0",
   "license": "Apache-2.0",
   "main": "dist/plugin.cjs.js",
   "module": "dist/plugin.module.js",
@@ -14,7 +14,7 @@
     "AuthgearCapacitor.podspec"
   ],
   "devDependencies": {
-    "@authgear/core": "2.14.0",
+    "@authgear/core": "2.15.0",
     "@capacitor/android": "^7.0.0",
     "@capacitor/core": "^7.0.0",
     "@capacitor/ios": "^7.0.0"
