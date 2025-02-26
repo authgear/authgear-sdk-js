@@ -33,15 +33,17 @@ npm run test
 VERSION="$VERSION" npm run build
 
 # Update the lock files in example apps to match VERSION.
-(cd example/reactweb && npm install)
-(cd example/reactnative && yarn install)
-(cd example/capacitor && npm install)
+(set -eu; cd example/reactweb; npm install)
+(set -eu; cd example/reactnative; yarn install)
+(set -eu; cd example/capacitor; npm install)
+(set -eu; cd example/reactnative/ios; bundle exec pod install)
+(set -eu; cd example/capacitor/ios/App; bundle exec pod install)
 
 git tag -a v"$VERSION" -s -m "Release v$VERSION"
 # The main branch is now protected. We cannot push to it directly.
 # git push git@github.com:authgear/authgear-sdk-js.git "$GIT_BRANCH"
 git push git@github.com:authgear/authgear-sdk-js.git v"$VERSION"
 
-(cd packages/authgear-web && npm publish --access public)
-(cd packages/authgear-react-native && npm publish --access public)
-(cd packages/authgear-capacitor && npm publish --access public)
+(set -eu; cd packages/authgear-web; npm publish --access public)
+(set -eu; cd packages/authgear-react-native; npm publish --access public)
+(set -eu; cd packages/authgear-capacitor; npm publish --access public)
