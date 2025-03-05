@@ -11,7 +11,15 @@ import { LatteAuthenticateOptions } from "./types";
 class Latte {
   public authgear: WebContainer;
   public customUIEndpoint: string;
-  public tokenizeEndpoint: string;
+  public middlewareEndpoint: string;
+
+  private get tokenizeEndpoint(): string {
+    return `${this.middlewareEndpoint}/token`;
+  }
+  private get proofOfPhoneNumberVerificationEndpoint(): string {
+    return `${this.middlewareEndpoint}/proof_of_phone_number_verification
+    `;
+  }
 
   private flows: LatteFlows;
 
@@ -20,11 +28,11 @@ class Latte {
   constructor(
     authgear: WebContainer,
     customUIEndpoint: string,
-    tokenizeEndpoint: string
+    middlewareEndpoint: string
   ) {
     this.authgear = authgear;
     this.customUIEndpoint = customUIEndpoint;
-    this.tokenizeEndpoint = tokenizeEndpoint;
+    this.middlewareEndpoint = middlewareEndpoint;
 
     this.flows = new LatteFlows(this);
   }
@@ -61,6 +69,25 @@ class Latte {
       throw new LatteError("unexpected response from tokenuze endpoint", resp);
     }
     return resp.text();
+  }
+
+  public async getProofOfPhoneNumberVerification(): Promise<string> {
+    await this.authgear.refreshAccessTokenIfNeeded();
+    const accessToken = this.authgear.accessToken;
+    if (accessToken == null) {
+      throw new LatteError("getProofOfPhoneNumberVerification requires authenticated user");
+    }
+
+    const resp = await this.fetch(this.proofOfPhoneNumberVerificationEndpoint, {
+      method: "POST",
+      body: JSON.stringify({ access_token: accessToken }),
+      credentials: "omit",
+    });
+    if (!resp.ok) {
+      throw new LatteError("unexpected response from proofOfPhoneNumberVerification endpoint", resp);
+    }
+    const json = await resp.json();
+    return json["proof_of_phone_number_verification"];
   }
 }
 
