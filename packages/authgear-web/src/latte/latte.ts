@@ -14,11 +14,11 @@ class Latte {
   public middlewareEndpoint: string;
 
   private get tokenizeEndpoint(): string {
-    return `${this.middlewareEndpoint}/token`;
+    return new URL('/token', this.middlewareEndpoint).toString();
   }
+
   private get proofOfPhoneNumberVerificationEndpoint(): string {
-    return `${this.middlewareEndpoint}/proof_of_phone_number_verification
-    `;
+    return new URL('/proof_of_phone_number_verification', this.middlewareEndpoint).toString();
   }
 
   private flows: LatteFlows;
