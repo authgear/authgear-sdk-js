@@ -1,9 +1,7 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
-    flake-utils = {
-      url = "github:numtide/flake-utils";
-    };
+    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs =
@@ -32,8 +30,6 @@
             pkgs.nodejs_20
             # 3.3.6
             pkgs.ruby_3_3
-            # 1.16.2
-            pkgs.cocoapods
             # 1.22.22
             pkgs.yarn
           ];
