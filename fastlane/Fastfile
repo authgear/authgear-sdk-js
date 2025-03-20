@@ -1,0 +1,48 @@
+default_platform(:ios)
+
+platform :ios do
+  lane :react_native_build_ios_app do |options|
+    build_app(
+      destination: "generic/platform=iOS",
+      workspace: "./example/reactnative/ios/reactNativeExample.xcworkspace",
+      scheme: "reactNativeExample",
+      configuration: "Release",
+      export_options: "./example/reactnative/ios/ExportOptions.plist",
+      clean: true,
+      output_directory: "./build/Release/iOS/reactNativeExample",
+      output_name: "reactNativeExample.ipa",
+      xcargs: "CURRENT_PROJECT_VERSION=#{options[:CURRENT_PROJECT_VERSION]}",
+    )
+  end
+
+  lane :capacitor_build_ios_simulator do
+    xcodebuild(
+      build: true,
+      destination: "generic/platform=iOS Simulator",
+      workspace: "./example/capacitor/ios/App/App.xcworkspace",
+      scheme: "App",
+    )
+  end
+
+  lane :capacitor_build_ios_app do |options|
+    build_app(
+      destination: "generic/platform=iOS",
+      workspace: "./example/capacitor/ios/App/App.xcworkspace",
+      scheme: "App",
+      configuration: "Release",
+      export_options: "./example/capacitor/ios/App/ExportOptions.plist",
+      clean: true,
+      output_directory: "./build/Release/iOS/capacitor",
+      output_name: "capacitor.ipa",
+      xcargs: "CURRENT_PROJECT_VERSION=#{options[:CURRENT_PROJECT_VERSION]}",
+    )
+  end
+
+  lane :upload_ios_app do |options|
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      api_key_path: "./build/fastlane-api-key.json",
+      ipa: options[:ipa],
+    )
+  end
+end

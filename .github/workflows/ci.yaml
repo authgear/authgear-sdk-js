@@ -160,33 +160,17 @@ jobs:
       run: |
         API_KEY_PATH=$RUNNER_TEMP/AuthKey_${IOS_API_KEY_ID}.p8
         echo -n "$IOS_API_KEY_BASE64" | base64 --decode -o $API_KEY_PATH
-    - run: make react-native-set-CFBundleVersion
-    - name: Run xcodebuild archive
-      run: |
-        export REACT_NATIVE_ARCHIVE_PATH="$RUNNER_TEMP/reactNativeExample.xcarchive"
-        make react-native-archive
-    - name: Run xcodebuild -exportArchive
-      run: |
-        export REACT_NATIVE_ARCHIVE_PATH="$RUNNER_TEMP/reactNativeExample.xcarchive"
-        export REACT_NATIVE_EXPORT_PATH="$RUNNER_TEMP/reactNativeExample.export"
-        make react-native-export-archive
-    - name: Validate .ipa
+    - name: Create fastlane api key json
       env:
         API_ISSUER: ${{ secrets.IOS_API_KEY_ISSUER }}
         API_KEY: ${{ secrets.IOS_API_KEY_ID }}
       run: |
-        export API_PRIVATE_KEYS_DIR="$RUNNER_TEMP"
-        export IPA_PATH="$RUNNER_TEMP/reactNativeExample.export/reactNativeExample.ipa"
-        make validate-app
+        export API_KEY_PATH=$RUNNER_TEMP/AuthKey_${API_KEY}.p8
+        make fastlane-api-key-json
+    - run: make react-native-build-ios-app
     - name: Upload to TestFlight
       if: ${{ github.ref == 'refs/heads/master' }}
-      env:
-        API_ISSUER: ${{ secrets.IOS_API_KEY_ISSUER }}
-        API_KEY: ${{ secrets.IOS_API_KEY_ID }}
-      run: |
-        export API_PRIVATE_KEYS_DIR="$RUNNER_TEMP"
-        export IPA_PATH="$RUNNER_TEMP/reactNativeExample.export/reactNativeExample.ipa"
-        make upload-app
+      run: make react-native-upload-ios-app
     - name: Clean up keychain and provisioning profile
       if: ${{ always() }}
       run: |
@@ -278,33 +262,17 @@ jobs:
       run: |
         API_KEY_PATH=$RUNNER_TEMP/AuthKey_${IOS_API_KEY_ID}.p8
         echo -n "$IOS_API_KEY_BASE64" | base64 --decode -o $API_KEY_PATH
-    - run: make capacitor-set-CFBundleVersion
-    - name: Run xcodebuild archive
-      run: |
-        export CAPACITOR_ARCHIVE_PATH="$RUNNER_TEMP/App.xcarchive"
-        make capacitor-archive
-    - name: Run xcodebuild -exportArchive
-      run: |
-        export CAPACITOR_ARCHIVE_PATH="$RUNNER_TEMP/App.xcarchive"
-        export CAPACITOR_EXPORT_PATH="$RUNNER_TEMP/App.export"
-        make capacitor-exportArchive
-    - name: Validate .ipa
+    - name: Create fastlane api key json
       env:
         API_ISSUER: ${{ secrets.IOS_API_KEY_ISSUER }}
         API_KEY: ${{ secrets.IOS_API_KEY_ID }}
       run: |
-        export API_PRIVATE_KEYS_DIR="$RUNNER_TEMP"
-        export IPA_PATH="$RUNNER_TEMP/App.export/App.ipa"
-        make validate-app
+        export API_KEY_PATH=$RUNNER_TEMP/AuthKey_${API_KEY}.p8
+        make fastlane-api-key-json
+    - run: make capacitor-build-ios-app
     - name: Upload to TestFlight
       if: ${{ github.ref == 'refs/heads/master' }}
-      env:
-        API_ISSUER: ${{ secrets.IOS_API_KEY_ISSUER }}
-        API_KEY: ${{ secrets.IOS_API_KEY_ID }}
-      run: |
-        export API_PRIVATE_KEYS_DIR="$RUNNER_TEMP"
-        export IPA_PATH="$RUNNER_TEMP/App.export/App.ipa"
-        make upload-app
+      run: make capacitor-upload-ios-app
     - name: Clean up keychain and provisioning profile
       if: ${{ always() }}
       run: |

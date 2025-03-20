@@ -2,14 +2,9 @@ REF := $(shell git describe --all --exact-match | sed -e "s|^heads/||")
 GIT_HASH ?= git-$(shell git rev-parse --short=12 HEAD)
 IMAGE ?= quay.io/theauthgear/authgear-demo-webapp:$(GIT_HASH)
 
-API_ISSUER ?= invalid
-API_KEY ?= invalid
-
-REACT_NATIVE_ARCHIVE_PATH ?= ./build/Release/iOS/reactNativeExample.xcarchive
-REACT_NATIVE_EXPORT_PATH ?= ./build/Release/iOS/reactNativeExample.export
-
-CAPACITOR_ARCHIVE_PATH ?= ./build/Release/iOS/App/App.xcarchive
-CAPACITOR_EXPORT_PATH ?= ./build/Release/iOS/App/App.export
+API_ISSUER ?= "invalid"
+API_KEY ?= "invalid"
+API_KEY_PATH ?= ./AuthKey_invalid.p8
 
 # The documentation build pipeline works in the following way.
 #
@@ -77,8 +72,16 @@ push-image:
 
 .PHONY: clean
 clean:
-	rm -rf ./example/reactnative/ios/build
-	rm -rf ./example/capacitor/ios/App/App/build
+	rm -rf ./build
+
+.PHONY: fastlane-api-key-json
+fastlane-api-key-json:
+	mkdir -p ./build
+	jq --slurp --raw-input > ./build/fastlane-api-key.json \
+		--arg key_id $(API_KEY) \
+		--arg issuer_id $(API_ISSUER) \
+		'{key_id: $$key_id, issuer_id: $$issuer_id, key: .}' \
+		$(API_KEY_PATH)
 
 .PHONY: sdk-build
 sdk-build:
@@ -122,27 +125,13 @@ react-native-bundle-install:
 react-native-pod-install:
 	cd ./example/reactnative/ios; bundle exec pod install
 
-.PHONY: react-native-set-CFBundleVersion
-react-native-set-CFBundleVersion:
-	/usr/libexec/Plistbuddy -c "Set CFBundleVersion $(shell date +%s)" ./example/reactnative/ios/reactNativeExample/Info.plist
+.PHONY: react-native-build-ios-app
+react-native-build-ios-app:
+	bundle exec fastlane react_native_build_ios_app CURRENT_PROJECT_VERSION:$(shell date +%s)
 
-.PHONY: react-native-archive
-react-native-archive:
-	cd ./example/reactnative/ios; \
-		xcodebuild archive \
-			-destination "generic/platform=iOS" \
-			-workspace reactNativeExample.xcworkspace \
-			-scheme reactNativeExample \
-			-configuration Release \
-			-archivePath $(REACT_NATIVE_ARCHIVE_PATH)
-
-.PHONY: react-native-export-archive
-react-native-export-archive:
-	cd ./example/reactnative/ios; \
-		xcodebuild -exportArchive \
-			-archivePath $(REACT_NATIVE_ARCHIVE_PATH) \
-			-exportPath $(REACT_NATIVE_EXPORT_PATH) \
-			-exportOptionsPlist ./ExportOptions.plist
+.PHONY: react-native-upload-ios-app
+react-native-upload-ios-app:
+	bundle exec fastlane upload_ios_app ipa:./build/Release/iOS/reactNativeExample/reactNativeExample.ipa
 
 .PHONY: capacitor-npm-ci
 capacitor-npm-ci:
@@ -163,33 +152,15 @@ capacitor-build-js:
 
 .PHONY: capacitor-build-ios-simulator
 capacitor-build-ios-simulator:
-	cd ./example/capacitor/ios/App; \
-		xcodebuild build \
-			-destination "generic/platform=iOS Simulator" \
-			-workspace App.xcworkspace \
-			-scheme App
+	bundle exec fastlane capacitor_build_ios_simulator
 
-.PHONY: capacitor-set-CFBundleVersion
-capacitor-set-CFBundleVersion:
-	/usr/libexec/Plistbuddy -c "Set CFBundleVersion $(shell date +%s)" ./example/capacitor/ios/App/App/Info.plist
+.PHONY: capacitor-build-ios-app
+capacitor-build-ios-app:
+	bundle exec fastlane capacitor_build_ios_app CURRENT_PROJECT_VERSION:$(shell date +%s)
 
-.PHONY: capacitor-archive
-capacitor-archive:
-	cd ./example/capacitor/ios/App; \
-		xcodebuild archive \
-			-destination "generic/platform=iOS" \
-			-workspace App.xcworkspace \
-			-scheme App \
-			-configuration Release \
-			-archivePath $(CAPACITOR_ARCHIVE_PATH)
-
-.PHONY: capacitor-exportArchive
-capacitor-exportArchive:
-	cd ./example/capacitor/ios/App; \
-		xcodebuild -exportArchive \
-			-archivePath $(CAPACITOR_ARCHIVE_PATH) \
-			-exportPath $(CAPACITOR_EXPORT_PATH) \
-			-exportOptionsPlist ./ExportOptions.plist
+.PHONY: capacitor-upload-ios-app
+capacitor-upload-ios-app:
+	bundle exec fastlane upload_ios_app ipa:./build/Release/iOS/capacitor/capacitor.ipa
 
 .PHONY: capacitor-build-unsigned-apk
 capacitor-build-unsigned-apk:
@@ -213,19 +184,3 @@ capacitor-apksigner:
 		--key-pass pass:$(ANDROID_KEY_PASSWORD) \
 		--out ./example/capacitor/android/app/build/outputs/apk/release/app-release-signed.apk \
 		./example/capacitor/android/app/build/outputs/apk/release/app-release-unsigned.apk
-
-.PHONY: validate-app
-validate-app:
-	xcrun altool --validate-app \
-		--file $(IPA_PATH) \
-		--type ios \
-		--apiKey $(API_KEY) \
-		--apiIssuer $(API_ISSUER)
-
-.PHONY: upload-app
-upload-app:
-	xcrun altool --upload-app \
-		--file $(IPA_PATH) \
-		--type ios \
-		--apiKey $(API_KEY) \
-		--apiIssuer $(API_ISSUER)
