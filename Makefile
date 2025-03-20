@@ -117,10 +117,6 @@ react-native-apksigner:
 		--out ./example/reactnative/android/app/build/outputs/apk/release/app-release-signed.apk \
 		./example/reactnative/android/app/build/outputs/apk/release/app-release-unsigned.apk
 
-.PHONY: react-native-bundle-install
-react-native-bundle-install:
-	cd ./example/reactnative; bundle install
-
 .PHONY: react-native-pod-install
 react-native-pod-install:
 	cd ./example/reactnative/ios; bundle exec pod install

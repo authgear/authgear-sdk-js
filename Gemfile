@@ -1,5 +1,3 @@
-## NOTE(louis): This Gemfile is intended for the whole project, except ./example/reactnative
-
 source "https://rubygems.org"
 
 # Ruby 3.3 is the default.
