@@ -129,50 +129,20 @@ jobs:
     - run: make sdk-build
     - run: make react-native-npm-ci
     - run: make react-native-pod-install
-    - name: Install the Apple certificate and provisioning profile
-      env:
-        IOS_CERTIFICATE_BASE64: ${{ secrets.REACT_NATIVE_IOS_CERTIFICATE_BASE64 }}
-        IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.REACT_NATIVE_IOS_PROVISIONING_PROFILE_BASE64 }}
-      run: |
-        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-        PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-
-        echo -n "$IOS_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
-        echo -n "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode -o $PP_PATH
-
-        security create-keychain -p "" $KEYCHAIN_PATH
-        security set-keychain-settings $KEYCHAIN_PATH
-        security unlock-keychain -p "" $KEYCHAIN_PATH
-
-        security import $CERTIFICATE_PATH -P "" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-        security list-keychain -d user -s $KEYCHAIN_PATH
-
-        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-    - name: Install App Store Connect API key
-      env:
-        IOS_API_KEY_BASE64: ${{ secrets.IOS_API_KEY_BASE64 }}
-        IOS_API_KEY_ID: ${{ secrets.IOS_API_KEY_ID }}
-      run: |
-        API_KEY_PATH=$RUNNER_TEMP/AuthKey_${IOS_API_KEY_ID}.p8
-        echo -n "$IOS_API_KEY_BASE64" | base64 --decode -o $API_KEY_PATH
-    - name: Create fastlane api key json
-      env:
-        API_ISSUER: ${{ secrets.IOS_API_KEY_ISSUER }}
-        API_KEY: ${{ secrets.IOS_API_KEY_ID }}
-      run: |
-        export API_KEY_PATH=$RUNNER_TEMP/AuthKey_${API_KEY}.p8
-        make fastlane-api-key-json
+    - uses: authgear/gh-actions-install-apple-certificate-and-provisioning-profile@v1
+      with:
+        certificate_base64: ${{ secrets.REACT_NATIVE_IOS_CERTIFICATE_BASE64 }}
+        provisioning_profile_base64: ${{ secrets.REACT_NATIVE_IOS_PROVISIONING_PROFILE_BASE64 }}
+    - uses: authgear/gh-actions-create-fastlane-api-key-json-file@v1
+      with:
+        api_key_id: ${{ secrets.IOS_API_KEY_ID }}
+        api_key_issuer: ${{ secrets.IOS_API_KEY_ISSUER }}
+        api_key_base64: ${{ secrets.IOS_API_KEY_BASE64 }}
+        output_path: ./build/fastlane-api-key.json
     - run: make react-native-build-ios-app
     - name: Upload to TestFlight
       if: ${{ github.ref == 'refs/heads/master' }}
       run: make react-native-upload-ios-app
-    - name: Clean up keychain and provisioning profile
-      if: ${{ always() }}
-      run: |
-        security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
-        rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
 
   react_native_android:
     if: ${{ github.repository == 'authgear/authgear-sdk-js' }}
@@ -231,50 +201,20 @@ jobs:
     - run: make capacitor-npm-ci
     - run: make capacitor-npm-audit
     - run: make capacitor-build-js
-    - name: Install the Apple certificate and provisioning profile
-      env:
-        IOS_CERTIFICATE_BASE64: ${{ secrets.CAPACITOR_IOS_CERTIFICATE_BASE64 }}
-        IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.CAPACITOR_IOS_PROVISIONING_PROFILE_BASE64 }}
-      run: |
-        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-        PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-
-        echo -n "$IOS_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
-        echo -n "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode -o $PP_PATH
-
-        security create-keychain -p "" $KEYCHAIN_PATH
-        security set-keychain-settings $KEYCHAIN_PATH
-        security unlock-keychain -p "" $KEYCHAIN_PATH
-
-        security import $CERTIFICATE_PATH -P "" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-        security list-keychain -d user -s $KEYCHAIN_PATH
-
-        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-    - name: Install App Store Connect API key
-      env:
-        IOS_API_KEY_BASE64: ${{ secrets.IOS_API_KEY_BASE64 }}
-        IOS_API_KEY_ID: ${{ secrets.IOS_API_KEY_ID }}
-      run: |
-        API_KEY_PATH=$RUNNER_TEMP/AuthKey_${IOS_API_KEY_ID}.p8
-        echo -n "$IOS_API_KEY_BASE64" | base64 --decode -o $API_KEY_PATH
-    - name: Create fastlane api key json
-      env:
-        API_ISSUER: ${{ secrets.IOS_API_KEY_ISSUER }}
-        API_KEY: ${{ secrets.IOS_API_KEY_ID }}
-      run: |
-        export API_KEY_PATH=$RUNNER_TEMP/AuthKey_${API_KEY}.p8
-        make fastlane-api-key-json
+    - uses: authgear/gh-actions-install-apple-certificate-and-provisioning-profile@v1
+      with:
+        certificate_base64: ${{ secrets.CAPACITOR_IOS_CERTIFICATE_BASE64 }}
+        provisioning_profile_base64: ${{ secrets.CAPACITOR_IOS_PROVISIONING_PROFILE_BASE64 }}
+    - uses: authgear/gh-actions-create-fastlane-api-key-json-file@v1
+      with:
+        api_key_id: ${{ secrets.IOS_API_KEY_ID }}
+        api_key_issuer: ${{ secrets.IOS_API_KEY_ISSUER }}
+        api_key_base64: ${{ secrets.IOS_API_KEY_BASE64 }}
+        output_path: ./build/fastlane-api-key.json
     - run: make capacitor-build-ios-app
     - name: Upload to TestFlight
       if: ${{ github.ref == 'refs/heads/master' }}
       run: make capacitor-upload-ios-app
-    - name: Clean up keychain and provisioning profile
-      if: ${{ always() }}
-      run: |
-        security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
-        rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
 
   capacitor_android:
     if: ${{ github.repository == 'authgear/authgear-sdk-js' }}

@@ -2,10 +2,6 @@ REF := $(shell git describe --all --exact-match | sed -e "s|^heads/||")
 GIT_HASH ?= git-$(shell git rev-parse --short=12 HEAD)
 IMAGE ?= quay.io/theauthgear/authgear-demo-webapp:$(GIT_HASH)
 
-API_ISSUER ?= "invalid"
-API_KEY ?= "invalid"
-API_KEY_PATH ?= ./AuthKey_invalid.p8
-
 # The documentation build pipeline works in the following way.
 #
 # 1. Generate individual .d.ts with tsc.
@@ -73,15 +69,6 @@ push-image:
 .PHONY: clean
 clean:
 	rm -rf ./build
-
-.PHONY: fastlane-api-key-json
-fastlane-api-key-json:
-	mkdir -p ./build
-	jq --slurp --raw-input > ./build/fastlane-api-key.json \
-		--arg key_id $(API_KEY) \
-		--arg issuer_id $(API_ISSUER) \
-		'{key_id: $$key_id, issuer_id: $$issuer_id, key: .}' \
-		$(API_KEY_PATH)
 
 .PHONY: sdk-build
 sdk-build:
