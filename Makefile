@@ -65,3 +65,105 @@ build-image:
 .PHONY: push-image
 push-image:
 	docker push $(IMAGE)
+
+.PHONY: clean
+clean:
+	rm -rf ./build
+
+.PHONY: sdk-build
+sdk-build:
+	npm ci
+	npm run build
+
+.PHONY: react-native-npm-ci
+react-native-npm-ci:
+	cd ./example/reactnative; \
+		rm -rf node_modules; \
+		yarn install --frozen-lockfile
+
+.PHONY: react-native-set-versionCode
+react-native-set-versionCode:
+	/usr/bin/sed -I "" "s/versionCode 1/versionCode $(shell date +%s)/" ./example/reactnative/android/app/build.gradle
+
+.PHONY:	react-native-build-unsigned-apk
+react-native-build-unsigned-apk:
+	cd ./example/reactnative/android; \
+		./gradlew :app:assembleRelease
+
+.PHONY: react-native-zipalign
+react-native-zipalign:
+	"$(ANDROID_HOME)/build-tools/33.0.3/zipalign" -c -v 4 ./example/reactnative/android/app/build/outputs/apk/release/app-release-unsigned.apk
+
+.PHONY: react-native-apksigner
+react-native-apksigner:
+	"$(ANDROID_HOME)/build-tools/33.0.3/apksigner" sign \
+		--ks $(ANDROID_KEYSTORE_PATH) \
+		--ks-key-alias $(ANDROID_KEY_ALIAS) \
+		--ks-pass pass:$(ANDROID_KEYSTORE_PASSWORD) \
+		--key-pass pass:$(ANDROID_KEY_PASSWORD) \
+		--out ./example/reactnative/android/app/build/outputs/apk/release/app-release-signed.apk \
+		./example/reactnative/android/app/build/outputs/apk/release/app-release-unsigned.apk
+
+.PHONY: react-native-pod-install
+react-native-pod-install:
+	cd ./example/reactnative/ios; bundle exec pod install
+
+.PHONY: react-native-build-ios-app
+react-native-build-ios-app:
+	bundle exec fastlane react_native_build_ios_app CURRENT_PROJECT_VERSION:$(shell date +%s)
+
+.PHONY: react-native-upload-ios-app
+react-native-upload-ios-app:
+	bundle exec fastlane upload_ios_app ipa:./build/Release/iOS/reactNativeExample/reactNativeExample.ipa
+
+.PHONY: capacitor-npm-ci
+capacitor-npm-ci:
+	cd ./example/capacitor; \
+		npm ci
+
+.PHONY: capacitor-npm-audit
+capacitor-npm-audit:
+	cd ./example/capacitor; \
+		npm audit
+
+# npx cap sync runs `bundle exec pod install` under the hood.
+.PHONY: capacitor-build-js
+capacitor-build-js:
+	cd ./example/capacitor; \
+		npm run build; \
+		npx cap sync
+
+.PHONY: capacitor-build-ios-simulator
+capacitor-build-ios-simulator:
+	bundle exec fastlane capacitor_build_ios_simulator
+
+.PHONY: capacitor-build-ios-app
+capacitor-build-ios-app:
+	bundle exec fastlane capacitor_build_ios_app CURRENT_PROJECT_VERSION:$(shell date +%s)
+
+.PHONY: capacitor-upload-ios-app
+capacitor-upload-ios-app:
+	bundle exec fastlane upload_ios_app ipa:./build/Release/iOS/capacitor/capacitor.ipa
+
+.PHONY: capacitor-build-unsigned-apk
+capacitor-build-unsigned-apk:
+	cd ./example/capacitor/android; \
+		./gradlew :app:assembleRelease
+
+.PHONY: capacitor-set-versionCode
+capacitor-set-versionCode:
+	/usr/bin/sed -I "" "s/versionCode 1/versionCode $(shell date +%s)/" ./example/capacitor/android/app/build.gradle
+
+.PHONY: capacitor-zipalign
+capacitor-zipalign:
+	"$(ANDROID_HOME)/build-tools/35.0.1/zipalign" -c -v 4 ./example/capacitor/android/app/build/outputs/apk/release/app-release-unsigned.apk
+
+.PHONY: capacitor-apksigner
+capacitor-apksigner:
+	"$(ANDROID_HOME)/build-tools/35.0.1/apksigner" sign \
+		--ks $(ANDROID_KEYSTORE_PATH) \
+		--ks-key-alias $(ANDROID_KEY_ALIAS) \
+		--ks-pass pass:$(ANDROID_KEYSTORE_PASSWORD) \
+		--key-pass pass:$(ANDROID_KEY_PASSWORD) \
+		--out ./example/capacitor/android/app/build/outputs/apk/release/app-release-signed.apk \
+		./example/capacitor/android/app/build/outputs/apk/release/app-release-unsigned.apk

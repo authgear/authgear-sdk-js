@@ -26,9 +26,8 @@ jobs:
         node-version-file: "./.tool-versions"
     - uses: ruby/setup-ruby@v1
       with:
-        bundler-cache: false
-    - run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
-    - run: bundle install
+        bundler-cache: true
+    - run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
     - run: npm ci
     - run: npm ci
       working-directory: ./website
@@ -79,16 +78,9 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version-file: "./.tool-versions"
-    - uses: ruby/setup-ruby@v1
-      with:
-        bundler-cache: false
-    - run: npm ci
-    - run: npm run build
-    - working-directory: ./example/reactnative
-      run: yarn
-    - name: Build unsigned APK
-      working-directory: ./example/reactnative/android
-      run: ./gradlew :app:assembleRelease
+    - run: make sdk-build
+    - run: make react-native-npm-ci
+    - run: make react-native-build-unsigned-apk
 
   test_capacitor_ios:
     runs-on: macos-14
@@ -99,19 +91,13 @@ jobs:
         node-version-file: "./.tool-versions"
     - uses: ruby/setup-ruby@v1
       with:
-        bundler-cache: false
-    - run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
-    - run: npm ci
-    - run: npm run build
-    - working-directory: ./example/capacitor
-      run: npm ci
-    - working-directory: ./example/capacitor
-      run: npm run build
-    - working-directory: ./example/capacitor
-      run: npx cap sync
-    - name: Run xcodebuild
-      working-directory: ./example/capacitor/ios/App
-      run: xcodebuild -quiet -workspace App.xcworkspace -scheme App -sdk iphonesimulator build
+        bundler-cache: true
+    - run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+    - run: make sdk-build
+    - run: make capacitor-npm-ci
+    - run: make capacitor-build-js
+    - run: make capacitor-build-ios-simulator
+
   test_capacitor_android:
     runs-on: macos-14
     steps:
@@ -119,23 +105,13 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version-file: "./.tool-versions"
-    - uses: ruby/setup-ruby@v1
-      with:
-        bundler-cache: false
-    - run: npm ci
-    - run: npm run build
-    - working-directory: ./example/capacitor
-      run: npm ci
-    - working-directory: ./example/capacitor
-      run: npm run build
-    - working-directory: ./example/capacitor
-      run: npx cap sync
-    - name: Build unsigned APK
-      working-directory: ./example/capacitor/android
-      run: ./gradlew :app:assembleRelease
+    - run: make sdk-build
+    - run: make capacitor-npm-ci
+    - run: make capacitor-build-js
+    - run: make capacitor-build-unsigned-apk
 
   react_native_ios:
-    if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.ref == 'refs/heads/master' && github.event_name == 'push' }}
+    if: ${{ github.repository == 'authgear/authgear-sdk-js' }}
     needs: test
     # When we change the runner image, the ruby version will change too.
     # We need to update .tool-versions to make them the same.
@@ -148,62 +124,28 @@ jobs:
         node-version-file: "./.tool-versions"
     - uses: ruby/setup-ruby@v1
       with:
-        bundler-cache: false
-    - run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
-    - run: npm install -g appcenter-cli
-    - run: npm ci
-    - run: npm run build
-    - working-directory: ./example/reactnative
-      run: yarn
-    - working-directory: ./example/reactnative
-      # Install cocoapods from the Gemfile
-      run: bundle install
-    - working-directory: ./example/reactnative
-      # Run the specific cocoapods
-      run: bundle exec pod install --project-directory=ios
-    - name: Install the Apple certificate and provisioning profile
-      env:
-        IOS_CERTIFICATE_BASE64: ${{ secrets.REACT_NATIVE_IOS_CERTIFICATE_BASE64 }}
-        IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.REACT_NATIVE_IOS_PROVISIONING_PROFILE_BASE64 }}
-      run: |
-        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-        PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+        bundler-cache: true
+    - run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+    - run: make sdk-build
+    - run: make react-native-npm-ci
+    - run: make react-native-pod-install
+    - uses: authgear/gh-actions-install-apple-certificate-and-provisioning-profile@v1
+      with:
+        certificate_base64: ${{ secrets.REACT_NATIVE_IOS_CERTIFICATE_BASE64 }}
+        provisioning_profile_base64: ${{ secrets.REACT_NATIVE_IOS_PROVISIONING_PROFILE_BASE64 }}
+    - uses: authgear/gh-actions-create-fastlane-api-key-json-file@v1
+      with:
+        api_key_id: ${{ secrets.IOS_API_KEY_ID }}
+        api_key_issuer: ${{ secrets.IOS_API_KEY_ISSUER }}
+        api_key_base64: ${{ secrets.IOS_API_KEY_BASE64 }}
+        output_path: ./build/fastlane-api-key.json
+    - run: make react-native-build-ios-app
+    - name: Upload to TestFlight
+      if: ${{ github.ref == 'refs/heads/master' }}
+      run: make react-native-upload-ios-app
 
-        echo -n "$IOS_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
-        echo -n "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode -o $PP_PATH
-
-        security create-keychain -p "" $KEYCHAIN_PATH
-        security set-keychain-settings $KEYCHAIN_PATH
-        security unlock-keychain -p "" $KEYCHAIN_PATH
-
-        security import $CERTIFICATE_PATH -P "" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-        security list-keychain -d user -s $KEYCHAIN_PATH
-
-        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-    - name: Set CFBundleVersion
-      working-directory: ./example/reactnative/ios
-      run: |
-        BUILD_NUMBER=$(date +%s)
-        /usr/libexec/Plistbuddy -c "Set CFBundleVersion $BUILD_NUMBER" ./reactNativeExample/Info.plist
-    - name: Run xcodebuild archive
-      working-directory: ./example/reactnative/ios
-      run: xcodebuild -workspace reactNativeExample.xcworkspace -scheme reactNativeExample -configuration Release -archivePath "$RUNNER_TEMP/reactNativeExample.xcarchive" archive
-    - name: Run xcodebuild -exportArchive
-      working-directory: ./example/reactnative/ios
-      run: xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/reactNativeExample.xcarchive" -exportPath "$RUNNER_TEMP/reactNativeExample.export" -exportOptionsPlist "./ExportOptions.plist"
-    - name: Distribute to App Center
-      env:
-        APPCENTER_ACCESS_TOKEN: ${{ secrets.REACT_NATIVE_IOS_APPCENTER_ACCESS_TOKEN }}
-      run: appcenter distribute release --debug --silent --file "$RUNNER_TEMP/reactNativeExample.export/reactNativeExample.ipa" --store "App Store Connect Users" --app "Oursky/Authgear-demo-RN-iOS" --release-notes "no release notes"
-    - name: Clean up keychain and provisioning profile
-      if: ${{ always() }}
-      run: |
-        security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
-        rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
   react_native_android:
-    if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.ref == 'refs/heads/master' && github.event_name == 'push' }}
+    if: ${{ github.repository == 'authgear/authgear-sdk-js' }}
     needs: test
     # When we change the runner image, the available Android build tools versions will also change.
     # We need to update build.gradle too.
@@ -216,47 +158,34 @@ jobs:
         node-version-file: "./.tool-versions"
     - uses: ruby/setup-ruby@v1
       with:
-        bundler-cache: false
-    - run: npm install -g appcenter-cli
-    - run: npm ci
-    - run: npm run build
-    - working-directory: ./example/reactnative
-      run: yarn
-    - name: Set versionCode
-      run: |
-        VERSION_CODE=$(date +%s)
-        sed -I "" "s/versionCode 1/versionCode $VERSION_CODE/" ./example/reactnative/android/app/build.gradle
-    - name: Build unsigned APK
-      working-directory: ./example/reactnative/android
-      run: ./gradlew :app:assembleRelease
+        bundler-cache: true
+    - run: make sdk-build
+    - run: make react-native-npm-ci
+    - run: make react-native-set-versionCode
+    - run: make react-native-build-unsigned-apk
     - name: Install keystore
       env:
         ANDROID_KEYSTORE_BASE64: ${{ secrets.REACT_NATIVE_ANDROID_KEYSTORE_BASE64 }}
       run: |
         KEYSTORE_PATH=$RUNNER_TEMP/keystore.jks
         echo -n "$ANDROID_KEYSTORE_BASE64" | base64 --decode -o $KEYSTORE_PATH
-    - name: Run zipalign
-      run: |
-        "$ANDROID_HOME/build-tools/33.0.3/zipalign" -c -v 4 ./example/reactnative/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    - run: make react-native-zipalign
     - name: Run apksigner
       env:
         ANDROID_KEYSTORE_PASSWORD: ${{ secrets.REACT_NATIVE_ANDROID_KEYSTORE_PASSWORD }}
         ANDROID_KEY_ALIAS: ${{ secrets.REACT_NATIVE_ANDROID_KEY_ALIAS }}
         ANDROID_KEY_PASSWORD: ${{ secrets.REACT_NATIVE_ANDROID_KEY_PASSWORD }}
       run: |
-        "$ANDROID_HOME/build-tools/33.0.3/apksigner" sign \
-          --ks $RUNNER_TEMP/keystore.jks \
-          --ks-key-alias "$ANDROID_KEY_ALIAS" \
-          --ks-pass "pass:$ANDROID_KEYSTORE_PASSWORD" \
-          --key-pass "pass:$ANDROID_KEY_PASSWORD" \
-          --out ./example/reactnative/android/app/build/outputs/apk/release/app-release-signed.apk \
-          ./example/reactnative/android/app/build/outputs/apk/release/app-release-unsigned.apk
+        export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/keystore.jks"
+        make react-native-apksigner
     - name: Distribute to App Center
+      if: ${{ github.ref == 'refs/heads/master' }}
       env:
         APPCENTER_ACCESS_TOKEN: ${{ secrets.REACT_NATIVE_ANDROID_APPCENTER_ACCESS_TOKEN }}
       run: appcenter distribute release --debug --silent --file ./example/reactnative/android/app/build/outputs/apk/release/app-release-signed.apk --group "Collaborators" --app "Oursky/Authgear-demo-RN-Android" --release-notes "no release notes"
+
   capacitor_ios:
-    if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.ref == 'refs/heads/master' && github.event_name == 'push' }}
+    if: ${{ github.repository == 'authgear/authgear-sdk-js' }}
     needs: test
     runs-on: macos-14
     steps:
@@ -266,62 +195,29 @@ jobs:
         node-version-file: "./.tool-versions"
     - uses: ruby/setup-ruby@v1
       with:
-        bundler-cache: false
-    - run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
-    - run: npm install -g appcenter-cli
-    - run: npm ci
-    - run: npm run build
-    - working-directory: ./example/capacitor
-      run: npm ci
-    - working-directory: ./example/capacitor
-      run: npm audit
-    - working-directory: ./example/capacitor
-      run: npm run build
-    - working-directory: ./example/capacitor
-      run: npx cap sync
-    - name: Install the Apple certificate and provisioning profile
-      env:
-        IOS_CERTIFICATE_BASE64: ${{ secrets.CAPACITOR_IOS_CERTIFICATE_BASE64 }}
-        IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.CAPACITOR_IOS_PROVISIONING_PROFILE_BASE64 }}
-      run: |
-        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-        PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+        bundler-cache: true
+    - run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+    - run: make sdk-build
+    - run: make capacitor-npm-ci
+    - run: make capacitor-npm-audit
+    - run: make capacitor-build-js
+    - uses: authgear/gh-actions-install-apple-certificate-and-provisioning-profile@v1
+      with:
+        certificate_base64: ${{ secrets.CAPACITOR_IOS_CERTIFICATE_BASE64 }}
+        provisioning_profile_base64: ${{ secrets.CAPACITOR_IOS_PROVISIONING_PROFILE_BASE64 }}
+    - uses: authgear/gh-actions-create-fastlane-api-key-json-file@v1
+      with:
+        api_key_id: ${{ secrets.IOS_API_KEY_ID }}
+        api_key_issuer: ${{ secrets.IOS_API_KEY_ISSUER }}
+        api_key_base64: ${{ secrets.IOS_API_KEY_BASE64 }}
+        output_path: ./build/fastlane-api-key.json
+    - run: make capacitor-build-ios-app
+    - name: Upload to TestFlight
+      if: ${{ github.ref == 'refs/heads/master' }}
+      run: make capacitor-upload-ios-app
 
-        echo -n "$IOS_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
-        echo -n "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode -o $PP_PATH
-
-        security create-keychain -p "" $KEYCHAIN_PATH
-        security set-keychain-settings $KEYCHAIN_PATH
-        security unlock-keychain -p "" $KEYCHAIN_PATH
-
-        security import $CERTIFICATE_PATH -P "" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-        security list-keychain -d user -s $KEYCHAIN_PATH
-
-        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-    - name: Set CFBundleVersion
-      working-directory: ./example/capacitor/ios/App
-      run: |
-        BUILD_NUMBER=$(date +%s)
-        /usr/libexec/Plistbuddy -c "Set CFBundleVersion $BUILD_NUMBER" ./App/Info.plist
-    - name: Run xcodebuild archive
-      working-directory: ./example/capacitor/ios/App
-      run: xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -archivePath "$RUNNER_TEMP/App.xcarchive" archive
-    - name: Run xcodebuild -exportArchive
-      working-directory: ./example/capacitor/ios/App
-      run: xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" -exportPath "$RUNNER_TEMP/App.export" -exportOptionsPlist "./ExportOptions.plist"
-    - name: Distribute to App Center
-      env:
-        APPCENTER_ACCESS_TOKEN: ${{ secrets.CAPACITOR_IOS_APPCENTER_ACCESS_TOKEN }}
-      run: appcenter distribute release --debug --silent --file "$RUNNER_TEMP/App.export/App.ipa" --store "App Store Connect Users" --app "Oursky/Authgear-Demo-Capacitor-iOS" --release-notes "no release notes"
-    - name: Clean up keychain and provisioning profile
-      if: ${{ always() }}
-      run: |
-        security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
-        rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
   capacitor_android:
-    if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.ref == 'refs/heads/master' && github.event_name == 'push' }}
+    if: ${{ github.repository == 'authgear/authgear-sdk-js' }}
     needs: test
     runs-on: macos-14
     steps:
@@ -331,48 +227,31 @@ jobs:
         node-version-file: "./.tool-versions"
     - uses: ruby/setup-ruby@v1
       with:
-        bundler-cache: false
+        bundler-cache: true
     - run: npm install -g appcenter-cli
-    - run: npm ci
-    - run: npm run build
-    - working-directory: ./example/capacitor
-      run: npm ci
-    - working-directory: ./example/capacitor
-      run: npm audit
-    - working-directory: ./example/capacitor
-      run: npm run build
-    - working-directory: ./example/capacitor
-      run: npx cap sync
-    - name: Set versionCode
-      run: |
-        VERSION_CODE=$(date +%s)
-        sed -I "" "s/versionCode 1/versionCode $VERSION_CODE/" ./example/capacitor/android/app/build.gradle
-    - name: Build unsigned APK
-      working-directory: ./example/capacitor/android
-      run: ./gradlew :app:assembleRelease
+    - run: make sdk-build
+    - run: make capacitor-npm-ci
+    - run: make capacitor-npm-audit
+    - run: make capacitor-build-js
+    - run: make capacitor-set-versionCode
+    - run: make capacitor-build-unsigned-apk
     - name: Install keystore
       env:
         ANDROID_KEYSTORE_BASE64: ${{ secrets.CAPACITOR_ANDROID_KEYSTORE_BASE64 }}
       run: |
         KEYSTORE_PATH=$RUNNER_TEMP/keystore.jks
         echo -n "$ANDROID_KEYSTORE_BASE64" | base64 --decode -o $KEYSTORE_PATH
-    - name: Run zipalign
-      run: |
-        "$ANDROID_HOME/build-tools/35.0.1/zipalign" -c -v 4 ./example/capacitor/android/app/build/outputs/apk/release/app-release-unsigned.apk
+    - run: make capacitor-zipalign
     - name: Run apksigner
       env:
         ANDROID_KEYSTORE_PASSWORD: ${{ secrets.CAPACITOR_ANDROID_KEYSTORE_PASSWORD }}
         ANDROID_KEY_ALIAS: ${{ secrets.CAPACITOR_ANDROID_KEY_ALIAS }}
         ANDROID_KEY_PASSWORD: ${{ secrets.CAPACITOR_ANDROID_KEY_PASSWORD }}
       run: |
-        "$ANDROID_HOME/build-tools/35.0.1/apksigner" sign \
-          --ks $RUNNER_TEMP/keystore.jks \
-          --ks-key-alias "$ANDROID_KEY_ALIAS" \
-          --ks-pass "pass:$ANDROID_KEYSTORE_PASSWORD" \
-          --key-pass "pass:$ANDROID_KEY_PASSWORD" \
-          --out ./example/capacitor/android/app/build/outputs/apk/release/app-release-signed.apk \
-          ./example/capacitor/android/app/build/outputs/apk/release/app-release-unsigned.apk
+        export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/keystore.jks"
+        make capacitor-apksigner
     - name: Distribute to App Center
+      if: ${{ github.ref == 'refs/heads/master' }}
       env:
         APPCENTER_ACCESS_TOKEN: ${{ secrets.CAPACITOR_ANDROID_APPCENTER_ACCESS_TOKEN }}
       run: appcenter distribute release --debug --silent --file ./example/capacitor/android/app/build/outputs/apk/release/app-release-signed.apk --group "Collaborators" --app "Oursky/Authgear-Demo-Capacitor-Android" --release-notes "no release notes"

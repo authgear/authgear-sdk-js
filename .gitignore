@@ -15,5 +15,11 @@ xcuserdata/
 xcshareddata/
 temp/
 
+build/
+
 # Ruby
 vendor/bundle/
+
+# fastlane
+/fastlane/README.md
+/fastlane/report.xml
