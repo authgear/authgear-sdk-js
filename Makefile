@@ -110,11 +110,11 @@ react-native-pod-install:
 
 .PHONY: react-native-build-ios-app
 react-native-build-ios-app:
-	bundle exec fastlane react_native_build_ios_app CURRENT_PROJECT_VERSION:$(shell date +%s)
+	bundle exec fastlane ios react_native_build_ios_app CURRENT_PROJECT_VERSION:$(shell date +%s)
 
 .PHONY: react-native-upload-ios-app
 react-native-upload-ios-app:
-	bundle exec fastlane upload_ios_app ipa:./build/Release/iOS/reactNativeExample/reactNativeExample.ipa
+	bundle exec fastlane ios upload_ios_app ipa:./build/Release/iOS/reactNativeExample/reactNativeExample.ipa
 
 .PHONY: capacitor-npm-ci
 capacitor-npm-ci:
@@ -135,15 +135,15 @@ capacitor-build-js:
 
 .PHONY: capacitor-build-ios-simulator
 capacitor-build-ios-simulator:
-	bundle exec fastlane capacitor_build_ios_simulator
+	bundle exec fastlane ios capacitor_build_ios_simulator
 
 .PHONY: capacitor-build-ios-app
 capacitor-build-ios-app:
-	bundle exec fastlane capacitor_build_ios_app CURRENT_PROJECT_VERSION:$(shell date +%s)
+	bundle exec fastlane ios capacitor_build_ios_app CURRENT_PROJECT_VERSION:$(shell date +%s)
 
 .PHONY: capacitor-upload-ios-app
 capacitor-upload-ios-app:
-	bundle exec fastlane upload_ios_app ipa:./build/Release/iOS/capacitor/capacitor.ipa
+	bundle exec fastlane ios upload_ios_app ipa:./build/Release/iOS/capacitor/capacitor.ipa
 
 .PHONY: capacitor-build-unsigned-apk
 capacitor-build-unsigned-apk:

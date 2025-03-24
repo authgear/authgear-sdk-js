@@ -1,5 +1,3 @@
-default_platform(:ios)
-
 platform :ios do
   lane :react_native_build_ios_app do |options|
     build_app(
