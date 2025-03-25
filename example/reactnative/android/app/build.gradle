@@ -100,10 +100,14 @@ android {
 
     namespace "com.reactnativeexample"
     defaultConfig {
-        applicationId "com.reactnativeexample"
+        applicationId "com.authgear.sdk.exampleapp.reactnative"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+        if (project.hasProperty("VERSION_CODE")) {
+            versionCode Integer.parseInt(project.findProperty("VERSION_CODE"))
+        } else {
+            versionCode 1
+        }
         versionName "1.0"
     }
 
@@ -122,6 +126,14 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        if (project.hasProperty("STORE_FILE")) {
+            release {
+                storeFile file(project.findProperty("STORE_FILE"))
+                storePassword project.findProperty("STORE_PASSWORD")
+                keyAlias project.findProperty("KEY_ALIAS")
+                keyPassword project.findProperty("KEY_PASSWORD")
+            }
+        }
     }
     buildTypes {
         debug {
@@ -134,6 +146,9 @@ android {
             // signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            if (project.hasProperty("STORE_FILE")) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 

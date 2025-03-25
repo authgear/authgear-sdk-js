@@ -81,28 +81,10 @@ react-native-npm-ci:
 		rm -rf node_modules; \
 		yarn install --frozen-lockfile
 
-.PHONY: react-native-set-versionCode
-react-native-set-versionCode:
-	/usr/bin/sed -I "" "s/versionCode 1/versionCode $(shell date +%s)/" ./example/reactnative/android/app/build.gradle
-
-.PHONY:	react-native-build-unsigned-apk
-react-native-build-unsigned-apk:
+.PHONY:	react-native-build-unsigned-aab
+react-native-build-unsigned-aab:
 	cd ./example/reactnative/android; \
-		./gradlew :app:assembleRelease
-
-.PHONY: react-native-zipalign
-react-native-zipalign:
-	"$(ANDROID_HOME)/build-tools/33.0.3/zipalign" -c -v 4 ./example/reactnative/android/app/build/outputs/apk/release/app-release-unsigned.apk
-
-.PHONY: react-native-apksigner
-react-native-apksigner:
-	"$(ANDROID_HOME)/build-tools/33.0.3/apksigner" sign \
-		--ks $(ANDROID_KEYSTORE_PATH) \
-		--ks-key-alias $(ANDROID_KEY_ALIAS) \
-		--ks-pass pass:$(ANDROID_KEYSTORE_PASSWORD) \
-		--key-pass pass:$(ANDROID_KEY_PASSWORD) \
-		--out ./example/reactnative/android/app/build/outputs/apk/release/app-release-signed.apk \
-		./example/reactnative/android/app/build/outputs/apk/release/app-release-unsigned.apk
+		./gradlew :app:bundleRelease
 
 .PHONY: react-native-pod-install
 react-native-pod-install:
@@ -110,11 +92,25 @@ react-native-pod-install:
 
 .PHONY: react-native-build-ios-app
 react-native-build-ios-app:
-	bundle exec fastlane react_native_build_ios_app CURRENT_PROJECT_VERSION:$(shell date +%s)
+	bundle exec fastlane ios react_native_build_ios_app CURRENT_PROJECT_VERSION:$(shell date +%s)
 
 .PHONY: react-native-upload-ios-app
 react-native-upload-ios-app:
-	bundle exec fastlane upload_ios_app ipa:./build/Release/iOS/reactNativeExample/reactNativeExample.ipa
+	bundle exec fastlane ios upload_ios_app ipa:./build/Release/iOS/reactNativeExample/reactNativeExample.ipa
+
+.PHONY: react-native-build-aab
+react-native-build-aab:
+	bundle exec fastlane android react_native_build_aab \
+		VERSION_CODE:$(shell date +%s) \
+		STORE_FILE:$(STORE_FILE) \
+		STORE_PASSWORD:$(STORE_PASSWORD) \
+		KEY_ALIAS:$(KEY_ALIAS) \
+		KEY_PASSWORD:$(KEY_PASSWORD)
+
+.PHONY: react-native-upload-aab
+react-native-upload-aab:
+	bundle exec fastlane android react_native_upload_aab \
+		json_key:$(GOOGLE_SERVICE_ACCOUNT_KEY_JSON_FILE)
 
 .PHONY: capacitor-npm-ci
 capacitor-npm-ci:
@@ -135,35 +131,31 @@ capacitor-build-js:
 
 .PHONY: capacitor-build-ios-simulator
 capacitor-build-ios-simulator:
-	bundle exec fastlane capacitor_build_ios_simulator
+	bundle exec fastlane ios capacitor_build_ios_simulator
 
 .PHONY: capacitor-build-ios-app
 capacitor-build-ios-app:
-	bundle exec fastlane capacitor_build_ios_app CURRENT_PROJECT_VERSION:$(shell date +%s)
+	bundle exec fastlane ios capacitor_build_ios_app CURRENT_PROJECT_VERSION:$(shell date +%s)
 
 .PHONY: capacitor-upload-ios-app
 capacitor-upload-ios-app:
-	bundle exec fastlane upload_ios_app ipa:./build/Release/iOS/capacitor/capacitor.ipa
+	bundle exec fastlane ios upload_ios_app ipa:./build/Release/iOS/capacitor/capacitor.ipa
 
-.PHONY: capacitor-build-unsigned-apk
-capacitor-build-unsigned-apk:
+.PHONY: capacitor-build-unsigned-aab
+capacitor-build-unsigned-aab:
 	cd ./example/capacitor/android; \
-		./gradlew :app:assembleRelease
+		./gradlew :app:bundleRelease
 
-.PHONY: capacitor-set-versionCode
-capacitor-set-versionCode:
-	/usr/bin/sed -I "" "s/versionCode 1/versionCode $(shell date +%s)/" ./example/capacitor/android/app/build.gradle
+.PHONY: capacitor-build-aab
+capacitor-build-aab:
+	bundle exec fastlane android capacitor_build_aab \
+		VERSION_CODE:$(shell date +%s) \
+		STORE_FILE:$(STORE_FILE) \
+		STORE_PASSWORD:$(STORE_PASSWORD) \
+		KEY_ALIAS:$(KEY_ALIAS) \
+		KEY_PASSWORD:$(KEY_PASSWORD)
 
-.PHONY: capacitor-zipalign
-capacitor-zipalign:
-	"$(ANDROID_HOME)/build-tools/35.0.1/zipalign" -c -v 4 ./example/capacitor/android/app/build/outputs/apk/release/app-release-unsigned.apk
-
-.PHONY: capacitor-apksigner
-capacitor-apksigner:
-	"$(ANDROID_HOME)/build-tools/35.0.1/apksigner" sign \
-		--ks $(ANDROID_KEYSTORE_PATH) \
-		--ks-key-alias $(ANDROID_KEY_ALIAS) \
-		--ks-pass pass:$(ANDROID_KEYSTORE_PASSWORD) \
-		--key-pass pass:$(ANDROID_KEY_PASSWORD) \
-		--out ./example/capacitor/android/app/build/outputs/apk/release/app-release-signed.apk \
-		./example/capacitor/android/app/build/outputs/apk/release/app-release-unsigned.apk
+.PHONY: capacitor-upload-aab
+capacitor-upload-aab:
+	bundle exec fastlane android capacitor_upload_aab \
+		json_key:$(GOOGLE_SERVICE_ACCOUNT_KEY_JSON_FILE)

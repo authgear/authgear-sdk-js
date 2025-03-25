@@ -1,5 +1,3 @@
-default_platform(:ios)
-
 platform :ios do
   lane :react_native_build_ios_app do |options|
     build_app(
@@ -43,6 +41,54 @@ platform :ios do
       skip_waiting_for_build_processing: true,
       api_key_path: "./build/fastlane-api-key.json",
       ipa: options[:ipa],
+    )
+  end
+end
+
+platform :android do
+  lane :react_native_build_aab do |options|
+    gradle(
+      project_dir: "./example/reactnative/android",
+      tasks: [":app:bundleRelease"],
+      properties: {
+        "VERSION_CODE" => options[:VERSION_CODE],
+        "STORE_FILE" => options[:STORE_FILE],
+        "STORE_PASSWORD" => options[:STORE_PASSWORD],
+        "KEY_ALIAS" => options[:KEY_ALIAS],
+        "KEY_PASSWORD" => options[:KEY_PASSWORD],
+      },
+    )
+  end
+
+  lane :react_native_upload_aab do |options|
+    upload_to_play_store(
+      json_key: options[:json_key],
+      package_name: "com.authgear.sdk.exampleapp.reactnative",
+      track: "internal",
+      aab: "./example/reactnative/android/app/build/outputs/bundle/release/app-release.aab",
+    )
+  end
+
+  lane :capacitor_build_aab do |options|
+    gradle(
+      project_dir: "./example/capacitor/android",
+      tasks: [":app:bundleRelease"],
+      properties: {
+        "VERSION_CODE" => options[:VERSION_CODE],
+        "STORE_FILE" => options[:STORE_FILE],
+        "STORE_PASSWORD" => options[:STORE_PASSWORD],
+        "KEY_ALIAS" => options[:KEY_ALIAS],
+        "KEY_PASSWORD" => options[:KEY_PASSWORD],
+      },
+    )
+  end
+
+  lane :capacitor_upload_aab do |options|
+    upload_to_play_store(
+      json_key: options[:json_key],
+      package_name: "com.authgear.sdk.exampleapp.capacitor",
+      track: "internal",
+      aab: "./example/capacitor/android/app/build/outputs/bundle/release/app-release.aab",
     )
   end
 end

@@ -1,13 +1,11 @@
 buildscript {
     ext {
-        // buildToolsVersion depends on the available build tools on the Github runner.
-        // See https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
-        buildToolsVersion = "33.0.3"
+        buildToolsVersion = "35.0.0"
         minSdkVersion = 24
-        compileSdkVersion = 33
-        targetSdkVersion = 33
+        compileSdkVersion = 35
+        targetSdkVersion = 34
         ndkVersion = "26.1.10909125"
-        kotlinVersion = "1.9.24"
+        kotlinVersion = "1.9.25"
     }
     repositories {
         google()

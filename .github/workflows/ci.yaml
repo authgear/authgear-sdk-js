@@ -80,7 +80,7 @@ jobs:
         node-version-file: "./.tool-versions"
     - run: make sdk-build
     - run: make react-native-npm-ci
-    - run: make react-native-build-unsigned-apk
+    - run: make react-native-build-unsigned-aab
 
   test_capacitor_ios:
     runs-on: macos-14
@@ -108,7 +108,7 @@ jobs:
     - run: make sdk-build
     - run: make capacitor-npm-ci
     - run: make capacitor-build-js
-    - run: make capacitor-build-unsigned-apk
+    - run: make capacitor-build-unsigned-aab
 
   react_native_ios:
     if: ${{ github.repository == 'authgear/authgear-sdk-js' }}
@@ -161,28 +161,24 @@ jobs:
         bundler-cache: true
     - run: make sdk-build
     - run: make react-native-npm-ci
-    - run: make react-native-set-versionCode
-    - run: make react-native-build-unsigned-apk
-    - name: Install keystore
+    - name: Build aab
       env:
-        ANDROID_KEYSTORE_BASE64: ${{ secrets.REACT_NATIVE_ANDROID_KEYSTORE_BASE64 }}
+        STORE_BASE64: ${{ secrets.REACT_NATIVE_ANDROID_KEYSTORE_BASE64 }}
+        STORE_PASSWORD: ${{ secrets.REACT_NATIVE_ANDROID_KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.REACT_NATIVE_ANDROID_KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.REACT_NATIVE_ANDROID_KEY_PASSWORD }}
       run: |
-        KEYSTORE_PATH=$RUNNER_TEMP/keystore.jks
-        echo -n "$ANDROID_KEYSTORE_BASE64" | base64 --decode -o $KEYSTORE_PATH
-    - run: make react-native-zipalign
-    - name: Run apksigner
-      env:
-        ANDROID_KEYSTORE_PASSWORD: ${{ secrets.REACT_NATIVE_ANDROID_KEYSTORE_PASSWORD }}
-        ANDROID_KEY_ALIAS: ${{ secrets.REACT_NATIVE_ANDROID_KEY_ALIAS }}
-        ANDROID_KEY_PASSWORD: ${{ secrets.REACT_NATIVE_ANDROID_KEY_PASSWORD }}
-      run: |
-        export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/keystore.jks"
-        make react-native-apksigner
-    - name: Distribute to App Center
+        export STORE_FILE="$RUNNER_TEMP/upload_key.jks"
+        echo -n "$STORE_BASE64" | base64 --decode -o "$STORE_FILE"
+        make react-native-build-aab
+    - name: Upload aab
       if: ${{ github.ref == 'refs/heads/master' }}
       env:
-        APPCENTER_ACCESS_TOKEN: ${{ secrets.REACT_NATIVE_ANDROID_APPCENTER_ACCESS_TOKEN }}
-      run: appcenter distribute release --debug --silent --file ./example/reactnative/android/app/build/outputs/apk/release/app-release-signed.apk --group "Collaborators" --app "Oursky/Authgear-demo-RN-Android" --release-notes "no release notes"
+        GOOGLE_SERVICE_ACCOUNT_KEY_JSON_BASE64: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY_JSON_BASE64 }}
+      run: |
+        export GOOGLE_SERVICE_ACCOUNT_KEY_JSON_FILE="$RUNNER_TEMP/google_service_account_key.json"
+        echo -n "$GOOGLE_SERVICE_ACCOUNT_KEY_JSON_BASE64" | base64 --decode -o "$GOOGLE_SERVICE_ACCOUNT_KEY_JSON_FILE"
+        make react-native-upload-aab
 
   capacitor_ios:
     if: ${{ github.repository == 'authgear/authgear-sdk-js' }}
@@ -228,30 +224,25 @@ jobs:
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
-    - run: npm install -g appcenter-cli
     - run: make sdk-build
     - run: make capacitor-npm-ci
     - run: make capacitor-npm-audit
     - run: make capacitor-build-js
-    - run: make capacitor-set-versionCode
-    - run: make capacitor-build-unsigned-apk
-    - name: Install keystore
+    - name: Build aab
       env:
-        ANDROID_KEYSTORE_BASE64: ${{ secrets.CAPACITOR_ANDROID_KEYSTORE_BASE64 }}
+        STORE_BASE64: ${{ secrets.CAPACITOR_ANDROID_KEYSTORE_BASE64 }}
+        STORE_PASSWORD: ${{ secrets.CAPACITOR_ANDROID_KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.CAPACITOR_ANDROID_KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.CAPACITOR_ANDROID_KEY_PASSWORD }}
       run: |
-        KEYSTORE_PATH=$RUNNER_TEMP/keystore.jks
-        echo -n "$ANDROID_KEYSTORE_BASE64" | base64 --decode -o $KEYSTORE_PATH
-    - run: make capacitor-zipalign
-    - name: Run apksigner
-      env:
-        ANDROID_KEYSTORE_PASSWORD: ${{ secrets.CAPACITOR_ANDROID_KEYSTORE_PASSWORD }}
-        ANDROID_KEY_ALIAS: ${{ secrets.CAPACITOR_ANDROID_KEY_ALIAS }}
-        ANDROID_KEY_PASSWORD: ${{ secrets.CAPACITOR_ANDROID_KEY_PASSWORD }}
-      run: |
-        export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/keystore.jks"
-        make capacitor-apksigner
-    - name: Distribute to App Center
+        export STORE_FILE="$RUNNER_TEMP/upload_key.jks"
+        echo -n "$STORE_BASE64" | base64 --decode -o "$STORE_FILE"
+        make capacitor-build-aab
+    - name: Upload aab
       if: ${{ github.ref == 'refs/heads/master' }}
       env:
-        APPCENTER_ACCESS_TOKEN: ${{ secrets.CAPACITOR_ANDROID_APPCENTER_ACCESS_TOKEN }}
-      run: appcenter distribute release --debug --silent --file ./example/capacitor/android/app/build/outputs/apk/release/app-release-signed.apk --group "Collaborators" --app "Oursky/Authgear-Demo-Capacitor-Android" --release-notes "no release notes"
+        GOOGLE_SERVICE_ACCOUNT_KEY_JSON_BASE64: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY_JSON_BASE64 }}
+      run: |
+        export GOOGLE_SERVICE_ACCOUNT_KEY_JSON_FILE="$RUNNER_TEMP/google_service_account_key.json"
+        echo -n "$GOOGLE_SERVICE_ACCOUNT_KEY_JSON_BASE64" | base64 --decode -o "$GOOGLE_SERVICE_ACCOUNT_KEY_JSON_FILE"
+        make capacitor-upload-aab
