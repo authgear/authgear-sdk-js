@@ -5,5 +5,6 @@ source "https://rubygems.org"
 # https://github.com/actions/runner-images/issues/11345
 ruby "~> 3.3"
 
+gem "bundler-audit", "~> 0.9.2"
 gem "cocoapods", "~> 1.16"
 gem "fastlane", "~> 2.227"

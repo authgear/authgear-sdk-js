@@ -27,6 +27,7 @@ jobs:
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
+    - run: make ruby-audit
     - run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
     - run: npm ci
     - run: npm ci
@@ -111,7 +112,7 @@ jobs:
     - run: make capacitor-build-unsigned-aab
 
   react_native_ios:
-    if: ${{ github.repository == 'authgear/authgear-sdk-js' }}
+    if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.event_name == 'push' }}
     needs: test
     # When we change the runner image, the ruby version will change too.
     # We need to update .tool-versions to make them the same.
@@ -145,7 +146,7 @@ jobs:
       run: make react-native-upload-ios-app
 
   react_native_android:
-    if: ${{ github.repository == 'authgear/authgear-sdk-js' }}
+    if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.event_name == 'push' }}
     needs: test
     # When we change the runner image, the available Android build tools versions will also change.
     # We need to update build.gradle too.
@@ -181,7 +182,7 @@ jobs:
         make react-native-upload-aab
 
   capacitor_ios:
-    if: ${{ github.repository == 'authgear/authgear-sdk-js' }}
+    if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.event_name == 'push' }}
     needs: test
     runs-on: macos-14
     steps:
@@ -213,7 +214,7 @@ jobs:
       run: make capacitor-upload-ios-app
 
   capacitor_android:
-    if: ${{ github.repository == 'authgear/authgear-sdk-js' }}
+    if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.event_name == 'push' }}
     needs: test
     runs-on: macos-14
     steps:

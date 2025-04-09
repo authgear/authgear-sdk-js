@@ -66,6 +66,10 @@ build-image:
 push-image:
 	docker push $(IMAGE)
 
+.PHONY: ruby-audit
+ruby-audit:
+	bundle exec bundler-audit check --update
+
 .PHONY: clean
 clean:
 	rm -rf ./build
