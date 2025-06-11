@@ -74,6 +74,7 @@ export async function openAuthorizeURL(
 }
 
 export async function openAuthorizeURLWithWebView(options: {
+  invocationID: string;
   url: string;
   redirectURI: string;
 
@@ -84,6 +85,9 @@ export async function openAuthorizeURLWithWebView(options: {
 
   actionBarBackgroundColor?: string;
   actionBarButtonTintColor?: string;
+
+  iosWechatRedirectURI?: string;
+  androidWechatRedirectURI?: string;
 }): Promise<string> {
   const redirectURIWithQuery: string = await _wrapPromise(
     AuthgearReactNative.openAuthorizeURLWithWebView(options)

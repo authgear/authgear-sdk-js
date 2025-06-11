@@ -37,6 +37,11 @@ RCT_EXPORT_MODULE(AuthgearReactNative)
   return dispatch_get_main_queue();
 }
 
+- (NSArray<NSString *> *)supportedEvents
+{
+    return @[@"authgear-react-native"];
+}
+
 + (BOOL)application:(UIApplication *)app
             openURL:(NSURL *)URL
             options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
@@ -250,12 +255,14 @@ RCT_EXPORT_METHOD(openAuthorizeURLWithWebView:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
+    NSString *invocationID = options[@"invocationID"];
     NSString *url = options[@"url"];
     NSString *redirectURI = options[@"redirectURI"];
     UIModalPresentationStyle modalPresentationStyle = [self modalPresentationStyleFromString:options[@"modalPresentationStyle"]];
     UIColor *navigationBarBackgroundColor = [self uiColorFromNSString:options[@"navigationBarBackgroundColor"]];
     UIColor *navigationBarButtonTintColor = [self uiColorFromNSString:options[@"navigationBarButtonTintColor"]];
     BOOL isInspectable = [self boolFromNSString:options[@"iosIsInspectable"]];
+    NSString *wechatRedirectURIString = options[@"iosWechatRedirectURI"];
 
     AGWKWebViewController *controller = [[AGWKWebViewController alloc] initWithURL:[[NSURL alloc] initWithString:url]
                                                                        redirectURI:[[NSURL alloc] initWithString:redirectURI]
@@ -273,6 +280,15 @@ RCT_EXPORT_METHOD(openAuthorizeURLWithWebView:(NSDictionary *)options
     }];
     controller.navigationBarBackgroundColor = navigationBarBackgroundColor;
     controller.navigationBarButtonTintColor = navigationBarButtonTintColor;
+    if (wechatRedirectURIString != nil) {
+        controller.wechatRedirectURI = [[NSURL alloc] initWithString:wechatRedirectURIString];
+        controller.onWechatRedirectURINavigate = ^(NSURL *url) {
+            [self sendEventWithName:@"authgear-react-native" body:@{
+                @"invocationID": invocationID,
+                @"url": [url absoluteString]
+            }];
+        };
+    }
     controller.modalPresentationStyle = modalPresentationStyle;
     controller.presentationContextProvider = self;
     [controller start];

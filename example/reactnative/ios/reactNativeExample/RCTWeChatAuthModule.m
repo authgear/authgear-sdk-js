@@ -35,10 +35,12 @@ RCT_EXPORT_METHOD(sendWechatAuthRequest:(NSString *)state
   self.sendWechatAuthResolve = resolve;
   self.sendWechatAuthReject = reject;
 
-  SendAuthReq* req = [[SendAuthReq alloc] init];
-  req.scope = @"snsapi_userinfo";
-  req.state = state;
-  [WXApi sendReq:req completion:nil];
+  dispatch_async(dispatch_get_main_queue(), ^{
+    SendAuthReq* req = [[SendAuthReq alloc] init];
+    req.scope = @"snsapi_userinfo";
+    req.state = state;
+    [WXApi sendReq:req completion:nil];
+  });
 }
 
 - (void)handleWechatAuthResult:(NSNotification *)notification

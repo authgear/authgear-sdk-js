@@ -369,6 +369,10 @@ const HomeScreen: React.FC = () => {
               ios: {
                 modalPresentationStyle: 'fullScreen',
                 isInspectable: true,
+                wechatRedirectURI,
+              },
+              android: {
+                wechatRedirectURI,
               },
             })
           : undefined,

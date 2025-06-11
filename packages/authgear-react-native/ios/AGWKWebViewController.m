@@ -170,6 +170,15 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
             [self dismissSelf];
             return;
         }
+        if (self.wechatRedirectURI != nil) {
+            if ([parts.string isEqualToString:self.wechatRedirectURI.absoluteString]) {
+                decisionHandler(WKNavigationActionPolicyCancel);
+                if (self.onWechatRedirectURINavigate != nil) {
+                    self.onWechatRedirectURINavigate(navigationURL);
+                }
+                return;
+            }
+        }
     }
 
     if (@available(iOS 14.5, *)) {

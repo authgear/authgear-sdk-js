@@ -26,6 +26,8 @@ typedef void(^AGWKWebViewControllerCompletionHandler)(NSURL *url, NSError *error
 @property (nonatomic, weak) id<AGWKWebViewControllerPresentationContextProviding> presentationContextProvider;
 @property (nonatomic, copy) UIColor *navigationBarBackgroundColor;
 @property (nonatomic, copy) UIColor *navigationBarButtonTintColor;
+@property (nonatomic, copy) NSURL *wechatRedirectURI;
+@property (nonatomic, copy) void(^onWechatRedirectURINavigate)(NSURL *url);
 
 - (void)cancel;
 - (void)start;
