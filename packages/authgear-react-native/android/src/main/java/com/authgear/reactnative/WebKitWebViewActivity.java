@@ -119,9 +119,6 @@ public class WebKitWebViewActivity extends AppCompatActivity {
         }
 
         private boolean shouldOverrideUrlLoading(Uri uri) {
-            if (AuthgearReactNativeModule.handleWechatRedirectDeepLink(uri)) {
-                return true;
-            }
             if (this.checkRedirectURI(uri)) {
                 return true;
             }

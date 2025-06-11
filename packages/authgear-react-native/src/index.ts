@@ -29,7 +29,6 @@ import {
 } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
-  registerWechatRedirectURI,
   openURL,
   createBiometricPrivateKey,
   checkBiometricSupported,
@@ -61,7 +60,6 @@ import {
   UIImplementation,
   DeviceBrowserUIImplementation,
 } from "./ui_implementation";
-import EventEmitter from "./eventEmitter";
 export * from "@authgear/core";
 export * from "./types";
 export * from "./storage";
@@ -172,11 +170,6 @@ export class ReactNativeContainer {
   uiImplementation: UIImplementation;
 
   private dpopProvider: DPoPProvider;
-
-  /**
-   * @internal
-   */
-  wechatRedirectDeepLinkListener: (url: string) => void;
 
   /**
    * Delegation for customizing the behavior of your application.
@@ -300,14 +293,6 @@ export class ReactNativeContainer {
     this.tokenStorage = new PersistentTokenStorage();
     this.sharedStorage = sharedStorage;
     this.uiImplementation = new DeviceBrowserUIImplementation();
-
-    this.wechatRedirectDeepLinkListener = (url: string) => {
-      this._sendWechatRedirectURIToDelegate(url);
-    };
-    EventEmitter.addListener(
-      "onAuthgearOpenWechatRedirectURI",
-      this.wechatRedirectDeepLinkListener
-    );
   }
 
   /**
@@ -461,9 +446,6 @@ export class ReactNativeContainer {
       ...options,
       platform,
     });
-    if (options.wechatRedirectURI != null) {
-      await registerWechatRedirectURI(options.wechatRedirectURI);
-    }
     const redirectURL = await this.uiImplementation.openAuthorizationURL({
       url: authorizeURL,
       redirectURI: options.redirectURI,
@@ -521,9 +503,6 @@ export class ReactNativeContainer {
       scope: this.baseContainer.getSettingsActionScopes(),
       xSettingsAction: action,
     });
-    if (options.wechatRedirectURI != null) {
-      await registerWechatRedirectURI(options.wechatRedirectURI);
-    }
     const redirectURL = await this.uiImplementation.openAuthorizationURL({
       url: authorizeURL,
       redirectURI: options.redirectURI,
@@ -598,10 +577,6 @@ export class ReactNativeContainer {
       scope: this.baseContainer.getReauthenticateScopes(),
     });
 
-    if (options.wechatRedirectURI != null) {
-      await registerWechatRedirectURI(options.wechatRedirectURI);
-    }
-
     const redirectURL = await this.uiImplementation.openAuthorizationURL({
       url: endpoint,
       redirectURI: options.redirectURI,
@@ -662,10 +637,6 @@ export class ReactNativeContainer {
         ? { wechatRedirectURI: options.wechatRedirectURI }
         : {}),
     });
-
-    if (options?.wechatRedirectURI != null) {
-      await registerWechatRedirectURI(options.wechatRedirectURI);
-    }
 
     await openURL(targetURL);
   }
@@ -816,9 +787,6 @@ export class ReactNativeContainer {
       loginHint,
       platform,
     });
-    if (options.wechatRedirectURI != null) {
-      await registerWechatRedirectURI(options.wechatRedirectURI);
-    }
     const redirectURL = await this.uiImplementation.openAuthorizationURL({
       url: authorizeURL,
       redirectURI: options.redirectURI,

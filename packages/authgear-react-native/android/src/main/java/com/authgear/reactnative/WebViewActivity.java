@@ -39,9 +39,6 @@ public class WebViewActivity extends AppCompatActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
-                if (AuthgearReactNativeModule.handleWechatRedirectDeepLink(uri)) {
-                    return true;
-                };
                 return super.shouldOverrideUrlLoading(view, request);
             }
 
@@ -49,9 +46,6 @@ public class WebViewActivity extends AppCompatActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 Uri uri = Uri.parse(url);
-                if (AuthgearReactNativeModule.handleWechatRedirectDeepLink(uri)) {
-                    return true;
-                };
                 return super.shouldOverrideUrlLoading(view, url);
             }
         });
@@ -83,7 +77,6 @@ public class WebViewActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        AuthgearReactNativeModule.unregisterCurrentWechatRedirectURI();
     }
 
     @Override

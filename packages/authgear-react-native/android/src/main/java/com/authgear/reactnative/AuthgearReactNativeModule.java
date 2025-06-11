@@ -79,38 +79,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         reactContext.addActivityEventListener(this);
     }
 
-    /**
-     * Check and handle wehchat redirect uri and trigger delegate function if needed
-     */
-    private static String currentWechatRedirectURI;
-    private static OnOpenWechatRedirectURIListener onOpenWechatRedirectURIListener;
-
-    public static void registerCurrentWechatRedirectURI(String uri, OnOpenWechatRedirectURIListener listener) {
-        if (uri != null) {
-            currentWechatRedirectURI = uri;
-            onOpenWechatRedirectURIListener = listener;
-        } else {
-            unregisterCurrentWechatRedirectURI();
-        }
-    }
-
-    public static void unregisterCurrentWechatRedirectURI() {
-        currentWechatRedirectURI = null;
-        onOpenWechatRedirectURIListener = null;
-    }
-
-    public static Boolean handleWechatRedirectDeepLink(Uri deepLink) {
-        if (currentWechatRedirectURI == null) {
-            return false;
-        }
-        String deepLinkWithoutQuery = getURLWithoutQuery(deepLink);
-        if (currentWechatRedirectURI.equals(deepLinkWithoutQuery)) {
-            onOpenWechatRedirectURIListener.OnURI(deepLink);
-            return true;
-        }
-        return false;
-    }
-
     @Override
     public String getName() {
         return "AuthgearReactNative";
@@ -776,17 +744,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     }
 
     @ReactMethod
-    public void registerWechatRedirectURI(String wechatRedirectURI, Promise promise) {
-        registerCurrentWechatRedirectURI(wechatRedirectURI, new OnOpenWechatRedirectURIListener() {
-            @Override
-            public void OnURI(Uri uri) {
-                sendOpenWechatRedirectURI(uri);
-            }
-        });
-        promise.resolve(null);
-    }
-
-    @ReactMethod
     public void openURL(String urlString, Promise promise) {
         final int requestCode = this.mHandles.push(new StartActivityHandle(ACTIVITY_PROMISE_TAG_OPEN_URL, promise));
         try {
@@ -1092,14 +1049,5 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         Uri.Builder builder = uri.buildUpon().clearQuery();
         builder = builder.fragment("");
         return builder.build().toString();
-    }
-
-    private void sendOpenWechatRedirectURI(Uri uri) {
-        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                .emit("onAuthgearOpenWechatRedirectURI", uri.toString());
-    }
-
-    public interface OnOpenWechatRedirectURIListener {
-        void OnURI(Uri uri);
     }
 }
