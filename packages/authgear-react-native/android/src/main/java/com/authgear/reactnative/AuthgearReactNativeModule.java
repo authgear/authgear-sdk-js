@@ -46,7 +46,6 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import com.google.crypto.tink.shaded.protobuf.InvalidProtocolBufferException;
 
@@ -62,20 +61,28 @@ import org.json.JSONObject;
 
 public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implements ActivityEventListener {
 
+    private static class Handle {
+        Promise mPromise;
+
+        Handle(Promise promise) {
+            this.mPromise = promise;
+        }
+    }
+
     private static final String LOGTAG = "AuthgearReactNative";
     private static final String ENCRYPTED_SHARED_PREFERENCES_NAME = "authgear_encrypted_shared_preferences";
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
     private static final int ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION = 1;
     private static final int ACTIVITY_PROMISE_TAG_OPEN_URL = 2;
-    private StartActivityHandles mHandles;
+    private final StartActivityHandles<Handle> mHandles;
 
     private final ReactApplicationContext reactContext;
 
     public AuthgearReactNativeModule(ReactApplicationContext context) {
         super(context);
         this.reactContext = context;
-        this.mHandles = new StartActivityHandles();
+        this.mHandles = new StartActivityHandles<>();
         reactContext.addActivityEventListener(this);
     }
 
@@ -745,7 +752,8 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
     @ReactMethod
     public void openURL(String urlString, Promise promise) {
-        final int requestCode = this.mHandles.push(new StartActivityHandle(ACTIVITY_PROMISE_TAG_OPEN_URL, promise));
+        final Handle handle = new Handle(promise);
+        final int requestCode = this.mHandles.push(new StartActivityHandle<>(ACTIVITY_PROMISE_TAG_OPEN_URL, handle));
         try {
             Activity currentActivity = getCurrentActivity();
             if (currentActivity == null) {
@@ -757,16 +765,17 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             Intent intent = WebViewActivity.createIntent(context, urlString);
             currentActivity.startActivityForResult(intent, requestCode);
         } catch (Exception e) {
-            StartActivityHandle<Promise> handle = this.mHandles.pop(requestCode);
-            if (handle != null) {
-                handle.value.reject(e);
+            StartActivityHandle<Handle> startActivityHandle = this.mHandles.pop(requestCode);
+            if (startActivityHandle != null) {
+                startActivityHandle.value.mPromise.reject(e);
             }
         }
     }
 
     @ReactMethod
     public void openAuthorizeURLWithWebView(ReadableMap options, Promise promise) {
-        final int requestCode = this.mHandles.push(new StartActivityHandle(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, promise));
+        final Handle handle = new Handle(promise);
+        final int requestCode = this.mHandles.push(new StartActivityHandle<>(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, handle));
 
         try {
             Activity currentActivity = this.getCurrentActivity();
@@ -781,6 +790,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             Uri redirectURI = Uri.parse(options.getString("redirectURI"));
             Integer actionBarBackgroundColor = this.readColorInt(options, "actionBarBackgroundColor");
             Integer actionBarButtonTintColor = this.readColorInt(options, "actionBarButtonTintColor");
+
             WebKitWebViewActivity.Options webViewOptions = new WebKitWebViewActivity.Options();
             webViewOptions.url = url;
             webViewOptions.redirectURI = redirectURI;
@@ -790,9 +800,9 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             Intent intent = WebKitWebViewActivity.createIntent(ctx, webViewOptions);
             currentActivity.startActivityForResult(intent, requestCode);
         } catch (Exception e) {
-            StartActivityHandle<Promise> handle = this.mHandles.pop(requestCode);
-            if (handle != null) {
-                handle.value.reject(e);
+            StartActivityHandle<Handle> startActivityHandle = this.mHandles.pop(requestCode);
+            if (startActivityHandle != null) {
+                startActivityHandle.value.mPromise.reject(e);
             }
         }
     }
@@ -812,7 +822,8 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
     @ReactMethod
     public void openAuthorizeURL(String urlString, String callbackURL, boolean shareSessionWithSystemBrowser, Promise promise) {
-        final int requestCode = this.mHandles.push(new StartActivityHandle(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, promise));
+        final Handle handle = new Handle(promise);
+        final int requestCode = this.mHandles.push(new StartActivityHandle<>(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, handle));
         try {
             Activity currentActivity = getCurrentActivity();
             if (currentActivity == null) {
@@ -827,9 +838,9 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             Intent intent = OAuthCoordinatorActivity.createAuthorizationIntent(context, uri);
             currentActivity.startActivityForResult(intent, requestCode);
         } catch (Exception e) {
-            StartActivityHandle<Promise> handle = this.mHandles.pop(requestCode);
-            if (handle != null) {
-                handle.value.reject(e);
+            StartActivityHandle<Handle> startActivityHandle = this.mHandles.pop(requestCode);
+            if (startActivityHandle != null) {
+                startActivityHandle.value.mPromise.reject(e);
             }
         }
     }
@@ -966,10 +977,10 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
     @Override
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
-        final StartActivityHandle<Promise> handle = this.mHandles.pop(requestCode);
-        if (handle != null) {
-            final int tag = handle.tag;
-            final Promise promise = handle.value;
+        final StartActivityHandle<Handle> startActivityHandle = this.mHandles.pop(requestCode);
+        if (startActivityHandle != null) {
+            final int tag = startActivityHandle.tag;
+            final Promise promise = startActivityHandle.value.mPromise;
             switch (tag) {
                 case ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION:
                     if (resultCode == Activity.RESULT_CANCELED) {
