@@ -49,6 +49,9 @@ public class WebKitWebViewActivity extends AppCompatActivity {
         public Integer actionBarBackgroundColor;
         public Integer actionBarButtonTintColor;
 
+        public Uri wechatRedirectURI;
+        public String wechatRedirectURIIntentAction;
+
         public Options() {}
 
         private Options(Bundle bundle) {
@@ -60,18 +63,34 @@ public class WebKitWebViewActivity extends AppCompatActivity {
             if (bundle.containsKey("actionBarButtonTintColor")) {
                 this.actionBarButtonTintColor = bundle.getInt("actionBarButtonTintColor");
             }
+            if (bundle.containsKey("wechatRedirectURI")) {
+                this.wechatRedirectURI = bundle.getParcelable("wechatRedirectURI");
+            }
+            if (bundle.containsKey("wechatRedirectURIIntentAction")) {
+                this.wechatRedirectURIIntentAction = bundle.getString("wechatRedirectURIIntentAction");
+            }
         }
 
         public Bundle toBundle() {
             Bundle bundle = new Bundle();
+
             bundle.putParcelable("url", this.url);
             bundle.putParcelable("redirectURI", this.redirectURI);
+
             if (this.actionBarBackgroundColor != null) {
                 bundle.putInt("actionBarBackgroundColor", this.actionBarBackgroundColor);
             }
             if (this.actionBarButtonTintColor != null) {
                 bundle.putInt("actionBarButtonTintColor", this.actionBarButtonTintColor);
             }
+
+            if (this.wechatRedirectURI != null) {
+                bundle.putParcelable("wechatRedirectURI", this.wechatRedirectURI);
+            }
+            if (this.wechatRedirectURIIntentAction != null) {
+                bundle.putString("wechatRedirectURIIntentAction", this.wechatRedirectURIIntentAction);
+            }
+
             return bundle;
         }
     }
@@ -122,6 +141,9 @@ public class WebKitWebViewActivity extends AppCompatActivity {
             if (this.checkRedirectURI(uri)) {
                 return true;
             }
+            if (this.checkWechatRedirectURI(uri)) {
+                return true;
+            }
             return false;
         }
 
@@ -134,6 +156,26 @@ public class WebKitWebViewActivity extends AppCompatActivity {
                 this.activity.finish();
                 return true;
             }
+            return false;
+        }
+
+        private boolean checkWechatRedirectURI(Uri uri) {
+            Options options = this.activity.getOptions();
+            Uri wechatRedirectURI = options.wechatRedirectURI;
+            String wechatRedirectURIIntentAction = options.wechatRedirectURIIntentAction;
+            if (wechatRedirectURI == null || wechatRedirectURIIntentAction == null) {
+                return false;
+            }
+
+            Uri withoutQuery = this.removeQueryAndFragment(uri);
+            if (withoutQuery.toString().equals(wechatRedirectURI.toString())) {
+                Intent intent = new Intent(wechatRedirectURIIntentAction);
+                intent.setPackage(this.activity.getApplicationContext().getPackageName());
+                intent.putExtra("uri", uri.toString());
+                this.activity.getApplicationContext().sendBroadcast(intent);
+                return true;
+            }
+
             return false;
         }
 

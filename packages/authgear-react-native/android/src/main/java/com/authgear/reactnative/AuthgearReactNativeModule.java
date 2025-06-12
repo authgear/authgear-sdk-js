@@ -17,12 +17,15 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Objects;
 import java.util.UUID;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.graphics.Color;
@@ -46,6 +49,7 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import com.google.crypto.tink.shaded.protobuf.InvalidProtocolBufferException;
 
@@ -53,6 +57,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.security.crypto.MasterKey;
 import androidx.security.crypto.EncryptedSharedPreferences;
@@ -63,6 +68,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
     private static class Handle {
         Promise mPromise;
+        BroadcastReceiver mBroadcastReceiver;
 
         Handle(Promise promise) {
             this.mPromise = promise;
@@ -786,16 +792,40 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
             Context ctx = currentActivity;
 
+            String invocationID = options.getString("invocationID");
             Uri url = Uri.parse(options.getString("url"));
             Uri redirectURI = Uri.parse(options.getString("redirectURI"));
             Integer actionBarBackgroundColor = this.readColorInt(options, "actionBarBackgroundColor");
             Integer actionBarButtonTintColor = this.readColorInt(options, "actionBarButtonTintColor");
+            String wechatRedirectURIString = options.getString("androidWechatRedirectURI");
 
             WebKitWebViewActivity.Options webViewOptions = new WebKitWebViewActivity.Options();
             webViewOptions.url = url;
             webViewOptions.redirectURI = redirectURI;
             webViewOptions.actionBarBackgroundColor = actionBarBackgroundColor;
             webViewOptions.actionBarButtonTintColor = actionBarButtonTintColor;
+            if (wechatRedirectURIString != null) {
+                String intentAction = String.format("com.authgear.reactnative.callback.%s", invocationID);
+                handle.mBroadcastReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        if (Objects.equals(intent.getAction(), intentAction)) {
+                            String uriString = intent.getExtras().getString("uri");
+                            WritableMap map = Arguments.createMap();
+                            map.putString("invocationID", invocationID);
+                            map.putString("url", uriString);
+                            AuthgearReactNativeModule.this.sendEvent("authgear-react-native", map);
+                        }
+                    }
+                };
+
+                IntentFilter intentFilter = new IntentFilter(intentAction);
+
+                webViewOptions.wechatRedirectURI = Uri.parse(wechatRedirectURIString);
+                webViewOptions.wechatRedirectURIIntentAction = intentAction;
+
+                ContextCompat.registerReceiver(ctx.getApplicationContext(), handle.mBroadcastReceiver, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
+            }
 
             Intent intent = WebKitWebViewActivity.createIntent(ctx, webViewOptions);
             currentActivity.startActivityForResult(intent, requestCode);
@@ -818,6 +848,10 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             return Color.argb(a, r, g, b);
         }
         return null;
+    }
+
+    private void sendEvent(String name, ReadableMap map) {
+        this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(name, map);
     }
 
     @ReactMethod
@@ -981,6 +1015,9 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         if (startActivityHandle != null) {
             final int tag = startActivityHandle.tag;
             final Promise promise = startActivityHandle.value.mPromise;
+            if (startActivityHandle.value.mBroadcastReceiver != null) {
+                activity.getApplicationContext().unregisterReceiver(startActivityHandle.value.mBroadcastReceiver);
+            }
             switch (tag) {
                 case ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION:
                     if (resultCode == Activity.RESULT_CANCELED) {
