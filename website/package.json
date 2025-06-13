@@ -14,22 +14,16 @@
     "write-heading-ids": "docusaurus write-heading-ids",
     "typecheck": "tsc"
   },
-  "overrides": {
-    "serve-handler": {
-      "path-to-regexp": "^3.3.0"
-    }
-  },
   "dependencies": {
-    "@docusaurus/core": "^3.5.2",
-    "@docusaurus/preset-classic": "^3.5.2",
-    "@mdx-js/react": "^3.0.1",
-    "clsx": "^1.2.1",
-    "prism-react-renderer": "^2.4.0",
+    "@docusaurus/core": "^3.8.1",
+    "@docusaurus/preset-classic": "^3.8.1",
+    "@mdx-js/react": "^3.1.0",
+    "prism-react-renderer": "^2.4.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^3.5.2"
+    "@docusaurus/module-type-aliases": "^3.8.1"
   },
   "browserslist": {
     "production": [
