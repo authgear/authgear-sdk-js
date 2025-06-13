@@ -17,12 +17,15 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Objects;
 import java.util.UUID;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.graphics.Color;
@@ -54,6 +57,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.security.crypto.MasterKey;
 import androidx.security.crypto.EncryptedSharedPreferences;
@@ -62,53 +66,30 @@ import org.json.JSONObject;
 
 public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implements ActivityEventListener {
 
+    private static class Handle {
+        Promise mPromise;
+        BroadcastReceiver mBroadcastReceiver;
+
+        Handle(Promise promise) {
+            this.mPromise = promise;
+        }
+    }
+
     private static final String LOGTAG = "AuthgearReactNative";
     private static final String ENCRYPTED_SHARED_PREFERENCES_NAME = "authgear_encrypted_shared_preferences";
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
     private static final int ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION = 1;
     private static final int ACTIVITY_PROMISE_TAG_OPEN_URL = 2;
-    private StartActivityHandles mHandles;
+    private final StartActivityHandles<Handle> mHandles;
 
     private final ReactApplicationContext reactContext;
 
     public AuthgearReactNativeModule(ReactApplicationContext context) {
         super(context);
         this.reactContext = context;
-        this.mHandles = new StartActivityHandles();
+        this.mHandles = new StartActivityHandles<>();
         reactContext.addActivityEventListener(this);
-    }
-
-    /**
-     * Check and handle wehchat redirect uri and trigger delegate function if needed
-     */
-    private static String currentWechatRedirectURI;
-    private static OnOpenWechatRedirectURIListener onOpenWechatRedirectURIListener;
-
-    public static void registerCurrentWechatRedirectURI(String uri, OnOpenWechatRedirectURIListener listener) {
-        if (uri != null) {
-            currentWechatRedirectURI = uri;
-            onOpenWechatRedirectURIListener = listener;
-        } else {
-            unregisterCurrentWechatRedirectURI();
-        }
-    }
-
-    public static void unregisterCurrentWechatRedirectURI() {
-        currentWechatRedirectURI = null;
-        onOpenWechatRedirectURIListener = null;
-    }
-
-    public static Boolean handleWechatRedirectDeepLink(Uri deepLink) {
-        if (currentWechatRedirectURI == null) {
-            return false;
-        }
-        String deepLinkWithoutQuery = getURLWithoutQuery(deepLink);
-        if (currentWechatRedirectURI.equals(deepLinkWithoutQuery)) {
-            onOpenWechatRedirectURIListener.OnURI(deepLink);
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -776,19 +757,9 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     }
 
     @ReactMethod
-    public void registerWechatRedirectURI(String wechatRedirectURI, Promise promise) {
-        registerCurrentWechatRedirectURI(wechatRedirectURI, new OnOpenWechatRedirectURIListener() {
-            @Override
-            public void OnURI(Uri uri) {
-                sendOpenWechatRedirectURI(uri);
-            }
-        });
-        promise.resolve(null);
-    }
-
-    @ReactMethod
     public void openURL(String urlString, Promise promise) {
-        final int requestCode = this.mHandles.push(new StartActivityHandle(ACTIVITY_PROMISE_TAG_OPEN_URL, promise));
+        final Handle handle = new Handle(promise);
+        final int requestCode = this.mHandles.push(new StartActivityHandle<>(ACTIVITY_PROMISE_TAG_OPEN_URL, handle));
         try {
             Activity currentActivity = getCurrentActivity();
             if (currentActivity == null) {
@@ -800,16 +771,17 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             Intent intent = WebViewActivity.createIntent(context, urlString);
             currentActivity.startActivityForResult(intent, requestCode);
         } catch (Exception e) {
-            StartActivityHandle<Promise> handle = this.mHandles.pop(requestCode);
-            if (handle != null) {
-                handle.value.reject(e);
+            StartActivityHandle<Handle> startActivityHandle = this.mHandles.pop(requestCode);
+            if (startActivityHandle != null) {
+                startActivityHandle.value.mPromise.reject(e);
             }
         }
     }
 
     @ReactMethod
     public void openAuthorizeURLWithWebView(ReadableMap options, Promise promise) {
-        final int requestCode = this.mHandles.push(new StartActivityHandle(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, promise));
+        final Handle handle = new Handle(promise);
+        final int requestCode = this.mHandles.push(new StartActivityHandle<>(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, handle));
 
         try {
             Activity currentActivity = this.getCurrentActivity();
@@ -820,22 +792,47 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
             Context ctx = currentActivity;
 
+            String invocationID = options.getString("invocationID");
             Uri url = Uri.parse(options.getString("url"));
             Uri redirectURI = Uri.parse(options.getString("redirectURI"));
             Integer actionBarBackgroundColor = this.readColorInt(options, "actionBarBackgroundColor");
             Integer actionBarButtonTintColor = this.readColorInt(options, "actionBarButtonTintColor");
+            String wechatRedirectURIString = options.getString("androidWechatRedirectURI");
+
             WebKitWebViewActivity.Options webViewOptions = new WebKitWebViewActivity.Options();
             webViewOptions.url = url;
             webViewOptions.redirectURI = redirectURI;
             webViewOptions.actionBarBackgroundColor = actionBarBackgroundColor;
             webViewOptions.actionBarButtonTintColor = actionBarButtonTintColor;
+            if (wechatRedirectURIString != null) {
+                String intentAction = String.format("com.authgear.reactnative.callback.%s", invocationID);
+                handle.mBroadcastReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        if (Objects.equals(intent.getAction(), intentAction)) {
+                            String uriString = intent.getExtras().getString("uri");
+                            WritableMap map = Arguments.createMap();
+                            map.putString("invocationID", invocationID);
+                            map.putString("url", uriString);
+                            AuthgearReactNativeModule.this.sendEvent("authgear-react-native", map);
+                        }
+                    }
+                };
+
+                IntentFilter intentFilter = new IntentFilter(intentAction);
+
+                webViewOptions.wechatRedirectURI = Uri.parse(wechatRedirectURIString);
+                webViewOptions.wechatRedirectURIIntentAction = intentAction;
+
+                ContextCompat.registerReceiver(ctx.getApplicationContext(), handle.mBroadcastReceiver, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
+            }
 
             Intent intent = WebKitWebViewActivity.createIntent(ctx, webViewOptions);
             currentActivity.startActivityForResult(intent, requestCode);
         } catch (Exception e) {
-            StartActivityHandle<Promise> handle = this.mHandles.pop(requestCode);
-            if (handle != null) {
-                handle.value.reject(e);
+            StartActivityHandle<Handle> startActivityHandle = this.mHandles.pop(requestCode);
+            if (startActivityHandle != null) {
+                startActivityHandle.value.mPromise.reject(e);
             }
         }
     }
@@ -853,9 +850,14 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         return null;
     }
 
+    private void sendEvent(String name, ReadableMap map) {
+        this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(name, map);
+    }
+
     @ReactMethod
     public void openAuthorizeURL(String urlString, String callbackURL, boolean shareSessionWithSystemBrowser, Promise promise) {
-        final int requestCode = this.mHandles.push(new StartActivityHandle(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, promise));
+        final Handle handle = new Handle(promise);
+        final int requestCode = this.mHandles.push(new StartActivityHandle<>(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, handle));
         try {
             Activity currentActivity = getCurrentActivity();
             if (currentActivity == null) {
@@ -870,9 +872,9 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             Intent intent = OAuthCoordinatorActivity.createAuthorizationIntent(context, uri);
             currentActivity.startActivityForResult(intent, requestCode);
         } catch (Exception e) {
-            StartActivityHandle<Promise> handle = this.mHandles.pop(requestCode);
-            if (handle != null) {
-                handle.value.reject(e);
+            StartActivityHandle<Handle> startActivityHandle = this.mHandles.pop(requestCode);
+            if (startActivityHandle != null) {
+                startActivityHandle.value.mPromise.reject(e);
             }
         }
     }
@@ -1009,10 +1011,13 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
 
     @Override
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
-        final StartActivityHandle<Promise> handle = this.mHandles.pop(requestCode);
-        if (handle != null) {
-            final int tag = handle.tag;
-            final Promise promise = handle.value;
+        final StartActivityHandle<Handle> startActivityHandle = this.mHandles.pop(requestCode);
+        if (startActivityHandle != null) {
+            final int tag = startActivityHandle.tag;
+            final Promise promise = startActivityHandle.value.mPromise;
+            if (startActivityHandle.value.mBroadcastReceiver != null) {
+                activity.getApplicationContext().unregisterReceiver(startActivityHandle.value.mBroadcastReceiver);
+            }
             switch (tag) {
                 case ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION:
                     if (resultCode == Activity.RESULT_CANCELED) {
@@ -1092,14 +1097,5 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         Uri.Builder builder = uri.buildUpon().clearQuery();
         builder = builder.fragment("");
         return builder.build().toString();
-    }
-
-    private void sendOpenWechatRedirectURI(Uri uri) {
-        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                .emit("onAuthgearOpenWechatRedirectURI", uri.toString());
-    }
-
-    public interface OnOpenWechatRedirectURIListener {
-        void OnURI(Uri uri);
     }
 }

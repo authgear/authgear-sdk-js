@@ -1,4 +1,7 @@
+import URL from "core-js-pure/features/url";
 import { openAuthorizeURL, openAuthorizeURLWithWebView } from "./nativemodule";
+import { ReactNativeContainerDelegate } from "./types";
+import eventEmitter from "./eventEmitter";
 
 /**
  * OpenAuthorizationURLOptions is options for {@link UIImplementation.openAuthorizationURL}.
@@ -21,6 +24,11 @@ export interface OpenAuthorizationURLOptions {
    * such as those underlying implementations are based on ASWebAuthenticationSession, or CustomTabs.
    */
   shareCookiesWithDeviceBrowser: boolean;
+
+  /**
+   * @internal
+   */
+  containerDelegate?: ReactNativeContainerDelegate;
 }
 
 /**
@@ -88,6 +96,12 @@ export interface WebKitWebViewUIImplementationOptionsIOS {
    * See https://developer.apple.com/documentation/webkit/wkwebview/4111163-isinspectable.
    */
   isInspectable?: boolean;
+
+  /**
+   * When the webview navigates to this URI, instead of follow the URI in the webview,
+   * invoke sendWechatAuthRequest.
+   */
+  wechatRedirectURI?: string;
 }
 
 /**
@@ -104,6 +118,11 @@ export interface WebKitWebViewUIImplementationOptionsAndroid {
    * The color is in hexadecimal format representing the argb, for example, blue is 0xff0000ff.
    */
   actionBarButtonTintColor?: number;
+  /**
+   * When the webview navigates to this URI, instead of follow the URI in the webview,
+   * invoke sendWechatAuthRequest.
+   */
+  wechatRedirectURI?: string;
 }
 
 /**
@@ -136,19 +155,43 @@ export class WebKitWebViewUIImplementation implements UIImplementation {
   async openAuthorizationURL(
     options: OpenAuthorizationURLOptions
   ): Promise<string> {
-    return openAuthorizeURLWithWebView({
-      url: options.url,
-      redirectURI: options.redirectURI,
-      navigationBarBackgroundColor:
-        this.options?.ios?.navigationBarBackgroundColor?.toString(16),
-      navigationBarButtonTintColor:
-        this.options?.ios?.navigationBarButtonTintColor?.toString(16),
-      modalPresentationStyle: this.options?.ios?.modalPresentationStyle,
-      iosIsInspectable: this.options?.ios?.isInspectable ? "true" : "false",
-      actionBarBackgroundColor:
-        this.options?.android?.actionBarBackgroundColor?.toString(16),
-      actionBarButtonTintColor:
-        this.options?.android?.actionBarButtonTintColor?.toString(16),
-    });
+    const invocationID = Math.floor(Math.random() * Math.pow(2, 32)).toString(
+      16
+    );
+
+    const subscription = eventEmitter.addListener(
+      "authgear-react-native",
+      (args: { invocationID: string; url: string }) => {
+        if (args.invocationID === invocationID) {
+          const url = new URL(args.url);
+          const state = url.searchParams.get("state");
+          if (state != null) {
+            options.containerDelegate?.sendWechatAuthRequest(state);
+          }
+        }
+      }
+    );
+
+    try {
+      return await openAuthorizeURLWithWebView({
+        invocationID,
+        url: options.url,
+        redirectURI: options.redirectURI,
+        navigationBarBackgroundColor:
+          this.options?.ios?.navigationBarBackgroundColor?.toString(16),
+        navigationBarButtonTintColor:
+          this.options?.ios?.navigationBarButtonTintColor?.toString(16),
+        modalPresentationStyle: this.options?.ios?.modalPresentationStyle,
+        iosIsInspectable: this.options?.ios?.isInspectable ? "true" : "false",
+        actionBarBackgroundColor:
+          this.options?.android?.actionBarBackgroundColor?.toString(16),
+        actionBarButtonTintColor:
+          this.options?.android?.actionBarButtonTintColor?.toString(16),
+        iosWechatRedirectURI: this.options?.ios?.wechatRedirectURI,
+        androidWechatRedirectURI: this.options?.android?.wechatRedirectURI,
+      });
+    } finally {
+      subscription.remove();
+    }
   }
 }

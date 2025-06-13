@@ -1,7 +1,6 @@
 #import "AppDelegate.h"
 
 #import <React/RCTBundleURLProvider.h>
-#import <AGAuthgearReactNative.h>
 #import "RCTWechatAuthModule.h"
 
 // config
@@ -42,7 +41,6 @@ NSString* const WechatAuthErrorDomain = @"com.authgear.example.reactnative.wecha
 
 - (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray *))restorationHandler {
   [WXApi handleOpenUniversalLink:userActivity delegate:self];
-  [AGAuthgearReactNative application:application continueUserActivity:userActivity restorationHandler:restorationHandler];
   return YES;
 }
 
