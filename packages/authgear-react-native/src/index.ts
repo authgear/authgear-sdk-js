@@ -450,7 +450,6 @@ export class ReactNativeContainer {
       url: authorizeURL,
       redirectURI: options.redirectURI,
       shareCookiesWithDeviceBrowser: this._shareCookiesWithDeviceBrowser(),
-      containerDelegate: this.delegate,
     });
     const xDeviceInfo = await getXDeviceInfo();
     const result = await this.baseContainer._finishAuthentication(
@@ -508,7 +507,6 @@ export class ReactNativeContainer {
       url: authorizeURL,
       redirectURI: options.redirectURI,
       shareCookiesWithDeviceBrowser: this._shareCookiesWithDeviceBrowser(),
-      containerDelegate: this.delegate,
     });
     const xDeviceInfo = await getXDeviceInfo();
     await this.baseContainer._finishSettingsAction(redirectURL, {
@@ -583,7 +581,6 @@ export class ReactNativeContainer {
       url: endpoint,
       redirectURI: options.redirectURI,
       shareCookiesWithDeviceBrowser: this._shareCookiesWithDeviceBrowser(),
-      containerDelegate: this.delegate,
     });
     const xDeviceInfo = await getXDeviceInfo();
     const result = await this.baseContainer._finishReauthentication(
@@ -794,7 +791,6 @@ export class ReactNativeContainer {
       url: authorizeURL,
       redirectURI: options.redirectURI,
       shareCookiesWithDeviceBrowser: this._shareCookiesWithDeviceBrowser(),
-      containerDelegate: this.delegate,
     });
     const result = await this.baseContainer._finishAuthentication(
       redirectURL,
@@ -891,18 +887,6 @@ export class ReactNativeContainer {
       state,
       Platform.OS
     );
-  }
-
-  /**
-   * @internal
-   */
-  _sendWechatRedirectURIToDelegate(deepLink: string): void {
-    const u = new URL(deepLink);
-    const params = u.searchParams;
-    const state = params.get("state");
-    if (state) {
-      this.delegate?.sendWechatAuthRequest(state);
-    }
   }
 
   /**

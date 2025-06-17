@@ -1,6 +1,5 @@
 import URL from "core-js-pure/features/url";
 import { openAuthorizeURL, openAuthorizeURLWithWebView } from "./nativemodule";
-import { ReactNativeContainerDelegate } from "./types";
 import eventEmitter from "./eventEmitter";
 
 /**
@@ -24,11 +23,6 @@ export interface OpenAuthorizationURLOptions {
    * such as those underlying implementations are based on ASWebAuthenticationSession, or CustomTabs.
    */
   shareCookiesWithDeviceBrowser: boolean;
-
-  /**
-   * @internal
-   */
-  containerDelegate?: ReactNativeContainerDelegate;
 }
 
 /**
@@ -134,6 +128,19 @@ export interface WebKitWebViewUIImplementationOptionsAndroid {
 export interface WebKitWebViewUIImplementationOptions {
   ios?: WebKitWebViewUIImplementationOptionsIOS;
   android?: WebKitWebViewUIImplementationOptionsAndroid;
+
+  /**
+   * This callback will be called when user click login with WeChat in
+   * react-native.
+   *
+   * Developer should implement this function to use WeChat SDK to
+   * obtain WeChat authentication code. After obtaining the code, developer
+   * should call wechatAuthCallback with code and state to complete the
+   * WeChat login.
+   *
+   * @public
+   */
+  sendWechatAuthRequest?: (state: string) => void;
 }
 
 /**
@@ -166,7 +173,7 @@ export class WebKitWebViewUIImplementation implements UIImplementation {
           const url = new URL(args.url);
           const state = url.searchParams.get("state");
           if (state != null) {
-            options.containerDelegate?.sendWechatAuthRequest(state);
+            this.options?.sendWechatAuthRequest?.(state);
           }
         }
       }

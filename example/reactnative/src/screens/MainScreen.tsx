@@ -294,6 +294,25 @@ const HomeScreen: React.FC = () => {
       });
   }, []);
 
+  const sendWechatAuthRequest = useCallback(
+    (state: string) => {
+      console.log('user click login with wechat, open wechat sdk');
+      const {WechatAuth} = NativeModules;
+      WechatAuth.sendWechatAuthRequest(state)
+        .then((result: {code: string; state: string}) => {
+          console.log('sending wechat auth callback');
+          return authgear.wechatAuthCallback(result.code, result.state);
+        })
+        .then(() => {
+          console.log('send wechat auth callback successfully');
+        })
+        .catch((err: Error) => {
+          showError(err);
+        });
+    },
+    [showError],
+  );
+
   const delegate: ReactNativeContainerDelegate = useMemo(() => {
     const d: ReactNativeContainerDelegate = {
       onSessionStateChange: (
@@ -305,24 +324,9 @@ const HomeScreen: React.FC = () => {
           setUserInfo(null);
         }
       },
-      sendWechatAuthRequest: state => {
-        console.log('user click login with wechat, open wechat sdk');
-        const {WechatAuth} = NativeModules;
-        WechatAuth.sendWechatAuthRequest(state)
-          .then((result: {code: string; state: string}) => {
-            console.log('sending wechat auth callback');
-            return authgear.wechatAuthCallback(result.code, result.state);
-          })
-          .then(() => {
-            console.log('send wechat auth callback successfully');
-          })
-          .catch((err: Error) => {
-            showError(err);
-          });
-      },
     };
     return d;
-  }, [setSessionState, setUserInfo, showError]);
+  }, [setSessionState, setUserInfo]);
 
   useEffect(() => {
     authgear.delegate = delegate;
@@ -374,6 +378,7 @@ const HomeScreen: React.FC = () => {
               android: {
                 wechatRedirectURI,
               },
+              sendWechatAuthRequest,
             })
           : undefined,
         isSSOEnabled,
@@ -398,6 +403,7 @@ const HomeScreen: React.FC = () => {
     useWebKitWebView,
     postConfigure,
     showError,
+    sendWechatAuthRequest,
   ]);
 
   const login = useCallback(() => {
