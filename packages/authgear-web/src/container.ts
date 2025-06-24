@@ -774,7 +774,7 @@ export class WebContainer {
    *
    * @public
    */
-  async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
+  async fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
     return this.baseContainer.fetch(input, init);
   }
 }

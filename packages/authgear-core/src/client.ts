@@ -99,7 +99,7 @@ export abstract class _BaseAPIClient {
     return this._doFetch(request);
   }
 
-  async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
+  async fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
     if (this._requestClass == null) {
       throw new AuthgearError("missing requestClass in api client");
     }
