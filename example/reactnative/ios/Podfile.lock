@@ -1,5 +1,5 @@
 PODS:
-  - authgear-react-native (2.15.0):
+  - authgear-react-native (3.1.0):
     - React-Core
   - boost (1.84.0)
   - DoubleConversion (1.1.6)
@@ -1721,7 +1721,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  authgear-react-native: 5d523ca4c9db4810847f7c405f8bdddbd0479693
+  authgear-react-native: f18f7b81cd7d210a87e1efbc9f861be5b0459a79
   boost: 1dca942403ed9342f98334bf4c3621f011aa7946
   DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
   FBLazyVector: be509404b5de73a64a74284edcaf73a5d1e128b1
