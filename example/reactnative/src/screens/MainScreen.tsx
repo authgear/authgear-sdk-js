@@ -145,6 +145,16 @@ const biometricOptions: BiometricOptions = {
   },
 };
 
+async function myfetch(
+  input: URL | RequestInfo,
+  init?: RequestInit,
+): Promise<Response> {
+  // @ts-expect-error The Request class in React Native does not take URL in the first argument.
+  const request = new Request(input, init);
+  request.headers.set('x-custom-header', '42');
+  return fetch(request);
+}
+
 const HomeScreen: React.FC = () => {
   const [initialized, setInitialized] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -383,6 +393,7 @@ const HomeScreen: React.FC = () => {
           : undefined,
         isSSOEnabled,
         preAuthenticatedURLEnabled,
+        fetch: myfetch,
       })
       .then(() => {
         postConfigure();

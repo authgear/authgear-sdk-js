@@ -93,6 +93,15 @@ function isPlatformWeb(): boolean {
   return Capacitor.getPlatform() === "web";
 }
 
+async function myfetch(
+  input: URL | RequestInfo,
+  init?: RequestInit
+): Promise<Response> {
+  const request = new Request(input, init);
+  request.headers.set("x-custom-header", "42");
+  return fetch(request);
+}
+
 function AuthgearDemo() {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertHeader, setAlertHeader] = useState("");
@@ -228,6 +237,7 @@ function AuthgearDemo() {
           endpoint,
           sessionType: "refresh_token",
           isSSOEnabled,
+          fetch: myfetch,
         });
       } else {
         await authgearCapacitor.configure({
@@ -246,6 +256,7 @@ function AuthgearDemo() {
             : undefined,
           isSSOEnabled,
           preAuthenticatedURLEnabled,
+          fetch: myfetch,
         });
       }
       await postConfigure();
