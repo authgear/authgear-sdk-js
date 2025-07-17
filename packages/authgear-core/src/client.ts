@@ -26,7 +26,7 @@ export function _removeTrailingSlash(s: string): string {
 /**
  * @internal
  */
-export abstract class _BaseAPIClient {
+export class _BaseAPIClient {
   private dpopProvider: DPoPProvider | null;
   userAgent?: string;
 
@@ -47,15 +47,21 @@ export abstract class _BaseAPIClient {
   }
 
   // eslint-disable-next-line no-undef
-  abstract _fetchFunction?: typeof fetch;
-
+  _fetch: typeof fetch;
   // eslint-disable-next-line no-undef
-  abstract _requestClass?: typeof Request;
+  _Request: typeof Request;
 
   _config?: _OIDCConfiguration;
 
-  constructor(dpopProvider: DPoPProvider | null) {
-    this.dpopProvider = dpopProvider;
+  constructor(options: {
+    // eslint-disable-next-line no-undef
+    fetch: typeof fetch;
+    Request: typeof Request;
+    dpopProvider: DPoPProvider | null;
+  }) {
+    this._fetch = options.fetch;
+    this._Request = options.Request;
+    this.dpopProvider = options.dpopProvider;
   }
 
   protected async _prepareHeaders(): Promise<Record<string, string>> {
@@ -71,10 +77,6 @@ export abstract class _BaseAPIClient {
   }
 
   async _doFetch(request: Request): Promise<Response> {
-    if (!this._fetchFunction) {
-      throw new AuthgearError("missing fetchFunction in api client");
-    }
-
     if (this.dpopProvider != null) {
       const dpopJWT = await this.dpopProvider.generateDPoPProof({
         htm: request.method,
@@ -85,25 +87,18 @@ export abstract class _BaseAPIClient {
       }
     }
 
-    return this._fetchFunction(request);
+    return this._fetch(request);
   }
 
   async _fetchWithoutRefresh(
     url: string,
     init?: RequestInit
   ): Promise<Response> {
-    if (!this._requestClass) {
-      throw new AuthgearError("missing requestClass in api client");
-    }
-    const request = new this._requestClass(url, init);
+    const request = new this._Request(url, init);
     return this._doFetch(request);
   }
 
   async fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-    if (this._requestClass == null) {
-      throw new AuthgearError("missing requestClass in api client");
-    }
-
     if (this._delegate == null) {
       throw new AuthgearError("missing delegate in api client");
     }
@@ -113,7 +108,7 @@ export abstract class _BaseAPIClient {
       await this._delegate.refreshAccessToken();
     }
 
-    const request = new this._requestClass(input, init);
+    const request = new this._Request(input, init);
 
     const headers = await this._prepareHeaders();
     for (const key of Object.keys(headers)) {

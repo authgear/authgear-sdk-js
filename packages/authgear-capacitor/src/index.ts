@@ -121,14 +121,6 @@ export interface ConfigureOptions {
   uiImplementation?: UIImplementation;
 }
 
-/**
- * @internal
- */
-export class _CapacitorAPIClient extends _BaseAPIClient {
-  _fetchFunction = window.fetch.bind(window);
-  _requestClass = Request;
-}
-
 async function getXDeviceInfo(): Promise<string> {
   const deviceInfo = await getDeviceInfo();
   const deviceInfoJSON = JSON.stringify(deviceInfo);
@@ -151,7 +143,7 @@ export class CapacitorContainer {
   /**
    * @internal
    */
-  baseContainer: _BaseContainer<_CapacitorAPIClient>;
+  baseContainer: _BaseContainer<_BaseAPIClient>;
 
   /**
    * @internal
@@ -270,13 +262,14 @@ export class CapacitorContainer {
       },
     });
     this.dpopProvider = dpopProvider;
-    const apiClient = new _CapacitorAPIClient(dpopProvider);
 
-    this.baseContainer = new _BaseContainer<_CapacitorAPIClient>(
-      o,
-      apiClient,
-      this
-    );
+    const apiClient = new _BaseAPIClient({
+      fetch: window.fetch.bind(window),
+      Request: Request,
+      dpopProvider,
+    });
+
+    this.baseContainer = new _BaseContainer<_BaseAPIClient>(o, apiClient, this);
     this.baseContainer.apiClient._delegate = this;
 
     this.storage = new PersistentContainerStorage();

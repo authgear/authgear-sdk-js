@@ -4,6 +4,7 @@ import {
   UserInfo,
   ContainerOptions,
   _BaseContainer,
+  _BaseAPIClient,
   _ContainerStorage,
   TokenStorage,
   SessionState,
@@ -14,7 +15,6 @@ import {
   SettingsAction,
   type InterAppSharedStorage,
 } from "@authgear/core";
-import { _WebAPIClient } from "./client";
 import {
   PersistentTokenStorage,
   PersistentContainerStorage,
@@ -87,7 +87,7 @@ export class WebContainer {
   /**
    * @internal
    */
-  baseContainer: _BaseContainer<_WebAPIClient>;
+  baseContainer: _BaseContainer<_BaseAPIClient>;
 
   /**
    * @internal
@@ -184,9 +184,19 @@ export class WebContainer {
       ...options,
     } as ContainerOptions;
 
-    const apiClient = new _WebAPIClient();
+    const apiClient = new _BaseAPIClient({
+      // fetch() expects the context of the function to be window.
+      // If that does not hold, we will get the following error:
+      //
+      //   TypeError: Failed to execute 'fetch' on 'Window': Illegal invocation
+      //
+      // To prevent this, we bind window to fetch().
+      fetch: window.fetch.bind(window),
+      Request: Request,
+      dpopProvider: null,
+    });
 
-    this.baseContainer = new _BaseContainer<_WebAPIClient>(o, apiClient, this);
+    this.baseContainer = new _BaseContainer<_BaseAPIClient>(o, apiClient, this);
     this.baseContainer.apiClient._delegate = this;
 
     this.storage = new PersistentContainerStorage();

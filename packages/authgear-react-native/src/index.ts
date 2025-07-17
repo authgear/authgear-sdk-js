@@ -113,14 +113,6 @@ export interface ConfigureOptions {
   uiImplementation?: UIImplementation;
 }
 
-/**
- * @internal
- */
-export class _ReactNativeAPIClient extends _BaseAPIClient {
-  _fetchFunction = fetch;
-  _requestClass = Request;
-}
-
 async function getXDeviceInfo(): Promise<string> {
   const deviceInfo = await getDeviceInfo();
   const deviceInfoJSON = JSON.stringify(deviceInfo);
@@ -143,7 +135,7 @@ export class ReactNativeContainer {
   /**
    * @internal
    */
-  baseContainer: _BaseContainer<_ReactNativeAPIClient>;
+  baseContainer: _BaseContainer<_BaseAPIClient>;
 
   /**
    * @internal
@@ -280,13 +272,13 @@ export class ReactNativeContainer {
     });
 
     this.dpopProvider = dpopProvider;
-    const apiClient = new _ReactNativeAPIClient(dpopProvider);
+    const apiClient = new _BaseAPIClient({
+      fetch: fetch,
+      Request: Request,
+      dpopProvider: dpopProvider,
+    });
 
-    this.baseContainer = new _BaseContainer<_ReactNativeAPIClient>(
-      o,
-      apiClient,
-      this
-    );
+    this.baseContainer = new _BaseContainer<_BaseAPIClient>(o, apiClient, this);
     this.baseContainer.apiClient._delegate = this;
 
     this.storage = new PersistentContainerStorage();
