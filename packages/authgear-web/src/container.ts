@@ -70,6 +70,16 @@ export interface ConfigureOptions {
    * @defaultValue false
    */
   isSSOEnabled?: boolean;
+
+  /*
+   * Override the fetch() function the SDK uses to access the endpoint.
+   * If this is not specified, the global fetch() function is used.
+   * Note that the fetch() function IS NOT used in the UIImplementation,
+   * it is only used to access endpoints like the Token endpoint.
+   * For example, you want to provide a custom fetch() function to include additional headers
+   * in all requests that are sent to your self-hosted deployment.
+   */
+  fetch?: typeof window.fetch;
 }
 
 /**
@@ -288,6 +298,8 @@ export class WebContainer {
    */
   async configure(options: ConfigureOptions): Promise<void> {
     this.clientID = options.clientID;
+    this.baseContainer.apiClient._fetch =
+      options.fetch ?? window.fetch.bind(window);
     this.baseContainer.apiClient.endpoint = options.endpoint;
     if (options.sessionType != null) {
       this.sessionType = options.sessionType;
