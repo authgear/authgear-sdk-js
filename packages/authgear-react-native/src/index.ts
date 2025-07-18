@@ -111,14 +111,16 @@ export interface ConfigureOptions {
    * The implementation of UIImplementation.
    */
   uiImplementation?: UIImplementation;
-}
 
-/**
- * @internal
- */
-export class _ReactNativeAPIClient extends _BaseAPIClient {
-  _fetchFunction = fetch;
-  _requestClass = Request;
+  /*
+   * Override the fetch() function the SDK uses to access the endpoint.
+   * If this is not specified, the global fetch() function is used.
+   * Note that the fetch() function IS NOT used in the UIImplementation,
+   * it is only used to access endpoints like the Token endpoint.
+   * For example, you want to provide a custom fetch() function to include additional headers
+   * in all requests that are sent to your self-hosted deployment.
+   */
+  fetch?: typeof fetch;
 }
 
 async function getXDeviceInfo(): Promise<string> {
@@ -143,7 +145,7 @@ export class ReactNativeContainer {
   /**
    * @internal
    */
-  baseContainer: _BaseContainer<_ReactNativeAPIClient>;
+  baseContainer: _BaseContainer<_BaseAPIClient>;
 
   /**
    * @internal
@@ -280,13 +282,13 @@ export class ReactNativeContainer {
     });
 
     this.dpopProvider = dpopProvider;
-    const apiClient = new _ReactNativeAPIClient(dpopProvider);
+    const apiClient = new _BaseAPIClient({
+      fetch: fetch,
+      Request: Request,
+      dpopProvider: dpopProvider,
+    });
 
-    this.baseContainer = new _BaseContainer<_ReactNativeAPIClient>(
-      o,
-      apiClient,
-      this
-    );
+    this.baseContainer = new _BaseContainer<_BaseAPIClient>(o, apiClient, this);
     this.baseContainer.apiClient._delegate = this;
 
     this.storage = new PersistentContainerStorage();
@@ -395,6 +397,7 @@ export class ReactNativeContainer {
     const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
 
     this.clientID = options.clientID;
+    this.baseContainer.apiClient._fetch = options.fetch ?? fetch;
     this.baseContainer.apiClient.endpoint = options.endpoint;
     this.baseContainer.refreshToken = refreshToken ?? undefined;
     this.baseContainer.accessToken = undefined;

@@ -119,14 +119,16 @@ export interface ConfigureOptions {
    * The UIImplementation.
    */
   uiImplementation?: UIImplementation;
-}
 
-/**
- * @internal
- */
-export class _CapacitorAPIClient extends _BaseAPIClient {
-  _fetchFunction = window.fetch.bind(window);
-  _requestClass = Request;
+  /*
+   * Override the fetch() function the SDK uses to access the endpoint.
+   * If this is not specified, the global fetch() function is used.
+   * Note that the fetch() function IS NOT used in the UIImplementation,
+   * it is only used to access endpoints like the Token endpoint.
+   * For example, you want to provide a custom fetch() function to include additional headers
+   * in all requests that are sent to your self-hosted deployment.
+   */
+  fetch?: typeof window.fetch;
 }
 
 async function getXDeviceInfo(): Promise<string> {
@@ -151,7 +153,7 @@ export class CapacitorContainer {
   /**
    * @internal
    */
-  baseContainer: _BaseContainer<_CapacitorAPIClient>;
+  baseContainer: _BaseContainer<_BaseAPIClient>;
 
   /**
    * @internal
@@ -270,13 +272,14 @@ export class CapacitorContainer {
       },
     });
     this.dpopProvider = dpopProvider;
-    const apiClient = new _CapacitorAPIClient(dpopProvider);
 
-    this.baseContainer = new _BaseContainer<_CapacitorAPIClient>(
-      o,
-      apiClient,
-      this
-    );
+    const apiClient = new _BaseAPIClient({
+      fetch: window.fetch.bind(window),
+      Request: Request,
+      dpopProvider,
+    });
+
+    this.baseContainer = new _BaseContainer<_BaseAPIClient>(o, apiClient, this);
     this.baseContainer.apiClient._delegate = this;
 
     this.storage = new PersistentContainerStorage();
@@ -373,7 +376,11 @@ export class CapacitorContainer {
     const refreshToken = await this.tokenStorage.getRefreshToken(this.name);
 
     this.clientID = options.clientID;
+
+    this.baseContainer.apiClient._fetch =
+      options.fetch ?? window.fetch.bind(window);
     this.baseContainer.apiClient.endpoint = options.endpoint;
+
     this.baseContainer.refreshToken = refreshToken ?? undefined;
     this.baseContainer.accessToken = undefined;
 

@@ -83,6 +83,15 @@ function ShowError(props: { error: unknown }) {
   return <pre>{JSON.stringify(data, null, 2)}</pre>;
 }
 
+async function myfetch(
+  input: URL | RequestInfo,
+  init?: RequestInit
+): Promise<Response> {
+  const request = new Request(input, init);
+  request.headers.set("x-custom-header", "42");
+  return fetch(request);
+}
+
 function Root() {
   const initialClientID = readClientID();
   const initialEndpoint = readEndpoint();
@@ -94,7 +103,8 @@ function Root() {
   const [endpoint, setEndpoint] = useState(initialEndpoint);
   const [isSSOEnabled, setIsSSOEnabled] = useState(initialIsSSOEnabled);
   const [page, setPage] = useState<string>();
-  const [authenticationFlowGroup, setAuthenticationflowGroup] = useState<string>("");
+  const [authenticationFlowGroup, setAuthenticationflowGroup] =
+    useState<string>("");
 
   const [error, setError] = useState<unknown>(null);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -122,6 +132,7 @@ function Root() {
           clientID,
           sessionType,
           isSSOEnabled,
+          fetch: myfetch,
         })
         .then(
           () => {
@@ -225,21 +236,24 @@ function Root() {
       );
   }, []);
 
-  const onClickSignIn = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    authgear
-      .startAuthentication({
-        redirectURI: makeRedirectURI(),
-        state: "authenticate",
-        page,
-        authenticationFlowGroup,
-      })
-      .then(
-        () => {},
-        (err) => setError(err)
-      );
-  }, [page, authenticationFlowGroup]);
+  const onClickSignIn = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      authgear
+        .startAuthentication({
+          redirectURI: makeRedirectURI(),
+          state: "authenticate",
+          page,
+          authenticationFlowGroup,
+        })
+        .then(
+          () => {},
+          (err) => setError(err)
+        );
+    },
+    [page, authenticationFlowGroup]
+  );
 
   const onClickSignInAnonymously = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
