@@ -3,7 +3,6 @@ ext {
     compileSdkVersion = 35
     targetSdkVersion = 35
     // buildToolsVersion depends on the available build tools on the Github runner.
-    // See https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#android
     buildToolsVersion = "35.0.1"
     androidxActivityVersion = '1.9.2'
     androidxAppCompatVersion = '1.7.0'
