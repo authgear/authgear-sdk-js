@@ -12,6 +12,7 @@ const App: React.FC = () => {
   return (
     <>
       <StatusBar barStyle="light-content" />
+      {/* @ts-expect-error */}
       <View style={safeAreaStyle}>
         <MainScreen />
       </View>
