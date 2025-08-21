@@ -7,7 +7,7 @@ buildscript {
         targetSdkVersion = 35
         // ndkVersion depends on the available NDK on on the GitHub runner.
         ndkVersion = "27.3.13750724"
-        kotlinVersion = "1.9.25"
+        kotlinVersion = "2.0.21"
     }
     repositories {
         google()
