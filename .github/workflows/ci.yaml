@@ -18,7 +18,7 @@ on:
 
 jobs:
   test:
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -28,7 +28,7 @@ jobs:
       with:
         bundler-cache: true
     - run: make ruby-audit
-    - run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+    - run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
     - run: npm ci
     - run: npm ci
       working-directory: ./website
@@ -72,8 +72,8 @@ jobs:
   test_react_native_android:
     # When we change the runner image, the available Android build tools versions will also change.
     # We need to update build.gradle too.
-    # See https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
-    runs-on: macos-14
+    # See https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md
+    runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -84,7 +84,7 @@ jobs:
     - run: make react-native-build-unsigned-aab
 
   test_capacitor_ios:
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -93,14 +93,14 @@ jobs:
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
-    - run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+    - run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
     - run: make sdk-build
     - run: make capacitor-npm-ci
     - run: make capacitor-build-js
     - run: make capacitor-build-ios-simulator
 
   test_capacitor_android:
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -116,8 +116,8 @@ jobs:
     needs: test
     # When we change the runner image, the ruby version will change too.
     # We need to update .tool-versions to make them the same.
-    # See https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
-    runs-on: macos-14
+    # See https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md
+    runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -126,13 +126,14 @@ jobs:
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
-    - run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+    - run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
     - run: make sdk-build
     - run: make react-native-npm-ci
     - run: make react-native-pod-install
     - uses: authgear/gh-actions-install-apple-certificate-and-provisioning-profile@v1
       with:
         certificate_base64: ${{ secrets.REACT_NATIVE_IOS_CERTIFICATE_BASE64 }}
+        certificate_password: ${{ secrets.REACT_NATIVE_IOS_CERTIFICATE_PASSWORD }}
         provisioning_profile_base64: ${{ secrets.REACT_NATIVE_IOS_PROVISIONING_PROFILE_BASE64 }}
     - uses: authgear/gh-actions-create-fastlane-api-key-json-file@v1
       with:
@@ -150,8 +151,8 @@ jobs:
     needs: test
     # When we change the runner image, the available Android build tools versions will also change.
     # We need to update build.gradle too.
-    # See https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
-    runs-on: macos-14
+    # See https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md
+    runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -184,7 +185,7 @@ jobs:
   capacitor_ios:
     if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.event_name == 'push' }}
     needs: test
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -193,7 +194,7 @@ jobs:
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
-    - run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+    - run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
     - run: make sdk-build
     - run: make capacitor-npm-ci
     - run: make capacitor-npm-audit
@@ -201,6 +202,7 @@ jobs:
     - uses: authgear/gh-actions-install-apple-certificate-and-provisioning-profile@v1
       with:
         certificate_base64: ${{ secrets.CAPACITOR_IOS_CERTIFICATE_BASE64 }}
+        certificate_password: ${{ secrets.CAPACITOR_IOS_CERTIFICATE_PASSWORD }}
         provisioning_profile_base64: ${{ secrets.CAPACITOR_IOS_PROVISIONING_PROFILE_BASE64 }}
     - uses: authgear/gh-actions-create-fastlane-api-key-json-file@v1
       with:
@@ -216,7 +218,7 @@ jobs:
   capacitor_android:
     if: ${{ github.repository == 'authgear/authgear-sdk-js' && github.event_name == 'push' }}
     needs: test
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4

@@ -13,6 +13,9 @@
     "run-ios": "cap run ios",
     "run-android": "cap run android"
   },
+  "overrides": {
+    "external-editor": "@inquirer/external-editor"
+  },
   "dependencies": {
     "@authgear/capacitor": "../../packages/authgear-capacitor",
     "@authgear/web": "../../packages/authgear-web",
@@ -34,6 +37,7 @@
     "react-router-dom": "^5.3.4"
   },
   "devDependencies": {
+    "@inquirer/external-editor": "^1.0.0",
     "@capacitor/cli": "^7.0.0",
     "@ionic/cli": "^7.2.1",
     "@types/react": "^18.0.27",
