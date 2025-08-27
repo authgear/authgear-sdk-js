@@ -395,7 +395,9 @@ RCT_EXPORT_METHOD(generateUUID:(RCTPromiseResolveBlock)resolve rejecter:(RCTProm
 RCT_EXPORT_METHOD(checkBiometricSupported:(NSDictionary *)options resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     if (@available(iOS 11.3, *)) {
-        LAPolicy policy = LAPolicyDeviceOwnerAuthenticationWithBiometrics;
+        NSDictionary *iosDict = options[@"ios"];
+        NSString *policyString = iosDict[@"policy"];
+        LAPolicy policy = [self laPolicyFromString:policyString];
         LAContext *context = [self laContextFromPolicy:policy];
         NSError *error = NULL;
         [context canEvaluatePolicy:policy error:&error];
@@ -435,8 +437,9 @@ RCT_EXPORT_METHOD(createBiometricPrivateKey:(NSDictionary *)options resolver:(RC
     NSDictionary *iosDict = options[@"ios"];
     NSString *constraint = iosDict[@"constraint"];
     NSString *localizedReason = iosDict[@"localizedReason"];
+    NSString *policyString = iosDict[@"policy"];
     NSString *tag = [NSString stringWithFormat:@"com.authgear.keys.biometric.%@", kid];
-    LAPolicy policy = LAPolicyDeviceOwnerAuthenticationWithBiometrics;
+    LAPolicy policy = [self laPolicyFromString:policyString];
     LAContext *context = [self laContextFromPolicy:policy];
 
     [context evaluatePolicy:policy localizedReason:localizedReason reply:^(BOOL success, NSError * _Nullable laError) {
