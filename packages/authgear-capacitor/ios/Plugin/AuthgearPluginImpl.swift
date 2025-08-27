@@ -282,9 +282,9 @@ import Capacitor
         }
     }
 
-    @objc func checkBiometricSupported() throws {
+    @objc func checkBiometricSupported(policyString: String) throws {
         if #available(iOS 11.3, *) {
-            let policy = LAPolicy.deviceOwnerAuthenticationWithBiometrics
+            let policy = LAPolicy.from(string: policyString)!
             let laContext = self.makeLAContext(policy: policy)
             var error: NSError?
             laContext.canEvaluatePolicy(policy, error: &error)
@@ -297,7 +297,7 @@ import Capacitor
     }
 
     @objc func createBiometricPrivateKey(
-        policy: LAPolicy,
+        policyString: String,
         localizedReason: String,
         constraint: String,
         kid: String,
@@ -305,6 +305,7 @@ import Capacitor
         payload: [String: Any],
         completion: @escaping (String?, Error?) -> Void
     ) {
+        let policy = LAPolicy.from(string: policyString)!
         let ctx = makeLAContext(policy: policy)
         ctx.evaluatePolicy(policy, localizedReason: localizedReason) { ok, error in
             if let error = error {
