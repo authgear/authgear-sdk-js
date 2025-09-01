@@ -187,27 +187,6 @@ public class AuthgearPlugin extends Plugin {
     }
 
     @PluginMethod
-    public void openURL(PluginCall call) {
-        String urlString = call.getString("url");
-        Uri uri = Uri.parse(urlString).normalizeScheme();
-
-        Context ctx = this.getContext();
-        Intent intent = WebViewActivity.createIntent(ctx, uri.toString());
-        this.startActivityForResult(call, intent, "handleOpenURL");
-    }
-
-    @ActivityCallback
-    private void handleOpenURL(PluginCall call, ActivityResult activityResult) {
-        int resultCode = activityResult.getResultCode();
-        if (resultCode == Activity.RESULT_CANCELED) {
-            call.resolve();
-        }
-        if (resultCode == Activity.RESULT_OK) {
-            call.resolve();
-        }
-    }
-
-    @PluginMethod
     public void checkBiometricSupported(PluginCall call) {
         JSObject android = call.getObject("android");
         JSONArray constraint = this.jsObjectGetArray(android, "constraint");

@@ -53,10 +53,6 @@ export async function generateUUID(): Promise<string> {
   return _wrapPromise(AuthgearReactNative.generateUUID());
 }
 
-export async function openURL(url: string): Promise<void> {
-  return _wrapPromise(AuthgearReactNative.openURL(url));
-}
-
 export async function openAuthorizeURL(
   url: string,
   callbackURL: string,

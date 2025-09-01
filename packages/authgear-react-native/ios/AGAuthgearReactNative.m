@@ -219,38 +219,6 @@ RCT_EXPORT_METHOD(dismiss:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseReje
     resolve(nil);
 }
 
-RCT_EXPORT_METHOD(openURL:(NSURL *)url
-                  resolve:(RCTPromiseResolveBlock)resolve
-                   reject:(RCTPromiseRejectBlock)reject)
-{
-    NSString *scheme = @"nocallback";
-    if (@available(iOS 12.0, *)) {
-        self.asSession = [[ASWebAuthenticationSession alloc] initWithURL:url
-                                                                            callbackURLScheme:scheme
-                                                                            completionHandler:^(NSURL *url, NSError *error) {
-            if (error) {
-                BOOL isUserCancelled = ([[error domain] isEqualToString:ASWebAuthenticationSessionErrorDomain] &&
-                [error code] == ASWebAuthenticationSessionErrorCodeCanceledLogin);
-                if (isUserCancelled) {
-                    resolve(nil);
-                } else {
-                    reject(RCTErrorUnspecified, [NSString stringWithFormat:@"Unable to open URL: %@", url], error);
-                }
-            } else {
-                resolve(nil);
-            }
-            [self cleanup];
-        }];
-        if (@available(iOS 13.0, *)) {
-            self.asSession.presentationContextProvider = self;
-            self.asSession.prefersEphemeralWebBrowserSession = @YES;
-        }
-        [self.asSession start];
-    } else {
-        reject(RCTErrorUnspecified, @"SDK supports only iOS 12.0 or newer", nil);
-    }
-}
-
 RCT_EXPORT_METHOD(openAuthorizeURLWithWebView:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)

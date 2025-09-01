@@ -509,12 +509,19 @@ function AuthgearDemo() {
   }, [authenticationFlowGroup, showError, colorScheme, showAuthTime]);
 
   const openSettings = useCallback(async () => {
+    setLoading(true);
     if (isPlatformWeb()) {
-      authgearWeb.open(WebPage.Settings);
+      await authgearWeb.open(WebPage.Settings);
     } else {
-      authgearCapacitor.open(CapacitorPage.Settings);
+      try {
+        await authgearCapacitor.open(CapacitorPage.Settings);
+      } catch (e) {
+        showError(e);
+      } finally {
+        setLoading(false);
+      }
     }
-  }, []);
+  }, [showError]);
 
   const changePassword = useCallback(async () => {
     if (isPlatformWeb()) {

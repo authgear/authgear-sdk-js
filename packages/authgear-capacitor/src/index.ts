@@ -5,6 +5,7 @@ import {
   type TokenStorage,
   type UserInfo,
   AuthgearError,
+  CancelError,
   OAuthError,
   SessionState,
   SessionStateChangeReason,
@@ -30,7 +31,6 @@ import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
   generateUUID,
   getDeviceInfo,
-  openURL,
   createBiometricPrivateKey,
   checkBiometricSupported,
   removeBiometricPrivateKey,
@@ -588,7 +588,19 @@ export class CapacitorContainer {
       platform,
     });
 
-    await openURL({ url: targetURL });
+    try {
+      await this.uiImplementation.openAuthorizationURL({
+        url: targetURL,
+        redirectURI: "nocallback://nocallback",
+        shareCookiesWithDeviceBrowser: false,
+      });
+    } catch (e: unknown) {
+      if (e instanceof CancelError) {
+        // Ignore CancelError.
+        return;
+      }
+      throw e;
+    }
   }
 
   /**
