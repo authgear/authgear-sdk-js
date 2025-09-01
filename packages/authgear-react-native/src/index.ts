@@ -13,6 +13,7 @@ import {
   SessionState,
   SessionStateChangeReason,
   AuthgearError,
+  CancelError,
   Page,
   PromptOption,
   SettingsAction,
@@ -29,7 +30,6 @@ import {
 } from "./storage";
 import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
-  openURL,
   createBiometricPrivateKey,
   checkBiometricSupported,
   removeBiometricPrivateKey,
@@ -641,7 +641,19 @@ export class ReactNativeContainer {
         : {}),
     });
 
-    await openURL(targetURL);
+    try {
+      await this.uiImplementation.openAuthorizationURL({
+        url: targetURL,
+        redirectURI: "nocallback://nocallback",
+        shareCookiesWithDeviceBrowser: false,
+      });
+    } catch (e: unknown) {
+      if (e instanceof CancelError) {
+        // Ignore CancelError.
+        return;
+      }
+      throw e;
+    }
   }
 
   /**

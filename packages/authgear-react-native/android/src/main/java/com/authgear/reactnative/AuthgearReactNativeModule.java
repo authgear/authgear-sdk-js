@@ -80,7 +80,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
     private static final int ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION = 1;
-    private static final int ACTIVITY_PROMISE_TAG_OPEN_URL = 2;
     private final StartActivityHandles<Handle> mHandles;
 
     private final ReactApplicationContext reactContext;
@@ -757,28 +756,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     }
 
     @ReactMethod
-    public void openURL(String urlString, Promise promise) {
-        final Handle handle = new Handle(promise);
-        final int requestCode = this.mHandles.push(new StartActivityHandle<>(ACTIVITY_PROMISE_TAG_OPEN_URL, handle));
-        try {
-            Activity currentActivity = getCurrentActivity();
-            if (currentActivity == null) {
-                promise.reject(new Exception("No Activity"));
-                return;
-            }
-
-            Context context = currentActivity;
-            Intent intent = WebViewActivity.createIntent(context, urlString);
-            currentActivity.startActivityForResult(intent, requestCode);
-        } catch (Exception e) {
-            StartActivityHandle<Handle> startActivityHandle = this.mHandles.pop(requestCode);
-            if (startActivityHandle != null) {
-                startActivityHandle.value.mPromise.reject(e);
-            }
-        }
-    }
-
-    @ReactMethod
     public void openAuthorizeURLWithWebView(ReadableMap options, Promise promise) {
         final Handle handle = new Handle(promise);
         final int requestCode = this.mHandles.push(new StartActivityHandle<>(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, handle));
@@ -1025,14 +1002,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
                     }
                     if (resultCode == Activity.RESULT_OK) {
                         promise.resolve(data.getData().toString());
-                    }
-                    break;
-                case ACTIVITY_PROMISE_TAG_OPEN_URL:
-                    if (resultCode == Activity.RESULT_CANCELED) {
-                        promise.resolve(null);
-                    }
-                    if (resultCode == Activity.RESULT_OK) {
-                        promise.resolve(null);
                     }
                     break;
             }
