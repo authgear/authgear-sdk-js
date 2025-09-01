@@ -133,20 +133,6 @@ public class AuthgearPlugin: CAPPlugin {
         }
     }
 
-    @objc func openURL(_ call: CAPPluginCall) {
-        let url = URL(string: call.getString("url")!)!
-
-        DispatchQueue.main.async {
-            self.impl.openURL(window: (self.bridge?.webView?.window)!, url: url) { (error) in
-                if let error = error {
-                    error.reject(call)
-                } else {
-                    call.resolve()
-                }
-            }
-        }
-    }
-
     @objc func checkBiometricSupported(_ call: CAPPluginCall) {
         let ios = call.getObject("ios")!
         let policyString = ios["policy"] as! String

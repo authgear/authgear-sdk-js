@@ -13,7 +13,6 @@ CAP_PLUGIN(AuthgearPlugin, "Authgear",
            CAP_PLUGIN_METHOD(generateUUID, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(openAuthorizeURL, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(openAuthorizeURLWithWebView, CAPPluginReturnPromise);
-           CAP_PLUGIN_METHOD(openURL, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(checkBiometricSupported, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(createBiometricPrivateKey, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(signWithBiometricPrivateKey, CAPPluginReturnPromise);

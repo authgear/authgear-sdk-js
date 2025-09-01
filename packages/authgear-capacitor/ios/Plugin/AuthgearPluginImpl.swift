@@ -250,38 +250,6 @@ import Capacitor
         controller?.start()
     }
 
-    @objc func openURL(window: UIWindow, url: URL, completion: @escaping (Error?) -> Void) {
-        if #available(iOS 12.0, *) {
-            let scheme = "nocallback"
-            var asWebSession: ASWebAuthenticationSession?
-            asWebSession = ASWebAuthenticationSession(
-                url: url,
-                callbackURLScheme: scheme
-            ) { redirectURI, error in
-                self.asWebAuthenticationSessionHandles.removeValue(forKey: asWebSession!)
-                if let error = error {
-                    let nsError = error as NSError
-                    let isCancel = nsError.domain == ASWebAuthenticationSessionErrorDomain && nsError.code == ASWebAuthenticationSessionError.Code.canceledLogin.rawValue
-                    if isCancel {
-                        completion(nil)
-                    } else {
-                        completion(NSError.makeUnrecoverableAuthgearError(message: "openURL failed", error: error))
-                    }
-                } else {
-                    completion(nil)
-                }
-            }
-            self.asWebAuthenticationSessionHandles[asWebSession!] = window
-            if #available(iOS 13.0, *) {
-                asWebSession!.presentationContextProvider = self
-                asWebSession!.prefersEphemeralWebBrowserSession = true
-            }
-            asWebSession!.start()
-        } else {
-            completion(NSError.makeUnrecoverableAuthgearError(message: "SDK supports only iOS 12.0 or newer", error: nil))
-        }
-    }
-
     @objc func checkBiometricSupported(policyString: String) throws {
         if #available(iOS 11.3, *) {
             let policy = LAPolicy.from(string: policyString)!
