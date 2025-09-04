@@ -7,20 +7,26 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
@@ -28,8 +34,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.graphics.Insets;
 import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.core.util.TypedValueCompat;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 public class WebKitWebViewActivity extends AppCompatActivity {
 
@@ -38,7 +50,11 @@ public class WebKitWebViewActivity extends AppCompatActivity {
     private static final int MENU_ID_CANCEL = 1;
     private static final int TAG_FILE_CHOOSER = 1;
 
+    private FrameLayout mRootFrameLayout;
+    private Toolbar mToolbar;
+    private FrameLayout mToolbarFrameLayout;
     private WebView mWebView;
+    private Insets mLastSeenInsets;
     private Uri result;
     private StartActivityHandles<ValueCallback<Uri[]>> handles = new StartActivityHandles<>();
 
@@ -86,6 +102,19 @@ public class WebKitWebViewActivity extends AppCompatActivity {
         }
 
         @Override
+        public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            super.onPageStarted(view, url, favicon);
+            // onPageStarted is not always called, but when it is called, it is called before
+            // onPageFinished.
+            // Therefore, we put the edge-to-edge handling here hoping that
+            // the safe area insets can be set as soon as possible.
+
+            view.evaluateJavascript(USERSCRIPT_USER_SELECT_NONE, null);
+            this.activity.handleNonEdgeToEdge();
+            this.activity.handleEdgeToEdge();
+        }
+
+        @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
 
@@ -96,6 +125,8 @@ public class WebKitWebViewActivity extends AppCompatActivity {
             // The caveat is that the script is run in the main frame only.
             // But we do not actually use iframes so it does not matter.
             view.evaluateJavascript(USERSCRIPT_USER_SELECT_NONE, null);
+            this.activity.handleNonEdgeToEdge();
+            this.activity.handleEdgeToEdge();
         }
 
         @TargetApi(Build.VERSION_CODES.N)
@@ -199,9 +230,74 @@ public class WebKitWebViewActivity extends AppCompatActivity {
         return intent;
     }
 
+    private float getActionBarSizeInDp() {
+        float actionBarSizeInDp = 44f;
+        TypedValue tv = new TypedValue();
+        if (this.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            int actionBarSizeInPx = TypedValue.complexToDimensionPixelSize(tv.data, this.getResources().getDisplayMetrics());
+            actionBarSizeInDp = TypedValueCompat.pxToDp((float) actionBarSizeInPx, this.getResources().getDisplayMetrics());
+        }
+        return actionBarSizeInDp;
+    }
+
+    private void applyInsetsToWebView(Insets safeAreaInsets) {
+        float actionBarSizeInDp = this.getActionBarSizeInDp();
+        DisplayMetrics displayMetrics = this.getResources().getDisplayMetrics();
+        float actionBarSizeInPx = TypedValueCompat.dpToPx(actionBarSizeInDp, displayMetrics);
+        float top = TypedValueCompat.pxToDp((float) safeAreaInsets.top + actionBarSizeInPx, displayMetrics);
+        float right = TypedValueCompat.pxToDp((float) safeAreaInsets.right, displayMetrics);
+        float bottom = TypedValueCompat.pxToDp((float) safeAreaInsets.bottom, displayMetrics);
+        float left = TypedValueCompat.pxToDp((float) safeAreaInsets.left, displayMetrics);
+
+        String safeAreaJs =
+                "document.documentElement.style.setProperty('--safe-area-inset-top', '" + top + "px');\n" +
+                        "document.documentElement.style.setProperty('--safe-area-inset-right', '" + right + "px');\n" +
+                        "document.documentElement.style.setProperty('--safe-area-inset-bottom', '" + bottom + "px');\n" +
+                        "document.documentElement.style.setProperty('--safe-area-inset-left', '" + left + "px');";
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            this.mWebView.evaluateJavascript(safeAreaJs, null);
+        }
+    }
+
+    private void handleNonEdgeToEdge() {
+        // In non edge-to-edge, the insets listener is not called.
+        // So we have to apply the insets here.
+        Insets insets = this.mLastSeenInsets == null ? Insets.NONE : this.mLastSeenInsets;
+        this.applyInsetsToWebView(insets);
+    }
+
+    private void handleEdgeToEdge() {
+        // In edge-to-edge, we ask the system to invoke the insets listener.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
+            this.mRootFrameLayout.requestApplyInsets();
+        }
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        this.mRootFrameLayout = new FrameLayout(this);
+        this.mRootFrameLayout.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        ));
+
+        this.mToolbarFrameLayout = new FrameLayout(this);
+        this.mToolbarFrameLayout.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        ));
+
+        float actionBarSizeInDp = this.getActionBarSizeInDp();
+
+        this.mToolbar = new Toolbar(this);
+        this.mToolbar.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                (int) TypedValueCompat.dpToPx(actionBarSizeInDp, this.getResources().getDisplayMetrics())
+        ));
+        this.setSupportActionBar(this.mToolbar);
 
         Options options = this.getOptions();
 
@@ -210,7 +306,9 @@ public class WebKitWebViewActivity extends AppCompatActivity {
 
         // Configure navigation bar background color.
         if (options.actionBarBackgroundColor != null) {
-            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(options.actionBarBackgroundColor));
+            ColorDrawable colorDrawable = new ColorDrawable(options.actionBarBackgroundColor);
+            getSupportActionBar().setBackgroundDrawable(colorDrawable);
+            this.mToolbarFrameLayout.setBackgroundDrawable(colorDrawable);
         }
 
         // Show back button.
@@ -225,17 +323,62 @@ public class WebKitWebViewActivity extends AppCompatActivity {
 
         // Configure web view.
         this.mWebView = new WebView(this);
+        this.mWebView.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        ));
         this.mWebView.getSettings().setSupportMultipleWindows(true);
         this.mWebView.getSettings().setDomStorageEnabled(true);
-        this.setContentView(this.mWebView);
         this.mWebView.setWebViewClient(new MyWebViewClient(this));
         this.mWebView.setWebChromeClient(new MyWebChromeClient(this));
         WebSettings webSettings = this.mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
 
-        if (savedInstanceState == null) {
-            this.mWebView.loadUrl(options.url.toString());
-        }
+        this.mRootFrameLayout.addView(this.mWebView);
+        this.mRootFrameLayout.addView(this.mToolbarFrameLayout);
+        this.mToolbarFrameLayout.addView(this.mToolbar);
+        this.setContentView(this.mRootFrameLayout);
+
+        ViewCompat.setOnApplyWindowInsetsListener(this.mRootFrameLayout, new OnApplyWindowInsetsListener() {
+
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(View v, WindowInsetsCompat insets) {
+                Insets safeAreaInsets = insets.getInsets(
+                        WindowInsetsCompat.Type.systemBars() |
+                                WindowInsetsCompat.Type.displayCutout() |
+                                WindowInsetsCompat.Type.ime()
+                );
+
+                WebKitWebViewActivity.this.mLastSeenInsets = safeAreaInsets;
+
+                ViewGroup.MarginLayoutParams toolbarParams = (ViewGroup.MarginLayoutParams) mToolbar.getLayoutParams();
+                toolbarParams.setMargins(
+                        safeAreaInsets.left,
+                        safeAreaInsets.top,
+                        safeAreaInsets.right,
+                        0
+                );
+
+                WebKitWebViewActivity.this.applyInsetsToWebView(safeAreaInsets);
+
+                return WindowInsetsCompat.CONSUMED;
+            }
+        });
+
+        this.mRootFrameLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                // We want the content view to draw at least once before loading the URL.
+                //
+                // In non edge-to-edge, the insets listener is never called so mLastSeenInsets is null.
+                //
+                // In edge-to-edge, the insets listener will be called at least once in the first draw,
+                // so by the time onPageStart / onPageFinished is called, mLastSeenInsets is not null.
+                if (savedInstanceState == null) {
+                    WebKitWebViewActivity.this.mWebView.loadUrl(options.url.toString());
+                }
+            }
+        });
     }
 
     @Override
