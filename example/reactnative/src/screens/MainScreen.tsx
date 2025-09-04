@@ -387,6 +387,8 @@ const HomeScreen: React.FC = () => {
               },
               android: {
                 wechatRedirectURI,
+                actionBarBackgroundColor: 0x00ffffff,
+                actionBarButtonTintColor: 0xff000000,
               },
               sendWechatAuthRequest,
             })
