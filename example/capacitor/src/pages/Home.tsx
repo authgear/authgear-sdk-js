@@ -252,6 +252,10 @@ function AuthgearDemo() {
                   modalPresentationStyle: "fullScreen",
                   isInspectable: true,
                 },
+                android: {
+                  actionBarBackgroundColor: 0x00ffffff,
+                  actionBarButtonTintColor: 0xff000000,
+                },
               })
             : undefined,
           isSSOEnabled,
