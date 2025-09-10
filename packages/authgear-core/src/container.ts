@@ -31,7 +31,7 @@ import { _BaseAPIClient } from "./client";
 
 /**
  * To prevent user from using expired access token, we have to check in advance
- * whether it had expired in `shouldRefreshAccessToke`. If we
+ * whether it had expired in `shouldRefreshAccessToken`. If we
  * use the expiry time in {@link _OIDCTokenResponse} directly to check for expiry, it is possible
  * that the access token had passed the check but ends up being expired when it arrives at
  * the server due to slow traffic or unfair scheduler.
