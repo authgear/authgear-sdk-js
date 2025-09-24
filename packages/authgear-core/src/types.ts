@@ -152,15 +152,9 @@ export interface _APIClientDelegate {
   getAccessToken(): string | undefined;
 
   /**
-   * Called by the API Client before sending HTTP request.
-   * If true is returned, refreshAccessToken() is then called.
-   */
-  shouldRefreshAccessToken(): boolean;
-
-  /**
    * Called by the API client to refresh the access token.
    */
-  refreshAccessToken(): Promise<void>;
+  refreshAccessTokenIfNeeded(): Promise<void>;
 }
 
 /**
