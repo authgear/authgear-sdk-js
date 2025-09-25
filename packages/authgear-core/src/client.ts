@@ -103,10 +103,7 @@ export class _BaseAPIClient {
       throw new AuthgearError("missing delegate in api client");
     }
 
-    const shouldRefresh = this._delegate.shouldRefreshAccessToken();
-    if (shouldRefresh) {
-      await this._delegate.refreshAccessToken();
-    }
+    await this._delegate.refreshAccessTokenIfNeeded();
 
     const request = new this._Request(input, init);
 
