@@ -530,6 +530,78 @@ export class ReactNativeContainer {
   }
 
   /**
+   * addEmail() opens the settings page in a {@link UIImplementation} for the user to add an email.
+   * After adding the email, the {@link UIImplementation} will be closed.
+   *
+   * You can refer to {@link SettingsActionOptions} for more customization.
+   *
+   * @public
+   */
+  async addEmail(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.AddEmail, options);
+  }
+
+  /**
+   * addPhone() opens the settings page in a {@link UIImplementation} for the user to add a phone number.
+   * After adding the phone number, the {@link UIImplementation} will be closed.
+   *
+   * You can refer to {@link SettingsActionOptions} for more customization.
+   *
+   * @public
+   */
+  async addPhone(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.AddPhone, options);
+  }
+
+  /**
+   * addUsername() opens the settings page in a {@link UIImplementation} for the user to add a username.
+   * After adding the username, the {@link UIImplementation} will be closed.
+   *
+   * You can refer to {@link SettingsActionOptions} for more customization.
+   *
+   * @public
+   */
+  async addUsername(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.AddUsername, options);
+  }
+
+  /**
+   * changeEmail() opens the settings page in a {@link UIImplementation} for the user to change their email.
+   * After changing the email, the {@link UIImplementation} will be closed.
+   *
+   * You can refer to {@link SettingsActionOptions} for more customization.
+   *
+   * @public
+   */
+  async changeEmail(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.ChangeEmail, options);
+  }
+
+  /**
+   * changePhone() opens the settings page in a {@link UIImplementation} for the user to change their phone number.
+   * After changing the phone number, the {@link UIImplementation} will be closed.
+   *
+   * You can refer to {@link SettingsActionOptions} for more customization.
+   *
+   * @public
+   */
+  async changePhone(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.ChangePhone, options);
+  }
+
+  /**
+   * changeUsername() opens the settings page in a {@link UIImplementation} for the user to change their username.
+   * After changing the username, the {@link UIImplementation} will be closed.
+   *
+   * You can refer to {@link SettingsActionOptions} for more customization.
+   *
+   * @public
+   */
+  async changeUsername(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.ChangeUsername, options);
+  }
+
+  /**
    * deleteAccount() opens the settings page in a {@link UIImplementation} for the user to delete their account.
    * After deletion, the {@link UIImplementation} will be closed and the user is logged out.
    *
