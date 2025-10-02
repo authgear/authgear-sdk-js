@@ -693,6 +693,48 @@ export class CapacitorContainer {
   }
 
   /**
+   * @public
+   */
+  async addEmail(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.AddEmail, options);
+  }
+
+  /**
+   * @public
+   */
+  async addPhone(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.AddPhone, options);
+  }
+
+  /**
+   * @public
+   */
+  async addUsername(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.AddUsername, options);
+  }
+
+  /**
+   * @public
+   */
+  async changeEmail(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.ChangeEmail, options);
+  }
+
+  /**
+   * @public
+   */
+  async changePhone(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.ChangePhone, options);
+  }
+
+  /**
+   * @public
+   */
+  async changeUsername(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.ChangeUsername, options);
+  }
+
+  /**
    * implements _BaseContainerDelegate
    *
    * @internal
