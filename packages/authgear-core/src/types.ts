@@ -97,6 +97,13 @@ export enum PromptOption {
 /**
  * @internal
  */
+export interface _SettingsActionQuery {
+  q_login_id?: string;
+}
+
+/**
+ * @internal
+ */
 export interface _OIDCAuthenticationRequest {
   redirectURI: string;
   responseType:
@@ -128,6 +135,7 @@ export interface _OIDCAuthenticationRequest {
     | "change_email"
     | "change_phone"
     | "change_username";
+  xSettingsActionQuery?: _SettingsActionQuery;
   authenticationFlowGroup?: string;
   clientID?: string;
   xPreAuthenticatedURLToken?: string;

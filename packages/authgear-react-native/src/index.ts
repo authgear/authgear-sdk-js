@@ -53,6 +53,7 @@ import {
   ReauthenticateResult,
   SettingsActionOptions,
   PreAuthenticatedURLOptions,
+  _InternalSettingsActionOptions,
 } from "./types";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 import { BiometricPrivateKeyNotFoundError } from "./error";
@@ -473,7 +474,7 @@ export class ReactNativeContainer {
    */
   async _openSettingsAction(
     action: SettingsAction,
-    options: SettingsActionOptions
+    options: _InternalSettingsActionOptions
   ): Promise<void> {
     const idToken = this.getIDTokenHint();
     if (idToken == null) {
@@ -505,6 +506,9 @@ export class ReactNativeContainer {
       responseType: "urn:authgear:params:oauth:response-type:settings-action",
       scope: this.baseContainer.getSettingsActionScopes(),
       xSettingsAction: action,
+      xSettingsActionQuery: {
+        q_login_id: options.qLoginID,
+      },
     });
     const redirectURL = await this.uiImplementation.openAuthorizationURL({
       url: authorizeURL,
@@ -573,8 +577,14 @@ export class ReactNativeContainer {
    *
    * @public
    */
-  async changeEmail(options: SettingsActionOptions): Promise<void> {
-    return this._openSettingsAction(SettingsAction.ChangeEmail, options);
+  async changeEmail(
+    originalEmail: string,
+    options: SettingsActionOptions
+  ): Promise<void> {
+    return this._openSettingsAction(SettingsAction.ChangeEmail, {
+      ...options,
+      qLoginID: originalEmail,
+    });
   }
 
   /**
@@ -585,8 +595,14 @@ export class ReactNativeContainer {
    *
    * @public
    */
-  async changePhone(options: SettingsActionOptions): Promise<void> {
-    return this._openSettingsAction(SettingsAction.ChangePhone, options);
+  async changePhone(
+    originalPhone: string,
+    options: SettingsActionOptions
+  ): Promise<void> {
+    return this._openSettingsAction(SettingsAction.ChangePhone, {
+      ...options,
+      qLoginID: originalPhone,
+    });
   }
 
   /**
@@ -597,8 +613,14 @@ export class ReactNativeContainer {
    *
    * @public
    */
-  async changeUsername(options: SettingsActionOptions): Promise<void> {
-    return this._openSettingsAction(SettingsAction.ChangeUsername, options);
+  async changeUsername(
+    originalUsername: string,
+    options: SettingsActionOptions
+  ): Promise<void> {
+    return this._openSettingsAction(SettingsAction.ChangeUsername, {
+      ...options,
+      qLoginID: originalUsername,
+    });
   }
 
   /**

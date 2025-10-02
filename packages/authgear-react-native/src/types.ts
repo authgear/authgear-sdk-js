@@ -263,6 +263,13 @@ export interface SettingsActionOptions {
 }
 
 /**
+ * @internal
+ */
+export interface _InternalSettingsActionOptions extends SettingsActionOptions {
+  qLoginID?: string;
+}
+
+/**
  * BiometricLAPolicy configures iOS specific behavior.
  * It must be consistent with BiometricAccessConstraintIOS.
  *

@@ -492,6 +492,14 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (options.xSettingsAction != null) {
       query.append("x_settings_action", options.xSettingsAction);
     }
+    if (options.xSettingsActionQuery != null) {
+      query.append(
+        "x_settings_action_query",
+        new URLSearchParams(
+          Object.entries(options.xSettingsActionQuery)
+        ).toString()
+      );
+    }
     if (options.xPreAuthenticatedURLToken != null) {
       query.append(
         "x_pre_authenticated_url_token",
