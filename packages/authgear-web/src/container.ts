@@ -424,6 +424,60 @@ export class WebContainer {
   }
 
   /**
+   * Start settings action "add_email" by redirecting to the authorization endpoint.
+   *
+   * @public
+   */
+  async startAddEmail(options: SettingsActionOptions): Promise<void> {
+    await this.startSettingsAction(SettingsAction.AddEmail, options);
+  }
+
+  /**
+   * Start settings action "add_phone" by redirecting to the authorization endpoint.
+   *
+   * @public
+   */
+  async startAddPhone(options: SettingsActionOptions): Promise<void> {
+    await this.startSettingsAction(SettingsAction.AddPhone, options);
+  }
+
+  /**
+   * Start settings action "add_username" by redirecting to the authorization endpoint.
+   *
+   * @public
+   */
+  async startAddUsername(options: SettingsActionOptions): Promise<void> {
+    await this.startSettingsAction(SettingsAction.AddUsername, options);
+  }
+
+  /**
+   * Start settings action "change_email" by redirecting to the authorization endpoint.
+   *
+   * @public
+   */
+  async startChangeEmail(options: SettingsActionOptions): Promise<void> {
+    await this.startSettingsAction(SettingsAction.ChangeEmail, options);
+  }
+
+  /**
+   * Start settings action "change_phone" by redirecting to the authorization endpoint.
+   *
+   * @public
+   */
+  async startChangePhone(options: SettingsActionOptions): Promise<void> {
+    await this.startSettingsAction(SettingsAction.ChangePhone, options);
+  }
+
+  /**
+   * Start settings action "change_username" by redirecting to the authorization endpoint.
+   *
+   * @public
+   */
+  async startChangeUsername(options: SettingsActionOptions): Promise<void> {
+    await this.startSettingsAction(SettingsAction.ChangeUsername, options);
+  }
+
+  /**
    * Start reauthentication by redirecting to the authorization endpoint.
    */
   async startReauthentication(options: ReauthenticateOptions): Promise<void> {
@@ -527,6 +581,72 @@ export class WebContainer {
   async finishDeleteAccount(): Promise<void> {
     await this.finishSettingsAction();
     return this.baseContainer._clearSession(SessionStateChangeReason.Invalid);
+  }
+
+  /**
+   * Finish settings action "add_email".
+   *
+   * It may reject with OAuthError.
+   *
+   * @public
+   */
+  async finishAddEmail(): Promise<void> {
+    return this.finishSettingsAction();
+  }
+
+  /**
+   * Finish settings action "add_phone".
+   *
+   * It may reject with OAuthError.
+   *
+   * @public
+   */
+  async finishAddPhone(): Promise<void> {
+    return this.finishSettingsAction();
+  }
+
+  /**
+   * Finish settings action "add_username".
+   *
+   * It may reject with OAuthError.
+   *
+   * @public
+   */
+  async finishAddUsername(): Promise<void> {
+    return this.finishSettingsAction();
+  }
+
+  /**
+   * Finish settings action "change_email".
+   *
+   * It may reject with OAuthError.
+   *
+   * @public
+   */
+  async finishChangeEmail(): Promise<void> {
+    return this.finishSettingsAction();
+  }
+
+  /**
+   * Finish settings action "change_phone".
+   *
+   * It may reject with OAuthError.
+   *
+   * @public
+   */
+  async finishChangePhone(): Promise<void> {
+    return this.finishSettingsAction();
+  }
+
+  /**
+   * Finish settings action "change_username".
+   *
+   * It may reject with OAuthError.
+   *
+   * @public
+   */
+  async finishChangeUsername(): Promise<void> {
+    return this.finishSettingsAction();
   }
 
   /**
