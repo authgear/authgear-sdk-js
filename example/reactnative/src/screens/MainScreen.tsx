@@ -686,6 +686,66 @@ const HomeScreen: React.FC = () => {
       .catch(err => showError(err));
   }, [showError, colorScheme]);
 
+  const addEmail = useCallback(async () => {
+    authgear
+      .addEmail({
+        redirectURI: redirectURI,
+        colorScheme: colorScheme as ColorScheme,
+        wechatRedirectURI,
+      })
+      .catch(err => showError(err));
+  }, [showError, colorScheme]);
+
+  const addPhone = useCallback(async () => {
+    authgear
+      .addPhone({
+        redirectURI: redirectURI,
+        colorScheme: colorScheme as ColorScheme,
+        wechatRedirectURI,
+      })
+      .catch(err => showError(err));
+  }, [showError, colorScheme]);
+
+  const addUsername = useCallback(async () => {
+    authgear
+      .addUsername({
+        redirectURI: redirectURI,
+        colorScheme: colorScheme as ColorScheme,
+        wechatRedirectURI,
+      })
+      .catch(err => showError(err));
+  }, [showError, colorScheme]);
+
+  const editEmail = useCallback(async () => {
+    authgear
+      .changeEmail(userInfo?.email ?? '', {
+        redirectURI: redirectURI,
+        colorScheme: colorScheme as ColorScheme,
+        wechatRedirectURI,
+      })
+      .catch(err => showError(err));
+  }, [showError, colorScheme, userInfo]);
+
+  const editPhone = useCallback(async () => {
+    authgear
+      .changePhone(userInfo?.phoneNumber ?? '', {
+        redirectURI: redirectURI,
+        colorScheme: colorScheme as ColorScheme,
+        wechatRedirectURI,
+      })
+      .catch(err => showError(err));
+  }, [showError, colorScheme, userInfo]);
+
+  const editUsername = useCallback(async () => {
+    authgear
+      .changeUsername(userInfo?.preferredUsername ?? '', {
+        redirectURI: redirectURI,
+        colorScheme: colorScheme as ColorScheme,
+        wechatRedirectURI,
+      })
+      .catch(err => showError(err));
+  }, [showError, colorScheme, userInfo]);
+
   const fetchUserInfo = useCallback(() => {
     setLoading(true);
     authgear
@@ -947,6 +1007,59 @@ const HomeScreen: React.FC = () => {
             disabled={!initialized || !loggedIn}
           />
         </View>
+
+        <View style={styles.button}>
+          <Button
+            title="Add Email"
+            onPress={addEmail}
+            disabled={!initialized || !loggedIn}
+          />
+        </View>
+
+        <View style={styles.button}>
+          <Button
+            title="Add Phone"
+            onPress={addPhone}
+            disabled={!initialized || !loggedIn}
+          />
+        </View>
+
+        <View style={styles.button}>
+          <Button
+            title="Add Username"
+            onPress={addUsername}
+            disabled={!initialized || !loggedIn}
+          />
+        </View>
+
+        <View style={styles.button}>
+          <Button
+            title="Edit Email"
+            onPress={editEmail}
+            disabled={!initialized || !loggedIn || userInfo?.email == null}
+          />
+        </View>
+
+        <View style={styles.button}>
+          <Button
+            title="Edit Phone"
+            onPress={editPhone}
+            disabled={
+              !initialized || !loggedIn || userInfo?.phoneNumber == null
+            }
+          />
+        </View>
+
+        <View style={styles.button}>
+          <Button
+            title="Edit Username"
+            onPress={editUsername}
+            disabled={
+              !initialized || !loggedIn || userInfo?.preferredUsername == null
+            }
+          />
+        </View>
+
         <View style={styles.button}>
           <Button
             title="Fetch User Info"
