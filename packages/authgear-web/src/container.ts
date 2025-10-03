@@ -30,6 +30,7 @@ import {
   AuthenticateResult,
   ReauthenticateResult,
   SettingsActionOptions,
+  _InternalSettingsActionOptions,
 } from "./types";
 
 /**
@@ -372,7 +373,7 @@ export class WebContainer {
    */
   async startSettingsAction(
     action: SettingsAction,
-    options: SettingsActionOptions
+    options: _InternalSettingsActionOptions
   ): Promise<void> {
     const idToken = this.getIDTokenHint();
     if (idToken == null || !this.canReauthenticate()) {
@@ -400,6 +401,7 @@ export class WebContainer {
         responseType: "urn:authgear:params:oauth:response-type:settings-action",
         scope: this.baseContainer.getSettingsActionScopes(),
         xSettingsAction: action,
+        xSettingsActionQuery: { q_login_id: options.qLoginID },
       });
       window.location.href = endpoint;
     }
@@ -455,8 +457,14 @@ export class WebContainer {
    *
    * @public
    */
-  async startChangeEmail(options: SettingsActionOptions): Promise<void> {
-    await this.startSettingsAction(SettingsAction.ChangeEmail, options);
+  async startChangeEmail(
+    originalEmail: string,
+    options: SettingsActionOptions
+  ): Promise<void> {
+    await this.startSettingsAction(SettingsAction.ChangeEmail, {
+      ...options,
+      qLoginID: originalEmail,
+    });
   }
 
   /**
@@ -464,8 +472,14 @@ export class WebContainer {
    *
    * @public
    */
-  async startChangePhone(options: SettingsActionOptions): Promise<void> {
-    await this.startSettingsAction(SettingsAction.ChangePhone, options);
+  async startChangePhone(
+    originalPhone: string,
+    options: SettingsActionOptions
+  ): Promise<void> {
+    await this.startSettingsAction(SettingsAction.ChangePhone, {
+      ...options,
+      qLoginID: originalPhone,
+    });
   }
 
   /**
@@ -473,8 +487,14 @@ export class WebContainer {
    *
    * @public
    */
-  async startChangeUsername(options: SettingsActionOptions): Promise<void> {
-    await this.startSettingsAction(SettingsAction.ChangeUsername, options);
+  async startChangeUsername(
+    originalUsername: string,
+    options: SettingsActionOptions
+  ): Promise<void> {
+    await this.startSettingsAction(SettingsAction.ChangeUsername, {
+      ...options,
+      qLoginID: originalUsername,
+    });
   }
 
   /**

@@ -186,6 +186,13 @@ export interface SettingsActionOptions {
 }
 
 /**
+ * @internal
+ */
+export interface _InternalSettingsActionOptions extends SettingsActionOptions {
+  qLoginID?: string;
+}
+
+/**
  * Auth UI anonymous user promotion options
  *
  * @public
