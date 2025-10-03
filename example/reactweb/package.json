@@ -5,7 +5,8 @@
   "scripts": {
     "start": "PORT=4000 parcel serve --no-cache src/index.html",
     "build": "parcel build src/index.html",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint"
   },
   "dependencies": {
     "@authgear/web": "../../packages/authgear-web",
@@ -17,6 +18,8 @@
   "devDependencies": {
     "@types/react": "17.0.42",
     "@types/react-dom": "17.0.14",
+    "eslint-plugin-react": "7.29.4",
+    "eslint-plugin-react-hooks": "4.4.0",
     "parcel": "^2.16.0",
     "process": "^0.11.10",
     "typescript": "5.4.2"
