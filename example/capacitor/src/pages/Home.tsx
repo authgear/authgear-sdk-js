@@ -127,6 +127,7 @@ function AuthgearDemo() {
     return readUseWebKitWebView();
   });
   const [biometricEnabled, setBiometricEnabled] = useState<boolean>(false);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   const [preAuthenticatedURLEnabled, setIsPreAuthenticatedURLEnabled] =
     useState(() => {
@@ -212,9 +213,11 @@ function AuthgearDemo() {
     }
 
     if (isPlatformWeb()) {
-      await authgearWeb.fetchUserInfo();
+      const userInfo = await authgearWeb.fetchUserInfo();
+      setUserInfo(userInfo);
     } else {
-      await authgearCapacitor.fetchUserInfo();
+      const userInfo = await authgearCapacitor.fetchUserInfo();
+      setUserInfo(userInfo);
     }
 
     setInitialized(true);
@@ -299,6 +302,7 @@ function AuthgearDemo() {
           page: page === "" ? undefined : page,
           authenticationFlowGroup,
         });
+        setUserInfo(result.userInfo);
         showUserInfo(result.userInfo);
       }
     } catch (e) {
@@ -334,6 +338,7 @@ function AuthgearDemo() {
       const { userInfo } = await authgearCapacitor.authenticateBiometric(
         biometricOptions
       );
+      setUserInfo(userInfo);
       showUserInfo(userInfo);
     } catch (e: unknown) {
       showError(e);
@@ -554,14 +559,76 @@ function AuthgearDemo() {
     }
   }, [showError]);
 
+  const addEmail = useCallback(async () => {
+    if (isPlatformWeb()) {
+      // Not implemented.
+    } else {
+      authgearCapacitor.addEmail({
+        redirectURI: REDIRECT_URI_CAPACITOR,
+      });
+    }
+  }, []);
+
+  const addPhone = useCallback(async () => {
+    if (isPlatformWeb()) {
+      // Not implemented.
+    } else {
+      authgearCapacitor.addPhone({
+        redirectURI: REDIRECT_URI_CAPACITOR,
+      });
+    }
+  }, []);
+
+  const addUsername = useCallback(async () => {
+    if (isPlatformWeb()) {
+      // Not implemented.
+    } else {
+      authgearCapacitor.addUsername({
+        redirectURI: REDIRECT_URI_CAPACITOR,
+      });
+    }
+  }, []);
+
+  const changeEmail = useCallback(async () => {
+    if (isPlatformWeb()) {
+      // Not implemented.
+    } else {
+      authgearCapacitor.changeEmail(userInfo?.email ?? "", {
+        redirectURI: REDIRECT_URI_CAPACITOR,
+      });
+    }
+  }, [userInfo]);
+
+  const changePhone = useCallback(async () => {
+    if (isPlatformWeb()) {
+      // Not implemented.
+    } else {
+      authgearCapacitor.changePhone(userInfo?.phoneNumber ?? "", {
+        redirectURI: REDIRECT_URI_CAPACITOR,
+      });
+    }
+  }, [userInfo]);
+
+  const changeUsername = useCallback(async () => {
+    if (isPlatformWeb()) {
+      // Not implemented.
+    } else {
+      authgearCapacitor.changeUsername(userInfo?.preferredUsername ?? "", {
+        redirectURI: REDIRECT_URI_CAPACITOR,
+      });
+    }
+  }, [userInfo]);
+
   const fetchUserInfo = useCallback(async () => {
     setLoading(true);
     try {
       if (isPlatformWeb()) {
         const userInfo = await authgearWeb.fetchUserInfo();
+        setUserInfo(userInfo);
         showUserInfo(userInfo);
       } else {
         const userInfo = await authgearCapacitor.fetchUserInfo();
+        setUserInfo(userInfo);
         showUserInfo(userInfo);
       }
     } catch (e) {
@@ -803,6 +870,66 @@ function AuthgearDemo() {
     [deleteAccount]
   );
 
+  const onClickAddEmail = useCallback(
+    (e: MouseEvent<HTMLIonButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      addEmail();
+    },
+    [addEmail]
+  );
+
+  const onClickAddPhone = useCallback(
+    (e: MouseEvent<HTMLIonButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      addPhone();
+    },
+    [addPhone]
+  );
+
+  const onClickAddUsername = useCallback(
+    (e: MouseEvent<HTMLIonButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      addUsername();
+    },
+    [addUsername]
+  );
+
+  const onClickChangeEmail = useCallback(
+    (e: MouseEvent<HTMLIonButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      changeEmail();
+    },
+    [changeEmail]
+  );
+
+  const onClickChangePhone = useCallback(
+    (e: MouseEvent<HTMLIonButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      changePhone();
+    },
+    [changePhone]
+  );
+
+  const onClickChangeUsername = useCallback(
+    (e: MouseEvent<HTMLIonButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      changeUsername();
+    },
+    [changeUsername]
+  );
+
   const onClickFetchUserInfo = useCallback(
     (e: MouseEvent<HTMLIonButtonElement>) => {
       e.preventDefault();
@@ -1020,6 +1147,68 @@ function AuthgearDemo() {
             onClick={onClickDeleteAccount}
           >
             Delete Account
+          </IonButton>
+        )}
+        {isPlatformWeb() ? null : (
+          <IonButton
+            className="button"
+            disabled={!initialized || !loggedIn || userInfo?.email != null}
+            onClick={onClickAddEmail}
+          >
+            Add Email
+          </IonButton>
+        )}
+        {isPlatformWeb() ? null : (
+          <IonButton
+            className="button"
+            disabled={
+              !initialized || !loggedIn || userInfo?.phoneNumber != null
+            }
+            onClick={onClickAddPhone}
+          >
+            Add Phone
+          </IonButton>
+        )}
+        {isPlatformWeb() ? null : (
+          <IonButton
+            className="button"
+            disabled={
+              !initialized || !loggedIn || userInfo?.preferredUsername != null
+            }
+            onClick={onClickAddUsername}
+          >
+            Add Username
+          </IonButton>
+        )}
+        {isPlatformWeb() ? null : (
+          <IonButton
+            className="button"
+            disabled={!initialized || !loggedIn || userInfo?.email == null}
+            onClick={onClickChangeEmail}
+          >
+            Change Email
+          </IonButton>
+        )}
+        {isPlatformWeb() ? null : (
+          <IonButton
+            className="button"
+            disabled={
+              !initialized || !loggedIn || userInfo?.phoneNumber == null
+            }
+            onClick={onClickChangePhone}
+          >
+            Change Phone
+          </IonButton>
+        )}
+        {isPlatformWeb() ? null : (
+          <IonButton
+            className="button"
+            disabled={
+              !initialized || !loggedIn || userInfo?.preferredUsername == null
+            }
+            onClick={onClickChangeUsername}
+          >
+            Change Username
           </IonButton>
         )}
         <IonButton

@@ -55,6 +55,7 @@ import {
   type BiometricOptions,
   type SettingsActionOptions,
   type PreAuthenticatedURLOptions,
+  _InternalSettingsActionOptions,
 } from "./types";
 import { BiometricPrivateKeyNotFoundError } from "./error";
 
@@ -633,7 +634,7 @@ export class CapacitorContainer {
    */
   async _openSettingsAction(
     action: SettingsAction,
-    options: SettingsActionOptions
+    options: _InternalSettingsActionOptions
   ): Promise<void> {
     const idToken = this.getIDTokenHint();
     if (idToken == null) {
@@ -665,6 +666,9 @@ export class CapacitorContainer {
       responseType: "urn:authgear:params:oauth:response-type:settings-action",
       scope: this.baseContainer.getSettingsActionScopes(),
       xSettingsAction: action,
+      xSettingsActionQuery: {
+        q_login_id: options.qLoginID,
+      },
     });
     const redirectURL = await this.uiImplementation.openAuthorizationURL({
       url: authorizeURL,
@@ -690,6 +694,66 @@ export class CapacitorContainer {
   async deleteAccount(options: SettingsActionOptions): Promise<void> {
     await this._openSettingsAction(SettingsAction.DeleteAccount, options);
     return this.baseContainer._clearSession(SessionStateChangeReason.Invalid);
+  }
+
+  /**
+   * @public
+   */
+  async addEmail(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.AddEmail, options);
+  }
+
+  /**
+   * @public
+   */
+  async addPhone(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.AddPhone, options);
+  }
+
+  /**
+   * @public
+   */
+  async addUsername(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.AddUsername, options);
+  }
+
+  /**
+   * @public
+   */
+  async changeEmail(
+    originalEmail: string,
+    options: SettingsActionOptions
+  ): Promise<void> {
+    return this._openSettingsAction(SettingsAction.ChangeEmail, {
+      ...options,
+      qLoginID: originalEmail,
+    });
+  }
+
+  /**
+   * @public
+   */
+  async changePhone(
+    originalPhone: string,
+    options: SettingsActionOptions
+  ): Promise<void> {
+    return this._openSettingsAction(SettingsAction.ChangePhone, {
+      ...options,
+      qLoginID: originalPhone,
+    });
+  }
+
+  /**
+   * @public
+   */
+  async changeUsername(
+    originalUsername: string,
+    options: SettingsActionOptions
+  ): Promise<void> {
+    return this._openSettingsAction(SettingsAction.ChangeUsername, {
+      ...options,
+      qLoginID: originalUsername,
+    });
   }
 
   /**

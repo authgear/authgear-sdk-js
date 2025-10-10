@@ -30,6 +30,7 @@ import {
   AuthenticateResult,
   ReauthenticateResult,
   SettingsActionOptions,
+  _InternalSettingsActionOptions,
 } from "./types";
 
 /**
@@ -372,7 +373,7 @@ export class WebContainer {
    */
   async startSettingsAction(
     action: SettingsAction,
-    options: SettingsActionOptions
+    options: _InternalSettingsActionOptions
   ): Promise<void> {
     const idToken = this.getIDTokenHint();
     if (idToken == null || !this.canReauthenticate()) {
@@ -400,6 +401,7 @@ export class WebContainer {
         responseType: "urn:authgear:params:oauth:response-type:settings-action",
         scope: this.baseContainer.getSettingsActionScopes(),
         xSettingsAction: action,
+        xSettingsActionQuery: { q_login_id: options.qLoginID },
       });
       window.location.href = endpoint;
     }
@@ -421,6 +423,78 @@ export class WebContainer {
    */
   async startDeleteAccount(options: SettingsActionOptions): Promise<void> {
     await this.startSettingsAction(SettingsAction.DeleteAccount, options);
+  }
+
+  /**
+   * Start settings action "add_email" by redirecting to the authorization endpoint.
+   *
+   * @public
+   */
+  async startAddEmail(options: SettingsActionOptions): Promise<void> {
+    await this.startSettingsAction(SettingsAction.AddEmail, options);
+  }
+
+  /**
+   * Start settings action "add_phone" by redirecting to the authorization endpoint.
+   *
+   * @public
+   */
+  async startAddPhone(options: SettingsActionOptions): Promise<void> {
+    await this.startSettingsAction(SettingsAction.AddPhone, options);
+  }
+
+  /**
+   * Start settings action "add_username" by redirecting to the authorization endpoint.
+   *
+   * @public
+   */
+  async startAddUsername(options: SettingsActionOptions): Promise<void> {
+    await this.startSettingsAction(SettingsAction.AddUsername, options);
+  }
+
+  /**
+   * Start settings action "change_email" by redirecting to the authorization endpoint.
+   *
+   * @public
+   */
+  async startChangeEmail(
+    originalEmail: string,
+    options: SettingsActionOptions
+  ): Promise<void> {
+    await this.startSettingsAction(SettingsAction.ChangeEmail, {
+      ...options,
+      qLoginID: originalEmail,
+    });
+  }
+
+  /**
+   * Start settings action "change_phone" by redirecting to the authorization endpoint.
+   *
+   * @public
+   */
+  async startChangePhone(
+    originalPhone: string,
+    options: SettingsActionOptions
+  ): Promise<void> {
+    await this.startSettingsAction(SettingsAction.ChangePhone, {
+      ...options,
+      qLoginID: originalPhone,
+    });
+  }
+
+  /**
+   * Start settings action "change_username" by redirecting to the authorization endpoint.
+   *
+   * @public
+   */
+  async startChangeUsername(
+    originalUsername: string,
+    options: SettingsActionOptions
+  ): Promise<void> {
+    await this.startSettingsAction(SettingsAction.ChangeUsername, {
+      ...options,
+      qLoginID: originalUsername,
+    });
   }
 
   /**
@@ -527,6 +601,72 @@ export class WebContainer {
   async finishDeleteAccount(): Promise<void> {
     await this.finishSettingsAction();
     return this.baseContainer._clearSession(SessionStateChangeReason.Invalid);
+  }
+
+  /**
+   * Finish settings action "add_email".
+   *
+   * It may reject with OAuthError.
+   *
+   * @public
+   */
+  async finishAddEmail(): Promise<void> {
+    return this.finishSettingsAction();
+  }
+
+  /**
+   * Finish settings action "add_phone".
+   *
+   * It may reject with OAuthError.
+   *
+   * @public
+   */
+  async finishAddPhone(): Promise<void> {
+    return this.finishSettingsAction();
+  }
+
+  /**
+   * Finish settings action "add_username".
+   *
+   * It may reject with OAuthError.
+   *
+   * @public
+   */
+  async finishAddUsername(): Promise<void> {
+    return this.finishSettingsAction();
+  }
+
+  /**
+   * Finish settings action "change_email".
+   *
+   * It may reject with OAuthError.
+   *
+   * @public
+   */
+  async finishChangeEmail(): Promise<void> {
+    return this.finishSettingsAction();
+  }
+
+  /**
+   * Finish settings action "change_phone".
+   *
+   * It may reject with OAuthError.
+   *
+   * @public
+   */
+  async finishChangePhone(): Promise<void> {
+    return this.finishSettingsAction();
+  }
+
+  /**
+   * Finish settings action "change_username".
+   *
+   * It may reject with OAuthError.
+   *
+   * @public
+   */
+  async finishChangeUsername(): Promise<void> {
+    return this.finishSettingsAction();
   }
 
   /**

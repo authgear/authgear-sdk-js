@@ -53,6 +53,7 @@ import {
   ReauthenticateResult,
   SettingsActionOptions,
   PreAuthenticatedURLOptions,
+  _InternalSettingsActionOptions,
 } from "./types";
 import { getAnonymousJWK, signAnonymousJWT } from "./jwt";
 import { BiometricPrivateKeyNotFoundError } from "./error";
@@ -473,7 +474,7 @@ export class ReactNativeContainer {
    */
   async _openSettingsAction(
     action: SettingsAction,
-    options: SettingsActionOptions
+    options: _InternalSettingsActionOptions
   ): Promise<void> {
     const idToken = this.getIDTokenHint();
     if (idToken == null) {
@@ -505,6 +506,9 @@ export class ReactNativeContainer {
       responseType: "urn:authgear:params:oauth:response-type:settings-action",
       scope: this.baseContainer.getSettingsActionScopes(),
       xSettingsAction: action,
+      xSettingsActionQuery: {
+        q_login_id: options.qLoginID,
+      },
     });
     const redirectURL = await this.uiImplementation.openAuthorizationURL({
       url: authorizeURL,
@@ -527,6 +531,96 @@ export class ReactNativeContainer {
    */
   async changePassword(options: SettingsActionOptions): Promise<void> {
     return this._openSettingsAction(SettingsAction.ChangePassword, options);
+  }
+
+  /**
+   * addEmail() opens the settings page in a {@link UIImplementation} for the user to add an email.
+   * After adding the email, the {@link UIImplementation} will be closed.
+   *
+   * You can refer to {@link SettingsActionOptions} for more customization.
+   *
+   * @public
+   */
+  async addEmail(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.AddEmail, options);
+  }
+
+  /**
+   * addPhone() opens the settings page in a {@link UIImplementation} for the user to add a phone number.
+   * After adding the phone number, the {@link UIImplementation} will be closed.
+   *
+   * You can refer to {@link SettingsActionOptions} for more customization.
+   *
+   * @public
+   */
+  async addPhone(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.AddPhone, options);
+  }
+
+  /**
+   * addUsername() opens the settings page in a {@link UIImplementation} for the user to add a username.
+   * After adding the username, the {@link UIImplementation} will be closed.
+   *
+   * You can refer to {@link SettingsActionOptions} for more customization.
+   *
+   * @public
+   */
+  async addUsername(options: SettingsActionOptions): Promise<void> {
+    return this._openSettingsAction(SettingsAction.AddUsername, options);
+  }
+
+  /**
+   * changeEmail() opens the settings page in a {@link UIImplementation} for the user to change their email.
+   * After changing the email, the {@link UIImplementation} will be closed.
+   *
+   * You can refer to {@link SettingsActionOptions} for more customization.
+   *
+   * @public
+   */
+  async changeEmail(
+    originalEmail: string,
+    options: SettingsActionOptions
+  ): Promise<void> {
+    return this._openSettingsAction(SettingsAction.ChangeEmail, {
+      ...options,
+      qLoginID: originalEmail,
+    });
+  }
+
+  /**
+   * changePhone() opens the settings page in a {@link UIImplementation} for the user to change their phone number.
+   * After changing the phone number, the {@link UIImplementation} will be closed.
+   *
+   * You can refer to {@link SettingsActionOptions} for more customization.
+   *
+   * @public
+   */
+  async changePhone(
+    originalPhone: string,
+    options: SettingsActionOptions
+  ): Promise<void> {
+    return this._openSettingsAction(SettingsAction.ChangePhone, {
+      ...options,
+      qLoginID: originalPhone,
+    });
+  }
+
+  /**
+   * changeUsername() opens the settings page in a {@link UIImplementation} for the user to change their username.
+   * After changing the username, the {@link UIImplementation} will be closed.
+   *
+   * You can refer to {@link SettingsActionOptions} for more customization.
+   *
+   * @public
+   */
+  async changeUsername(
+    originalUsername: string,
+    options: SettingsActionOptions
+  ): Promise<void> {
+    return this._openSettingsAction(SettingsAction.ChangeUsername, {
+      ...options,
+      qLoginID: originalUsername,
+    });
   }
 
   /**

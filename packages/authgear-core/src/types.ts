@@ -97,6 +97,13 @@ export enum PromptOption {
 /**
  * @internal
  */
+export interface _SettingsActionQuery {
+  q_login_id?: string;
+}
+
+/**
+ * @internal
+ */
 export interface _OIDCAuthenticationRequest {
   redirectURI: string;
   responseType:
@@ -119,7 +126,16 @@ export interface _OIDCAuthenticationRequest {
   page?: string;
   suppressIDPSessionCookie?: boolean;
   oauthProviderAlias?: string;
-  xSettingsAction?: "change_password" | "delete_account";
+  xSettingsAction?:
+    | "change_password"
+    | "delete_account"
+    | "add_email"
+    | "add_phone"
+    | "add_username"
+    | "change_email"
+    | "change_phone"
+    | "change_username";
+  xSettingsActionQuery?: _SettingsActionQuery;
   authenticationFlowGroup?: string;
   clientID?: string;
   xPreAuthenticatedURLToken?: string;
@@ -443,6 +459,30 @@ export enum SettingsAction {
    * Delete account in Authgear settings page.
    */
   DeleteAccount = "delete_account",
+  /**
+   * Add email in Authgear settings page.
+   */
+  AddEmail = "add_email",
+  /**
+   * Add phone in Authgear settings page.
+   */
+  AddPhone = "add_phone",
+  /**
+   * Add username in Authgear settings page.
+   */
+  AddUsername = "add_username",
+  /**
+   * Change email in Authgear settings page.
+   */
+  ChangeEmail = "change_email",
+  /**
+   * Change phone in Authgear settings page.
+   */
+  ChangePhone = "change_phone",
+  /**
+   * Change username in Authgear settings page.
+   */
+  ChangeUsername = "change_username",
 }
 
 /**

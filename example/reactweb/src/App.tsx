@@ -54,6 +54,18 @@ function getOAuthState(): OAuthState | undefined {
       return "change_password";
     case "delete_account":
       return "delete_account";
+    case "add_email":
+      return "add_email";
+    case "add_phone":
+      return "add_phone";
+    case "add_username":
+      return "add_username";
+    case "change_email":
+      return "change_email";
+    case "change_phone":
+      return "change_phone";
+    case "change_username":
+      return "change_username";
   }
   return undefined;
 }
@@ -63,7 +75,13 @@ type OAuthState =
   | "reauthenticate"
   | "promote"
   | "change_password"
-  | "delete_account";
+  | "delete_account"
+  | "add_email"
+  | "add_phone"
+  | "add_username"
+  | "change_email"
+  | "change_phone"
+  | "change_username";
 
 function ShowError(props: { error: unknown }) {
   const { error } = props;
@@ -235,6 +253,93 @@ function Root() {
         (err) => setError(err)
       );
   }, []);
+
+  const onClickAddEmail = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    authgear
+      .startAddEmail({
+        redirectURI: makeRedirectURI(),
+        state: "add_email",
+      })
+      .catch((err) => setError(err));
+  }, []);
+
+  const onClickAddPhone = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    authgear
+      .startAddPhone({
+        redirectURI: makeRedirectURI(),
+        state: "add_phone",
+      })
+      .catch((err) => setError(err));
+  }, []);
+
+  const onClickAddUsername = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    authgear
+      .startAddUsername({
+        redirectURI: makeRedirectURI(),
+        state: "add_username",
+      })
+      .catch((err) => setError(err));
+  }, []);
+
+  const onClickChangeEmail = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (userInfo?.email == null) {
+        setError(new Error("Email is not available"));
+        return;
+      }
+      authgear
+        .startChangeEmail(userInfo.email, {
+          redirectURI: makeRedirectURI(),
+          state: "change_email",
+        })
+        .catch((err) => setError(err));
+    },
+    [userInfo]
+  );
+
+  const onClickChangePhone = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (userInfo?.phoneNumber == null) {
+        setError(new Error("Phone number is not available"));
+        return;
+      }
+      authgear
+        .startChangePhone(userInfo.phoneNumber, {
+          redirectURI: makeRedirectURI(),
+          state: "change_phone",
+        })
+        .catch((err) => setError(err));
+    },
+    [userInfo]
+  );
+
+  const onClickChangeUsername = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (userInfo?.preferredUsername == null) {
+        setError(new Error("Username is not available"));
+        return;
+      }
+      authgear
+        .startChangeUsername(userInfo.preferredUsername, {
+          redirectURI: makeRedirectURI(),
+          state: "change_username",
+        })
+        .catch((err) => setError(err));
+    },
+    [userInfo]
+  );
 
   const onClickSignIn = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
@@ -510,6 +615,54 @@ function Root() {
           >
             Delete Account
           </button>
+          <button
+            className="button"
+            type="button"
+            onClick={onClickAddEmail}
+            disabled={userInfo?.email != null}
+          >
+            Add Email
+          </button>
+          <button
+            className="button"
+            type="button"
+            onClick={onClickAddPhone}
+            disabled={userInfo?.phoneNumber != null}
+          >
+            Add Phone
+          </button>
+          <button
+            className="button"
+            type="button"
+            onClick={onClickAddUsername}
+            disabled={userInfo?.preferredUsername != null}
+          >
+            Add Username
+          </button>
+          <button
+            className="button"
+            type="button"
+            onClick={onClickChangeEmail}
+            disabled={userInfo?.email == null}
+          >
+            Change Email
+          </button>
+          <button
+            className="button"
+            type="button"
+            onClick={onClickChangePhone}
+            disabled={userInfo?.phoneNumber == null}
+          >
+            Change Phone
+          </button>
+          <button
+            className="button"
+            type="button"
+            onClick={onClickChangeUsername}
+            disabled={userInfo?.preferredUsername == null}
+          >
+            Change Username
+          </button>
           <button className="button" type="button" onClick={onClickSignOut}>
             Sign out
           </button>
@@ -592,6 +745,54 @@ function AuthRedirect() {
               break;
             case "delete_account":
               authgear.finishDeleteAccount().then(
+                (_) => {
+                  navigate("/");
+                },
+                (err) => setError(err)
+              );
+              break;
+            case "add_email":
+              authgear.finishAddEmail().then(
+                (_) => {
+                  navigate("/");
+                },
+                (err) => setError(err)
+              );
+              break;
+            case "add_phone":
+              authgear.finishAddPhone().then(
+                (_) => {
+                  navigate("/");
+                },
+                (err) => setError(err)
+              );
+              break;
+            case "add_username":
+              authgear.finishAddUsername().then(
+                (_) => {
+                  navigate("/");
+                },
+                (err) => setError(err)
+              );
+              break;
+            case "change_email":
+              authgear.finishChangeEmail().then(
+                (_) => {
+                  navigate("/");
+                },
+                (err) => setError(err)
+              );
+              break;
+            case "change_phone":
+              authgear.finishChangePhone().then(
+                (_) => {
+                  navigate("/");
+                },
+                (err) => setError(err)
+              );
+              break;
+            case "change_username":
+              authgear.finishChangeUsername().then(
                 (_) => {
                   navigate("/");
                 },
