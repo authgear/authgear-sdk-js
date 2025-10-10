@@ -1152,7 +1152,7 @@ function AuthgearDemo() {
         {isPlatformWeb() ? null : (
           <IonButton
             className="button"
-            disabled={!initialized || !loggedIn}
+            disabled={!initialized || !loggedIn || userInfo?.email != null}
             onClick={onClickAddEmail}
           >
             Add Email
@@ -1161,7 +1161,9 @@ function AuthgearDemo() {
         {isPlatformWeb() ? null : (
           <IonButton
             className="button"
-            disabled={!initialized || !loggedIn}
+            disabled={
+              !initialized || !loggedIn || userInfo?.phoneNumber != null
+            }
             onClick={onClickAddPhone}
           >
             Add Phone
@@ -1170,7 +1172,9 @@ function AuthgearDemo() {
         {isPlatformWeb() ? null : (
           <IonButton
             className="button"
-            disabled={!initialized || !loggedIn}
+            disabled={
+              !initialized || !loggedIn || userInfo?.preferredUsername != null
+            }
             onClick={onClickAddUsername}
           >
             Add Username

@@ -1012,7 +1012,7 @@ const HomeScreen: React.FC = () => {
           <Button
             title="Add Email"
             onPress={addEmail}
-            disabled={!initialized || !loggedIn}
+            disabled={!initialized || !loggedIn || userInfo?.email != null}
           />
         </View>
 
@@ -1020,7 +1020,9 @@ const HomeScreen: React.FC = () => {
           <Button
             title="Add Phone"
             onPress={addPhone}
-            disabled={!initialized || !loggedIn}
+            disabled={
+              !initialized || !loggedIn || userInfo?.phoneNumber != null
+            }
           />
         </View>
 
@@ -1028,7 +1030,9 @@ const HomeScreen: React.FC = () => {
           <Button
             title="Add Username"
             onPress={addUsername}
-            disabled={!initialized || !loggedIn}
+            disabled={
+              !initialized || !loggedIn || userInfo?.preferredUsername != null
+            }
           />
         </View>
 
