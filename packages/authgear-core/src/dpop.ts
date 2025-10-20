@@ -89,13 +89,11 @@ export class DefaultDPoPProvider implements DPoPProvider {
     try {
       const jwt = await this.plugin.signWithDPoPPrivateKey(kid, payload);
       return jwt;
-    } catch (_: unknown) {
-      // Generate a new key if the original key cannot be used for any reason
-      kid = await this.plugin.generateUUID();
-      await this.plugin.createDPoPPrivateKey(kid);
-      await this.sharedStorage.setDPoPKeyID(this.getNamespace(), kid);
-      const jwt = await this.plugin.signWithDPoPPrivateKey(kid, payload);
-      return jwt;
+    } catch (e: unknown) {
+      // Clear the existing key ID if the key cannot be used for any reason
+      await this.sharedStorage.delDPoPKeyID(this.getNamespace());
+      // rethrow the error so we know there is some error occurred
+      throw e;
     }
   }
 
@@ -106,21 +104,21 @@ export class DefaultDPoPProvider implements DPoPProvider {
     const existingKeyId = await this.sharedStorage.getDPoPKeyID(
       this.getNamespace()
     );
-    let kid: string | null = null;
-    if (existingKeyId != null) {
-      const existingKeyOK = await this.plugin.checkDPoPPrivateKey(
-        existingKeyId
-      );
-      if (existingKeyOK) {
-        kid = existingKeyId;
-      }
-    }
+    let kid: string | null = existingKeyId;
     if (kid == null) {
       kid = await this.plugin.generateUUID();
       await this.plugin.createDPoPPrivateKey(kid);
       await this.sharedStorage.setDPoPKeyID(this.getNamespace(), kid);
     }
-    const jkt = await this.plugin.computeDPoPJKT(kid);
-    return jkt;
+
+    try {
+      const jkt = await this.plugin.computeDPoPJKT(kid);
+      return jkt;
+    } catch (e: unknown) {
+      // Clear the existing key ID if the key cannot be used for any reason
+      await this.sharedStorage.delDPoPKeyID(this.getNamespace());
+      // rethrow the error so we know there is some error occurred
+      throw e;
+    }
   }
 }
