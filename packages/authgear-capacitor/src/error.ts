@@ -173,7 +173,8 @@ export function _wrapError(e: unknown): unknown {
       return err;
     }
   }
-  const err = new AuthgearError();
+  const message = typeof e === "object" ? (e as any).message : "";
+  const err = new AuthgearError(message);
   err.underlyingError = e;
   return err;
 }
