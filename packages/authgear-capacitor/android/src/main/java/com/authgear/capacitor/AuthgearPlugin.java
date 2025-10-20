@@ -493,7 +493,7 @@ public class AuthgearPlugin extends Plugin {
     }
 
     private void reject(PluginCall call, Exception e) {
-        call.reject(e.getMessage(), e.getClass().getName(), e);
+        call.reject(e.getLocalizedMessage(), e.getClass().getName(), e);
     }
 
     private void rejectWithCancel(PluginCall call) {
