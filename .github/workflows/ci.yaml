@@ -37,6 +37,8 @@ jobs:
     - run: npm audit
       working-directory: ./website
       if: ${{ !cancelled() }}
+    - run: npm run check-tidy
+      if: ${{ !cancelled() }}
     - run: npm run format
       if: ${{ !cancelled() }}
     - run: npm run lint
