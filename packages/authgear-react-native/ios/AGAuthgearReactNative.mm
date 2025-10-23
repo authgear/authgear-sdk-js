@@ -1,13 +1,10 @@
-#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 12000)
-#import <AuthenticationServices/AuthenticationServices.h>
-#endif
+#import <sys/utsname.h>
+
 #import <CommonCrypto/CommonDigest.h>
 #import <React/RCTUtils.h>
-#import <LocalAuthentication/LocalAuthentication.h>
-#import <sys/utsname.h>
+
 #import "AGAuthgearReactNative.h"
 #import "AGWKWebViewController.h"
-#import <CommonCrypto/CommonDigest.h>
 
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 12000)
 @interface AGAuthgearReactNative() <ASWebAuthenticationPresentationContextProviding, AGWKWebViewControllerPresentationContextProviding>
@@ -20,6 +17,14 @@
 @implementation AGAuthgearReactNative
 
 RCT_EXPORT_MODULE(AuthgearReactNative)
+
+#ifdef RCT_NEW_ARCH_ENABLED
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
+    (const facebook::react::ObjCTurboModule::InitParams &)params
+{
+    return std::make_shared<facebook::react::NativeAuthgearReactNativeSpecJSI>(params);
+}
+#endif
 
 + (BOOL)requiresMainQueueSetup
 {
@@ -251,7 +256,7 @@ RCT_EXPORT_METHOD(openAuthorizeURLWithWebView:(NSDictionary *)options
     if (wechatRedirectURIString != nil) {
         controller.wechatRedirectURI = [[NSURL alloc] initWithString:wechatRedirectURIString];
         controller.onWechatRedirectURINavigate = ^(NSURL *url) {
-            [self sendEventWithName:@"onAuthgearReactNative" body:@{
+            [self onAuthgearReactNative:@{
                 @"invocationID": invocationID,
                 @"url": [url absoluteString]
             }];
@@ -1090,5 +1095,17 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
     }
     return false;
 }
+
+#ifdef RCT_NEW_ARCH_ENABLED
+-(void)onAuthgearReactNative:(NSDictionary *)data
+{
+    [self emitOnAuthgearReactNative:data];
+}
+#else
+-(void)onAuthgearReactNative:(NSDictionary *)data
+{
+    [self sendEventWithName:@"onAuthgearReactNative" body:data];
+}
+#endif
 
 @end

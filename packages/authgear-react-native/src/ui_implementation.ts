@@ -1,6 +1,6 @@
 import URL from "core-js-pure/features/url";
 import { openAuthorizeURL, openAuthorizeURLWithWebView } from "./nativemodule";
-import AuthgearReactNative from "./NativeAuthgearReactNative";
+import { onAuthgearReactNative } from "./event_compat";
 
 /**
  * OpenAuthorizationURLOptions is options for {@link UIImplementation.openAuthorizationURL}.
@@ -166,7 +166,7 @@ export class WebKitWebViewUIImplementation implements UIImplementation {
       16
     );
 
-    const subscription = AuthgearReactNative.onAuthgearReactNative(
+    const subscription = onAuthgearReactNative(
       (args: { invocationID: string; url: string }) => {
         if (args.invocationID === invocationID) {
           const url = new URL(args.url);
