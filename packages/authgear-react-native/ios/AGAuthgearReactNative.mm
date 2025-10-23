@@ -39,7 +39,7 @@ RCT_EXPORT_MODULE(AuthgearReactNative)
 
 - (NSArray<NSString *> *)supportedEvents
 {
-    return @[@"authgear-react-native"];
+    return @[@"onAuthgearReactNative"];
 }
 
 + (BOOL)application:(UIApplication *)app
@@ -251,7 +251,7 @@ RCT_EXPORT_METHOD(openAuthorizeURLWithWebView:(NSDictionary *)options
     if (wechatRedirectURIString != nil) {
         controller.wechatRedirectURI = [[NSURL alloc] initWithString:wechatRedirectURIString];
         controller.onWechatRedirectURINavigate = ^(NSURL *url) {
-            [self sendEventWithName:@"authgear-react-native" body:@{
+            [self sendEventWithName:@"onAuthgearReactNative" body:@{
                 @"invocationID": invocationID,
                 @"url": [url absoluteString]
             }];

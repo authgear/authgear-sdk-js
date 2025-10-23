@@ -791,7 +791,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
                             WritableMap map = Arguments.createMap();
                             map.putString("invocationID", invocationID);
                             map.putString("url", uriString);
-                            AuthgearReactNativeModule.this.sendEvent("authgear-react-native", map);
+                            AuthgearReactNativeModule.this.sendEvent("onAuthgearReactNative", map);
                         }
                     }
                 };
