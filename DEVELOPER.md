@@ -48,6 +48,21 @@ then when the codegen runs in the app, the scanning will fail.
 
 This implies the version we use for codegen indicates the minimum version of React Native our SDK requires.
 
+## Important Notes
+
+### You must resolve all warnings in AGAuthgearReactNative.mm
+
+One common issue is that AGAuthgearReactNative does not actually conform to the generated spec.
+But this is not a compilation error, rather a warning.
+
+This warning will become a runtime crash only until a particular native method is called.
+
+Common issues include
+
+- The method labels mismatch, for example, it is `resolve` and `reject` in the spec, but it was `resolver` and `rejecter` in the implementation.
+- The argument type mismatch, for example, when it is `number` in JavaScript, then the type is `double` in the spec.
+  If you declare it to be `NSUInteger`, the `double` will be incorrectly cast to `NSUInteger`, resulting in a very large unsigned integer.
+
 ## FAQ
 
 ### Why do we need to install devDep `@react-native-community/cli` in `packages/authgear-react-native`?
