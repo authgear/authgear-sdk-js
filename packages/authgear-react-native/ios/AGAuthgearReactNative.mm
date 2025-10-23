@@ -576,14 +576,14 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
             reject([@(error.code) stringValue], error.localizedDescription, error);
             return;
         }
-        
+
         NSMutableDictionary *jwk = [[NSMutableDictionary alloc] init];
         jwk[@"kid"] = kid;
         [self getJWKFromPrivateKey:privateKey jwk:jwk error:&error];
         NSDictionary *jwkParams = [self makeDPoPJWKRequiredParams:jwk];
         NSData *jwkParamsJSON = [self serializeToJSON:jwkParams];
         NSMutableData *hashBytes = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];
-        CC_SHA256(jwkParamsJSON.bytes, jwkParamsJSON.length, hashBytes.mutableBytes);
+        CC_SHA256(jwkParamsJSON.bytes, (unsigned int)jwkParamsJSON.length, (unsigned char *)hashBytes.mutableBytes);
         NSString *jkt = [self base64URLEncode:hashBytes];
         resolve(jkt);
     });
@@ -795,7 +795,7 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
 {
     NSData *utf8 = [input dataUsingEncoding:NSUTF8StringEncoding];
     unsigned char result[CC_SHA256_DIGEST_LENGTH];
-    CC_SHA256([utf8 bytes], [utf8 length], result);
+    CC_SHA256([utf8 bytes], (unsigned int)[utf8 length], result);
     NSMutableArray *arr = [NSMutableArray arrayWithCapacity:CC_SHA256_DIGEST_LENGTH];
     for (int i = 0; i < CC_SHA256_DIGEST_LENGTH; i++) {
         [arr addObject:[NSNumber numberWithInt:(result[i] & 0xff)]];
@@ -946,7 +946,7 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
 -(NSData *)signData:(SecKeyRef)privateKey data:(NSData *)data error:(out NSError **)error
 {
     NSMutableData *hash = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];
-    CC_SHA256(data.bytes, (unsigned int)data.length, hash.mutableBytes);
+    CC_SHA256(data.bytes, (unsigned int)data.length, (unsigned char *)hash.mutableBytes);
     CFErrorRef cfError = NULL;
     CFDataRef dataRef = SecKeyCreateSignature(
         privateKey,
@@ -972,7 +972,7 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
   }
 
   NSMutableData *hash = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];
-  CC_SHA256(data.bytes, (unsigned int)data.length, hash.mutableBytes);
+  CC_SHA256(data.bytes, (unsigned int)data.length, (unsigned char *)hash.mutableBytes);
 
   NSData *sig = (__bridge NSData*)SecKeyCreateSignature(
     privKey,
