@@ -1,5 +1,6 @@
 #import "AppDelegate.h"
 
+#import <RCTAppDelegate.h>
 #import <React/RCTBundleURLProvider.h>
 #import <ReactAppDependencyProvider/RCTAppDependencyProvider.h>
 #import "RCTWechatAuthModule.h"
@@ -11,23 +12,9 @@ NSString* const WechatUniversalLink = @"https://authgear-demo-rn.pandawork.com/w
 // Error domain
 NSString* const WechatAuthErrorDomain = @"com.authgear.example.reactnative.wechatauth_error";
 
-@implementation AppDelegate
+@implementation ReactNativeDelegate
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-{
-  self.moduleName = @"reactNativeExample";
-  self.dependencyProvider = [RCTAppDependencyProvider new];
-  // You can add your custom initial props in the dictionary below.
-  // They will be passed down to the ViewController used by React Native.
-  self.initialProps = @{};
-
-  // Setup Wechat SDK
-  [WXApi registerApp:WechatAppID universalLink:WechatUniversalLink];
-
-  return [super application:application didFinishLaunchingWithOptions:launchOptions];
-}
-
-- (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
+- (NSURL *_Nullable)sourceURLForBridge:(nonnull RCTBridge *)bridge
 {
   return [self bundleURL];
 }
@@ -39,6 +26,28 @@ NSString* const WechatAuthErrorDomain = @"com.authgear.example.reactnative.wecha
 #else
   return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
+}
+
+@end
+
+@implementation AppDelegate
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+  self.reactNativeDelegate = [ReactNativeDelegate new];
+  self.reactNativeFactory = [[RCTReactNativeFactory alloc] initWithDelegate:self.reactNativeDelegate];
+  self.reactNativeDelegate.dependencyProvider = [RCTAppDependencyProvider new];
+
+  self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  [self.reactNativeFactory startReactNativeWithModuleName:@"reactNativeExample"
+                                                 inWindow:self.window
+                                        initialProperties:@{}
+                                            launchOptions:launchOptions];
+
+  // Setup Wechat SDK
+  [WXApi registerApp:WechatAppID universalLink:WechatUniversalLink];
+
+  return true;
 }
 
 - (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray *))restorationHandler {
