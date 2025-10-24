@@ -6,6 +6,7 @@
 > This section assumes you have basic understanding on support React Native New Architecture in a library.
 > If you are not, please read:
 > - https://github.com/reactwg/react-native-new-architecture/blob/main/docs/enable-libraries.md
+> - https://github.com/reactwg/react-native-new-architecture/blob/main/docs/backwards-compat-turbo-modules.md
 > - https://github.com/react-native-community/RNNewArchitectureLibraries/tree/feat/back-turbomodule-070
 > - https://reactnative.dev/docs/the-new-architecture/codegen-cli
 > - https://reactnative.dev/docs/the-new-architecture/codegen-cli#including-generated-code-into-libraries
@@ -62,6 +63,13 @@ Common issues include
 - The method labels mismatch, for example, it is `resolve` and `reject` in the spec, but it was `resolver` and `rejecter` in the implementation.
 - The argument type mismatch, for example, when it is `number` in JavaScript, then the type is `double` in the spec.
   If you declare it to be `NSUInteger`, the `double` will be incorrectly cast to `NSUInteger`, resulting in a very large unsigned integer.
+
+### You must ensure the Android Native Module follows the generated spec
+
+For example, when the argument is `number`, the generated type in the spec is `double`.
+You must ensure the method signature in the legacy native module follow the spec.
+Note that you cannot make the legacy native module `implements` the spec,
+so you have to ensure this manually.
 
 ## FAQ
 
