@@ -1,23 +1,46 @@
 package com.authgear.reactnative;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
-import com.facebook.react.ReactPackage;
+import com.facebook.react.BaseReactPackage;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.uimanager.ViewManager;
-import com.facebook.react.bridge.JavaScriptModule;
+import com.facebook.react.module.model.ReactModuleInfo;
+import com.facebook.react.module.model.ReactModuleInfoProvider;
 
-public class AuthgearReactNativePackage implements ReactPackage {
+import java.util.HashMap;
+import java.util.Map;
+
+public class AuthgearReactNativePackage extends BaseReactPackage {
+
+    @Nullable
     @Override
-    public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-        return Arrays.<NativeModule>asList(new AuthgearReactNativeModule(reactContext));
+    public NativeModule getModule(@NonNull String name, @NonNull ReactApplicationContext reactApplicationContext) {
+        if (name.equals(AuthgearReactNativeModuleImpl.NAME)) {
+            return new AuthgearReactNativeModule(reactApplicationContext);
+        }
+        return null;
     }
 
+    @NonNull
     @Override
-    public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-        return Collections.emptyList();
+    public ReactModuleInfoProvider getReactModuleInfoProvider() {
+        return () -> {
+            final Map<String, ReactModuleInfo> moduleInfos = new HashMap<>();
+            boolean isTurboModule = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED;
+            moduleInfos.put(
+                    AuthgearReactNativeModuleImpl.NAME,
+                    new ReactModuleInfo(
+                            AuthgearReactNativeModuleImpl.NAME,
+                            AuthgearReactNativeModuleImpl.NAME,
+                            false, // canOverrideExistingModule
+                            false, // needsEagerInit
+                            false, // isCxxModule
+                            isTurboModule // isTurboModule
+                    )
+            );
+            return moduleInfos;
+        };
     }
 }
