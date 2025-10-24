@@ -79,7 +79,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     }
 
     @ReactMethod
-    public void randomBytes(int length, Promise promise) {
+    public void randomBytes(double length, Promise promise) {
         this.mImpl.randomBytes(length, promise);
     }
 

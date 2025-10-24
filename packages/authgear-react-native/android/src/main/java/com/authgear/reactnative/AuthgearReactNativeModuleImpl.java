@@ -725,9 +725,9 @@ class AuthgearReactNativeModuleImpl implements ActivityEventListener {
         promise.resolve(null);
     }
 
-    public void randomBytes(int length, Promise promise) {
+    public void randomBytes(double length, Promise promise) {
         SecureRandom rng = new SecureRandom();
-        byte[] output = new byte[length];
+        byte[] output = new byte[new Double(length).intValue()];
         rng.nextBytes(output);
         promise.resolve(this.bytesToArray(output));
     }
