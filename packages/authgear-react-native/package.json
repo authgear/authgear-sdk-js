@@ -9,11 +9,12 @@
   },
   "main": "dist/authgear-react-native.js",
   "files": [
-    "index.d.ts",
-    "dist/authgear-react-native.js",
+    "android",
     "authgear-react-native.podspec",
+    "dist/authgear-react-native.js",
+    "index.d.ts",
     "ios",
-    "android"
+    "react-native.config.js"
   ],
   "devDependencies": {
     "@authgear/core": "4.1.0",
