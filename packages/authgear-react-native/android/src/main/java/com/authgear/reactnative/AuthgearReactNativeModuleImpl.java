@@ -74,6 +74,7 @@ class AuthgearReactNativeModuleImpl implements ActivityEventListener {
 
     interface Module {
         ReactApplicationContext impl_getReactApplicationContext();
+        void impl_sendEvent(ReadableMap body);
     }
 
     private static class Handle {
@@ -777,7 +778,7 @@ class AuthgearReactNativeModuleImpl implements ActivityEventListener {
                             WritableMap map = Arguments.createMap();
                             map.putString("invocationID", invocationID);
                             map.putString("url", uriString);
-                            AuthgearReactNativeModuleImpl.this.sendEvent("onAuthgearReactNative", map);
+                            AuthgearReactNativeModuleImpl.this.sendEvent(map);
                         }
                     }
                 };
@@ -813,8 +814,8 @@ class AuthgearReactNativeModuleImpl implements ActivityEventListener {
         return null;
     }
 
-    private void sendEvent(String name, ReadableMap map) {
-        this.getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(name, map);
+    private void sendEvent(ReadableMap map) {
+        this.mModule.impl_sendEvent(map);
     }
 
     public void openAuthorizeURL(String urlString, String callbackURL, boolean shareSessionWithSystemBrowser, Promise promise) {

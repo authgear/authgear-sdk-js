@@ -5,6 +5,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import javax.annotation.Nonnull;
 
@@ -20,6 +21,11 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     @Override
     public ReactApplicationContext impl_getReactApplicationContext() {
         return this.getReactApplicationContext();
+    }
+
+    @Override
+    public void impl_sendEvent(ReadableMap body) {
+        this.getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("onAuthgearReactNative", body);
     }
 
     @Override

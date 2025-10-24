@@ -21,6 +21,11 @@ public class AuthgearReactNativeModule extends NativeAuthgearReactNativeSpec imp
     }
 
     @Override
+    public void impl_sendEvent(ReadableMap body) {
+        this.emitOnAuthgearReactNative(body);
+    }
+
+    @Override
     public void storageGetItem(String key, Promise promise) {
         this.mImpl.storageGetItem(key, promise);
     }
