@@ -650,7 +650,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     }
 
     private FragmentActivity rejectFragmentActivity(Promise promise) {
-        Activity activity = this.getCurrentActivity();
+        Activity activity = this.getReactApplicationContext().getCurrentActivity();
         if (activity instanceof FragmentActivity) {
             return (FragmentActivity) activity;
         }
@@ -761,7 +761,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         final int requestCode = this.mHandles.push(new StartActivityHandle<>(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, handle));
 
         try {
-            Activity currentActivity = this.getCurrentActivity();
+            Activity currentActivity = this.getReactApplicationContext().getCurrentActivity();
             if (currentActivity == null) {
                 promise.reject(new Exception("No Activity"));
                 return;
@@ -836,7 +836,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         final Handle handle = new Handle(promise);
         final int requestCode = this.mHandles.push(new StartActivityHandle<>(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, handle));
         try {
-            Activity currentActivity = getCurrentActivity();
+            Activity currentActivity = this.getReactApplicationContext().getCurrentActivity();
             if (currentActivity == null) {
                 promise.reject(new Exception("No Activity"));
                 return;
