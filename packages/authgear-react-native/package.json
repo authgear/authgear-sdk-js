@@ -2,18 +2,26 @@
   "name": "@authgear/react-native",
   "version": "4.1.0",
   "license": "Apache-2.0",
+  "scripts": {
+    "check-tidy": "npm run codegen:android && npm run codegen:ios && ./scripts/check_tidy.sh",
+    "codegen:android": "./scripts/codegen_android.sh",
+    "codegen:ios": "./scripts/codegen_ios.sh"
+  },
   "main": "dist/authgear-react-native.js",
   "files": [
-    "index.d.ts",
-    "dist/authgear-react-native.js",
+    "android",
     "authgear-react-native.podspec",
+    "dist/authgear-react-native.js",
+    "index.d.ts",
     "ios",
-    "android"
+    "react-native.config.js"
   ],
   "devDependencies": {
     "@authgear/core": "4.1.0",
+    "@react-native-community/cli": "^20.0.2",
     "@types/react-native": "0.69.1",
-    "core-js-pure": "^3.37.0"
+    "core-js-pure": "^3.37.0",
+    "react-native": "0.80.2"
   },
   "peerDependencies": {
     "react-native": ">=0.60.0 <1.0.0"
@@ -27,5 +35,18 @@
     "Biometric Login",
     "React Native",
     "React Native authentication"
-  ]
+  ],
+  "codegenConfig": {
+    "name": "AuthgearReactNativeSpec",
+    "type": "modules",
+    "jsSrcsDir": "./src",
+    "outputDir": {
+      "android": "./android/src/main",
+      "ios": "./ios"
+    },
+    "android": {
+      "javaPackageName": "com.authgear.reactnative"
+    },
+    "includesGeneratedCode": true
+  }
 }

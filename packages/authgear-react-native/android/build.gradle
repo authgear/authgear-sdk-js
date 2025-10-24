@@ -45,6 +45,16 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    sourceSets {
+        main {
+            if (isNewArchitectureEnabled()) {
+                java.srcDirs += ["src/newarch"]
+            } else {
+                java.srcDirs += ["src/oldarch"]
+            }
+        }
+    }
 }
 
 repositories {
@@ -129,10 +139,12 @@ dependencies {
     implementation "com.google.crypto.tink:tink-android:1.8.0"
 }
 
-if (isNewArchitectureEnabled()) {
-  react {
-    jsRootDir = file("../dist/")
-    libraryName = "Authgear"
-    codegenJavaPackageName = "com.authgear.reactnative"
-  }
-}
+// We run codegen manually.
+//
+// if (isNewArchitectureEnabled()) {
+//   react {
+//     jsRootDir = file("../dist/")
+//     libraryName = "Authgear"
+//     codegenJavaPackageName = "com.authgear.reactnative"
+//   }
+// }

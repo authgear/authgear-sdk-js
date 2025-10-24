@@ -1,13 +1,10 @@
-#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 12000)
-#import <AuthenticationServices/AuthenticationServices.h>
-#endif
+#import <sys/utsname.h>
+
 #import <CommonCrypto/CommonDigest.h>
 #import <React/RCTUtils.h>
-#import <LocalAuthentication/LocalAuthentication.h>
-#import <sys/utsname.h>
+
 #import "AGAuthgearReactNative.h"
 #import "AGWKWebViewController.h"
-#import <CommonCrypto/CommonDigest.h>
 
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 12000)
 @interface AGAuthgearReactNative() <ASWebAuthenticationPresentationContextProviding, AGWKWebViewControllerPresentationContextProviding>
@@ -20,6 +17,14 @@
 @implementation AGAuthgearReactNative
 
 RCT_EXPORT_MODULE(AuthgearReactNative)
+
+#ifdef RCT_NEW_ARCH_ENABLED
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
+    (const facebook::react::ObjCTurboModule::InitParams &)params
+{
+    return std::make_shared<facebook::react::NativeAuthgearReactNativeSpecJSI>(params);
+}
+#endif
 
 + (BOOL)requiresMainQueueSetup
 {
@@ -39,7 +44,7 @@ RCT_EXPORT_MODULE(AuthgearReactNative)
 
 - (NSArray<NSString *> *)supportedEvents
 {
-    return @[@"authgear-react-native"];
+    return @[@"onAuthgearReactNative"];
 }
 
 + (BOOL)application:(UIApplication *)app
@@ -251,7 +256,7 @@ RCT_EXPORT_METHOD(openAuthorizeURLWithWebView:(NSDictionary *)options
     if (wechatRedirectURIString != nil) {
         controller.wechatRedirectURI = [[NSURL alloc] initWithString:wechatRedirectURIString];
         controller.onWechatRedirectURINavigate = ^(NSURL *url) {
-            [self sendEventWithName:@"authgear-react-native" body:@{
+            [self onAuthgearReactNative:@{
                 @"invocationID": invocationID,
                 @"url": [url absoluteString]
             }];
@@ -297,17 +302,17 @@ RCT_EXPORT_METHOD(openAuthorizeURL:(NSURL *)url
     }
 }
 
-RCT_EXPORT_METHOD(randomBytes:(NSUInteger)length resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(randomBytes:(double)length resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
     resolve([self randomBytes:length]);
 }
 
-RCT_EXPORT_METHOD(sha256String:(NSString *)input resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(sha256String:(NSString *)input resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
     resolve([self sha256String:input]);
 }
 
-RCT_EXPORT_METHOD(getAnonymousKey:(NSString *)kid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(getAnonymousKey:(NSString *)kid resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
   if (@available(iOS 10.0, *)) {
     if (!kid) {
@@ -337,10 +342,10 @@ RCT_EXPORT_METHOD(getAnonymousKey:(NSString *)kid resolver:(RCTPromiseResolveBlo
   }
 }
 
-RCT_EXPORT_METHOD(signAnonymousToken:(NSString *)kid data:(NSString *)s resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(signAnonymousToken:(NSString *)kid tokenData:(NSString *)tokenData resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
   if (@available(iOS 10.0, *)) {
-    NSData *data = [s dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *data = [tokenData dataUsingEncoding:NSUTF8StringEncoding];
     NSString *tag = [@"com.authgear.keys.anonymous." stringByAppendingString:kid];
     NSData *sig = nil;
     NSError *error = [self signData:tag data:data psig:&sig];
@@ -354,13 +359,13 @@ RCT_EXPORT_METHOD(signAnonymousToken:(NSString *)kid data:(NSString *)s resolver
   }
 }
 
-RCT_EXPORT_METHOD(generateUUID:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(generateUUID:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
   NSString *uuid = [[NSUUID UUID] UUIDString];
   resolve(uuid);
 }
 
-RCT_EXPORT_METHOD(checkBiometricSupported:(NSDictionary *)options resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(checkBiometricSupported:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
     if (@available(iOS 11.3, *)) {
         NSDictionary *iosDict = options[@"ios"];
@@ -379,8 +384,8 @@ RCT_EXPORT_METHOD(checkBiometricSupported:(NSDictionary *)options resolver:(RCTP
     }
 }
 
-RCT_EXPORT_METHOD(removeBiometricPrivateKey:(NSString *)kid resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(removeBiometricPrivateKey:(NSString *)kid resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
 {
     NSString *tag = [NSString stringWithFormat:@"com.authgear.keys.biometric.%@", kid];
     NSDictionary *query = @{
@@ -397,8 +402,8 @@ RCT_EXPORT_METHOD(removeBiometricPrivateKey:(NSString *)kid resolver:(RCTPromise
     }
 }
 
-RCT_EXPORT_METHOD(createBiometricPrivateKey:(NSDictionary *)options resolver:(RCTPromiseResolveBlock)resolve
-    rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(createBiometricPrivateKey:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve
+    reject:(RCTPromiseRejectBlock)reject)
 {
     NSString *kid = options[@"kid"];
     NSDictionary *payload = options[@"payload"];
@@ -443,8 +448,8 @@ RCT_EXPORT_METHOD(createBiometricPrivateKey:(NSDictionary *)options resolver:(RC
     }];
 }
 
-RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(RCTPromiseResolveBlock)resolve
-                      rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve
+                      reject:(RCTPromiseRejectBlock)reject)
 {
 
     NSString *kid = options[@"kid"];
@@ -482,10 +487,10 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolver:(
         });
     }];
 }
-    
+
 RCT_EXPORT_METHOD(checkDPoPSupported:(NSDictionary *)options
-  resolver:(RCTPromiseResolveBlock)resolve
-  rejecter:(RCTPromiseRejectBlock)reject)
+  resolve:(RCTPromiseResolveBlock)resolve
+  reject:(RCTPromiseRejectBlock)reject)
 {
     if (@available(iOS 11.3, *)) {
         resolve(@"true");
@@ -493,10 +498,10 @@ RCT_EXPORT_METHOD(checkDPoPSupported:(NSDictionary *)options
     }
     resolve(@"false");
 }
-    
+
 RCT_EXPORT_METHOD(createDPoPPrivateKey:(NSDictionary *)options
-  resolver:(RCTPromiseResolveBlock)resolve
-  rejecter:(RCTPromiseRejectBlock)reject)
+  resolve:(RCTPromiseResolveBlock)resolve
+  reject:(RCTPromiseRejectBlock)reject)
 {
     NSString *kid = options[@"kid"];
     NSString *tag = [NSString stringWithFormat:@"com.authgear.keys.dpop.%@", kid];
@@ -518,10 +523,10 @@ RCT_EXPORT_METHOD(createDPoPPrivateKey:(NSDictionary *)options
         resolve(nil);
     });
 }
-    
+
 RCT_EXPORT_METHOD(signWithDPoPPrivateKey:(NSDictionary *)options
-  resolver:(RCTPromiseResolveBlock)resolve
-  rejecter:(RCTPromiseRejectBlock)reject)
+  resolve:(RCTPromiseResolveBlock)resolve
+  reject:(RCTPromiseRejectBlock)reject)
 {
     NSString *kid = options[@"kid"];
     NSDictionary *payload = options[@"payload"];
@@ -544,10 +549,10 @@ RCT_EXPORT_METHOD(signWithDPoPPrivateKey:(NSDictionary *)options
         resolve(jwt);
     });
 }
-    
+
 RCT_EXPORT_METHOD(checkDPoPPrivateKey:(NSDictionary *)options
-  resolver:(RCTPromiseResolveBlock)resolve
-  rejecter:(RCTPromiseRejectBlock)reject)
+  resolve:(RCTPromiseResolveBlock)resolve
+  reject:(RCTPromiseRejectBlock)reject)
 {
     NSString *kid = options[@"kid"];
     NSString *tag = [NSString stringWithFormat:@"com.authgear.keys.dpop.%@", kid];
@@ -562,10 +567,10 @@ RCT_EXPORT_METHOD(checkDPoPPrivateKey:(NSDictionary *)options
         resolve(@"true");
     });
 }
-    
+
 RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
-  resolver:(RCTPromiseResolveBlock)resolve
-  rejecter:(RCTPromiseRejectBlock)reject)
+  resolve:(RCTPromiseResolveBlock)resolve
+  reject:(RCTPromiseRejectBlock)reject)
 {
     NSString *kid = options[@"kid"];
     NSString *tag = [NSString stringWithFormat:@"com.authgear.keys.dpop.%@", kid];
@@ -576,14 +581,14 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
             reject([@(error.code) stringValue], error.localizedDescription, error);
             return;
         }
-        
+
         NSMutableDictionary *jwk = [[NSMutableDictionary alloc] init];
         jwk[@"kid"] = kid;
         [self getJWKFromPrivateKey:privateKey jwk:jwk error:&error];
         NSDictionary *jwkParams = [self makeDPoPJWKRequiredParams:jwk];
         NSData *jwkParamsJSON = [self serializeToJSON:jwkParams];
         NSMutableData *hashBytes = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];
-        CC_SHA256(jwkParamsJSON.bytes, jwkParamsJSON.length, hashBytes.mutableBytes);
+        CC_SHA256(jwkParamsJSON.bytes, (unsigned int)jwkParamsJSON.length, (unsigned char *)hashBytes.mutableBytes);
         NSString *jkt = [self base64URLEncode:hashBytes];
         resolve(jkt);
     });
@@ -604,7 +609,7 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
     }
     return jwt;
 }
-    
+
 -(NSString *)signDPoPJWT:(SecKeyRef)privateKey kid:(NSString *)kid payload:(NSDictionary *)payload error:(out NSError **)error
 {
     NSMutableDictionary *jwk = [[NSMutableDictionary alloc] init];
@@ -639,7 +644,7 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
     }
     return (SecKeyRef)item;
 }
-    
+
 - (SecKeyRef)getDPoPPrivateKey:(NSString *)tag error:(out NSError **)error
 {
     NSDictionary *query = @{
@@ -672,7 +677,7 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
     }
     return privateKey;
 }
-    
+
 - (SecKeyRef)generateDPoPPrivateKey:(out NSError **)error
 {
     CFErrorRef cfError = NULL;
@@ -687,8 +692,8 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
     }
     return privateKey;
 }
-    
-    
+
+
 - (void)addDPoPPrivateKey:(SecKeyRef)privateKey tag:(NSString *)tag error:(out NSError **)error
 {
     CFErrorRef cfError = NULL;
@@ -777,14 +782,16 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
   return nil;
 }
 
--(NSArray *)randomBytes:(NSUInteger)length
+-(NSArray *)randomBytes:(double)length
 {
-    NSMutableData *data = [NSMutableData dataWithLength:length];
-    SecRandomCopyBytes(kSecRandomDefault, length, [data mutableBytes]);
-    NSMutableArray *arr = [NSMutableArray arrayWithCapacity:length];
-    const char *bytes = [data bytes];
+    NSUInteger lengthUInt = [[NSNumber numberWithDouble:length] unsignedIntegerValue];
+    NSMutableData *data = [NSMutableData dataWithLength:lengthUInt];
+    SecRandomCopyBytes(kSecRandomDefault, lengthUInt, [data mutableBytes]);
+    NSMutableArray *arr = [NSMutableArray arrayWithCapacity:lengthUInt];
+    const void *bytes = [data bytes];
     for (int i = 0; i < [data length]; i++) {
-        [arr addObject:[NSNumber numberWithInt:(bytes[i] & 0xff)]];
+        const char *theByte = (const char *)bytes;
+        [arr addObject:[NSNumber numberWithInt:(theByte[i] & 0xff)]];
     }
     return arr;
 }
@@ -793,7 +800,7 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
 {
     NSData *utf8 = [input dataUsingEncoding:NSUTF8StringEncoding];
     unsigned char result[CC_SHA256_DIGEST_LENGTH];
-    CC_SHA256([utf8 bytes], [utf8 length], result);
+    CC_SHA256([utf8 bytes], (unsigned int)[utf8 length], result);
     NSMutableArray *arr = [NSMutableArray arrayWithCapacity:CC_SHA256_DIGEST_LENGTH];
     for (int i = 0; i < CC_SHA256_DIGEST_LENGTH; i++) {
         [arr addObject:[NSNumber numberWithInt:(result[i] & 0xff)]];
@@ -899,7 +906,7 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
         @"jwk": jwk,
     };
 }
-    
+
 -(NSDictionary *)makeDPoPJWTHeader:(NSDictionary *)jwk
 {
     return @{
@@ -909,7 +916,7 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
         @"jwk": jwk,
     };
 }
-    
+
 -(NSDictionary *)makeDPoPJWKRequiredParams:(NSDictionary *)jwk
 {
     return @{
@@ -944,7 +951,7 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
 -(NSData *)signData:(SecKeyRef)privateKey data:(NSData *)data error:(out NSError **)error
 {
     NSMutableData *hash = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];
-    CC_SHA256(data.bytes, (unsigned int)data.length, hash.mutableBytes);
+    CC_SHA256(data.bytes, (unsigned int)data.length, (unsigned char *)hash.mutableBytes);
     CFErrorRef cfError = NULL;
     CFDataRef dataRef = SecKeyCreateSignature(
         privateKey,
@@ -970,7 +977,7 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
   }
 
   NSMutableData *hash = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];
-  CC_SHA256(data.bytes, (unsigned int)data.length, hash.mutableBytes);
+  CC_SHA256(data.bytes, (unsigned int)data.length, (unsigned char *)hash.mutableBytes);
 
   NSData *sig = (__bridge NSData*)SecKeyCreateSignature(
     privKey,
@@ -1088,5 +1095,17 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
     }
     return false;
 }
+
+#ifdef RCT_NEW_ARCH_ENABLED
+-(void)onAuthgearReactNative:(NSDictionary *)data
+{
+    [self emitOnAuthgearReactNative:data];
+}
+#else
+-(void)onAuthgearReactNative:(NSDictionary *)data
+{
+    [self sendEventWithName:@"onAuthgearReactNative" body:data];
+}
+#endif
 
 @end

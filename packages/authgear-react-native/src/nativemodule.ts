@@ -1,12 +1,10 @@
-import { NativeModules } from "react-native";
 import { BiometricPrivateKeyOptions, BiometricOptions } from "./types";
 import { _wrapError } from "./error";
+import AuthgearReactNative from "./NativeAuthgearReactNative";
 
 // In ios objc code, reading a BOOL from a NSDictionary always got true
 // So encode the boolean as string before passing to native
 type BooleanString = "false" | "true";
-
-const { AuthgearReactNative } = NativeModules;
 
 async function _wrapPromise<T>(p: Promise<T>): Promise<T> {
   try {

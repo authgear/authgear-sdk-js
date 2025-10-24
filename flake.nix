@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -26,9 +26,9 @@
         # We need to use the clang from Xcode.
         devShells.default = pkgs.mkShellNoCC {
           packages = [
-            # 20.18.1
+            # 20.19.5
             pkgs.nodejs_20
-            # 3.3.6
+            # 3.3.9
             pkgs.ruby_3_3
             # 1.22.22
             pkgs.yarn

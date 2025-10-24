@@ -39,32 +39,43 @@ import android.security.keystore.KeyProperties;
 import android.util.Base64;
 import android.util.Log;
 
-import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.ActivityEventListener;
-import com.facebook.react.bridge.Promise;
-import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
-import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.ReadableArray;
-import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.WritableArray;
-import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.modules.core.DeviceEventManagerModule;
-
-import com.google.crypto.tink.shaded.protobuf.InvalidProtocolBufferException;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
-import androidx.security.crypto.MasterKey;
 import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKey;
+
+import com.facebook.react.bridge.ActivityEventListener;
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.google.crypto.tink.shaded.protobuf.InvalidProtocolBufferException;
 
 import org.json.JSONObject;
 
-public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implements ActivityEventListener {
+class AuthgearReactNativeModuleImpl implements ActivityEventListener {
+    static final String NAME = "AuthgearReactNative";
+
+    private static final String LOGTAG = "AuthgearReactNative";
+    private static final Charset UTF8 = Charset.forName("UTF-8");
+    private static final String ENCRYPTED_SHARED_PREFERENCES_NAME = "authgear_encrypted_shared_preferences";
+    private static final int ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION = 1;
+
+    private final StartActivityHandles<Handle> mHandles;
+    private final Module mModule;
+
+    interface Module {
+        ReactApplicationContext impl_getReactApplicationContext();
+        void impl_sendEvent(ReadableMap body);
+    }
 
     private static class Handle {
         Promise mPromise;
@@ -75,28 +86,16 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
-    private static final String LOGTAG = "AuthgearReactNative";
-    private static final String ENCRYPTED_SHARED_PREFERENCES_NAME = "authgear_encrypted_shared_preferences";
-    private static final Charset UTF8 = Charset.forName("UTF-8");
-
-    private static final int ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION = 1;
-    private final StartActivityHandles<Handle> mHandles;
-
-    private final ReactApplicationContext reactContext;
-
-    public AuthgearReactNativeModule(ReactApplicationContext context) {
-        super(context);
-        this.reactContext = context;
+    public AuthgearReactNativeModuleImpl(Module module) {
+        this.mModule = module;
         this.mHandles = new StartActivityHandles<>();
-        reactContext.addActivityEventListener(this);
+        this.getReactApplicationContext().addActivityEventListener(this);
     }
 
-    @Override
-    public String getName() {
-        return "AuthgearReactNative";
+    private ReactApplicationContext getReactApplicationContext() {
+        return this.mModule.impl_getReactApplicationContext();
     }
 
-    @ReactMethod
     public void storageGetItem(String key, Promise promise) {
         try {
             SharedPreferences sharedPreferences = this.getSharePreferences();
@@ -116,7 +115,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
-    @ReactMethod
     public void storageSetItem(String key, String value, Promise promise) {
         try {
             SharedPreferences sharedPreferences = this.getSharePreferences();
@@ -136,7 +134,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
-    @ReactMethod
     public void storageDeleteItem(String key, Promise promise) {
         try {
             SharedPreferences sharedPreferences = this.getSharePreferences();
@@ -228,13 +225,11 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         return getReactApplicationContext().getSharedPreferences("authgear_shared_preferences", Context.MODE_PRIVATE);
     }
 
-    @ReactMethod
     public void generateUUID(Promise promise) {
         String uuid = UUID.randomUUID().toString();
         promise.resolve(uuid);
     }
 
-    @ReactMethod
     public void getDeviceInfo(Promise promise) {
         String baseOS = "";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -388,7 +383,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
-    @ReactMethod
     public void checkBiometricSupported(ReadableMap options, Promise promise) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             this.rejectMinimumBiometricAPILevel(promise);
@@ -419,7 +413,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         promise.reject(resultString, resultString);
     }
 
-    @ReactMethod
     public void removeBiometricPrivateKey(String kid, Promise promise) {
         String alias = "com.authgear.keys.biometric." + kid;
         try {
@@ -615,14 +608,14 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
             final BiometricPrompt prompt = new BiometricPrompt(activity, new BiometricPrompt.AuthenticationCallback() {
                 @Override
                 public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
-                    promise.reject(AuthgearReactNativeModule.this.errorCodeToString(errorCode), errString.toString());
+                    promise.reject(AuthgearReactNativeModuleImpl.this.errorCodeToString(errorCode), errString.toString());
                 }
 
                 @Override
                 public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                     Signature signature = result.getCryptoObject().getSignature();
                     try {
-                        String jwt = AuthgearReactNativeModule.this.signJWT(signature, header, payload);
+                        String jwt = AuthgearReactNativeModuleImpl.this.signJWT(signature, header, payload);
                         promise.resolve(jwt);
                     } catch (Exception e) {
                         promise.reject(e.getClass().getName(), e.getMessage(), e);
@@ -650,7 +643,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     }
 
     private FragmentActivity rejectFragmentActivity(Promise promise) {
-        Activity activity = this.getCurrentActivity();
+        Activity activity = this.getReactApplicationContext().getCurrentActivity();
         if (activity instanceof FragmentActivity) {
             return (FragmentActivity) activity;
         }
@@ -658,7 +651,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         return null;
     }
 
-    @ReactMethod
     public void createBiometricPrivateKey(ReadableMap options, Promise promise) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             this.rejectMinimumBiometricAPILevel(promise);
@@ -701,7 +693,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         throw new KeyNotFoundException();
     }
 
-    @ReactMethod
     public void signWithBiometricPrivateKey(ReadableMap options, Promise promise) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             this.rejectMinimumBiometricAPILevel(promise);
@@ -731,20 +722,17 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
-    @ReactMethod
     public void dismiss(Promise promise) {
         promise.resolve(null);
     }
 
-    @ReactMethod
-    public void randomBytes(int length, Promise promise) {
+    public void randomBytes(double length, Promise promise) {
         SecureRandom rng = new SecureRandom();
-        byte[] output = new byte[length];
+        byte[] output = new byte[new Double(length).intValue()];
         rng.nextBytes(output);
         promise.resolve(this.bytesToArray(output));
     }
 
-    @ReactMethod
     public void sha256String(String input, Promise promise) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -755,13 +743,12 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
-    @ReactMethod
     public void openAuthorizeURLWithWebView(ReadableMap options, Promise promise) {
         final Handle handle = new Handle(promise);
         final int requestCode = this.mHandles.push(new StartActivityHandle<>(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, handle));
 
         try {
-            Activity currentActivity = this.getCurrentActivity();
+            Activity currentActivity = this.getReactApplicationContext().getCurrentActivity();
             if (currentActivity == null) {
                 promise.reject(new Exception("No Activity"));
                 return;
@@ -791,7 +778,7 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
                             WritableMap map = Arguments.createMap();
                             map.putString("invocationID", invocationID);
                             map.putString("url", uriString);
-                            AuthgearReactNativeModule.this.sendEvent("authgear-react-native", map);
+                            AuthgearReactNativeModuleImpl.this.sendEvent(map);
                         }
                     }
                 };
@@ -827,16 +814,15 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         return null;
     }
 
-    private void sendEvent(String name, ReadableMap map) {
-        this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(name, map);
+    private void sendEvent(ReadableMap map) {
+        this.mModule.impl_sendEvent(map);
     }
 
-    @ReactMethod
     public void openAuthorizeURL(String urlString, String callbackURL, boolean shareSessionWithSystemBrowser, Promise promise) {
         final Handle handle = new Handle(promise);
         final int requestCode = this.mHandles.push(new StartActivityHandle<>(ACTIVITY_PROMISE_TAG_CODE_AUTHORIZATION, handle));
         try {
-            Activity currentActivity = getCurrentActivity();
+            Activity currentActivity = this.getReactApplicationContext().getCurrentActivity();
             if (currentActivity == null) {
                 promise.reject(new Exception("No Activity"));
                 return;
@@ -856,7 +842,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
-    @ReactMethod
     public void getAnonymousKey(String kid, Promise promise) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             promise.reject("EUNSPECIFIED", "Anonymous authentication is not supported on Android before version M.");
@@ -885,7 +870,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
-    @ReactMethod
     public void signAnonymousToken(String kid, String data, Promise promise) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             promise.reject("EUNSPECIFIED", "Anonymous authentication is not supported on Android before version M.");
@@ -910,7 +894,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
-    @ReactMethod
     public void checkDPoPSupported(ReadableMap options, Promise promise) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             promise.resolve("false");
@@ -920,7 +903,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    @ReactMethod
     public void createDPoPPrivateKey(ReadableMap options, Promise promise) {
         String kid = options.getString("kid");
         String alias = this.formatDPoPKeyAlias(kid);
@@ -932,7 +914,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
-    @ReactMethod
     public void signWithDPoPPrivateKey(ReadableMap options, Promise promise) {
         String kid = options.getString("kid");
         ReadableMap payload = options.getMap("payload");
@@ -949,7 +930,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
-    @ReactMethod
     public void checkDPoPPrivateKey(ReadableMap options, Promise promise) {
         String kid = options.getString("kid");
         String alias = this.formatDPoPKeyAlias(kid);
@@ -961,7 +941,6 @@ public class AuthgearReactNativeModule extends ReactContextBaseJavaModule implem
         }
     }
 
-    @ReactMethod
     public void computeDPoPJKT(ReadableMap options, Promise promise) {
         String kid = options.getString("kid");
         String alias = this.formatDPoPKeyAlias(kid);
