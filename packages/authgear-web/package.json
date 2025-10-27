@@ -2,6 +2,7 @@
   "name": "@authgear/web",
   "version": "4.1.0",
   "license": "Apache-2.0",
+  "repository": "https://github.com/authgear/authgear-sdk-js",
   "main": "dist/authgear-web.cjs.js",
   "module": "dist/authgear-web.module.js",
   "files": [

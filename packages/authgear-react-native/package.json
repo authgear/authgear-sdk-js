@@ -2,6 +2,7 @@
   "name": "@authgear/react-native",
   "version": "4.1.0",
   "license": "Apache-2.0",
+  "repository": "https://github.com/authgear/authgear-sdk-js",
   "scripts": {
     "check-tidy": "npm run codegen:android && npm run codegen:ios && ./scripts/check_tidy.sh",
     "codegen:android": "./scripts/codegen_android.sh",
