@@ -53,8 +53,8 @@
     "prettier": "2.6.2",
     "rimraf": "^5.0.5",
     "rollup": "^4.17.1",
-    "typedoc": "^0.25.13",
-    "typedoc-plugin-markdown": "^3.17.1",
+    "typedoc": "^0.28.14",
+    "typedoc-plugin-markdown": "^4.9.0",
     "typescript": "^5.4.5"
   }
 }

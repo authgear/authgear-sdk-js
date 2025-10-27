@@ -21,8 +21,8 @@ docs:
 		--entryPoints packages/authgear-web/index.d.ts \
 		--out ./temp/docs/web \
 		--plugin typedoc-plugin-markdown \
-		--namedAnchors \
-		--entryDocument index.md
+		--useHTMLAnchors \
+		--entryFileName index.md
 	npx typedoc \
 		--options typedoc/typedoc.json \
 		--tsconfig typedoc/tsconfig.react-native.json \
@@ -30,8 +30,8 @@ docs:
 		--entryPoints packages/authgear-react-native/index.d.ts \
 		--out ./temp/docs/react-native \
 		--plugin typedoc-plugin-markdown \
-		--namedAnchors \
-		--entryDocument index.md
+		--useHTMLAnchors \
+		--entryFileName index.md
 	npx typedoc \
 		--options typedoc/typedoc.json \
 		--tsconfig typedoc/tsconfig.capacitor.json \
@@ -39,8 +39,8 @@ docs:
 		--entryPoints packages/authgear-capacitor/index.d.ts \
 		--out ./temp/docs/capacitor \
 		--plugin typedoc-plugin-markdown \
-		--namedAnchors \
-		--entryDocument index.md
+		--useHTMLAnchors \
+		--entryFileName index.md
 	cp ./typedoc/index.md ./temp/docs/index.md
 	cp ./typedoc/web_index.md ./temp/docs/web/index.md
 	cp ./typedoc/react_native_index.md ./temp/docs/react-native/index.md
