@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.8.1">
 <title data-rh="true">WebContainer | Authgear SDK JS</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://authgear.github.io/authgear-sdk-js/docs/web/classes/WebContainer/"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="WebContainer | Authgear SDK JS"><meta data-rh="true" name="description" content="@authgear/web / WebContainer"><meta data-rh="true" property="og:description" content="@authgear/web / WebContainer"><link data-rh="true" rel="icon" href="/authgear-sdk-js/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://authgear.github.io/authgear-sdk-js/docs/web/classes/WebContainer/"><link data-rh="true" rel="alternate" href="https://authgear.github.io/authgear-sdk-js/docs/web/classes/WebContainer/" hreflang="en"><link data-rh="true" rel="alternate" href="https://authgear.github.io/authgear-sdk-js/docs/web/classes/WebContainer/" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"WebContainer","item":"https://authgear.github.io/authgear-sdk-js/docs/web/classes/WebContainer"}]}</script><link rel="stylesheet" href="/authgear-sdk-js/assets/css/styles.dce19cfa.css">
-<script src="/authgear-sdk-js/assets/js/runtime~main.a49c7fb6.js" defer="defer"></script>
+<script src="/authgear-sdk-js/assets/js/runtime~main.74a4d4c4.js" defer="defer"></script>
 <script src="/authgear-sdk-js/assets/js/main.765ad14a.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -44,8 +44,14 @@ You are responsible for managing the list of names in this case.</p>
 <li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#configure">configure</a></li>
 <li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#fetch">fetch</a></li>
 <li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#fetchuserinfo">fetchUserInfo</a></li>
+<li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#finishaddemail">finishAddEmail</a></li>
+<li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#finishaddphone">finishAddPhone</a></li>
+<li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#finishaddusername">finishAddUsername</a></li>
 <li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#finishauthentication">finishAuthentication</a></li>
+<li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#finishchangeemail">finishChangeEmail</a></li>
 <li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#finishchangepassword">finishChangePassword</a></li>
+<li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#finishchangephone">finishChangePhone</a></li>
+<li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#finishchangeusername">finishChangeUsername</a></li>
 <li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#finishdeleteaccount">finishDeleteAccount</a></li>
 <li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#finishpromoteanonymoususer">finishPromoteAnonymousUser</a></li>
 <li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#finishreauthentication">finishReauthentication</a></li>
@@ -56,8 +62,14 @@ You are responsible for managing the list of names in this case.</p>
 <li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#open">open</a></li>
 <li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#refreshaccesstokenifneeded">refreshAccessTokenIfNeeded</a></li>
 <li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#refreshidtoken">refreshIDToken</a></li>
+<li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#startaddemail">startAddEmail</a></li>
+<li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#startaddphone">startAddPhone</a></li>
+<li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#startaddusername">startAddUsername</a></li>
 <li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#startauthentication">startAuthentication</a></li>
+<li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#startchangeemail">startChangeEmail</a></li>
 <li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#startchangepassword">startChangePassword</a></li>
+<li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#startchangephone">startChangePhone</a></li>
+<li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#startchangeusername">startChangeUsername</a></li>
 <li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#startdeleteaccount">startDeleteAccount</a></li>
 <li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#startpromoteanonymoususer">startPromoteAnonymousUser</a></li>
 <li><a href="/authgear-sdk-js/docs/web/classes/WebContainer/#startreauthentication">startReauthentication</a></li>
@@ -70,31 +82,31 @@ You are responsible for managing the list of names in this case.</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns">Returns<a href="#returns" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><a href="/authgear-sdk-js/docs/web/classes/WebContainer/"><code>WebContainer</code></a></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in">Defined in<a href="#defined-in" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:707</p>
+<p>packages/authgear-web/index.d.ts:731</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="properties-1">Properties<a href="#properties-1" class="hash-link" aria-label="Direct link to Properties" title="Direct link to Properties">​</a></h2>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-delegate"><a id="delegate" name="delegate"></a> delegate<a href="#-delegate" class="hash-link" aria-label="Direct link to -delegate" title="Direct link to -delegate">​</a></h3>
 <p>• <code>Optional</code> <strong>delegate</strong>: <a href="/authgear-sdk-js/docs/web/interfaces/WebContainerDelegate/"><code>WebContainerDelegate</code></a></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-1">Defined in<a href="#defined-in-1" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:671</p>
+<p>packages/authgear-web/index.d.ts:695</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-sessiontype"><a id="sessiontype" name="sessiontype"></a> sessionType<a href="#-sessiontype" class="hash-link" aria-label="Direct link to -sessiontype" title="Direct link to -sessiontype">​</a></h3>
 <p>• <strong>sessionType</strong>: <code>&quot;cookie&quot;</code> | <code>&quot;refresh_token&quot;</code></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-2">Defined in<a href="#defined-in-2" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:667</p>
+<p>packages/authgear-web/index.d.ts:691</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="accessors-1">Accessors<a href="#accessors-1" class="hash-link" aria-label="Direct link to Accessors" title="Direct link to Accessors">​</a></h2>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-accesstoken"><a id="accesstoken" name="accesstoken"></a> accessToken<a href="#-accesstoken" class="hash-link" aria-label="Direct link to -accesstoken" title="Direct link to -accesstoken">​</a></h3>
 <p>• <code>get</code> <strong>accessToken</strong>(): <code>undefined</code> | <code>string</code></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-1">Returns<a href="#returns-1" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>undefined</code> | <code>string</code></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-3">Defined in<a href="#defined-in-3" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:705</p>
+<p>packages/authgear-web/index.d.ts:729</p>
 <p>• <code>set</code> <strong>accessToken</strong>(<code>accessToken</code>): <code>void</code></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-1">Parameters<a href="#parameters-1" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
 <table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>accessToken</code></td><td style="text-align:left"><code>undefined</code> | <code>string</code></td></tr></tbody></table>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-2">Returns<a href="#returns-2" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>void</code></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-4">Defined in<a href="#defined-in-4" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:706</p>
+<p>packages/authgear-web/index.d.ts:730</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-clientid"><a id="clientid" name="clientid"></a> clientID<a href="#-clientid" class="hash-link" aria-label="Direct link to -clientid" title="Direct link to -clientid">​</a></h3>
 <p>• <code>get</code> <strong>clientID</strong>(): <code>undefined</code> | <code>string</code></p>
@@ -102,14 +114,14 @@ You are responsible for managing the list of names in this case.</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-3">Returns<a href="#returns-3" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>undefined</code> | <code>string</code></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-5">Defined in<a href="#defined-in-5" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:686</p>
+<p>packages/authgear-web/index.d.ts:710</p>
 <p>• <code>set</code> <strong>clientID</strong>(<code>clientID</code>): <code>void</code></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-2">Parameters<a href="#parameters-2" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
 <table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>clientID</code></td><td style="text-align:left"><code>undefined</code> | <code>string</code></td></tr></tbody></table>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-4">Returns<a href="#returns-4" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>void</code></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-6">Defined in<a href="#defined-in-6" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:687</p>
+<p>packages/authgear-web/index.d.ts:711</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-isssoenabled"><a id="isssoenabled" name="isssoenabled"></a> isSSOEnabled<a href="#-isssoenabled" class="hash-link" aria-label="Direct link to -isssoenabled" title="Direct link to -isssoenabled">​</a></h3>
 <p>• <code>get</code> <strong>isSSOEnabled</strong>(): <code>boolean</code></p>
@@ -117,14 +129,14 @@ You are responsible for managing the list of names in this case.</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-5">Returns<a href="#returns-5" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>boolean</code></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-7">Defined in<a href="#defined-in-7" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:693</p>
+<p>packages/authgear-web/index.d.ts:717</p>
 <p>• <code>set</code> <strong>isSSOEnabled</strong>(<code>isSSOEnabled</code>): <code>void</code></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-3">Parameters<a href="#parameters-3" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
 <table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>isSSOEnabled</code></td><td style="text-align:left"><code>boolean</code></td></tr></tbody></table>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-6">Returns<a href="#returns-6" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>void</code></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-8">Defined in<a href="#defined-in-8" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:694</p>
+<p>packages/authgear-web/index.d.ts:718</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-name"><a id="name" name="name"></a> name<a href="#-name" class="hash-link" aria-label="Direct link to -name" title="Direct link to -name">​</a></h3>
 <p>• <code>get</code> <strong>name</strong>(): <code>string</code></p>
@@ -134,28 +146,28 @@ You are responsible for managing the list of names in this case.</p>
 <p><strong><code>Default Value</code></strong></p>
 <div class="language-ts codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-ts codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#bfc7d5"><span class="token string" style="color:rgb(195, 232, 141)">&quot;default&quot;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#bfc7d5"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#bfc7d5"><span class="token plain">@</span><span class="token keyword" style="font-style:italic">public</span><br></span></code></pre></div></div>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-9">Defined in<a href="#defined-in-9" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:679</p>
+<p>packages/authgear-web/index.d.ts:703</p>
 <p>• <code>set</code> <strong>name</strong>(<code>name</code>): <code>void</code></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-4">Parameters<a href="#parameters-4" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
 <table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>name</code></td><td style="text-align:left"><code>string</code></td></tr></tbody></table>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-8">Returns<a href="#returns-8" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>void</code></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-10">Defined in<a href="#defined-in-10" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:680</p>
+<p>packages/authgear-web/index.d.ts:704</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-sessionstate"><a id="sessionstate" name="sessionstate"></a> sessionState<a href="#-sessionstate" class="hash-link" aria-label="Direct link to -sessionstate" title="Direct link to -sessionstate">​</a></h3>
 <p>• <code>get</code> <strong>sessionState</strong>(): <a href="/authgear-sdk-js/docs/web/enums/SessionState/"><code>SessionState</code></a></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-9">Returns<a href="#returns-9" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><a href="/authgear-sdk-js/docs/web/enums/SessionState/"><code>SessionState</code></a></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-11">Defined in<a href="#defined-in-11" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:699</p>
+<p>packages/authgear-web/index.d.ts:723</p>
 <p>• <code>set</code> <strong>sessionState</strong>(<code>sessionState</code>): <code>void</code></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-5">Parameters<a href="#parameters-5" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
 <table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>sessionState</code></td><td style="text-align:left"><a href="/authgear-sdk-js/docs/web/enums/SessionState/"><code>SessionState</code></a></td></tr></tbody></table>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-10">Returns<a href="#returns-10" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>void</code></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-12">Defined in<a href="#defined-in-12" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:700</p>
+<p>packages/authgear-web/index.d.ts:724</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="methods-1">Methods<a href="#methods-1" class="hash-link" aria-label="Direct link to Methods" title="Direct link to Methods">​</a></h2>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-authenticateanonymously"><a id="authenticateanonymously" name="authenticateanonymously"></a> authenticateAnonymously<a href="#-authenticateanonymously" class="hash-link" aria-label="Direct link to -authenticateanonymously" title="Direct link to -authenticateanonymously">​</a></h3>
 <p>▸ <strong>authenticateAnonymously</strong>(): <code>Promise</code>&lt;<a href="/authgear-sdk-js/docs/web/interfaces/AuthenticateResult/"><code>AuthenticateResult</code></a>&gt;</p>
@@ -163,7 +175,7 @@ You are responsible for managing the list of names in this case.</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-11">Returns<a href="#returns-11" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<a href="/authgear-sdk-js/docs/web/interfaces/AuthenticateResult/"><code>AuthenticateResult</code></a>&gt;</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-13">Defined in<a href="#defined-in-13" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:827</p>
+<p>packages/authgear-web/index.d.ts:935</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-canreauthenticate"><a id="canreauthenticate" name="canreauthenticate"></a> canReauthenticate<a href="#-canreauthenticate" class="hash-link" aria-label="Direct link to -canreauthenticate" title="Direct link to -canreauthenticate">​</a></h3>
 <p>▸ <strong>canReauthenticate</strong>(): <code>boolean</code></p>
@@ -172,7 +184,7 @@ The information comes from the ID token and the ID token is NOT verified.</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-12">Returns<a href="#returns-12" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>boolean</code></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-14">Defined in<a href="#defined-in-14" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:720</p>
+<p>packages/authgear-web/index.d.ts:744</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-configure"><a id="configure" name="configure"></a> configure<a href="#-configure" class="hash-link" aria-label="Direct link to -configure" title="Direct link to -configure">​</a></h3>
 <p>▸ <strong>configure</strong>(<code>options</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
@@ -189,7 +201,7 @@ Otherwise, it is NOT recommended to call it more than once.</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-13">Returns<a href="#returns-13" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<code>void</code>&gt;</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-15">Defined in<a href="#defined-in-15" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:748</p>
+<p>packages/authgear-web/index.d.ts:772</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-fetch"><a id="fetch" name="fetch"></a> fetch<a href="#-fetch" class="hash-link" aria-label="Direct link to -fetch" title="Direct link to -fetch">​</a></h3>
 <p>▸ <strong>fetch</strong>(<code>input</code>, <code>init?</code>): <code>Promise</code>&lt;<code>Response</code>&gt;</p>
@@ -201,7 +213,7 @@ request, and handle refresh access token automatically.</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-14">Returns<a href="#returns-14" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<code>Response</code>&gt;</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-16">Defined in<a href="#defined-in-16" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:853</p>
+<p>packages/authgear-web/index.d.ts:961</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-fetchuserinfo"><a id="fetchuserinfo" name="fetchuserinfo"></a> fetchUserInfo<a href="#-fetchuserinfo" class="hash-link" aria-label="Direct link to -fetchuserinfo" title="Direct link to -fetchuserinfo">​</a></h3>
 <p>▸ <strong>fetchUserInfo</strong>(): <code>Promise</code>&lt;<a href="/authgear-sdk-js/docs/web/interfaces/UserInfo/"><code>UserInfo</code></a>&gt;</p>
@@ -209,84 +221,138 @@ request, and handle refresh access token automatically.</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-15">Returns<a href="#returns-15" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<a href="/authgear-sdk-js/docs/web/interfaces/UserInfo/"><code>UserInfo</code></a>&gt;</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-17">Defined in<a href="#defined-in-17" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:841</p>
+<p>packages/authgear-web/index.d.ts:949</p>
+<hr>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-finishaddemail"><a id="finishaddemail" name="finishaddemail"></a> finishAddEmail<a href="#-finishaddemail" class="hash-link" aria-label="Direct link to -finishaddemail" title="Direct link to -finishaddemail">​</a></h3>
+<p>▸ <strong>finishAddEmail</strong>(): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Finish settings action &quot;add_email&quot;.</p>
+<p>It may reject with OAuthError.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-16">Returns<a href="#returns-16" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-18">Defined in<a href="#defined-in-18" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:868</p>
+<hr>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-finishaddphone"><a id="finishaddphone" name="finishaddphone"></a> finishAddPhone<a href="#-finishaddphone" class="hash-link" aria-label="Direct link to -finishaddphone" title="Direct link to -finishaddphone">​</a></h3>
+<p>▸ <strong>finishAddPhone</strong>(): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Finish settings action &quot;add_phone&quot;.</p>
+<p>It may reject with OAuthError.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-17">Returns<a href="#returns-17" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-19">Defined in<a href="#defined-in-19" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:876</p>
+<hr>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-finishaddusername"><a id="finishaddusername" name="finishaddusername"></a> finishAddUsername<a href="#-finishaddusername" class="hash-link" aria-label="Direct link to -finishaddusername" title="Direct link to -finishaddusername">​</a></h3>
+<p>▸ <strong>finishAddUsername</strong>(): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Finish settings action &quot;add_username&quot;.</p>
+<p>It may reject with OAuthError.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-18">Returns<a href="#returns-18" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-20">Defined in<a href="#defined-in-20" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:884</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-finishauthentication"><a id="finishauthentication" name="finishauthentication"></a> finishAuthentication<a href="#-finishauthentication" class="hash-link" aria-label="Direct link to -finishauthentication" title="Direct link to -finishauthentication">​</a></h3>
 <p>▸ <strong>finishAuthentication</strong>(): <code>Promise</code>&lt;<a href="/authgear-sdk-js/docs/web/interfaces/AuthenticateResult/"><code>AuthenticateResult</code></a>&gt;</p>
 <p>Finish authentication.</p>
 <p>It may reject with OAuthError.</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-16">Returns<a href="#returns-16" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-19">Returns<a href="#returns-19" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<a href="/authgear-sdk-js/docs/web/interfaces/AuthenticateResult/"><code>AuthenticateResult</code></a>&gt;</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-18">Defined in<a href="#defined-in-18" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:778</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-21">Defined in<a href="#defined-in-21" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:838</p>
+<hr>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-finishchangeemail"><a id="finishchangeemail" name="finishchangeemail"></a> finishChangeEmail<a href="#-finishchangeemail" class="hash-link" aria-label="Direct link to -finishchangeemail" title="Direct link to -finishchangeemail">​</a></h3>
+<p>▸ <strong>finishChangeEmail</strong>(): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Finish settings action &quot;change_email&quot;.</p>
+<p>It may reject with OAuthError.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-20">Returns<a href="#returns-20" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-22">Defined in<a href="#defined-in-22" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:892</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-finishchangepassword"><a id="finishchangepassword" name="finishchangepassword"></a> finishChangePassword<a href="#-finishchangepassword" class="hash-link" aria-label="Direct link to -finishchangepassword" title="Direct link to -finishchangepassword">​</a></h3>
 <p>▸ <strong>finishChangePassword</strong>(): <code>Promise</code>&lt;<code>void</code>&gt;</p>
 <p>Finish settings action &quot;change_password&quot;.</p>
 <p>It may reject with OAuthError.</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-17">Returns<a href="#returns-17" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-21">Returns<a href="#returns-21" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<code>void</code>&gt;</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-19">Defined in<a href="#defined-in-19" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:792</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-23">Defined in<a href="#defined-in-23" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:852</p>
+<hr>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-finishchangephone"><a id="finishchangephone" name="finishchangephone"></a> finishChangePhone<a href="#-finishchangephone" class="hash-link" aria-label="Direct link to -finishchangephone" title="Direct link to -finishchangephone">​</a></h3>
+<p>▸ <strong>finishChangePhone</strong>(): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Finish settings action &quot;change_phone&quot;.</p>
+<p>It may reject with OAuthError.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-22">Returns<a href="#returns-22" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-24">Defined in<a href="#defined-in-24" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:900</p>
+<hr>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-finishchangeusername"><a id="finishchangeusername" name="finishchangeusername"></a> finishChangeUsername<a href="#-finishchangeusername" class="hash-link" aria-label="Direct link to -finishchangeusername" title="Direct link to -finishchangeusername">​</a></h3>
+<p>▸ <strong>finishChangeUsername</strong>(): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Finish settings action &quot;change_username&quot;.</p>
+<p>It may reject with OAuthError.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-23">Returns<a href="#returns-23" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-25">Defined in<a href="#defined-in-25" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:908</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-finishdeleteaccount"><a id="finishdeleteaccount" name="finishdeleteaccount"></a> finishDeleteAccount<a href="#-finishdeleteaccount" class="hash-link" aria-label="Direct link to -finishdeleteaccount" title="Direct link to -finishdeleteaccount">​</a></h3>
 <p>▸ <strong>finishDeleteAccount</strong>(): <code>Promise</code>&lt;<code>void</code>&gt;</p>
 <p>Finish settings action &quot;delete_account&quot;.</p>
 <p>It may reject with OAuthError.</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-18">Returns<a href="#returns-18" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-24">Returns<a href="#returns-24" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<code>void</code>&gt;</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-20">Defined in<a href="#defined-in-20" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:800</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-26">Defined in<a href="#defined-in-26" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:860</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-finishpromoteanonymoususer"><a id="finishpromoteanonymoususer" name="finishpromoteanonymoususer"></a> finishPromoteAnonymousUser<a href="#-finishpromoteanonymoususer" class="hash-link" aria-label="Direct link to -finishpromoteanonymoususer" title="Direct link to -finishpromoteanonymoususer">​</a></h3>
 <p>▸ <strong>finishPromoteAnonymousUser</strong>(): <code>Promise</code>&lt;<a href="/authgear-sdk-js/docs/web/interfaces/ReauthenticateResult/"><code>ReauthenticateResult</code></a>&gt;</p>
 <p>Finish promote anonymous user.</p>
 <p>It may reject with OAuthError.</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-19">Returns<a href="#returns-19" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-25">Returns<a href="#returns-25" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<a href="/authgear-sdk-js/docs/web/interfaces/ReauthenticateResult/"><code>ReauthenticateResult</code></a>&gt;</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-21">Defined in<a href="#defined-in-21" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:806</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-27">Defined in<a href="#defined-in-27" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:914</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-finishreauthentication"><a id="finishreauthentication" name="finishreauthentication"></a> finishReauthentication<a href="#-finishreauthentication" class="hash-link" aria-label="Direct link to -finishreauthentication" title="Direct link to -finishreauthentication">​</a></h3>
 <p>▸ <strong>finishReauthentication</strong>(): <code>Promise</code>&lt;<a href="/authgear-sdk-js/docs/web/interfaces/ReauthenticateResult/"><code>ReauthenticateResult</code></a>&gt;</p>
 <p>Finish reauthentication.</p>
 <p>It may reject with OAuthError.</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-20">Returns<a href="#returns-20" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-26">Returns<a href="#returns-26" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<a href="/authgear-sdk-js/docs/web/interfaces/ReauthenticateResult/"><code>ReauthenticateResult</code></a>&gt;</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-22">Defined in<a href="#defined-in-22" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:784</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-28">Defined in<a href="#defined-in-28" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:844</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-getauthtime"><a id="getauthtime" name="getauthtime"></a> getAuthTime<a href="#-getauthtime" class="hash-link" aria-label="Direct link to -getauthtime" title="Direct link to -getauthtime">​</a></h3>
 <p>▸ <strong>getAuthTime</strong>(): <code>undefined</code> | <code>Date</code></p>
 <p>getAuthTime() reports the last time the user was authenticated.
 The information comes from the ID token and the ID token is NOT verified.</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-21">Returns<a href="#returns-21" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-27">Returns<a href="#returns-27" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>undefined</code> | <code>Date</code></p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-23">Defined in<a href="#defined-in-23" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:727</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-29">Defined in<a href="#defined-in-29" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:751</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-getidtokenhint"><a id="getidtokenhint" name="getidtokenhint"></a> getIDTokenHint<a href="#-getidtokenhint" class="hash-link" aria-label="Direct link to -getidtokenhint" title="Direct link to -getidtokenhint">​</a></h3>
 <p>▸ <strong>getIDTokenHint</strong>(): <code>undefined</code> | <code>string</code></p>
 <p>getIDTokenHint() returns the ID token for the OIDC id_token_hint parameter.</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-22">Returns<a href="#returns-22" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-28">Returns<a href="#returns-28" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>undefined</code> | <code>string</code></p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-24">Defined in<a href="#defined-in-24" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:713</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-30">Defined in<a href="#defined-in-30" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:737</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-logout"><a id="logout" name="logout"></a> logout<a href="#-logout" class="hash-link" aria-label="Direct link to -logout" title="Direct link to -logout">​</a></h3>
 <p>▸ <strong>logout</strong>(<code>options?</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
 <p>Logout.</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-8">Parameters<a href="#parameters-8" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
 <table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr></thead><tbody><tr><td style="text-align:left"><code>options?</code></td><td style="text-align:left"><code>Object</code></td><td style="text-align:left">Logout options</td></tr><tr><td style="text-align:left"><code>options.force?</code></td><td style="text-align:left"><code>boolean</code></td><td style="text-align:left">-</td></tr><tr><td style="text-align:left"><code>options.redirectURI</code></td><td style="text-align:left"><code>string</code></td><td style="text-align:left">-</td></tr></tbody></table>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-23">Returns<a href="#returns-23" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-29">Returns<a href="#returns-29" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<code>void</code>&gt;</p>
 <p><strong><code>Remarks</code></strong></p>
 <p>If <code>force</code> parameter is set to <code>true</code>, all potential errors (e.g. network
 error) would be ignored.</p>
 <p><code>redirectURI</code> is required. User will be redirected to the uri after they
 have logged out.</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-25">Defined in<a href="#defined-in-25" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:820</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-31">Defined in<a href="#defined-in-31" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:928</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-makeauthorizeurl"><a id="makeauthorizeurl" name="makeauthorizeurl"></a> makeAuthorizeURL<a href="#-makeauthorizeurl" class="hash-link" aria-label="Direct link to -makeauthorizeurl" title="Direct link to -makeauthorizeurl">​</a></h3>
 <p>▸ <strong>makeAuthorizeURL</strong>(<code>options</code>): <code>Promise</code>&lt;<code>string</code>&gt;</p>
@@ -295,84 +361,144 @@ have logged out.</p>
 code.</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-9">Parameters<a href="#parameters-9" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
 <table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>options</code></td><td style="text-align:left"><a href="/authgear-sdk-js/docs/web/interfaces/AuthenticateOptions/"><code>AuthenticateOptions</code></a></td></tr></tbody></table>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-24">Returns<a href="#returns-24" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-30">Returns<a href="#returns-30" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<code>string</code>&gt;</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-26">Defined in<a href="#defined-in-26" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:837</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-32">Defined in<a href="#defined-in-32" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:945</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-open"><a id="open" name="open"></a> open<a href="#-open" class="hash-link" aria-label="Direct link to -open" title="Direct link to -open">​</a></h3>
 <p>▸ <strong>open</strong>(<code>page</code>, <code>options?</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-10">Parameters<a href="#parameters-10" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
 <table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>page</code></td><td style="text-align:left"><a href="/authgear-sdk-js/docs/web/enums/Page/"><code>Page</code></a></td></tr><tr><td style="text-align:left"><code>options?</code></td><td style="text-align:left"><a href="/authgear-sdk-js/docs/web/interfaces/SettingOptions/"><code>SettingOptions</code></a></td></tr></tbody></table>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-25">Returns<a href="#returns-25" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-31">Returns<a href="#returns-31" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<code>void</code>&gt;</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-27">Defined in<a href="#defined-in-27" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:807</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-33">Defined in<a href="#defined-in-33" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:915</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-refreshaccesstokenifneeded"><a id="refreshaccesstokenifneeded" name="refreshaccesstokenifneeded"></a> refreshAccessTokenIfNeeded<a href="#-refreshaccesstokenifneeded" class="hash-link" aria-label="Direct link to -refreshaccesstokenifneeded" title="Direct link to -refreshaccesstokenifneeded">​</a></h3>
 <p>▸ <strong>refreshAccessTokenIfNeeded</strong>(): <code>Promise</code>&lt;<code>void</code>&gt;</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-26">Returns<a href="#returns-26" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-32">Returns<a href="#returns-32" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<code>void</code>&gt;</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-28">Defined in<a href="#defined-in-28" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:845</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-34">Defined in<a href="#defined-in-34" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:953</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-refreshidtoken"><a id="refreshidtoken" name="refreshidtoken"></a> refreshIDToken<a href="#-refreshidtoken" class="hash-link" aria-label="Direct link to -refreshidtoken" title="Direct link to -refreshidtoken">​</a></h3>
 <p>▸ <strong>refreshIDToken</strong>(): <code>Promise</code>&lt;<code>void</code>&gt;</p>
 <p>refreshIDToken() asks the server to issue an ID token with latest claims.
 After refreshing, getIDTokenHint() and canReauthenticate() may return up-to-date value.</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-27">Returns<a href="#returns-27" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-33">Returns<a href="#returns-33" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<code>void</code>&gt;</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-29">Defined in<a href="#defined-in-29" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:734</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-35">Defined in<a href="#defined-in-35" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:758</p>
+<hr>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-startaddemail"><a id="startaddemail" name="startaddemail"></a> startAddEmail<a href="#-startaddemail" class="hash-link" aria-label="Direct link to -startaddemail" title="Direct link to -startaddemail">​</a></h3>
+<p>▸ <strong>startAddEmail</strong>(<code>options</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Start settings action &quot;add_email&quot; by redirecting to the authorization endpoint.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-11">Parameters<a href="#parameters-11" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
+<table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>options</code></td><td style="text-align:left"><a href="/authgear-sdk-js/docs/web/interfaces/SettingsActionOptions/"><code>SettingsActionOptions</code></a></td></tr></tbody></table>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-34">Returns<a href="#returns-34" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-36">Defined in<a href="#defined-in-36" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:794</p>
+<hr>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-startaddphone"><a id="startaddphone" name="startaddphone"></a> startAddPhone<a href="#-startaddphone" class="hash-link" aria-label="Direct link to -startaddphone" title="Direct link to -startaddphone">​</a></h3>
+<p>▸ <strong>startAddPhone</strong>(<code>options</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Start settings action &quot;add_phone&quot; by redirecting to the authorization endpoint.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-12">Parameters<a href="#parameters-12" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
+<table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>options</code></td><td style="text-align:left"><a href="/authgear-sdk-js/docs/web/interfaces/SettingsActionOptions/"><code>SettingsActionOptions</code></a></td></tr></tbody></table>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-35">Returns<a href="#returns-35" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-37">Defined in<a href="#defined-in-37" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:800</p>
+<hr>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-startaddusername"><a id="startaddusername" name="startaddusername"></a> startAddUsername<a href="#-startaddusername" class="hash-link" aria-label="Direct link to -startaddusername" title="Direct link to -startaddusername">​</a></h3>
+<p>▸ <strong>startAddUsername</strong>(<code>options</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Start settings action &quot;add_username&quot; by redirecting to the authorization endpoint.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-13">Parameters<a href="#parameters-13" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
+<table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>options</code></td><td style="text-align:left"><a href="/authgear-sdk-js/docs/web/interfaces/SettingsActionOptions/"><code>SettingsActionOptions</code></a></td></tr></tbody></table>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-36">Returns<a href="#returns-36" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-38">Defined in<a href="#defined-in-38" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:806</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-startauthentication"><a id="startauthentication" name="startauthentication"></a> startAuthentication<a href="#-startauthentication" class="hash-link" aria-label="Direct link to -startauthentication" title="Direct link to -startauthentication">​</a></h3>
 <p>▸ <strong>startAuthentication</strong>(<code>options</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
 <p>Start authentication by redirecting to the authorization endpoint.</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-11">Parameters<a href="#parameters-11" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-14">Parameters<a href="#parameters-14" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
 <table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>options</code></td><td style="text-align:left"><a href="/authgear-sdk-js/docs/web/interfaces/AuthenticateOptions/"><code>AuthenticateOptions</code></a></td></tr></tbody></table>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-28">Returns<a href="#returns-28" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-37">Returns<a href="#returns-37" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<code>void</code>&gt;</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-30">Defined in<a href="#defined-in-30" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:752</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-39">Defined in<a href="#defined-in-39" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:776</p>
+<hr>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-startchangeemail"><a id="startchangeemail" name="startchangeemail"></a> startChangeEmail<a href="#-startchangeemail" class="hash-link" aria-label="Direct link to -startchangeemail" title="Direct link to -startchangeemail">​</a></h3>
+<p>▸ <strong>startChangeEmail</strong>(<code>originalEmail</code>, <code>options</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Start settings action &quot;change_email&quot; by redirecting to the authorization endpoint.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-15">Parameters<a href="#parameters-15" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
+<table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>originalEmail</code></td><td style="text-align:left"><code>string</code></td></tr><tr><td style="text-align:left"><code>options</code></td><td style="text-align:left"><a href="/authgear-sdk-js/docs/web/interfaces/SettingsActionOptions/"><code>SettingsActionOptions</code></a></td></tr></tbody></table>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-38">Returns<a href="#returns-38" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-40">Defined in<a href="#defined-in-40" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:812</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-startchangepassword"><a id="startchangepassword" name="startchangepassword"></a> startChangePassword<a href="#-startchangepassword" class="hash-link" aria-label="Direct link to -startchangepassword" title="Direct link to -startchangepassword">​</a></h3>
 <p>▸ <strong>startChangePassword</strong>(<code>options</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
 <p>Start settings action &quot;change_password&quot; by redirecting to the authorization endpoint.</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-12">Parameters<a href="#parameters-12" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-16">Parameters<a href="#parameters-16" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
 <table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>options</code></td><td style="text-align:left"><a href="/authgear-sdk-js/docs/web/interfaces/SettingsActionOptions/"><code>SettingsActionOptions</code></a></td></tr></tbody></table>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-29">Returns<a href="#returns-29" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-39">Returns<a href="#returns-39" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<code>void</code>&gt;</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-31">Defined in<a href="#defined-in-31" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:758</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-41">Defined in<a href="#defined-in-41" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:782</p>
+<hr>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-startchangephone"><a id="startchangephone" name="startchangephone"></a> startChangePhone<a href="#-startchangephone" class="hash-link" aria-label="Direct link to -startchangephone" title="Direct link to -startchangephone">​</a></h3>
+<p>▸ <strong>startChangePhone</strong>(<code>originalPhone</code>, <code>options</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Start settings action &quot;change_phone&quot; by redirecting to the authorization endpoint.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-17">Parameters<a href="#parameters-17" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
+<table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>originalPhone</code></td><td style="text-align:left"><code>string</code></td></tr><tr><td style="text-align:left"><code>options</code></td><td style="text-align:left"><a href="/authgear-sdk-js/docs/web/interfaces/SettingsActionOptions/"><code>SettingsActionOptions</code></a></td></tr></tbody></table>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-40">Returns<a href="#returns-40" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-42">Defined in<a href="#defined-in-42" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:818</p>
+<hr>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="-startchangeusername"><a id="startchangeusername" name="startchangeusername"></a> startChangeUsername<a href="#-startchangeusername" class="hash-link" aria-label="Direct link to -startchangeusername" title="Direct link to -startchangeusername">​</a></h3>
+<p>▸ <strong>startChangeUsername</strong>(<code>originalUsername</code>, <code>options</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Start settings action &quot;change_username&quot; by redirecting to the authorization endpoint.</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-18">Parameters<a href="#parameters-18" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
+<table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>originalUsername</code></td><td style="text-align:left"><code>string</code></td></tr><tr><td style="text-align:left"><code>options</code></td><td style="text-align:left"><a href="/authgear-sdk-js/docs/web/interfaces/SettingsActionOptions/"><code>SettingsActionOptions</code></a></td></tr></tbody></table>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-41">Returns<a href="#returns-41" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-43">Defined in<a href="#defined-in-43" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:824</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-startdeleteaccount"><a id="startdeleteaccount" name="startdeleteaccount"></a> startDeleteAccount<a href="#-startdeleteaccount" class="hash-link" aria-label="Direct link to -startdeleteaccount" title="Direct link to -startdeleteaccount">​</a></h3>
 <p>▸ <strong>startDeleteAccount</strong>(<code>options</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
 <p>Start settings action &quot;delete_account&quot; by redirecting to the authorization endpoint.</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-13">Parameters<a href="#parameters-13" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-19">Parameters<a href="#parameters-19" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
 <table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>options</code></td><td style="text-align:left"><a href="/authgear-sdk-js/docs/web/interfaces/SettingsActionOptions/"><code>SettingsActionOptions</code></a></td></tr></tbody></table>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-30">Returns<a href="#returns-30" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-42">Returns<a href="#returns-42" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<code>void</code>&gt;</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-32">Defined in<a href="#defined-in-32" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:764</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-44">Defined in<a href="#defined-in-44" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:788</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-startpromoteanonymoususer"><a id="startpromoteanonymoususer" name="startpromoteanonymoususer"></a> startPromoteAnonymousUser<a href="#-startpromoteanonymoususer" class="hash-link" aria-label="Direct link to -startpromoteanonymoususer" title="Direct link to -startpromoteanonymoususer">​</a></h3>
 <p>▸ <strong>startPromoteAnonymousUser</strong>(<code>options</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
 <p>Start promote anonymous user by redirecting to the authorization endpoint.</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-14">Parameters<a href="#parameters-14" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-20">Parameters<a href="#parameters-20" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
 <table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>options</code></td><td style="text-align:left"><a href="/authgear-sdk-js/docs/web/interfaces/PromoteOptions/"><code>PromoteOptions</code></a></td></tr></tbody></table>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-31">Returns<a href="#returns-31" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-43">Returns<a href="#returns-43" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<code>void</code>&gt;</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-33">Defined in<a href="#defined-in-33" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:772</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-45">Defined in<a href="#defined-in-45" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:832</p>
 <hr>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="-startreauthentication"><a id="startreauthentication" name="startreauthentication"></a> startReauthentication<a href="#-startreauthentication" class="hash-link" aria-label="Direct link to -startreauthentication" title="Direct link to -startreauthentication">​</a></h3>
 <p>▸ <strong>startReauthentication</strong>(<code>options</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
 <p>Start reauthentication by redirecting to the authorization endpoint.</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-15">Parameters<a href="#parameters-15" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="parameters-21">Parameters<a href="#parameters-21" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters">​</a></h4>
 <table><thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr></thead><tbody><tr><td style="text-align:left"><code>options</code></td><td style="text-align:left"><a href="/authgear-sdk-js/docs/web/interfaces/ReauthenticateOptions/"><code>ReauthenticateOptions</code></a></td></tr></tbody></table>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-32">Returns<a href="#returns-32" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="returns-44">Returns<a href="#returns-44" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns">​</a></h4>
 <p><code>Promise</code>&lt;<code>void</code>&gt;</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-34">Defined in<a href="#defined-in-34" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
-<p>packages/authgear-web/index.d.ts:768</p></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col"><a href="https://github.com/authgear/authgear-sdk-js/edit/master/website/docs/web/classes/WebContainer.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/authgear-sdk-js/docs/web/classes/TransientTokenStorage/"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">TransientTokenStorage</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/authgear-sdk-js/docs/web/enums/ColorScheme/"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">ColorScheme</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#table-of-contents" class="table-of-contents__link toc-highlight">Table of contents</a><ul><li><a href="#constructors" class="table-of-contents__link toc-highlight">Constructors</a></li><li><a href="#properties" class="table-of-contents__link toc-highlight">Properties</a></li><li><a href="#accessors" class="table-of-contents__link toc-highlight">Accessors</a></li><li><a href="#methods" class="table-of-contents__link toc-highlight">Methods</a></li></ul></li><li><a href="#constructors-1" class="table-of-contents__link toc-highlight">Constructors</a><ul><li><a href="#-constructor" class="table-of-contents__link toc-highlight"><a></a> constructor</a></li></ul></li><li><a href="#properties-1" class="table-of-contents__link toc-highlight">Properties</a><ul><li><a href="#-delegate" class="table-of-contents__link toc-highlight"><a></a> delegate</a></li><li><a href="#-sessiontype" class="table-of-contents__link toc-highlight"><a></a> sessionType</a></li></ul></li><li><a href="#accessors-1" class="table-of-contents__link toc-highlight">Accessors</a><ul><li><a href="#-accesstoken" class="table-of-contents__link toc-highlight"><a></a> accessToken</a></li><li><a href="#-clientid" class="table-of-contents__link toc-highlight"><a></a> clientID</a></li><li><a href="#-isssoenabled" class="table-of-contents__link toc-highlight"><a></a> isSSOEnabled</a></li><li><a href="#-name" class="table-of-contents__link toc-highlight"><a></a> name</a></li><li><a href="#-sessionstate" class="table-of-contents__link toc-highlight"><a></a> sessionState</a></li></ul></li><li><a href="#methods-1" class="table-of-contents__link toc-highlight">Methods</a><ul><li><a href="#-authenticateanonymously" class="table-of-contents__link toc-highlight"><a></a> authenticateAnonymously</a></li><li><a href="#-canreauthenticate" class="table-of-contents__link toc-highlight"><a></a> canReauthenticate</a></li><li><a href="#-configure" class="table-of-contents__link toc-highlight"><a></a> configure</a></li><li><a href="#-fetch" class="table-of-contents__link toc-highlight"><a></a> fetch</a></li><li><a href="#-fetchuserinfo" class="table-of-contents__link toc-highlight"><a></a> fetchUserInfo</a></li><li><a href="#-finishauthentication" class="table-of-contents__link toc-highlight"><a></a> finishAuthentication</a></li><li><a href="#-finishchangepassword" class="table-of-contents__link toc-highlight"><a></a> finishChangePassword</a></li><li><a href="#-finishdeleteaccount" class="table-of-contents__link toc-highlight"><a></a> finishDeleteAccount</a></li><li><a href="#-finishpromoteanonymoususer" class="table-of-contents__link toc-highlight"><a></a> finishPromoteAnonymousUser</a></li><li><a href="#-finishreauthentication" class="table-of-contents__link toc-highlight"><a></a> finishReauthentication</a></li><li><a href="#-getauthtime" class="table-of-contents__link toc-highlight"><a></a> getAuthTime</a></li><li><a href="#-getidtokenhint" class="table-of-contents__link toc-highlight"><a></a> getIDTokenHint</a></li><li><a href="#-logout" class="table-of-contents__link toc-highlight"><a></a> logout</a></li><li><a href="#-makeauthorizeurl" class="table-of-contents__link toc-highlight"><a></a> makeAuthorizeURL</a></li><li><a href="#-open" class="table-of-contents__link toc-highlight"><a></a> open</a></li><li><a href="#-refreshaccesstokenifneeded" class="table-of-contents__link toc-highlight"><a></a> refreshAccessTokenIfNeeded</a></li><li><a href="#-refreshidtoken" class="table-of-contents__link toc-highlight"><a></a> refreshIDToken</a></li><li><a href="#-startauthentication" class="table-of-contents__link toc-highlight"><a></a> startAuthentication</a></li><li><a href="#-startchangepassword" class="table-of-contents__link toc-highlight"><a></a> startChangePassword</a></li><li><a href="#-startdeleteaccount" class="table-of-contents__link toc-highlight"><a></a> startDeleteAccount</a></li><li><a href="#-startpromoteanonymoususer" class="table-of-contents__link toc-highlight"><a></a> startPromoteAnonymousUser</a></li><li><a href="#-startreauthentication" class="table-of-contents__link toc-highlight"><a></a> startReauthentication</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/authgear-sdk-js/docs/">API References</a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2025 Oursky, Ltd.</div></div></div></footer></div>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="defined-in-46">Defined in<a href="#defined-in-46" class="hash-link" aria-label="Direct link to Defined in" title="Direct link to Defined in">​</a></h4>
+<p>packages/authgear-web/index.d.ts:828</p></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col"><a href="https://github.com/authgear/authgear-sdk-js/edit/master/website/docs/web/classes/WebContainer.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/authgear-sdk-js/docs/web/classes/TransientTokenStorage/"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">TransientTokenStorage</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/authgear-sdk-js/docs/web/enums/ColorScheme/"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">ColorScheme</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#table-of-contents" class="table-of-contents__link toc-highlight">Table of contents</a><ul><li><a href="#constructors" class="table-of-contents__link toc-highlight">Constructors</a></li><li><a href="#properties" class="table-of-contents__link toc-highlight">Properties</a></li><li><a href="#accessors" class="table-of-contents__link toc-highlight">Accessors</a></li><li><a href="#methods" class="table-of-contents__link toc-highlight">Methods</a></li></ul></li><li><a href="#constructors-1" class="table-of-contents__link toc-highlight">Constructors</a><ul><li><a href="#-constructor" class="table-of-contents__link toc-highlight"><a></a> constructor</a></li></ul></li><li><a href="#properties-1" class="table-of-contents__link toc-highlight">Properties</a><ul><li><a href="#-delegate" class="table-of-contents__link toc-highlight"><a></a> delegate</a></li><li><a href="#-sessiontype" class="table-of-contents__link toc-highlight"><a></a> sessionType</a></li></ul></li><li><a href="#accessors-1" class="table-of-contents__link toc-highlight">Accessors</a><ul><li><a href="#-accesstoken" class="table-of-contents__link toc-highlight"><a></a> accessToken</a></li><li><a href="#-clientid" class="table-of-contents__link toc-highlight"><a></a> clientID</a></li><li><a href="#-isssoenabled" class="table-of-contents__link toc-highlight"><a></a> isSSOEnabled</a></li><li><a href="#-name" class="table-of-contents__link toc-highlight"><a></a> name</a></li><li><a href="#-sessionstate" class="table-of-contents__link toc-highlight"><a></a> sessionState</a></li></ul></li><li><a href="#methods-1" class="table-of-contents__link toc-highlight">Methods</a><ul><li><a href="#-authenticateanonymously" class="table-of-contents__link toc-highlight"><a></a> authenticateAnonymously</a></li><li><a href="#-canreauthenticate" class="table-of-contents__link toc-highlight"><a></a> canReauthenticate</a></li><li><a href="#-configure" class="table-of-contents__link toc-highlight"><a></a> configure</a></li><li><a href="#-fetch" class="table-of-contents__link toc-highlight"><a></a> fetch</a></li><li><a href="#-fetchuserinfo" class="table-of-contents__link toc-highlight"><a></a> fetchUserInfo</a></li><li><a href="#-finishaddemail" class="table-of-contents__link toc-highlight"><a></a> finishAddEmail</a></li><li><a href="#-finishaddphone" class="table-of-contents__link toc-highlight"><a></a> finishAddPhone</a></li><li><a href="#-finishaddusername" class="table-of-contents__link toc-highlight"><a></a> finishAddUsername</a></li><li><a href="#-finishauthentication" class="table-of-contents__link toc-highlight"><a></a> finishAuthentication</a></li><li><a href="#-finishchangeemail" class="table-of-contents__link toc-highlight"><a></a> finishChangeEmail</a></li><li><a href="#-finishchangepassword" class="table-of-contents__link toc-highlight"><a></a> finishChangePassword</a></li><li><a href="#-finishchangephone" class="table-of-contents__link toc-highlight"><a></a> finishChangePhone</a></li><li><a href="#-finishchangeusername" class="table-of-contents__link toc-highlight"><a></a> finishChangeUsername</a></li><li><a href="#-finishdeleteaccount" class="table-of-contents__link toc-highlight"><a></a> finishDeleteAccount</a></li><li><a href="#-finishpromoteanonymoususer" class="table-of-contents__link toc-highlight"><a></a> finishPromoteAnonymousUser</a></li><li><a href="#-finishreauthentication" class="table-of-contents__link toc-highlight"><a></a> finishReauthentication</a></li><li><a href="#-getauthtime" class="table-of-contents__link toc-highlight"><a></a> getAuthTime</a></li><li><a href="#-getidtokenhint" class="table-of-contents__link toc-highlight"><a></a> getIDTokenHint</a></li><li><a href="#-logout" class="table-of-contents__link toc-highlight"><a></a> logout</a></li><li><a href="#-makeauthorizeurl" class="table-of-contents__link toc-highlight"><a></a> makeAuthorizeURL</a></li><li><a href="#-open" class="table-of-contents__link toc-highlight"><a></a> open</a></li><li><a href="#-refreshaccesstokenifneeded" class="table-of-contents__link toc-highlight"><a></a> refreshAccessTokenIfNeeded</a></li><li><a href="#-refreshidtoken" class="table-of-contents__link toc-highlight"><a></a> refreshIDToken</a></li><li><a href="#-startaddemail" class="table-of-contents__link toc-highlight"><a></a> startAddEmail</a></li><li><a href="#-startaddphone" class="table-of-contents__link toc-highlight"><a></a> startAddPhone</a></li><li><a href="#-startaddusername" class="table-of-contents__link toc-highlight"><a></a> startAddUsername</a></li><li><a href="#-startauthentication" class="table-of-contents__link toc-highlight"><a></a> startAuthentication</a></li><li><a href="#-startchangeemail" class="table-of-contents__link toc-highlight"><a></a> startChangeEmail</a></li><li><a href="#-startchangepassword" class="table-of-contents__link toc-highlight"><a></a> startChangePassword</a></li><li><a href="#-startchangephone" class="table-of-contents__link toc-highlight"><a></a> startChangePhone</a></li><li><a href="#-startchangeusername" class="table-of-contents__link toc-highlight"><a></a> startChangeUsername</a></li><li><a href="#-startdeleteaccount" class="table-of-contents__link toc-highlight"><a></a> startDeleteAccount</a></li><li><a href="#-startpromoteanonymoususer" class="table-of-contents__link toc-highlight"><a></a> startPromoteAnonymousUser</a></li><li><a href="#-startreauthentication" class="table-of-contents__link toc-highlight"><a></a> startReauthentication</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/authgear-sdk-js/docs/">API References</a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2025 Oursky, Ltd.</div></div></div></footer></div>
 </body>
 </html>
