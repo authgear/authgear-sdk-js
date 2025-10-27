@@ -11,10 +11,17 @@ on:
     branches:
     - '*'
     - '!gh-pages'
+    tags:
+    - '*'
   pull_request:
     branches:
     - '*'
     - '!gh-pages'
+
+# https://docs.npmjs.com/trusted-publishers#step-2-configure-your-cicd-workflow
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   test:
@@ -55,6 +62,32 @@ jobs:
       if: ${{ !cancelled() }}
     - run: make docs
       if: ${{ !cancelled() }}
+
+  publish:
+    if: ${{ github.ref_type == 'tag' }}
+    runs-on: macos-15
+    needs: test
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v6
+      with:
+        node-version-file: "./.tool-versions"
+    - run: node --version
+    - run: npm --version
+    - run: npm ci
+    - run: npm run build
+    - run: ../../scripts/npm-publish.sh
+      working-directory: ./packages/authgear-web/
+      env:
+        GITHUB_REF_NAME: ${{ github.ref_name }}
+    - run: ../../scripts/npm-publish.sh
+      working-directory: ./packages/authgear-react-native/
+      env:
+        GITHUB_REF_NAME: ${{ github.ref_name }}
+    - run: ../../scripts/npm-publish.sh
+      working-directory: ./packages/authgear-capacitor/
+      env:
+        GITHUB_REF_NAME: ${{ github.ref_name }}
 
   webapp-image:
     runs-on: ubuntu-24.04

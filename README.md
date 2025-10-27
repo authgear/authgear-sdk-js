@@ -70,13 +70,13 @@ $ (cd website && yarn install --frozen-lockfile)
 
 ## Releasing
 
-- Ensure you have `node`, `npm`, and `yarn` in your `PATH`.
-- Sign in as appropriate user in npm.
-
-```sh
-# VERSION should be in format like "0.1.0"
-$ GIT_USER=<github-username> GITHUB_TOKEN=<github-token> GIT_BRANCH=master VERSION=<new-version> ./scripts/release.sh
-```
+1. Ensure you have `node`, `npm`, `yarn`, `sed`, `git` in your `PATH`.
+2. Run `npm run set-version VERSION` to set the version. VERSION should be without the `v` at the beginning, for example, `1.0.0`.
+3. Commit the change.
+4. Create a pull request for this change.
+5. Wait for merge.
+6. Run `git tag -a vVERSION -m "Release vVERSION" MERGE_COMMIT`. MERGE_COMMIT should be the commit hash of the merge commit.
+7. Push the tag to `github.com/authgear/authgear-sdk-js`.
 
 ## Known issues
 
