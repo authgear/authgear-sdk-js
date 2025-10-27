@@ -1,5 +1,17 @@
+// This script does the following:
+// 1. Take the 1st positional argument, and assume it to be the version we want to set.
+// 2. Update all packages/*/package.json and the lock files with this version.
+// 3. Update ./packages/authgear-core/src/index.ts VERSION variable.
+// 4. Build the project once.
+// 5. Run `npm install` or `yarn install` in the ./example/* to update the lock files.
+// 6. Run `bundle exec pod install` to update the lock files.
+//
+// The goal of this script is to ensure all files are consistent with the given version.
+
+const assert = require("assert");
 const path = require("path");
 const fs = require("fs");
+const child_process = require("child_process");
 
 const version = process.argv[2];
 
@@ -60,3 +72,84 @@ for (const packageJSON of workspacePackageJSONs) {
 for (const a of toBeWritten) {
   writePackageJSON(a.path, a.packageJSON);
 }
+
+// Update source code.
+assert.equal(
+  child_process.spawnSync(
+    `sed -E 's/^export const VERSION.*/export const VERSION = "${version}";/' ./packages/authgear-core/src/index.ts > ./packages/authgear-core/src/index.ts.new`,
+    {
+      cwd,
+      stdio: "inherit",
+      shell: true,
+    }
+  ).status,
+  0
+);
+assert.equal(
+  child_process.spawnSync(
+    "mv",
+    [
+      "./packages/authgear-core/src/index.ts.new",
+      "./packages/authgear-core/src/index.ts",
+    ],
+    {
+      cwd,
+      stdio: "inherit",
+    }
+  ).status,
+  0
+);
+
+// Build
+assert.equal(
+  child_process.spawnSync("npm", ["run", "build"], {
+    cwd: cwd,
+    stdio: "inherit",
+  }).status,
+  0
+);
+
+assert.equal(
+  child_process.spawnSync("npm", ["install"], {
+    cwd: path.join(cwd, "./example/reactweb"),
+    stdio: "inherit",
+  }).status,
+  0
+);
+
+assert.equal(
+  child_process.spawnSync("rm", ["-rf", "node_modules/"], {
+    cwd: path.join(cwd, "./example/reactnative/"),
+    stdio: "inherit",
+  }).status,
+  0
+);
+assert.equal(
+  child_process.spawnSync("yarn", ["install"], {
+    cwd: path.join(cwd, "./example/reactnative/"),
+    stdio: "inherit",
+  }).status,
+  0
+);
+assert.equal(
+  child_process.spawnSync("bundle", ["exec", "pod", "install"], {
+    cwd: path.join(cwd, "./example/reactnative/ios"),
+    stdio: "inherit",
+  }).status,
+  0
+);
+
+assert.equal(
+  child_process.spawnSync("npm", ["install"], {
+    cwd: path.join(cwd, "./example/capacitor/"),
+    stdio: "inherit",
+  }).status,
+  0
+);
+assert.equal(
+  child_process.spawnSync("bundle", ["exec", "pod", "install"], {
+    cwd: path.join(cwd, "./example/capacitor/ios/App"),
+    stdio: "inherit",
+  }).status,
+  0
+);

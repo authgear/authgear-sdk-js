@@ -1,4 +1,3 @@
-/* global process */
 export * from "./types";
 export * from "./error";
 export * from "./client";
@@ -11,4 +10,4 @@ export * from "./dpop";
 /**
  * @public
  */
-export const VERSION: string = process.env.VERSION ?? "VERSION";
+export const VERSION = "4.1.0";

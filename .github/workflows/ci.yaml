@@ -49,7 +49,7 @@ jobs:
       if: ${{ !cancelled() }}
     - run: npm run verify
       if: ${{ !cancelled() }}
-    - run: npm run bundle
+    - run: npm run build
       if: ${{ !cancelled() }}
     - run: make docs
       if: ${{ !cancelled() }}
