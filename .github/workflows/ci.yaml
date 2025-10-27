@@ -21,12 +21,14 @@ jobs:
     runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
       with:
         node-version-file: "./.tool-versions"
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
+    - run: node --version
+    - run: npm --version
     - run: make ruby-audit
     - run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
     - run: npm ci
@@ -78,7 +80,7 @@ jobs:
     runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
       with:
         node-version-file: "./.tool-versions"
     - run: make sdk-build
@@ -89,7 +91,7 @@ jobs:
     runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
       with:
         node-version-file: "./.tool-versions"
     - uses: ruby/setup-ruby@v1
@@ -105,7 +107,7 @@ jobs:
     runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
       with:
         node-version-file: "./.tool-versions"
     - run: make sdk-build
@@ -122,7 +124,7 @@ jobs:
     runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
       with:
         node-version-file: "./.tool-versions"
     - uses: ruby/setup-ruby@v1
@@ -157,7 +159,7 @@ jobs:
     runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
       with:
         node-version-file: "./.tool-versions"
     - uses: ruby/setup-ruby@v1
@@ -190,7 +192,7 @@ jobs:
     runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
       with:
         node-version-file: "./.tool-versions"
     - uses: ruby/setup-ruby@v1
@@ -223,7 +225,7 @@ jobs:
     runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
       with:
         node-version-file: "./.tool-versions"
     - uses: ruby/setup-ruby@v1

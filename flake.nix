@@ -26,8 +26,8 @@
         # We need to use the clang from Xcode.
         devShells.default = pkgs.mkShellNoCC {
           packages = [
-            # 20.19.5
-            pkgs.nodejs_20
+            # 24.9.0
+            pkgs.nodejs_24
             # 3.3.9
             pkgs.ruby_3_3
             # 1.22.22
