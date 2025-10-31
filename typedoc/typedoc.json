@@ -1,4 +1,5 @@
 {
+  "disableSources": true,
   "excludeExternals": true,
   "excludePrivate": true,
   "excludeProtected": true,

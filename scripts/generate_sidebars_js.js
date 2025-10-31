@@ -29,7 +29,7 @@ const sidebar = {
         },
         {
           type: "category",
-          label: "Enums",
+          label: "Enumerations",
           items: [],
         },
       ],
@@ -54,7 +54,7 @@ const sidebar = {
         },
         {
           type: "category",
-          label: "Enums",
+          label: "Enumerations",
           items: [],
         },
       ],
@@ -79,7 +79,7 @@ const sidebar = {
         },
         {
           type: "category",
-          label: "Enums",
+          label: "Enumerations",
           items: [],
         },
       ],
@@ -149,6 +149,12 @@ function recur(dir) {
         i = CAPACITOR_PACKAGE_INDEX;
       } else {
         throw new Error("unexpected package " + package);
+      }
+
+      // The exported variables are VERSION and default.
+      // We do not want to document them.
+      if (kind === "variables") {
+        continue;
       }
 
       const j = indexForCategory(sidebar.root[i], kind);

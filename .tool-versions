@@ -1,4 +1,4 @@
-nodejs 20.19.5
+nodejs 24.9.0
 yarn 1.22.22
 kubectl 1.21.8
 # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#ruby

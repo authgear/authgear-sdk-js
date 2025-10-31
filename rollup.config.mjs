@@ -3,17 +3,10 @@ import { babel } from "@rollup/plugin-babel";
 import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
-import replace from "@rollup/plugin-replace";
 
 const extensions = [".mjs", ".js", ".jsx", ".ts", ".tsx"];
 
 const plugins = [
-  replace({
-    preventAssignment: true,
-    values: {
-      "process.env.VERSION": JSON.stringify(process.env.VERSION || "VERSION"),
-    },
-  }),
   resolve({
     extensions,
   }),
