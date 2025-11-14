@@ -237,19 +237,19 @@ class Authgear {
         return rootMap;
     }
 
-    int checkBiometricSupported(Context ctx, int flags) throws Exception {
+    int checkBiometricSupported(Context ctx, int allowedAuthenticatorsOnEnableFlags, int allowedAuthenticatorsOnAuthenticateFlags) throws Exception {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             throw this.makeBiometricMinimumAPILevelException();
         }
 
         BiometricManager manager = BiometricManager.from(ctx);
-        int result = manager.canAuthenticate(flags);
+        int result = manager.canAuthenticate(allowedAuthenticatorsOnEnableFlags);
 
         if (result == BiometricManager.BIOMETRIC_SUCCESS) {
             // Further test if the key pair generator can be initialized.
             // https://issuetracker.google.com/issues/147374428#comment9
             try {
-                this.createKeyPairGenerator(this.makeGenerateKeyPairSpec("__test__", true, flags, true));
+                this.createKeyPairGenerator(this.makeGenerateKeyPairSpec("__test__", true, allowedAuthenticatorsOnAuthenticateFlags, true));
             } catch (Exception e) {
                 // This branch is reachable only when there is a weak face and no strong fingerprints.
                 // So we treat this situation as BIOMETRIC_ERROR_NONE_ENROLLED.
@@ -266,11 +266,11 @@ class Authgear {
             throw this.makeBiometricMinimumAPILevelException();
         }
 
-        BiometricPrompt.PromptInfo promptInfo = this.buildPromptInfo(options);
+        BiometricPrompt.PromptInfo promptInfo = this.buildPromptInfo(options, options.allowedAuthenticatorsOnEnableFlags);
         KeyGenParameterSpec spec = this.makeGenerateKeyPairSpec(
                 options.alias,
                 true,
-                this.authenticatorTypesToKeyProperties(options.flags),
+                this.authenticatorTypesToKeyProperties(options.allowedAuthenticatorsOnAuthenticateFlags),
                 options.invalidatedByBiometricEnrollment
         );
         KeyPair keyPair = this.createKeyPair(spec);
@@ -289,7 +289,7 @@ class Authgear {
             throw this.makeBiometricMinimumAPILevelException();
         }
 
-        BiometricPrompt.PromptInfo promptInfo = this.buildPromptInfo(options);
+        BiometricPrompt.PromptInfo promptInfo = this.buildPromptInfo(options, options.allowedAuthenticatorsOnAuthenticateFlags);
         KeyPair keyPair = this.getPrivateKey(options.alias);
         this.signBiometricJWT(
                 activity,
@@ -435,14 +435,15 @@ class Authgear {
     }
 
     private BiometricPrompt.PromptInfo buildPromptInfo(
-            BiometricOptions options
+            BiometricOptions options,
+            int flags
     ) {
         BiometricPrompt.PromptInfo.Builder builder = new BiometricPrompt.PromptInfo.Builder();
         builder.setTitle(options.title);
         builder.setSubtitle(options.subtitle);
         builder.setDescription(options.description);
-        builder.setAllowedAuthenticators(options.flags);
-        if ((options.flags & BiometricManager.Authenticators.DEVICE_CREDENTIAL) == 0) {
+        builder.setAllowedAuthenticators(flags);
+        if ((flags & BiometricManager.Authenticators.DEVICE_CREDENTIAL) == 0) {
             builder.setNegativeButtonText(options.negativeButtonText);
         }
         return builder.build();

@@ -334,11 +334,18 @@ export enum BiometricAccessConstraintIOS {
  */
 export interface BiometricOptionsIOS {
   /**
-   * See https://developer.apple.com/documentation/localauthentication/lacontext/1514176-evaluatepolicy#parameters
+   * See https://developer.apple.com/documentation/localauthentication/lacontext/localizedreason
    *
    * @public
    */
   localizedReason: string;
+
+  /**
+   * See https://developer.apple.com/documentation/localauthentication/lacontext/localizedcanceltitle
+   *
+   * @public
+   */
+  localizedCancelTitle?: string;
   /**
    * Set the contraint for the authenticator to be used for biometric authentication.
    *
@@ -362,7 +369,7 @@ export interface BiometricOptionsIOS {
  *
  * @public
  */
-export enum BiometricAccessConstraintAndroid {
+export enum BiometricAuthenticatorAndroid {
   /**
    * The user can use Class 3 biometric to authenticate.
    *
@@ -411,14 +418,29 @@ export interface BiometricOptionsAndroid {
    * @public
    */
   negativeButtonText: string;
+
   /**
-   * Set the contraint for the authenticator to be used for biometric authentication.
+   * Set the allowed authenticators when the user enables biometric.
+   * This must be a subset of allowedAuthenticatorsOnAuthenticate because
+   * you normally want to ensure the user performed at least once biometric authentication during setup,
+   * but allow the user to fallback to passcode for subsequent biometric authentication.
    *
-   * See {@link BiometricAccessConstraintAndroid}
+   * See {@link BiometricAuthenticatorAndroid}
    *
    * @public
    */
-  constraint: BiometricAccessConstraintAndroid[];
+  allowedAuthenticatorsOnEnable: BiometricAuthenticatorAndroid[];
+  /**
+   * Set the allowed authenticators when the user performs biometric authentication.
+   * This must be a superset of allowedAuthenticatorsOnEnable because
+   * you normally want to ensure the user performed at least once biometric authentication during setup,
+   * but allow the user to fallback to passcode for subsequent biometric authentication.
+   *
+   * See {@link BiometricAuthenticatorAndroid}
+   *
+   * @public
+   */
+  allowedAuthenticatorsOnAuthenticate: BiometricAuthenticatorAndroid[];
   /**
    * The user needs to set up biometric again when a new biometric is enrolled or all enrolled biometrics are removed.
    *

@@ -389,16 +389,18 @@ class AuthgearReactNativeModuleImpl implements ActivityEventListener {
             return;
         }
         ReadableMap android = options.getMap("android");
-        ReadableArray constraint = android.getArray("constraint");
+        ReadableArray allowedAuthenticatorsOnEnable = android.getArray("allowedAuthenticatorsOnEnable");
+        ReadableArray allowedAuthenticatorsOnAuthenticate = android.getArray("allowedAuthenticatorsOnAuthenticate");
         BiometricManager manager = BiometricManager.from(this.getReactApplicationContext());
-        int flags = constraintToFlag(constraint);
-        int result = manager.canAuthenticate(flags);
+        int allowedAuthenticatorsOnEnableFlags = constraintToFlag(allowedAuthenticatorsOnEnable);
+        int allowedAuthenticatorsOnAuthenticateFlags = constraintToFlag(allowedAuthenticatorsOnAuthenticate);
+        int result = manager.canAuthenticate(allowedAuthenticatorsOnEnableFlags);
 
         if (result == BiometricManager.BIOMETRIC_SUCCESS) {
             // Further test if the key pair generator can be initialized.
             // https://issuetracker.google.com/issues/147374428#comment9
             try {
-                this.createKeyPairGenerator(this.makeGenerateKeyPairSpec("__test__", flags, true));
+                this.createKeyPairGenerator(this.makeGenerateKeyPairSpec("__test__", allowedAuthenticatorsOnAuthenticateFlags, true));
                 promise.resolve(null);
                 return;
             } catch (Exception e) {
@@ -665,13 +667,15 @@ class AuthgearReactNativeModuleImpl implements ActivityEventListener {
         String kid = options.getString("kid");
         ReadableMap payload = options.getMap("payload");
         ReadableMap android = options.getMap("android");
-        ReadableArray constraint = android.getArray("constraint");
+        ReadableArray allowedAuthenticatorsOnEnable = android.getArray("allowedAuthenticatorsOnEnable");
+        ReadableArray allowedAuthenticatorsOnAuthenticate = android.getArray("allowedAuthenticatorsOnAuthenticate");
         boolean invalidatedByBiometricEnrollment = android.getBoolean("invalidatedByBiometricEnrollment");
-        int flags = constraintToFlag(constraint);
+        int allowedAuthenticatorsOnEnableFlags = constraintToFlag(allowedAuthenticatorsOnEnable);
+        int allowedAuthenticatorsOnAuthenticateFlags = constraintToFlag(allowedAuthenticatorsOnAuthenticate);
 
         String alias = "com.authgear.keys.biometric." + kid;
-        BiometricPrompt.PromptInfo promptInfo = this.buildPromptInfo(android, flags);
-        KeyGenParameterSpec spec = this.makeGenerateKeyPairSpec(alias, authenticatorTypesToKeyProperties(flags), invalidatedByBiometricEnrollment);
+        BiometricPrompt.PromptInfo promptInfo = this.buildPromptInfo(android, allowedAuthenticatorsOnEnableFlags);
+        KeyGenParameterSpec spec = this.makeGenerateKeyPairSpec(alias, authenticatorTypesToKeyProperties(allowedAuthenticatorsOnAuthenticateFlags), invalidatedByBiometricEnrollment);
 
         try {
             KeyPair keyPair = this.createKeyPair(spec);
@@ -707,11 +711,11 @@ class AuthgearReactNativeModuleImpl implements ActivityEventListener {
         String kid = options.getString("kid");
         ReadableMap payload = options.getMap("payload");
         ReadableMap android = options.getMap("android");
-        ReadableArray constraint = android.getArray("constraint");
-        int flags = constraintToFlag(constraint);
+        ReadableArray allowedAuthenticatorsOnAuthenticate = android.getArray("allowedAuthenticatorsOnAuthenticate");
+        int allowedAuthenticatorsOnAuthenticateFlags = constraintToFlag(allowedAuthenticatorsOnAuthenticate);
 
         String alias = "com.authgear.keys.biometric." + kid;
-        BiometricPrompt.PromptInfo promptInfo = this.buildPromptInfo(android, flags);
+        BiometricPrompt.PromptInfo promptInfo = this.buildPromptInfo(android, allowedAuthenticatorsOnAuthenticateFlags);
 
         try {
             KeyPair keyPair = this.getPrivateKey(alias);

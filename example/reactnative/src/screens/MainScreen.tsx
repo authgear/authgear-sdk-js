@@ -30,7 +30,7 @@ import authgear, {
   BiometricOptions,
   BiometricAccessConstraintIOS,
   BiometricLAPolicy,
-  BiometricAccessConstraintAndroid,
+  BiometricAuthenticatorAndroid,
   SessionState,
   WebKitWebViewUIImplementation,
 } from '@authgear/react-native';
@@ -132,6 +132,7 @@ const wechatRedirectURI = Platform.select<string>({
 const biometricOptions: BiometricOptions = {
   ios: {
     localizedReason: 'Use biometric to authenticate',
+    localizedCancelTitle: 'Customized Cancel',
     constraint: BiometricAccessConstraintIOS.BiometryCurrentSet,
     policy: BiometricLAPolicy.deviceOwnerAuthenticationWithBiometrics,
   },
@@ -139,8 +140,14 @@ const biometricOptions: BiometricOptions = {
     title: 'Biometric Authentication',
     subtitle: 'Biometric authentication',
     description: 'Use biometric to authenticate',
-    negativeButtonText: 'Cancel',
-    constraint: [BiometricAccessConstraintAndroid.BiometricStrong],
+    negativeButtonText: 'Customized Cancel',
+    allowedAuthenticatorsOnEnable: [
+      BiometricAuthenticatorAndroid.BiometricStrong,
+    ],
+    allowedAuthenticatorsOnAuthenticate: [
+      BiometricAuthenticatorAndroid.BiometricStrong,
+      BiometricAuthenticatorAndroid.DeviceCredential,
+    ],
     invalidatedByBiometricEnrollment: true,
   },
 };

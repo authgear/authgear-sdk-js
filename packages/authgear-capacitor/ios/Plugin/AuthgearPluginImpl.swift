@@ -250,10 +250,10 @@ import Capacitor
         controller?.start()
     }
 
-    @objc func checkBiometricSupported(policyString: String) throws {
+    @objc func checkBiometricSupported(policyString: String, localizedCancelTitle: String?) throws {
         if #available(iOS 11.3, *) {
             let policy = LAPolicy.from(string: policyString)!
-            let laContext = self.makeLAContext(policy: policy)
+            let laContext = self.makeLAContext(policy: policy, localizedCancelTitle: localizedCancelTitle)
             var error: NSError?
             laContext.canEvaluatePolicy(policy, error: &error)
             if let error = error {
@@ -267,6 +267,7 @@ import Capacitor
     @objc func createBiometricPrivateKey(
         policyString: String,
         localizedReason: String,
+        localizedCancelTitle: String?,
         constraint: String,
         kid: String,
         tag: String,
@@ -274,7 +275,7 @@ import Capacitor
         completion: @escaping (String?, Error?) -> Void
     ) {
         let policy = LAPolicy.from(string: policyString)!
-        let ctx = makeLAContext(policy: policy)
+        let ctx = makeLAContext(policy: policy, localizedCancelTitle: localizedCancelTitle)
         ctx.evaluatePolicy(policy, localizedReason: localizedReason) { ok, error in
             if let error = error {
                 completion(nil, error)
@@ -296,13 +297,14 @@ import Capacitor
     @objc func signWithBiometricPrivateKey(
         policyString: String,
         localizedReason: String,
+        localizedCancelTitle: String?,
         kid: String,
         tag: String,
         payload: [String: Any],
         completion: @escaping (String?, Error?) -> Void
     ) {
         let policy = LAPolicy.from(string: policyString)!
-        let ctx = makeLAContext(policy: policy)
+        let ctx = makeLAContext(policy: policy, localizedCancelTitle: localizedCancelTitle)
         ctx.evaluatePolicy(policy, localizedReason: localizedReason) { ok, error in
             if let error = error {
                 completion(nil, error)
@@ -393,11 +395,12 @@ import Capacitor
         return window
     }
 
-    private func makeLAContext(policy: LAPolicy) -> LAContext {
+    private func makeLAContext(policy: LAPolicy, localizedCancelTitle: String?) -> LAContext {
         let ctx = LAContext()
         if policy == LAPolicy.deviceOwnerAuthenticationWithBiometrics {
             ctx.localizedFallbackTitle = "";
         }
+        ctx.localizedCancelTitle = localizedCancelTitle
         return ctx
     }
 
