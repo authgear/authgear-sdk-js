@@ -370,8 +370,9 @@ RCT_EXPORT_METHOD(checkBiometricSupported:(NSDictionary *)options resolve:(RCTPr
     if (@available(iOS 11.3, *)) {
         NSDictionary *iosDict = options[@"ios"];
         NSString *policyString = iosDict[@"policy"];
+        NSString *localizedCancelTitle = iosDict[@"localizedCancelTitle"];
         LAPolicy policy = [self laPolicyFromString:policyString];
-        LAContext *context = [self laContextFromPolicy:policy];
+        LAContext *context = [self laContextFromPolicy:policy localizedCancelTitle:localizedCancelTitle];
         NSError *error = NULL;
         [context canEvaluatePolicy:policy error:&error];
         if (error) {
@@ -410,10 +411,11 @@ RCT_EXPORT_METHOD(createBiometricPrivateKey:(NSDictionary *)options resolve:(RCT
     NSDictionary *iosDict = options[@"ios"];
     NSString *constraint = iosDict[@"constraint"];
     NSString *localizedReason = iosDict[@"localizedReason"];
+    NSString *localizedCancelTitle = iosDict[@"localizedCancelTitle"];
     NSString *policyString = iosDict[@"policy"];
     NSString *tag = [NSString stringWithFormat:@"com.authgear.keys.biometric.%@", kid];
     LAPolicy policy = [self laPolicyFromString:policyString];
-    LAContext *context = [self laContextFromPolicy:policy];
+    LAContext *context = [self laContextFromPolicy:policy localizedCancelTitle:localizedCancelTitle];
 
     [context evaluatePolicy:policy localizedReason:localizedReason reply:^(BOOL success, NSError * _Nullable laError) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -456,10 +458,11 @@ RCT_EXPORT_METHOD(signWithBiometricPrivateKey:(NSDictionary *)options resolve:(R
     NSDictionary *payload = options[@"payload"];
     NSDictionary *iosDict = options[@"ios"];
     NSString *localizedReason = iosDict[@"localizedReason"];
+    NSString *localizedCancelTitle = iosDict[@"localizedCancelTitle"];
     NSString *policyString = iosDict[@"policy"];
     NSString *tag = [NSString stringWithFormat:@"com.authgear.keys.biometric.%@", kid];
     LAPolicy policy = [self laPolicyFromString:policyString];
-    LAContext *context = [self laContextFromPolicy:policy];
+    LAContext *context = [self laContextFromPolicy:policy localizedCancelTitle:localizedCancelTitle];
 
     [context evaluatePolicy:policy localizedReason:localizedReason reply:^(BOOL success, NSError * _Nullable laError) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -1044,12 +1047,13 @@ RCT_EXPORT_METHOD(computeDPoPJKT:(NSDictionary *)options
     return LAPolicyDeviceOwnerAuthentication;
 }
 
--(LAContext *)laContextFromPolicy:(LAPolicy)policy
+-(LAContext *)laContextFromPolicy:(LAPolicy)policy localizedCancelTitle:(NSString *)localizedCancelTitle
 {
     LAContext *context = [[LAContext alloc] init];
     if (policy == LAPolicyDeviceOwnerAuthenticationWithBiometrics) {
         context.localizedFallbackTitle = @"";
     }
+    context.localizedCancelTitle = localizedCancelTitle;
     return context;
 }
 
