@@ -6,7 +6,8 @@ class BiometricOptions {
     JSObject payload;
     String kid;
     String alias;
-    int flags;
+    int allowedAuthenticatorsOnEnableFlags;
+    int allowedAuthenticatorsOnAuthenticateFlags;
     boolean invalidatedByBiometricEnrollment;
     String title;
     String subtitle;

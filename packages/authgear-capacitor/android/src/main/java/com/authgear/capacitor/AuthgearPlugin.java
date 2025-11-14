@@ -189,12 +189,14 @@ public class AuthgearPlugin extends Plugin {
     @PluginMethod
     public void checkBiometricSupported(PluginCall call) {
         JSObject android = call.getObject("android");
-        JSONArray constraint = this.jsObjectGetArray(android, "constraint");
-        int flags = this.constraintToFlag(constraint);
+        JSONArray allowedAuthenticatorsOnEnable = this.jsObjectGetArray(android, "allowedAuthenticatorsOnEnable");
+        JSONArray allowedAuthenticatorsOnAuthenticate = this.jsObjectGetArray(android, "allowedAuthenticatorsOnAuthenticate");
+        int allowedAuthenticatorsOnEnableFlags = this.constraintToFlag(allowedAuthenticatorsOnEnable);
+        int allowedAuthenticatorsOnAuthenticateFlags = this.constraintToFlag(allowedAuthenticatorsOnAuthenticate);
 
         Context ctx = this.getContext();
         try {
-            int result = this.implementation.checkBiometricSupported(ctx, flags);
+            int result = this.implementation.checkBiometricSupported(ctx, allowedAuthenticatorsOnEnableFlags, allowedAuthenticatorsOnAuthenticateFlags);
             if (result == BiometricManager.BIOMETRIC_SUCCESS) {
                 call.resolve();
             } else {
@@ -214,19 +216,23 @@ public class AuthgearPlugin extends Plugin {
         String kid = call.getString("kid");
         String alias = "com.authgear.keys.biometric." + kid;
         JSObject android = call.getObject("android");
-        JSONArray constraint = this.jsObjectGetArray(android, "constraint");
         boolean invalidatedByBiometricEnrollment = android.getBool("invalidatedByBiometricEnrollment");
-        int flags = this.constraintToFlag(constraint);
         String title = android.getString("title");
         String subtitle = android.getString("subtitle");
         String description = android.getString("description");
         String negativeButtonText = android.getString("negativeButtonText");
 
+        JSONArray allowedAuthenticatorsOnEnable = this.jsObjectGetArray(android, "allowedAuthenticatorsOnEnable");
+        JSONArray allowedAuthenticatorsOnAuthenticate = this.jsObjectGetArray(android, "allowedAuthenticatorsOnAuthenticate");
+        int allowedAuthenticatorsOnEnableFlags = this.constraintToFlag(allowedAuthenticatorsOnEnable);
+        int allowedAuthenticatorsOnAuthenticateFlags = this.constraintToFlag(allowedAuthenticatorsOnAuthenticate);
+
         BiometricOptions options = new BiometricOptions();
         options.payload = payload;
         options.kid = kid;
         options.alias = alias;
-        options.flags = flags;
+        options.allowedAuthenticatorsOnEnableFlags = allowedAuthenticatorsOnEnableFlags;
+        options.allowedAuthenticatorsOnAuthenticateFlags = allowedAuthenticatorsOnAuthenticateFlags;
         options.invalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
         options.title = title;
         options.subtitle = subtitle;
@@ -269,19 +275,23 @@ public class AuthgearPlugin extends Plugin {
         String kid = call.getString("kid");
         String alias = "com.authgear.keys.biometric." + kid;
         JSObject android = call.getObject("android");
-        JSONArray constraint = this.jsObjectGetArray(android, "constraint");
         boolean invalidatedByBiometricEnrollment = android.getBool("invalidatedByBiometricEnrollment");
-        int flags = this.constraintToFlag(constraint);
         String title = android.getString("title");
         String subtitle = android.getString("subtitle");
         String description = android.getString("description");
         String negativeButtonText = android.getString("negativeButtonText");
 
+        JSONArray allowedAuthenticatorsOnEnable = this.jsObjectGetArray(android, "allowedAuthenticatorsOnEnable");
+        JSONArray allowedAuthenticatorsOnAuthenticate = this.jsObjectGetArray(android, "allowedAuthenticatorsOnAuthenticate");
+        int allowedAuthenticatorsOnEnableFlags = this.constraintToFlag(allowedAuthenticatorsOnEnable);
+        int allowedAuthenticatorsOnAuthenticateFlags = this.constraintToFlag(allowedAuthenticatorsOnAuthenticate);
+
         BiometricOptions options = new BiometricOptions();
         options.payload = payload;
         options.kid = kid;
         options.alias = alias;
-        options.flags = flags;
+        options.allowedAuthenticatorsOnEnableFlags = allowedAuthenticatorsOnEnableFlags;
+        options.allowedAuthenticatorsOnAuthenticateFlags = allowedAuthenticatorsOnAuthenticateFlags;
         options.invalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
         options.title = title;
         options.subtitle = subtitle;
