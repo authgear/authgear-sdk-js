@@ -277,11 +277,17 @@ export enum BiometricAccessConstraintIOS {
  */
 export interface BiometricOptionsIOS {
   /**
-   * See https://developer.apple.com/documentation/localauthentication/lacontext/1514176-evaluatepolicy#parameters
+   * See https://developer.apple.com/documentation/localauthentication/lacontext/localizedreason
    *
    * @public
    */
   localizedReason: string;
+  /**
+   * See https://developer.apple.com/documentation/localauthentication/lacontext/localizedcanceltitle
+   *
+   * @public
+   */
+  localizedCancelTitle?: string;
   constraint: BiometricAccessConstraintIOS;
   policy: BiometricLAPolicy;
 }

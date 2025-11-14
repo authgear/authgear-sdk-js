@@ -136,9 +136,10 @@ public class AuthgearPlugin: CAPPlugin {
     @objc func checkBiometricSupported(_ call: CAPPluginCall) {
         let ios = call.getObject("ios")!
         let policyString = ios["policy"] as! String
+        let localizedCancelTitle = ios["localizedCancelTitle"] as? String
         DispatchQueue.main.async {
             do {
-                try self.impl.checkBiometricSupported(policyString: policyString)
+                try self.impl.checkBiometricSupported(policyString: policyString, localizedCancelTitle: localizedCancelTitle)
                 call.resolve()
             } catch {
                 error.reject(call)
@@ -153,12 +154,14 @@ public class AuthgearPlugin: CAPPlugin {
         let constraint = ios["constraint"] as! String
         let policyString = ios["policy"] as! String
         let localizedReason = ios["localizedReason"] as! String
+        let localizedCancelTitle = ios["localizedCancelTitle"] as? String
         let tag = "com.authgear.keys.biometric.\(kid)"
 
         DispatchQueue.main.async {
             self.impl.createBiometricPrivateKey(
                 policyString: policyString,
                 localizedReason: localizedReason,
+                localizedCancelTitle: localizedCancelTitle,
                 constraint: constraint,
                 kid: kid,
                 tag: tag,
@@ -182,12 +185,14 @@ public class AuthgearPlugin: CAPPlugin {
         let ios = call.getObject("ios")!
         let policyString = ios["policy"] as! String
         let localizedReason = ios["localizedReason"] as! String
+        let localizedCancelTitle = ios["localizedCancelTitle"] as? String
         let tag = "com.authgear.keys.biometric.\(kid)"
 
         DispatchQueue.main.async {
             self.impl.signWithBiometricPrivateKey(
                 policyString: policyString,
                 localizedReason: localizedReason,
+                localizedCancelTitle: localizedCancelTitle,
                 kid: kid,
                 tag: tag,
                 payload: payload
