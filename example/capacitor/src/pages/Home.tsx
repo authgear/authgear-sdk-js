@@ -44,7 +44,7 @@ import authgearCapacitor, {
   BiometricOptions,
   BiometricAccessConstraintIOS,
   BiometricLAPolicy,
-  BiometricAccessConstraintAndroid,
+  BiometricAuthenticatorAndroid,
   WebKitWebViewUIImplementation,
   DeviceBrowserUIImplementation,
 } from "@authgear/capacitor";
@@ -76,6 +76,7 @@ const REDIRECT_URI_CAPACITOR = "com.authgear.exampleapp.capacitor://host/path";
 const biometricOptions: BiometricOptions = {
   ios: {
     localizedReason: "Use biometric to authenticate",
+    localizedCancelTitle: "Customized Cancel",
     constraint: BiometricAccessConstraintIOS.BiometryCurrentSet,
     policy: BiometricLAPolicy.deviceOwnerAuthenticationWithBiometrics,
   },
@@ -83,8 +84,14 @@ const biometricOptions: BiometricOptions = {
     title: "Biometric Authentication",
     subtitle: "Biometric authentication",
     description: "Use biometric to authenticate",
-    negativeButtonText: "Cancel",
-    constraint: [BiometricAccessConstraintAndroid.BiometricStrong],
+    negativeButtonText: "Customized Cancel",
+    allowedAuthenticatorsOnEnable: [
+      BiometricAuthenticatorAndroid.BiometricStrong,
+    ],
+    allowedAuthenticatorsOnAuthenticate: [
+      BiometricAuthenticatorAndroid.BiometricStrong,
+      BiometricAuthenticatorAndroid.DeviceCredential,
+    ],
     invalidatedByBiometricEnrollment: true,
   },
 };
