@@ -1,3 +1,6 @@
+/**
+ * @public
+ */
 export enum AuthenticatorType {
   Password = "password",
   OOBOTPEmail = "oob_otp_email",
@@ -5,11 +8,17 @@ export enum AuthenticatorType {
   TOTP = "totp",
 }
 
+/**
+ * @public
+ */
 export enum AuthenticatorKind {
   Primary = "primary",
   Secondary = "secondary",
 }
 
+/**
+ * @public
+ */
 export interface Authenticator {
   createdAt: Date;
   updatedAt: Date;
