@@ -140,7 +140,7 @@ assert.equal(
 );
 
 assert.equal(
-  child_process.spawnSync("npm", ["install"], {
+  child_process.spawnSync("npm", ["install", "--force"], {
     cwd: path.join(cwd, "./example/capacitor/"),
     stdio: "inherit",
   }).status,
