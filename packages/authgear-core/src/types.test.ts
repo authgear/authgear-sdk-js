@@ -1,4 +1,4 @@
-import { _decodeUserInfo } from "./types";
+import { _decodeUserInfo, AuthenticatorType, AuthenticatorKind } from "./types";
 
 const USER_INFO = `
 {
@@ -7,6 +7,33 @@ const USER_INFO = `
   "https://authgear.com/claims/user/is_anonymous": false,
   "https://authgear.com/claims/user/can_reauthenticate": true,
   "https://authgear.com/claims/user/roles": ["role_a"],
+  "https://authgear.com/claims/user/authenticators": [
+    {
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z",
+      "type": "password",
+      "kind": "primary"
+    },
+    {
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z",
+      "type": "oob_otp_sms",
+      "kind": "primary"
+    },
+    {
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z",
+      "type": "oob_otp_email",
+      "kind": "primary"
+    },
+    {
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z",
+      "type": "totp",
+      "kind": "secondary"
+    }
+  ],
+  "https://authgear.com/claims/user/recovery_code_enabled": true,
 
   "email": "user@example.com",
   "email_verified": true,
@@ -55,6 +82,33 @@ describe("_decodeUserInfo", () => {
       birthdate: "1970-01-01",
       canReauthenticate: true,
       roles: ["role_a"],
+      authenticators: [
+        {
+          createdAt: new Date("2023-01-01T00:00:00Z"),
+          updatedAt: new Date("2023-01-01T00:00:00Z"),
+          type: AuthenticatorType.Password,
+          kind: AuthenticatorKind.Primary,
+        },
+        {
+          createdAt: new Date("2023-01-01T00:00:00Z"),
+          updatedAt: new Date("2023-01-01T00:00:00Z"),
+          type: AuthenticatorType.OOBOTPSMS,
+          kind: AuthenticatorKind.Primary,
+        },
+        {
+          createdAt: new Date("2023-01-01T00:00:00Z"),
+          updatedAt: new Date("2023-01-01T00:00:00Z"),
+          type: AuthenticatorType.OOBOTPEmail,
+          kind: AuthenticatorKind.Primary,
+        },
+        {
+          createdAt: new Date("2023-01-01T00:00:00Z"),
+          updatedAt: new Date("2023-01-01T00:00:00Z"),
+          type: AuthenticatorType.TOTP,
+          kind: AuthenticatorKind.Secondary,
+        },
+      ],
+      recoveryCodeEnabled: true,
       customAttributes: {
         foobar: 42,
       },
@@ -84,6 +138,33 @@ describe("_decodeUserInfo", () => {
           street_address: "10 Somewhere Street",
         },
         birthdate: "1970-01-01",
+        "https://authgear.com/claims/user/authenticators": [
+          {
+            created_at: "2023-01-01T00:00:00Z",
+            updated_at: "2023-01-01T00:00:00Z",
+            type: "password",
+            kind: "primary",
+          },
+          {
+            created_at: "2023-01-01T00:00:00Z",
+            updated_at: "2023-01-01T00:00:00Z",
+            type: "oob_otp_sms",
+            kind: "primary",
+          },
+          {
+            created_at: "2023-01-01T00:00:00Z",
+            updated_at: "2023-01-01T00:00:00Z",
+            type: "oob_otp_email",
+            kind: "primary",
+          },
+          {
+            created_at: "2023-01-01T00:00:00Z",
+            updated_at: "2023-01-01T00:00:00Z",
+            type: "totp",
+            kind: "secondary",
+          },
+        ],
+        "https://authgear.com/claims/user/recovery_code_enabled": true,
         custom_attributes: {
           foobar: 42,
         },
