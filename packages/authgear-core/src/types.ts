@@ -24,9 +24,6 @@ export interface Authenticator {
   updatedAt: Date;
   type: AuthenticatorType;
   kind: AuthenticatorKind;
-  displayName?: string;
-  email?: string;
-  phone?: string;
 }
 
 /**
@@ -219,9 +216,6 @@ export function _decodeAuthenticators(r: any): Authenticator[] | undefined {
       updatedAt: new Date(a["updated_at"]),
       type: a["type"],
       kind: a["kind"],
-      displayName: a["display_name"],
-      email: a["email"],
-      phone: a["phone"],
     };
   });
 }

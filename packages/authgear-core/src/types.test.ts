@@ -18,22 +18,19 @@ const USER_INFO = `
       "created_at": "2023-01-01T00:00:00Z",
       "updated_at": "2023-01-01T00:00:00Z",
       "type": "oob_otp_sms",
-      "kind": "primary",
-      "phone": "+85298765432"
+      "kind": "primary"
     },
     {
       "created_at": "2023-01-01T00:00:00Z",
       "updated_at": "2023-01-01T00:00:00Z",
       "type": "oob_otp_email",
-      "kind": "primary",
-      "email": "user@example.com"
+      "kind": "primary"
     },
     {
       "created_at": "2023-01-01T00:00:00Z",
       "updated_at": "2023-01-01T00:00:00Z",
       "type": "totp",
-      "kind": "secondary",
-      "display_name": "TOTP"
+      "kind": "secondary"
     }
   ],
   "https://authgear.com/claims/user/recovery_code_enabled": true,
@@ -97,21 +94,18 @@ describe("_decodeUserInfo", () => {
           updatedAt: new Date("2023-01-01T00:00:00Z"),
           type: AuthenticatorType.OOBOTPSMS,
           kind: AuthenticatorKind.Primary,
-          phone: "+85298765432",
         },
         {
           createdAt: new Date("2023-01-01T00:00:00Z"),
           updatedAt: new Date("2023-01-01T00:00:00Z"),
           type: AuthenticatorType.OOBOTPEmail,
           kind: AuthenticatorKind.Primary,
-          email: "user@example.com",
         },
         {
           createdAt: new Date("2023-01-01T00:00:00Z"),
           updatedAt: new Date("2023-01-01T00:00:00Z"),
           type: AuthenticatorType.TOTP,
           kind: AuthenticatorKind.Secondary,
-          displayName: "TOTP",
         },
       ],
       recoveryCodeEnabled: true,
@@ -156,21 +150,18 @@ describe("_decodeUserInfo", () => {
             updated_at: "2023-01-01T00:00:00Z",
             type: "oob_otp_sms",
             kind: "primary",
-            phone: "+85298765432",
           },
           {
             created_at: "2023-01-01T00:00:00Z",
             updated_at: "2023-01-01T00:00:00Z",
             type: "oob_otp_email",
             kind: "primary",
-            email: "user@example.com",
           },
           {
             created_at: "2023-01-01T00:00:00Z",
             updated_at: "2023-01-01T00:00:00Z",
             type: "totp",
             kind: "secondary",
-            display_name: "TOTP",
           },
         ],
         "https://authgear.com/claims/user/recovery_code_enabled": true,
