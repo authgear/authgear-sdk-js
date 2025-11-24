@@ -1,0 +1,4 @@
+The reason to have this file listed in package.json is to work around an issue of React Native codegen.
+This library includes generated code, so codegen is not required to run at all.
+However, codegen eagerly looks at `.codegenConfig.jsSrcsDir` and requires it to present in the distributed package.
+So, we have to work around the issue by including the directory.

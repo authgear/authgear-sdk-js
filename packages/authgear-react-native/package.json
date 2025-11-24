@@ -15,7 +15,8 @@
     "dist/authgear-react-native.js",
     "index.d.ts",
     "ios",
-    "react-native.config.js"
+    "react-native.config.js",
+    "src/.gitkeep"
   ],
   "devDependencies": {
     "@authgear/core": "5.0.0",
