@@ -32,6 +32,19 @@ const USER_INFO = `
       "type": "totp",
       "kind": "secondary"
     }
+    ,
+    {
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z",
+      "type": "murky_type",
+      "kind": "primary"
+    },
+    {
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z",
+      "type": "password",
+      "kind": "not_a_kind"
+    }
   ],
   "https://authgear.com/claims/user/recovery_code_enabled": true,
 
@@ -106,6 +119,18 @@ describe("_decodeUserInfo", () => {
           updatedAt: new Date("2023-01-01T00:00:00Z"),
           type: AuthenticatorType.TOTP,
           kind: AuthenticatorKind.Secondary,
+        },
+        {
+          createdAt: new Date("2023-01-01T00:00:00Z"),
+          updatedAt: new Date("2023-01-01T00:00:00Z"),
+          type: AuthenticatorType.Unknown,
+          kind: AuthenticatorKind.Primary,
+        },
+        {
+          createdAt: new Date("2023-01-01T00:00:00Z"),
+          updatedAt: new Date("2023-01-01T00:00:00Z"),
+          type: AuthenticatorType.Password,
+          kind: AuthenticatorKind.Unknown,
         },
       ],
       recoveryCodeEnabled: true,
