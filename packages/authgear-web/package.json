@@ -1,6 +1,6 @@
 {
   "name": "@authgear/web",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "license": "Apache-2.0",
   "repository": "https://github.com/authgear/authgear-sdk-js",
   "main": "dist/authgear-web.cjs.js",
@@ -12,7 +12,7 @@
     "dist/authgear-web.iife.js"
   ],
   "devDependencies": {
-    "@authgear/core": "5.0.0",
+    "@authgear/core": "5.0.1",
     "core-js-pure": "^3.37.0"
   },
   "keywords": [

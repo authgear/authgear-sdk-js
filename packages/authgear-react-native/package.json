@@ -1,6 +1,6 @@
 {
   "name": "@authgear/react-native",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "license": "Apache-2.0",
   "repository": "https://github.com/authgear/authgear-sdk-js",
   "scripts": {
@@ -19,7 +19,7 @@
     "src/.gitkeep"
   ],
   "devDependencies": {
-    "@authgear/core": "5.0.0",
+    "@authgear/core": "5.0.1",
     "@react-native-community/cli": "^20.0.2",
     "@types/react-native": "0.69.1",
     "core-js-pure": "^3.37.0",
