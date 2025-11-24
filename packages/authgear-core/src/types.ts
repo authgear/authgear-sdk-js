@@ -6,6 +6,8 @@ export enum AuthenticatorType {
   OOBOTPEmail = "oob_otp_email",
   OOBOTPSMS = "oob_otp_sms",
   TOTP = "totp",
+  Passkey = "passkey",
+  Unknown = "unknown",
 }
 
 /**
@@ -14,6 +16,7 @@ export enum AuthenticatorType {
 export enum AuthenticatorKind {
   Primary = "primary",
   Secondary = "secondary",
+  Unknown = "unknown",
 }
 
 /**
@@ -214,10 +217,44 @@ export function _decodeAuthenticators(r: any): Authenticator[] | undefined {
     return {
       createdAt: new Date(a["created_at"]),
       updatedAt: new Date(a["updated_at"]),
-      type: a["type"],
-      kind: a["kind"],
+      type: parseAuthenticatorType(a["type"]),
+      kind: parseAuthenticatorKind(a["kind"]),
     };
   });
+}
+
+/**
+ * @internal
+ */
+export function parseAuthenticatorType(value: string): AuthenticatorType {
+  switch (value) {
+    case "password":
+      return AuthenticatorType.Password;
+    case "oob_otp_email":
+      return AuthenticatorType.OOBOTPEmail;
+    case "oob_otp_sms":
+      return AuthenticatorType.OOBOTPSMS;
+    case "totp":
+      return AuthenticatorType.TOTP;
+    case "passkey":
+      return AuthenticatorType.Passkey;
+    default:
+      return AuthenticatorType.Unknown;
+  }
+}
+
+/**
+ * @internal
+ */
+export function parseAuthenticatorKind(value: string): AuthenticatorKind {
+  switch (value) {
+    case "primary":
+      return AuthenticatorKind.Primary;
+    case "secondary":
+      return AuthenticatorKind.Secondary;
+    default:
+      return AuthenticatorKind.Unknown;
+  }
 }
 
 /**
