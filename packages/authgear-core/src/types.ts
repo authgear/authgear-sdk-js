@@ -1,4 +1,32 @@
 /**
+ * @public
+ */
+export enum AuthenticatorType {
+  Password = "password",
+  OOBOTPEmail = "oob_otp_email",
+  OOBOTPSMS = "oob_otp_sms",
+  TOTP = "totp",
+}
+
+/**
+ * @public
+ */
+export enum AuthenticatorKind {
+  Primary = "primary",
+  Secondary = "secondary",
+}
+
+/**
+ * @public
+ */
+export interface Authenticator {
+  createdAt: Date;
+  updatedAt: Date;
+  type: AuthenticatorType;
+  kind: AuthenticatorKind;
+}
+
+/**
  * UserInfo is the result of fetchUserInfo.
  * It contains `sub` which is the User ID,
  * as well as OIDC standard claims like `email`,
@@ -14,6 +42,7 @@ export interface UserInfo {
   isVerified: boolean;
   isAnonymous: boolean;
   canReauthenticate: boolean;
+  recoveryCodeEnabled?: boolean;
   roles?: string[];
 
   raw: Record<string, unknown>;
@@ -44,6 +73,7 @@ export interface UserInfo {
     postalCode?: string;
     country?: string;
   };
+  authenticators?: Authenticator[];
 }
 
 /**
@@ -176,6 +206,23 @@ export interface _APIClientDelegate {
 /**
  * @internal
  */
+export function _decodeAuthenticators(r: any): Authenticator[] | undefined {
+  if (!Array.isArray(r)) {
+    return undefined;
+  }
+  return r.map((a) => {
+    return {
+      createdAt: new Date(a["created_at"]),
+      updatedAt: new Date(a["updated_at"]),
+      type: a["type"],
+      kind: a["kind"],
+    };
+  });
+}
+
+/**
+ * @internal
+ */
 export function _decodeUserInfo(r: any): UserInfo {
   const raw = r;
   const customAttributes = r["custom_attributes"] ?? {};
@@ -186,7 +233,12 @@ export function _decodeUserInfo(r: any): UserInfo {
     isAnonymous: r["https://authgear.com/claims/user/is_anonymous"] ?? false,
     canReauthenticate:
       r["https://authgear.com/claims/user/can_reauthenticate"] ?? false,
+    recoveryCodeEnabled:
+      r["https://authgear.com/claims/user/recovery_code_enabled"] ?? false,
     roles: r["https://authgear.com/claims/user/roles"],
+    authenticators: _decodeAuthenticators(
+      r["https://authgear.com/claims/user/authenticators"]
+    ),
 
     raw,
     customAttributes,
