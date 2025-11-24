@@ -31,8 +31,13 @@ const USER_INFO = `
       "updated_at": "2023-01-01T00:00:00Z",
       "type": "totp",
       "kind": "secondary"
-    }
-    ,
+    },
+    {
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z",
+      "type": "passkey",
+      "kind": "primary"
+    },
     {
       "created_at": "2023-01-01T00:00:00Z",
       "updated_at": "2023-01-01T00:00:00Z",
@@ -123,6 +128,12 @@ describe("_decodeUserInfo", () => {
         {
           createdAt: new Date("2023-01-01T00:00:00Z"),
           updatedAt: new Date("2023-01-01T00:00:00Z"),
+          type: AuthenticatorType.Passkey,
+          kind: AuthenticatorKind.Primary,
+        },
+        {
+          createdAt: new Date("2023-01-01T00:00:00Z"),
+          updatedAt: new Date("2023-01-01T00:00:00Z"),
           type: AuthenticatorType.Unknown,
           kind: AuthenticatorKind.Primary,
         },
@@ -187,6 +198,24 @@ describe("_decodeUserInfo", () => {
             updated_at: "2023-01-01T00:00:00Z",
             type: "totp",
             kind: "secondary",
+          },
+          {
+            created_at: "2023-01-01T00:00:00Z",
+            updated_at: "2023-01-01T00:00:00Z",
+            type: "passkey",
+            kind: "primary",
+          },
+          {
+            created_at: "2023-01-01T00:00:00Z",
+            updated_at: "2023-01-01T00:00:00Z",
+            type: "murky_type",
+            kind: "primary",
+          },
+          {
+            created_at: "2023-01-01T00:00:00Z",
+            updated_at: "2023-01-01T00:00:00Z",
+            type: "password",
+            kind: "not_a_kind",
           },
         ],
         "https://authgear.com/claims/user/recovery_code_enabled": true,

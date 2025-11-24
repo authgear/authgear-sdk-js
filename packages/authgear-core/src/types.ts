@@ -6,6 +6,7 @@ export enum AuthenticatorType {
   OOBOTPEmail = "oob_otp_email",
   OOBOTPSMS = "oob_otp_sms",
   TOTP = "totp",
+  Passkey = "passkey",
   Unknown = "unknown",
 }
 
@@ -235,6 +236,8 @@ export function parseAuthenticatorType(value: string): AuthenticatorType {
       return AuthenticatorType.OOBOTPSMS;
     case "totp":
       return AuthenticatorType.TOTP;
+    case "passkey":
+      return AuthenticatorType.Passkey;
     default:
       return AuthenticatorType.Unknown;
   }
