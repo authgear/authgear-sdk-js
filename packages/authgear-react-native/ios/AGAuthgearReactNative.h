@@ -8,7 +8,7 @@
 #import <LocalAuthentication/LocalAuthentication.h>
 
 #ifdef RCT_NEW_ARCH_ENABLED
-#import "AuthgearReactNativeSpec/AuthgearReactNativeSpec.h"
+#import "AuthgearReactNativeSpec.h"
 @interface AGAuthgearReactNative : NativeAuthgearReactNativeSpecBase <NativeAuthgearReactNativeSpec>
 #else
 #import <React/RCTBridgeModule.h>
