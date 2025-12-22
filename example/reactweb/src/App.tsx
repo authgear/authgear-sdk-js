@@ -562,7 +562,8 @@ function Root() {
         After that, click one of the following buttons to try different
         features.
       </p>
-      {sessionState === SessionState.Authenticated ? (
+      {sessionState === SessionState.Authenticated ||
+      (sessionType === "cookie" && userInfo != null) ? (
         <div className="button-group">
           <button
             className="button"
@@ -681,7 +682,8 @@ function Root() {
           </button>
         </div>
       )}
-      {sessionState === SessionState.Authenticated && userInfo != null ? (
+      {(sessionState === SessionState.Authenticated && userInfo != null) ||
+      (sessionType === "cookie" && userInfo != null) ? (
         <pre>{JSON.stringify(userInfo.raw, null, 2)}</pre>
       ) : null}
       <ShowError error={error} />
