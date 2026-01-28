@@ -3,8 +3,8 @@
   "version": "0.20.0",
   "private": true,
   "scripts": {
-    "start": "PORT=4000 parcel serve --no-cache src/index.html",
-    "build": "parcel build src/index.html",
+    "start": "vite",
+    "build": "vite build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint"
   },
@@ -12,15 +12,15 @@
     "@authgear/web": "../../packages/authgear-web",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.3"
+    "react-router-dom": "^6.30.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.65",
     "@types/react-dom": "^18.2.21",
+    "@vitejs/plugin-react": "^4.7.0",
     "eslint-plugin-react": "7.29.4",
     "eslint-plugin-react-hooks": "4.4.0",
-    "parcel": "^2.16.0",
-    "process": "^0.11.10",
-    "typescript": "5.4.2"
+    "typescript": "5.4.2",
+    "vite": "^7.3.1"
   }
 }
