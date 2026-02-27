@@ -14,7 +14,10 @@
     "run-android": "cap run android"
   },
   "overrides": {
-    "external-editor": "@inquirer/external-editor"
+    "external-editor": "@inquirer/external-editor",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^9.0.9"
+    }
   },
   "dependencies": {
     "@authgear/capacitor": "../../packages/authgear-capacitor",
