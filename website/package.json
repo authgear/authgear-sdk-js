@@ -25,8 +25,19 @@
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^3.9.2"
   },
+  "//": "Override serialize-javascript to v7. v6->v7 is safe on Node 20+.",
+  "//": "See https://github.com/yahoo/serialize-javascript/releases/tag/v7.0.0",
   "overrides": {
-    "minimatch": "^3.1.5"
+    "minimatch": "^3.1.5",
+    "copy-webpack-plugin": {
+      "serialize-javascript": "^7.0.4"
+    },
+    "css-minimizer-webpack-plugin": {
+      "serialize-javascript": "^7.0.4"
+    },
+    "terser-webpack-plugin": {
+      "serialize-javascript": "^7.0.4"
+    }
   },
   "browserslist": {
     "production": [

@@ -75,6 +75,7 @@ When an override or resolution is genuinely required, keep its scope as narrow a
 - For Yarn, use `yarn why <package>` and prefer the most specific resolution pattern that matches the vulnerable path.
 - If the vulnerable package can be updated through the existing semver range after a lockfile refresh, remove the temporary override or resolution instead of leaving it behind.
 - As part of the final pass, review any existing or newly added `overrides` and `resolutions` touched by the audit and remove entries that are now outdated, redundant, or no longer needed.
+- If an override or resolution crosses a major version line for a transitive dependency, only do it when you have primary-source evidence that the major change is compatible in this context, and note that evidence alongside the manifest change before verification.
 
 For this repo, also account for these specifics:
 
