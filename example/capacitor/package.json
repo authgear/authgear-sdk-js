@@ -14,7 +14,6 @@
     "run-android": "cap run android"
   },
   "overrides": {
-    "external-editor": "@inquirer/external-editor",
     "@typescript-eslint/typescript-estree": {
       "minimatch": "^9.0.9"
     }
@@ -40,7 +39,6 @@
     "react-router-dom": "^5.3.4"
   },
   "devDependencies": {
-    "@inquirer/external-editor": "^1.0.0",
     "@capacitor/cli": "^7.5.0",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
