@@ -7,7 +7,10 @@ async function windowCryptoSubtleDigest(
   algorithm: string,
   data: Uint8Array
 ): Promise<Uint8Array> {
-  const promiseOrEvent = window.crypto.subtle.digest(algorithm, data.buffer);
+  const promiseOrEvent = window.crypto.subtle.digest(
+    algorithm,
+    data.buffer as ArrayBuffer
+  );
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (promiseOrEvent.then) {
     return promiseOrEvent.then((output: ArrayBuffer) => {
