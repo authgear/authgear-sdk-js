@@ -1,10 +1,12 @@
 import { encode, decode } from "base64-arraybuffer";
 
+type Base64Input = ArrayBuffer | ArrayBufferView;
+
 /**
  * @internal
  */
-export function _base64URLEncode(arrayBuffer: ArrayBuffer): string {
-  return encode(arrayBuffer)
+export function _base64URLEncode(input: Base64Input): string {
+  return encode(input as ArrayBuffer)
     .replace(/\//g, "_")
     .replace(/\+/g, "-")
     .replace(/=+$/, "");
