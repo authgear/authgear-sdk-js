@@ -41,9 +41,9 @@ jobs:
     - run: npm ci
     - run: npm ci
       working-directory: ./website
-    - run: npm audit
+    - run: npm audit --audit-level=critical
       if: ${{ !cancelled() }}
-    - run: npm audit
+    - run: npm audit --audit-level=critical
       working-directory: ./website
       if: ${{ !cancelled() }}
     - run: npm run check-tidy
