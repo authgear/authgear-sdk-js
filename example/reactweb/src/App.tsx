@@ -6,6 +6,7 @@ import authgear, {
   Page,
   WebContainerDelegate,
   SessionState,
+  LinkOAuthOptions,
 } from "@authgear/web";
 import "./App.css";
 
@@ -66,6 +67,8 @@ function getOAuthState(): OAuthState | undefined {
       return "change_phone";
     case "change_username":
       return "change_username";
+    case "link_oauth":
+      return "link_oauth";
   }
   return undefined;
 }
@@ -81,7 +84,8 @@ type OAuthState =
   | "add_username"
   | "change_email"
   | "change_phone"
-  | "change_username";
+  | "change_username"
+  | "link_oauth";
 
 function ShowError(props: { error: unknown }) {
   const { error } = props;
@@ -123,6 +127,7 @@ function Root() {
   const [page, setPage] = useState<string>();
   const [authenticationFlowGroup, setAuthenticationflowGroup] =
     useState<string>("");
+  const [oauthProviderAlias, setOauthProviderAlias] = useState<string>("");
 
   const [error, setError] = useState<unknown>(null);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -321,6 +326,25 @@ function Root() {
         .catch((err) => setError(err));
     },
     [userInfo]
+  );
+
+  const onClickLinkOAuth = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (oauthProviderAlias === "") {
+        setError(new Error("OAuth Provider Alias is required"));
+        return;
+      }
+      authgear
+        .startLinkOAuth({
+          redirectURI: makeRedirectURI(),
+          state: "link_oauth",
+          oauthProviderAlias,
+        })
+        .catch((err) => setError(err));
+    },
+    [oauthProviderAlias]
   );
 
   const onClickChangeUsername = useCallback(
@@ -664,6 +688,23 @@ function Root() {
           >
             Change Username
           </button>
+          <label className="label">
+            OAuth Provider Alias (required for Link OAuth)
+            <input
+              className="input"
+              type="text"
+              placeholder="e.g. google"
+              value={oauthProviderAlias}
+              onChange={(e) => setOauthProviderAlias(e.currentTarget.value)}
+            />
+          </label>
+          <button
+            className="button"
+            type="button"
+            onClick={onClickLinkOAuth}
+          >
+            Link OAuth
+          </button>
           <button className="button" type="button" onClick={onClickSignOut}>
             Sign out
           </button>
@@ -795,6 +836,14 @@ function AuthRedirect() {
               break;
             case "change_username":
               authgear.finishChangeUsername().then(
+                (_) => {
+                  navigate("/");
+                },
+                (err) => setError(err)
+              );
+              break;
+            case "link_oauth":
+              authgear.finishLinkOAuth().then(
                 (_) => {
                   navigate("/");
                 },
