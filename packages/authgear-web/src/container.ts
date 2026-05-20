@@ -32,6 +32,7 @@ import {
   SettingsActionOptions,
   _InternalSettingsActionOptions,
   LinkOAuthOptions,
+  UnlinkOAuthOptions,
 } from "./types";
 
 /**
@@ -687,6 +688,26 @@ export class WebContainer {
    * @public
    */
   async finishLinkOAuth(): Promise<void> {
+    return this.finishSettingsAction();
+  }
+
+  /**
+   * Start settings action "unlink_oauth" by redirecting to the settings page.
+   *
+   * @public
+   */
+  async startUnlinkOAuth(options: UnlinkOAuthOptions): Promise<void> {
+    await this.startSettingsAction(SettingsAction.UnlinkOAuth, options);
+  }
+
+  /**
+   * Finish settings action "unlink_oauth".
+   *
+   * It may reject with OAuthError.
+   *
+   * @public
+   */
+  async finishUnlinkOAuth(): Promise<void> {
     return this.finishSettingsAction();
   }
 
