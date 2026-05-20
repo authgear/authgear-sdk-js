@@ -186,10 +186,36 @@ export interface SettingsActionOptions {
 }
 
 /**
+ * Options for connecting an OAuth provider via settings action.
+ * @public
+ */
+export interface LinkOAuthOptions extends SettingsActionOptions {
+  /**
+   * The alias of the OAuth provider to link,
+   * as configured in Authgear Portal under Social / Enterprise Login.
+   */
+  oauthProviderAlias: string;
+}
+
+/**
+ * Options for disconnecting an OAuth provider via settings action.
+ * @public
+ */
+export interface UnlinkOAuthOptions extends SettingsActionOptions {
+  /**
+   * The alias of the OAuth provider to unlink,
+   * as configured in Authgear Portal under Social / Enterprise Login.
+   * This field is required.
+   */
+  oauthProviderAlias: string;
+}
+
+/**
  * @internal
  */
 export interface _InternalSettingsActionOptions extends SettingsActionOptions {
   qLoginID?: string;
+  oauthProviderAlias?: string;
 }
 
 /**
