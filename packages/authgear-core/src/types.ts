@@ -167,7 +167,8 @@ export interface _OIDCAuthenticationRequest {
     | "add_username"
     | "change_email"
     | "change_phone"
-    | "change_username";
+    | "change_username"
+    | "link_oauth";
   xSettingsActionQuery?: _SettingsActionQuery;
   authenticationFlowGroup?: string;
   clientID?: string;
@@ -572,6 +573,10 @@ export enum SettingsAction {
    * Change username in Authgear settings page.
    */
   ChangeUsername = "change_username",
+  /**
+   * Link an OAuth provider in Authgear settings page.
+   */
+  LinkOAuth = "link_oauth",
 }
 
 /**
