@@ -7,6 +7,7 @@ import authgear, {
   WebContainerDelegate,
   SessionState,
   LinkOAuthOptions,
+  UnlinkOAuthOptions,
 } from "@authgear/web";
 import "./App.css";
 
@@ -69,6 +70,8 @@ function getOAuthState(): OAuthState | undefined {
       return "change_username";
     case "link_oauth":
       return "link_oauth";
+    case "unlink_oauth":
+      return "unlink_oauth";
   }
   return undefined;
 }
@@ -85,7 +88,8 @@ type OAuthState =
   | "change_email"
   | "change_phone"
   | "change_username"
-  | "link_oauth";
+  | "link_oauth"
+  | "unlink_oauth";
 
 function ShowError(props: { error: unknown }) {
   const { error } = props;
@@ -340,6 +344,25 @@ function Root() {
         .startLinkOAuth({
           redirectURI: makeRedirectURI(),
           state: "link_oauth",
+          oauthProviderAlias,
+        })
+        .catch((err) => setError(err));
+    },
+    [oauthProviderAlias]
+  );
+
+  const onClickUnlinkOAuth = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (oauthProviderAlias === "") {
+        setError(new Error("OAuth Provider Alias is required"));
+        return;
+      }
+      authgear
+        .startUnlinkOAuth({
+          redirectURI: makeRedirectURI(),
+          state: "unlink_oauth",
           oauthProviderAlias,
         })
         .catch((err) => setError(err));
@@ -689,7 +712,7 @@ function Root() {
             Change Username
           </button>
           <label className="label">
-            OAuth Provider Alias (required for Link OAuth)
+            OAuth Provider Alias (required for Link / Unlink OAuth)
             <input
               className="input"
               type="text"
@@ -704,6 +727,13 @@ function Root() {
             onClick={onClickLinkOAuth}
           >
             Link OAuth
+          </button>
+          <button
+            className="button"
+            type="button"
+            onClick={onClickUnlinkOAuth}
+          >
+            Unlink OAuth
           </button>
           <button className="button" type="button" onClick={onClickSignOut}>
             Sign out
@@ -844,6 +874,14 @@ function AuthRedirect() {
               break;
             case "link_oauth":
               authgear.finishLinkOAuth().then(
+                (_) => {
+                  navigate("/");
+                },
+                (err) => setError(err)
+              );
+              break;
+            case "unlink_oauth":
+              authgear.finishUnlinkOAuth().then(
                 (_) => {
                   navigate("/");
                 },

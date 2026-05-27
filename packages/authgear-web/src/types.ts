@@ -198,6 +198,19 @@ export interface LinkOAuthOptions extends SettingsActionOptions {
 }
 
 /**
+ * Options for disconnecting an OAuth provider via settings action.
+ * @public
+ */
+export interface UnlinkOAuthOptions extends SettingsActionOptions {
+  /**
+   * The alias of the OAuth provider to unlink,
+   * as configured in Authgear Portal under Social / Enterprise Login.
+   * This field is required.
+   */
+  oauthProviderAlias: string;
+}
+
+/**
  * @internal
  */
 export interface _InternalSettingsActionOptions extends SettingsActionOptions {
