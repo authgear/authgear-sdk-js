@@ -29,6 +29,7 @@
   "//": "See https://github.com/yahoo/serialize-javascript/releases/tag/v7.0.0",
   "overrides": {
     "minimatch": "^3.1.5",
+    "uuid": "^11.1.1",
     "copy-webpack-plugin": {
       "serialize-javascript": "^7.0.4"
     },
