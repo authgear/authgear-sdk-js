@@ -22,6 +22,43 @@ export enum AuthenticatorKind {
 /**
  * @public
  */
+export enum IdentityType {
+  LoginID = "login_id",
+  OAuth = "oauth",
+  Anonymous = "anonymous",
+  Biometric = "biometric",
+  Passkey = "passkey",
+  SIWE = "siwe",
+  LDAP = "ldap",
+  Unknown = "unknown",
+}
+
+/**
+ * @public
+ */
+export enum LoginIDType {
+  Email = "email",
+  Phone = "phone",
+  Username = "username",
+  Unknown = "unknown",
+}
+
+/**
+ * @public
+ */
+export interface Identity {
+  type: IdentityType;
+  createdAt: Date;
+  updatedAt: Date;
+  loginIDKey?: string;
+  loginIDType?: LoginIDType;
+  providerType?: string;
+  providerAlias?: string;
+}
+
+/**
+ * @public
+ */
 export interface Authenticator {
   createdAt: Date;
   updatedAt: Date;
@@ -77,6 +114,7 @@ export interface UserInfo {
     country?: string;
   };
   authenticators?: Authenticator[];
+  identities?: Identity[];
 }
 
 /**
@@ -228,6 +266,74 @@ export function _decodeAuthenticators(r: any): Authenticator[] | undefined {
 /**
  * @internal
  */
+export function parseLoginIDType(value: string): LoginIDType {
+  switch (value) {
+    case "email":
+      return LoginIDType.Email;
+    case "phone":
+      return LoginIDType.Phone;
+    case "username":
+      return LoginIDType.Username;
+    default:
+      return LoginIDType.Unknown;
+  }
+}
+
+/**
+ * @internal
+ */
+export function parseIdentityType(value: string): IdentityType {
+  switch (value) {
+    case "login_id":
+      return IdentityType.LoginID;
+    case "oauth":
+      return IdentityType.OAuth;
+    case "anonymous":
+      return IdentityType.Anonymous;
+    case "biometric":
+      return IdentityType.Biometric;
+    case "passkey":
+      return IdentityType.Passkey;
+    case "siwe":
+      return IdentityType.SIWE;
+    case "ldap":
+      return IdentityType.LDAP;
+    default:
+      return IdentityType.Unknown;
+  }
+}
+
+/**
+ * @internal
+ */
+export function _decodeIdentities(r: any): Identity[] | undefined {
+  if (!Array.isArray(r)) {
+    return undefined;
+  }
+  return r.map((i) => {
+    const identity: Identity = {
+      type: parseIdentityType(i["type"]),
+      createdAt: new Date(i["created_at"]),
+      updatedAt: new Date(i["updated_at"]),
+    };
+    if (identity.type === IdentityType.LoginID) {
+      identity.loginIDKey = i["login_id_key"];
+      identity.loginIDType =
+        i["login_id_type"] != null
+          ? parseLoginIDType(i["login_id_type"])
+          : undefined;
+    }
+    if (identity.type === IdentityType.OAuth) {
+      identity.providerType = i["provider_type"];
+      identity.providerAlias = i["provider_alias"];
+    }
+    return identity;
+  });
+}
+
+/**
+ * @internal
+ */
 export function parseAuthenticatorType(value: string): AuthenticatorType {
   switch (value) {
     case "password":
@@ -277,6 +383,9 @@ export function _decodeUserInfo(r: any): UserInfo {
     roles: r["https://authgear.com/claims/user/roles"],
     authenticators: _decodeAuthenticators(
       r["https://authgear.com/claims/user/authenticators"]
+    ),
+    identities: _decodeIdentities(
+      r["https://authgear.com/claims/user/identities"]
     ),
 
     raw,

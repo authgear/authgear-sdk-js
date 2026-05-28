@@ -1,4 +1,10 @@
-import { _decodeUserInfo, AuthenticatorType, AuthenticatorKind } from "./types";
+import {
+  _decodeUserInfo,
+  AuthenticatorType,
+  AuthenticatorKind,
+  IdentityType,
+  LoginIDType,
+} from "./types";
 
 const USER_INFO = `
 {
@@ -49,6 +55,27 @@ const USER_INFO = `
       "updated_at": "2023-01-01T00:00:00Z",
       "type": "password",
       "kind": "not_a_kind"
+    }
+  ],
+  "https://authgear.com/claims/user/identities": [
+    {
+      "type": "oauth",
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z",
+      "provider_type": "google",
+      "provider_alias": "google"
+    },
+    {
+      "type": "login_id",
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z",
+      "login_id_key": "email",
+      "login_id_type": "email"
+    },
+    {
+      "type": "unknown_future_type",
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
     }
   ],
   "https://authgear.com/claims/user/recovery_code_enabled": true,
@@ -144,6 +171,27 @@ describe("_decodeUserInfo", () => {
           kind: AuthenticatorKind.Unknown,
         },
       ],
+      identities: [
+        {
+          type: IdentityType.OAuth,
+          createdAt: new Date("2024-01-01T00:00:00Z"),
+          updatedAt: new Date("2024-01-01T00:00:00Z"),
+          providerType: "google",
+          providerAlias: "google",
+        },
+        {
+          type: IdentityType.LoginID,
+          createdAt: new Date("2024-01-01T00:00:00Z"),
+          updatedAt: new Date("2024-01-01T00:00:00Z"),
+          loginIDKey: "email",
+          loginIDType: LoginIDType.Email,
+        },
+        {
+          type: IdentityType.Unknown,
+          createdAt: new Date("2024-01-01T00:00:00Z"),
+          updatedAt: new Date("2024-01-01T00:00:00Z"),
+        },
+      ],
       recoveryCodeEnabled: true,
       customAttributes: {
         foobar: 42,
@@ -216,6 +264,27 @@ describe("_decodeUserInfo", () => {
             updated_at: "2023-01-01T00:00:00Z",
             type: "password",
             kind: "not_a_kind",
+          },
+        ],
+        "https://authgear.com/claims/user/identities": [
+          {
+            type: "oauth",
+            created_at: "2024-01-01T00:00:00Z",
+            updated_at: "2024-01-01T00:00:00Z",
+            provider_type: "google",
+            provider_alias: "google",
+          },
+          {
+            type: "login_id",
+            created_at: "2024-01-01T00:00:00Z",
+            updated_at: "2024-01-01T00:00:00Z",
+            login_id_key: "email",
+            login_id_type: "email",
+          },
+          {
+            type: "unknown_future_type",
+            created_at: "2024-01-01T00:00:00Z",
+            updated_at: "2024-01-01T00:00:00Z",
           },
         ],
         "https://authgear.com/claims/user/recovery_code_enabled": true,
