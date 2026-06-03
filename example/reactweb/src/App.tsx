@@ -358,7 +358,8 @@ function Root() {
     }
     return userInfo.identities.some(
       (i) =>
-        i.type === IdentityType.OAuth && i.providerAlias === oauthProviderAlias
+        i.type === IdentityType.OAuth &&
+        i.oauthProviderAlias === oauthProviderAlias
     );
   }, [oauthProviderAlias, userInfo]);
 
@@ -733,18 +734,10 @@ function Root() {
             />
           </label>
           <label className="label">{`Linked: ${isLinkedToOAuthAlias}`}</label>
-          <button
-            className="button"
-            type="button"
-            onClick={onClickLinkOAuth}
-          >
+          <button className="button" type="button" onClick={onClickLinkOAuth}>
             Link OAuth
           </button>
-          <button
-            className="button"
-            type="button"
-            onClick={onClickUnlinkOAuth}
-          >
+          <button className="button" type="button" onClick={onClickUnlinkOAuth}>
             Unlink OAuth
           </button>
           <button className="button" type="button" onClick={onClickSignOut}>

@@ -52,8 +52,8 @@ export interface Identity {
   updatedAt: Date;
   loginIDKey?: string;
   loginIDType?: LoginIDType;
-  providerType?: string;
-  providerAlias?: string;
+  oauthProviderType?: string;
+  oauthProviderAlias?: string;
 }
 
 /**
@@ -324,8 +324,8 @@ export function _decodeIdentities(r: any): Identity[] | undefined {
           : undefined;
     }
     if (identity.type === IdentityType.OAuth) {
-      identity.providerType = i["provider_type"];
-      identity.providerAlias = i["provider_alias"];
+      identity.oauthProviderType = i["oauth_provider_type"];
+      identity.oauthProviderAlias = i["oauth_provider_alias"];
     }
     return identity;
   });

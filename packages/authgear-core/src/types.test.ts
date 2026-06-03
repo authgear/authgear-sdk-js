@@ -62,8 +62,8 @@ const USER_INFO = `
       "type": "oauth",
       "created_at": "2024-01-01T00:00:00Z",
       "updated_at": "2024-01-01T00:00:00Z",
-      "provider_type": "google",
-      "provider_alias": "google"
+      "oauth_provider_type": "google",
+      "oauth_provider_alias": "google"
     },
     {
       "type": "login_id",
@@ -176,8 +176,8 @@ describe("_decodeUserInfo", () => {
           type: IdentityType.OAuth,
           createdAt: new Date("2024-01-01T00:00:00Z"),
           updatedAt: new Date("2024-01-01T00:00:00Z"),
-          providerType: "google",
-          providerAlias: "google",
+          oauthProviderType: "google",
+          oauthProviderAlias: "google",
         },
         {
           type: IdentityType.LoginID,
@@ -271,8 +271,8 @@ describe("_decodeUserInfo", () => {
             type: "oauth",
             created_at: "2024-01-01T00:00:00Z",
             updated_at: "2024-01-01T00:00:00Z",
-            provider_type: "google",
-            provider_alias: "google",
+            oauth_provider_type: "google",
+            oauth_provider_alias: "google",
           },
           {
             type: "login_id",
