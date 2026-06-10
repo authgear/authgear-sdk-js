@@ -8,6 +8,7 @@ import authgear, {
   SessionState,
   LinkOAuthOptions,
   UnlinkOAuthOptions,
+  IdentityType,
 } from "@authgear/web";
 import "./App.css";
 
@@ -350,6 +351,17 @@ function Root() {
     },
     [oauthProviderAlias]
   );
+
+  const isLinkedToOAuthAlias = useMemo(() => {
+    if (oauthProviderAlias === "" || userInfo?.identities == null) {
+      return false;
+    }
+    return userInfo.identities.some(
+      (i) =>
+        i.type === IdentityType.OAuth &&
+        i.oauthProviderAlias === oauthProviderAlias
+    );
+  }, [oauthProviderAlias, userInfo]);
 
   const onClickUnlinkOAuth = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
@@ -721,18 +733,11 @@ function Root() {
               onChange={(e) => setOauthProviderAlias(e.currentTarget.value)}
             />
           </label>
-          <button
-            className="button"
-            type="button"
-            onClick={onClickLinkOAuth}
-          >
+          <label className="label">{`Linked: ${isLinkedToOAuthAlias}`}</label>
+          <button className="button" type="button" onClick={onClickLinkOAuth}>
             Link OAuth
           </button>
-          <button
-            className="button"
-            type="button"
-            onClick={onClickUnlinkOAuth}
-          >
+          <button className="button" type="button" onClick={onClickUnlinkOAuth}>
             Unlink OAuth
           </button>
           <button className="button" type="button" onClick={onClickSignOut}>
