@@ -37,7 +37,7 @@ jobs:
     - run: node --version
     - run: npm --version
     - run: make ruby-audit
-    - run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+    - run: sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer
     - run: npm ci
     - run: npm ci
       working-directory: ./website
@@ -130,7 +130,7 @@ jobs:
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
-    - run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+    - run: sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer
     - run: make sdk-build
     - run: make capacitor-npm-ci
     - run: make capacitor-build-js
@@ -163,7 +163,7 @@ jobs:
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
-    - run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+    - run: sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer
     - run: make sdk-build
     - run: make react-native-npm-ci
     - run: make react-native-pod-install
@@ -231,7 +231,7 @@ jobs:
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
-    - run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+    - run: sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer
     - run: make sdk-build
     - run: make capacitor-npm-ci
     - run: make capacitor-npm-audit
