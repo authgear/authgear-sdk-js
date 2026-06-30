@@ -1,0 +1,7 @@
+---
+ignore:
+  # CVE-2026-54171: excon header leakage on redirects, patched in excon >= 1.5.0.
+  # Cannot upgrade: fastlane 2.236.1 (latest) still constrains excon < 1.0.0.
+  # fastlane master has relaxed this to < 2.0.0 but no release yet.
+  # Remove this ignore once fastlane ships with excon 1.x support.
+  - CVE-2026-54171
