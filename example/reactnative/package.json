@@ -26,7 +26,18 @@
     "minimatch/brace-expansion": "1.1.13",
     "micromatch/picomatch": "2.3.2",
     "@babel/preset-env/**/@babel/plugin-transform-modules-systemjs": "7.29.4",
-    "@react-native-community/cli/**/joi": "^17.13.4"
+    "@react-native-community/cli/**/joi": "^17.13.4",
+    "react-native/ws": "6.2.4",
+    "@react-native-community/cli-server-api/ws": "6.2.4",
+    "@react-native/dev-middleware/ws": "6.2.4",
+    "@react-native/metro-config/**/ws": "7.5.11",
+    "react-native/**/react-devtools-core/ws": "7.5.11",
+    "react-native/**/metro/ws": "7.5.11",
+    "@react-native-community/cli/**/launch-editor": "2.14.1",
+    "@react-native-community/cli-platform-android/**/launch-editor": "2.14.1",
+    "@react-native-community/cli-platform-ios/**/launch-editor": "2.14.1",
+    "eslint/**/js-yaml": "4.2.0",
+    "@babel/core": "7.29.7"
   },
   "devDependencies": {
     "//": "For unknown reason, we need to install eslint-plugin-jest oursevles so that it is found by eslint",

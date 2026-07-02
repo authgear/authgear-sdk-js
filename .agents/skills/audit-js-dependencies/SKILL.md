@@ -106,6 +106,18 @@ yarn add <package>@<fixed-version>
 
 Avoid opportunistic upgrades. The goal is to remove vulnerable dependencies with the narrowest safe diff.
 
+## Tool Path Setup
+
+`npm` and `yarn` are not in the default shell PATH in this environment. Locate them in the Nix store before running any commands:
+
+```bash
+NPM=$(find /nix/store -maxdepth 3 -name "npm" -path "*/nodejs-24*/bin/npm" 2>/dev/null | head -1)
+YARN=$(find /nix/store -maxdepth 3 -name "yarn" -path "*/yarn-*/bin/yarn" 2>/dev/null | head -1)
+export PATH="$(dirname $NPM):$(dirname $YARN):$PATH"
+```
+
+Use this PATH prefix for every `npm` and `yarn` command in this skill.
+
 ## Verify After Changes
 
 Re-run the audit for every root you touched. Then run the most relevant lightweight verification for each affected project:
@@ -117,6 +129,26 @@ Re-run the audit for every root you touched. Then run the most relevant lightwei
 - `website`: `npm run build`
 
 If a dependency update affects native mobile tooling, note any heavier validation you did not run, such as Capacitor or React Native platform builds.
+
+## Run Local CI Checks Before Completing
+
+After all audits and per-project verifications pass, run the full local CI suite from the repo root before declaring the task done. These mirror the `test` job in `.github/workflows/ci.yaml`.
+
+Run each command individually and capture its exit code explicitly. **Never pipe a CI command through `tail`, `grep`, or any filter** — doing so returns the filter's exit code, not the command's, silently hiding failures.
+
+```bash
+npm audit --audit-level=critical; echo "exit: $?"
+cd website && npm audit --audit-level=critical; echo "exit: $?"; cd ..
+npm run check-tidy; echo "exit: $?"
+npm run format; echo "exit: $?"
+npm run lint; echo "exit: $?"
+npm run typecheck; echo "exit: $?"
+npm run test; echo "exit: $?"
+npm run verify; echo "exit: $?"
+npm run build; echo "exit: $?"
+```
+
+All nine commands must print `exit: 0`. If any print a non-zero exit, fix the issue before completing. Do not skip this step.
 
 ## Report Breaking Changes Instead Of Applying Them
 
