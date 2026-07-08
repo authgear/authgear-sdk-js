@@ -7,7 +7,12 @@
 # Fail fast when the codegen command has changes in its behavior.
 set -eux
 
-npx @react-native-community/cli codegen --platform android --source library
+# RN >=0.82 crashes in readGeneratedAutolinkingOutput when --outputPath is
+# omitted (it resolves path.resolve(undefined, ...) before falling back to
+# codegenConfig.outputDir). Pass it explicitly to work around the regression;
+# this matches the path codegen would have computed from outputDir anyway.
+outputDirAndroid="$(jq <./package.json --raw-output '.codegenConfig.outputDir.android')"
+npx @react-native-community/cli codegen --platform android --source library --outputPath "$outputDirAndroid"
 
 codegenConfigName="$(jq <./package.json --raw-output '.codegenConfig.name')"
 javaPackageName="$(jq <./package.json --raw-output '.codegenConfig.android.javaPackageName')"
