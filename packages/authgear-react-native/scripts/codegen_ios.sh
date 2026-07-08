@@ -15,6 +15,13 @@ npx @react-native-community/cli codegen --platform ios --source library --output
 #
 # So we patched the generated code so that the generated code lives at the root of the outputDir,
 # and we changed our code to reference the header with `#import "AuthgearReactNativeSpec.h"`.
-mv "$outputDir/AuthgearReactNativeSpec/AuthgearReactNativeSpec.h" "$outputDir/AuthgearReactNativeSpec.h"
-mv "$outputDir/AuthgearReactNativeSpec/AuthgearReactNativeSpec-generated.mm" "$outputDir/AuthgearReactNativeSpec-generated.mm"
-rmdir "$outputDir/AuthgearReactNativeSpec/"
+#
+# RN >=0.83 additionally nests everything one level deeper under a `ReactCodegen/`
+# directory, and no longer emits a separate AuthgearReactNativeSpecJSI-generated.cpp
+# (the JSI glue is now a header-only template in AuthgearReactNativeSpecJSI.h).
+mv "$outputDir/ReactCodegen/AuthgearReactNativeSpecJSI.h" "$outputDir/AuthgearReactNativeSpecJSI.h"
+mv "$outputDir/ReactCodegen/AuthgearReactNativeSpec/AuthgearReactNativeSpec.h" "$outputDir/AuthgearReactNativeSpec.h"
+mv "$outputDir/ReactCodegen/AuthgearReactNativeSpec/AuthgearReactNativeSpec-generated.mm" "$outputDir/AuthgearReactNativeSpec-generated.mm"
+rm -f "$outputDir/AuthgearReactNativeSpecJSI-generated.cpp"
+rmdir "$outputDir/ReactCodegen/AuthgearReactNativeSpec/"
+rmdir "$outputDir/ReactCodegen/"

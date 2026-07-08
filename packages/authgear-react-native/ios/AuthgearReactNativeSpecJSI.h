@@ -15,243 +15,212 @@
 namespace facebook::react {
 
 
-  class JSI_EXPORT NativeAuthgearReactNativeCxxSpecJSI : public TurboModule {
-protected:
-  NativeAuthgearReactNativeCxxSpecJSI(std::shared_ptr<CallInvoker> jsInvoker);
-
-public:
-  virtual jsi::Value storageGetItem(jsi::Runtime &rt, jsi::String key) = 0;
-  virtual jsi::Value storageSetItem(jsi::Runtime &rt, jsi::String key, jsi::String value) = 0;
-  virtual jsi::Value storageDeleteItem(jsi::Runtime &rt, jsi::String key) = 0;
-  virtual jsi::Value getDeviceInfo(jsi::Runtime &rt) = 0;
-  virtual jsi::Value randomBytes(jsi::Runtime &rt, double length) = 0;
-  virtual jsi::Value sha256String(jsi::Runtime &rt, jsi::String input) = 0;
-  virtual jsi::Value generateUUID(jsi::Runtime &rt) = 0;
-  virtual jsi::Value openAuthorizeURL(jsi::Runtime &rt, jsi::String url, jsi::String callbackURL, bool prefersEphemeralWebBrowserSession) = 0;
-  virtual jsi::Value openAuthorizeURLWithWebView(jsi::Runtime &rt, jsi::Object options) = 0;
-  virtual jsi::Value dismiss(jsi::Runtime &rt) = 0;
-  virtual jsi::Value getAnonymousKey(jsi::Runtime &rt, std::optional<jsi::String> kid) = 0;
-  virtual jsi::Value signAnonymousToken(jsi::Runtime &rt, jsi::String kid, jsi::String tokenData) = 0;
-  virtual jsi::Value createBiometricPrivateKey(jsi::Runtime &rt, jsi::Object options) = 0;
-  virtual jsi::Value signWithBiometricPrivateKey(jsi::Runtime &rt, jsi::Object options) = 0;
-  virtual jsi::Value removeBiometricPrivateKey(jsi::Runtime &rt, jsi::String kid) = 0;
-  virtual jsi::Value checkBiometricSupported(jsi::Runtime &rt, jsi::Object options) = 0;
-  virtual jsi::Value checkDPoPSupported(jsi::Runtime &rt, jsi::Object stub) = 0;
-  virtual jsi::Value createDPoPPrivateKey(jsi::Runtime &rt, jsi::Object options) = 0;
-  virtual jsi::Value signWithDPoPPrivateKey(jsi::Runtime &rt, jsi::Object options) = 0;
-  virtual jsi::Value checkDPoPPrivateKey(jsi::Runtime &rt, jsi::Object options) = 0;
-  virtual jsi::Value computeDPoPJKT(jsi::Runtime &rt, jsi::Object options) = 0;
-
-};
-
 template <typename T>
 class JSI_EXPORT NativeAuthgearReactNativeCxxSpec : public TurboModule {
 public:
-  jsi::Value create(jsi::Runtime &rt, const jsi::PropNameID &propName) override {
-    return delegate_.create(rt, propName);
-  }
-
-  std::vector<jsi::PropNameID> getPropertyNames(jsi::Runtime& runtime) override {
-    return delegate_.getPropertyNames(runtime);
-  }
-
   static constexpr std::string_view kModuleName = "AuthgearReactNative";
 
 protected:
-  NativeAuthgearReactNativeCxxSpec(std::shared_ptr<CallInvoker> jsInvoker)
-    : TurboModule(std::string{NativeAuthgearReactNativeCxxSpec::kModuleName}, jsInvoker),
-      delegate_(reinterpret_cast<T*>(this), jsInvoker) {}
-
+  NativeAuthgearReactNativeCxxSpec(std::shared_ptr<CallInvoker> jsInvoker) : TurboModule(std::string{NativeAuthgearReactNativeCxxSpec::kModuleName}, jsInvoker) {
+    methodMap_["storageGetItem"] = MethodMetadata {.argCount = 1, .invoker = __storageGetItem};
+    methodMap_["storageSetItem"] = MethodMetadata {.argCount = 2, .invoker = __storageSetItem};
+    methodMap_["storageDeleteItem"] = MethodMetadata {.argCount = 1, .invoker = __storageDeleteItem};
+    methodMap_["getDeviceInfo"] = MethodMetadata {.argCount = 0, .invoker = __getDeviceInfo};
+    methodMap_["randomBytes"] = MethodMetadata {.argCount = 1, .invoker = __randomBytes};
+    methodMap_["sha256String"] = MethodMetadata {.argCount = 1, .invoker = __sha256String};
+    methodMap_["generateUUID"] = MethodMetadata {.argCount = 0, .invoker = __generateUUID};
+    methodMap_["openAuthorizeURL"] = MethodMetadata {.argCount = 3, .invoker = __openAuthorizeURL};
+    methodMap_["openAuthorizeURLWithWebView"] = MethodMetadata {.argCount = 1, .invoker = __openAuthorizeURLWithWebView};
+    methodMap_["dismiss"] = MethodMetadata {.argCount = 0, .invoker = __dismiss};
+    methodMap_["getAnonymousKey"] = MethodMetadata {.argCount = 1, .invoker = __getAnonymousKey};
+    methodMap_["signAnonymousToken"] = MethodMetadata {.argCount = 2, .invoker = __signAnonymousToken};
+    methodMap_["createBiometricPrivateKey"] = MethodMetadata {.argCount = 1, .invoker = __createBiometricPrivateKey};
+    methodMap_["signWithBiometricPrivateKey"] = MethodMetadata {.argCount = 1, .invoker = __signWithBiometricPrivateKey};
+    methodMap_["removeBiometricPrivateKey"] = MethodMetadata {.argCount = 1, .invoker = __removeBiometricPrivateKey};
+    methodMap_["checkBiometricSupported"] = MethodMetadata {.argCount = 1, .invoker = __checkBiometricSupported};
+    methodMap_["checkDPoPSupported"] = MethodMetadata {.argCount = 1, .invoker = __checkDPoPSupported};
+    methodMap_["createDPoPPrivateKey"] = MethodMetadata {.argCount = 1, .invoker = __createDPoPPrivateKey};
+    methodMap_["signWithDPoPPrivateKey"] = MethodMetadata {.argCount = 1, .invoker = __signWithDPoPPrivateKey};
+    methodMap_["checkDPoPPrivateKey"] = MethodMetadata {.argCount = 1, .invoker = __checkDPoPPrivateKey};
+    methodMap_["computeDPoPJKT"] = MethodMetadata {.argCount = 1, .invoker = __computeDPoPJKT};
+    eventEmitterMap_["onAuthgearReactNative"] = std::make_shared<AsyncEventEmitter<jsi::Value>>();
+  }
+  
   template <typename OnAuthgearReactNativeType> void emitOnAuthgearReactNative(OnAuthgearReactNativeType value) {
     static_assert(bridging::supportsFromJs<OnAuthgearReactNativeType, jsi::Object>, "value cannnot be converted to jsi::Object");
-    static_cast<AsyncEventEmitter<jsi::Value>&>(*delegate_.eventEmitterMap_["onAuthgearReactNative"]).emit([jsInvoker = jsInvoker_, eventValue = value](jsi::Runtime& rt) -> jsi::Value {
+    static_cast<AsyncEventEmitter<jsi::Value>&>(*eventEmitterMap_["onAuthgearReactNative"]).emit([jsInvoker = jsInvoker_, eventValue = value](jsi::Runtime& rt) -> jsi::Value {
       return bridging::toJs(rt, eventValue, jsInvoker);
     });
   }
-
 private:
-  class Delegate : public NativeAuthgearReactNativeCxxSpecJSI {
-  public:
-    Delegate(T *instance, std::shared_ptr<CallInvoker> jsInvoker) :
-      NativeAuthgearReactNativeCxxSpecJSI(std::move(jsInvoker)), instance_(instance) {
-      eventEmitterMap_["onAuthgearReactNative"] = std::make_shared<AsyncEventEmitter<jsi::Value>>();
-    }
+  static jsi::Value __storageGetItem(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::storageGetItem) == 2,
+      "Expected storageGetItem(...) to have 2 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::storageGetItem,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asString(rt));
+  }
 
-    jsi::Value storageGetItem(jsi::Runtime &rt, jsi::String key) override {
-      static_assert(
-          bridging::getParameterCount(&T::storageGetItem) == 2,
-          "Expected storageGetItem(...) to have 2 parameters");
+  static jsi::Value __storageSetItem(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::storageSetItem) == 3,
+      "Expected storageSetItem(...) to have 3 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::storageSetItem,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asString(rt),
+      count <= 1 ? throw jsi::JSError(rt, "Expected argument in position 1 to be passed") : args[1].asString(rt));
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::storageGetItem, jsInvoker_, instance_, std::move(key));
-    }
-    jsi::Value storageSetItem(jsi::Runtime &rt, jsi::String key, jsi::String value) override {
-      static_assert(
-          bridging::getParameterCount(&T::storageSetItem) == 3,
-          "Expected storageSetItem(...) to have 3 parameters");
+  static jsi::Value __storageDeleteItem(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::storageDeleteItem) == 2,
+      "Expected storageDeleteItem(...) to have 2 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::storageDeleteItem,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asString(rt));
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::storageSetItem, jsInvoker_, instance_, std::move(key), std::move(value));
-    }
-    jsi::Value storageDeleteItem(jsi::Runtime &rt, jsi::String key) override {
-      static_assert(
-          bridging::getParameterCount(&T::storageDeleteItem) == 2,
-          "Expected storageDeleteItem(...) to have 2 parameters");
+  static jsi::Value __getDeviceInfo(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* /*args*/, size_t /*count*/) {
+    static_assert(
+      bridging::getParameterCount(&T::getDeviceInfo) == 1,
+      "Expected getDeviceInfo(...) to have 1 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::getDeviceInfo,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule));
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::storageDeleteItem, jsInvoker_, instance_, std::move(key));
-    }
-    jsi::Value getDeviceInfo(jsi::Runtime &rt) override {
-      static_assert(
-          bridging::getParameterCount(&T::getDeviceInfo) == 1,
-          "Expected getDeviceInfo(...) to have 1 parameters");
+  static jsi::Value __randomBytes(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::randomBytes) == 2,
+      "Expected randomBytes(...) to have 2 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::randomBytes,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asNumber());
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::getDeviceInfo, jsInvoker_, instance_);
-    }
-    jsi::Value randomBytes(jsi::Runtime &rt, double length) override {
-      static_assert(
-          bridging::getParameterCount(&T::randomBytes) == 2,
-          "Expected randomBytes(...) to have 2 parameters");
+  static jsi::Value __sha256String(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::sha256String) == 2,
+      "Expected sha256String(...) to have 2 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::sha256String,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asString(rt));
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::randomBytes, jsInvoker_, instance_, std::move(length));
-    }
-    jsi::Value sha256String(jsi::Runtime &rt, jsi::String input) override {
-      static_assert(
-          bridging::getParameterCount(&T::sha256String) == 2,
-          "Expected sha256String(...) to have 2 parameters");
+  static jsi::Value __generateUUID(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* /*args*/, size_t /*count*/) {
+    static_assert(
+      bridging::getParameterCount(&T::generateUUID) == 1,
+      "Expected generateUUID(...) to have 1 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::generateUUID,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule));
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::sha256String, jsInvoker_, instance_, std::move(input));
-    }
-    jsi::Value generateUUID(jsi::Runtime &rt) override {
-      static_assert(
-          bridging::getParameterCount(&T::generateUUID) == 1,
-          "Expected generateUUID(...) to have 1 parameters");
+  static jsi::Value __openAuthorizeURL(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::openAuthorizeURL) == 4,
+      "Expected openAuthorizeURL(...) to have 4 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::openAuthorizeURL,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asString(rt),
+      count <= 1 ? throw jsi::JSError(rt, "Expected argument in position 1 to be passed") : args[1].asString(rt),
+      count <= 2 ? throw jsi::JSError(rt, "Expected argument in position 2 to be passed") : args[2].asBool());
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::generateUUID, jsInvoker_, instance_);
-    }
-    jsi::Value openAuthorizeURL(jsi::Runtime &rt, jsi::String url, jsi::String callbackURL, bool prefersEphemeralWebBrowserSession) override {
-      static_assert(
-          bridging::getParameterCount(&T::openAuthorizeURL) == 4,
-          "Expected openAuthorizeURL(...) to have 4 parameters");
+  static jsi::Value __openAuthorizeURLWithWebView(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::openAuthorizeURLWithWebView) == 2,
+      "Expected openAuthorizeURLWithWebView(...) to have 2 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::openAuthorizeURLWithWebView,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asObject(rt));
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::openAuthorizeURL, jsInvoker_, instance_, std::move(url), std::move(callbackURL), std::move(prefersEphemeralWebBrowserSession));
-    }
-    jsi::Value openAuthorizeURLWithWebView(jsi::Runtime &rt, jsi::Object options) override {
-      static_assert(
-          bridging::getParameterCount(&T::openAuthorizeURLWithWebView) == 2,
-          "Expected openAuthorizeURLWithWebView(...) to have 2 parameters");
+  static jsi::Value __dismiss(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* /*args*/, size_t /*count*/) {
+    static_assert(
+      bridging::getParameterCount(&T::dismiss) == 1,
+      "Expected dismiss(...) to have 1 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::dismiss,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule));
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::openAuthorizeURLWithWebView, jsInvoker_, instance_, std::move(options));
-    }
-    jsi::Value dismiss(jsi::Runtime &rt) override {
-      static_assert(
-          bridging::getParameterCount(&T::dismiss) == 1,
-          "Expected dismiss(...) to have 1 parameters");
+  static jsi::Value __getAnonymousKey(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::getAnonymousKey) == 2,
+      "Expected getAnonymousKey(...) to have 2 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::getAnonymousKey,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 || args[0].isNull() || args[0].isUndefined() ? std::nullopt : std::make_optional(args[0].asString(rt)));
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::dismiss, jsInvoker_, instance_);
-    }
-    jsi::Value getAnonymousKey(jsi::Runtime &rt, std::optional<jsi::String> kid) override {
-      static_assert(
-          bridging::getParameterCount(&T::getAnonymousKey) == 2,
-          "Expected getAnonymousKey(...) to have 2 parameters");
+  static jsi::Value __signAnonymousToken(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::signAnonymousToken) == 3,
+      "Expected signAnonymousToken(...) to have 3 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::signAnonymousToken,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asString(rt),
+      count <= 1 ? throw jsi::JSError(rt, "Expected argument in position 1 to be passed") : args[1].asString(rt));
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::getAnonymousKey, jsInvoker_, instance_, std::move(kid));
-    }
-    jsi::Value signAnonymousToken(jsi::Runtime &rt, jsi::String kid, jsi::String tokenData) override {
-      static_assert(
-          bridging::getParameterCount(&T::signAnonymousToken) == 3,
-          "Expected signAnonymousToken(...) to have 3 parameters");
+  static jsi::Value __createBiometricPrivateKey(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::createBiometricPrivateKey) == 2,
+      "Expected createBiometricPrivateKey(...) to have 2 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::createBiometricPrivateKey,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asObject(rt));
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::signAnonymousToken, jsInvoker_, instance_, std::move(kid), std::move(tokenData));
-    }
-    jsi::Value createBiometricPrivateKey(jsi::Runtime &rt, jsi::Object options) override {
-      static_assert(
-          bridging::getParameterCount(&T::createBiometricPrivateKey) == 2,
-          "Expected createBiometricPrivateKey(...) to have 2 parameters");
+  static jsi::Value __signWithBiometricPrivateKey(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::signWithBiometricPrivateKey) == 2,
+      "Expected signWithBiometricPrivateKey(...) to have 2 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::signWithBiometricPrivateKey,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asObject(rt));
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::createBiometricPrivateKey, jsInvoker_, instance_, std::move(options));
-    }
-    jsi::Value signWithBiometricPrivateKey(jsi::Runtime &rt, jsi::Object options) override {
-      static_assert(
-          bridging::getParameterCount(&T::signWithBiometricPrivateKey) == 2,
-          "Expected signWithBiometricPrivateKey(...) to have 2 parameters");
+  static jsi::Value __removeBiometricPrivateKey(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::removeBiometricPrivateKey) == 2,
+      "Expected removeBiometricPrivateKey(...) to have 2 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::removeBiometricPrivateKey,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asString(rt));
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::signWithBiometricPrivateKey, jsInvoker_, instance_, std::move(options));
-    }
-    jsi::Value removeBiometricPrivateKey(jsi::Runtime &rt, jsi::String kid) override {
-      static_assert(
-          bridging::getParameterCount(&T::removeBiometricPrivateKey) == 2,
-          "Expected removeBiometricPrivateKey(...) to have 2 parameters");
+  static jsi::Value __checkBiometricSupported(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::checkBiometricSupported) == 2,
+      "Expected checkBiometricSupported(...) to have 2 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::checkBiometricSupported,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asObject(rt));
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::removeBiometricPrivateKey, jsInvoker_, instance_, std::move(kid));
-    }
-    jsi::Value checkBiometricSupported(jsi::Runtime &rt, jsi::Object options) override {
-      static_assert(
-          bridging::getParameterCount(&T::checkBiometricSupported) == 2,
-          "Expected checkBiometricSupported(...) to have 2 parameters");
+  static jsi::Value __checkDPoPSupported(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::checkDPoPSupported) == 2,
+      "Expected checkDPoPSupported(...) to have 2 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::checkDPoPSupported,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asObject(rt));
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::checkBiometricSupported, jsInvoker_, instance_, std::move(options));
-    }
-    jsi::Value checkDPoPSupported(jsi::Runtime &rt, jsi::Object stub) override {
-      static_assert(
-          bridging::getParameterCount(&T::checkDPoPSupported) == 2,
-          "Expected checkDPoPSupported(...) to have 2 parameters");
+  static jsi::Value __createDPoPPrivateKey(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::createDPoPPrivateKey) == 2,
+      "Expected createDPoPPrivateKey(...) to have 2 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::createDPoPPrivateKey,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asObject(rt));
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::checkDPoPSupported, jsInvoker_, instance_, std::move(stub));
-    }
-    jsi::Value createDPoPPrivateKey(jsi::Runtime &rt, jsi::Object options) override {
-      static_assert(
-          bridging::getParameterCount(&T::createDPoPPrivateKey) == 2,
-          "Expected createDPoPPrivateKey(...) to have 2 parameters");
+  static jsi::Value __signWithDPoPPrivateKey(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::signWithDPoPPrivateKey) == 2,
+      "Expected signWithDPoPPrivateKey(...) to have 2 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::signWithDPoPPrivateKey,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asObject(rt));
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::createDPoPPrivateKey, jsInvoker_, instance_, std::move(options));
-    }
-    jsi::Value signWithDPoPPrivateKey(jsi::Runtime &rt, jsi::Object options) override {
-      static_assert(
-          bridging::getParameterCount(&T::signWithDPoPPrivateKey) == 2,
-          "Expected signWithDPoPPrivateKey(...) to have 2 parameters");
+  static jsi::Value __checkDPoPPrivateKey(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::checkDPoPPrivateKey) == 2,
+      "Expected checkDPoPPrivateKey(...) to have 2 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::checkDPoPPrivateKey,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asObject(rt));
+  }
 
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::signWithDPoPPrivateKey, jsInvoker_, instance_, std::move(options));
-    }
-    jsi::Value checkDPoPPrivateKey(jsi::Runtime &rt, jsi::Object options) override {
-      static_assert(
-          bridging::getParameterCount(&T::checkDPoPPrivateKey) == 2,
-          "Expected checkDPoPPrivateKey(...) to have 2 parameters");
-
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::checkDPoPPrivateKey, jsInvoker_, instance_, std::move(options));
-    }
-    jsi::Value computeDPoPJKT(jsi::Runtime &rt, jsi::Object options) override {
-      static_assert(
-          bridging::getParameterCount(&T::computeDPoPJKT) == 2,
-          "Expected computeDPoPJKT(...) to have 2 parameters");
-
-      return bridging::callFromJs<jsi::Value>(
-          rt, &T::computeDPoPJKT, jsInvoker_, instance_, std::move(options));
-    }
-
-  private:
-    friend class NativeAuthgearReactNativeCxxSpec;
-    T *instance_;
-  };
-
-  Delegate delegate_;
+  static jsi::Value __computeDPoPJKT(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
+    static_assert(
+      bridging::getParameterCount(&T::computeDPoPJKT) == 2,
+      "Expected computeDPoPJKT(...) to have 2 parameters");
+    return bridging::callFromJs<jsi::Value>(rt, &T::computeDPoPJKT,  static_cast<NativeAuthgearReactNativeCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asObject(rt));
+  }
 };
 
 } // namespace facebook::react
