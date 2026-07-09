@@ -14,7 +14,7 @@
   "dependencies": {
     "@authgear/react-native": "../../packages/authgear-react-native",
     "react": "19.2.3",
-    "react-native": "0.85.3"
+    "react-native": "0.86.0"
   },
   "resolutions": {
     "@react-native-community/cli/**/yaml": "2.8.3",
@@ -47,11 +47,11 @@
     "@react-native-community/cli": "20.2.0",
     "@react-native-community/cli-platform-android": "20.2.0",
     "@react-native-community/cli-platform-ios": "20.2.0",
-    "@react-native/babel-preset": "0.85.3",
-    "@react-native/eslint-config": "0.85.3",
-    "@react-native/jest-preset": "0.85.3",
-    "@react-native/metro-config": "0.85.3",
-    "@react-native/typescript-config": "0.85.3",
+    "@react-native/babel-preset": "0.86.0",
+    "@react-native/eslint-config": "0.86.0",
+    "@react-native/jest-preset": "0.86.0",
+    "@react-native/metro-config": "0.86.0",
+    "@react-native/typescript-config": "0.86.0",
     "@types/jest": "^29.5.13",
     "@types/react": "^19.2.0",
     "@types/react-test-renderer": "^19.1.0",
