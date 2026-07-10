@@ -68,7 +68,15 @@ push-image:
 
 .PHONY: ruby-audit
 ruby-audit:
-	bundle exec bundler-audit check --update
+	bundle exec bundler-audit update
+	@REPORT=$$(bundle exec bundler-audit check --format=json); \
+	if printf '%s' "$$REPORT" | jq -e '[.results[] | select(.type=="insecure_source" or .advisory.criticality=="critical")] | length == 0' >/dev/null; then \
+		echo "No critical Ruby advisories found."; \
+	else \
+		printf '%s' "$$REPORT" | jq .; \
+		echo "Critical advisory/advisories (or insecure source(s)) found. Failing."; \
+		exit 1; \
+	fi
 
 .PHONY: clean
 clean:
