@@ -139,12 +139,10 @@ dependencies {
     implementation "com.google.crypto.tink:tink-android:1.8.0"
 }
 
-// We run codegen manually.
-//
-// if (isNewArchitectureEnabled()) {
-//   react {
-//     jsRootDir = file("../dist/")
-//     libraryName = "Authgear"
-//     codegenJavaPackageName = "com.authgear.reactnative"
-//   }
-// }
+if (isNewArchitectureEnabled()) {
+  react {
+    jsRootDir = file("../src/")
+    libraryName = "AuthgearReactNativeSpec"
+    codegenJavaPackageName = "com.authgear.reactnative"
+  }
+}

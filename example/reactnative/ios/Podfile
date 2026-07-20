@@ -29,7 +29,13 @@ target 'reactNativeExample' do
 
   # Use WechatOpenSDK-XCFramework instead of WechatOpenSDK
   # See https://developers.weixin.qq.com/community/develop/doc/000c62b9b0ccf8c1d65fa90b751001?blockType=1
-  pod 'WechatOpenSDK-XCFramework', '~> 2.0.4'
+  #
+  # Pinned to an exact version rather than '~> 2.0.4': later 2.0.x releases
+  # (e.g. 2.0.5) ship a simulator xcframework slice that excludes an
+  # architecture Xcode still tries to build for on this toolchain, which
+  # breaks the build with a "file not found" error on WXApi.h. 2.0.4 is the
+  # last version confirmed to build cleanly for both simulator archs.
+  pod 'WechatOpenSDK-XCFramework', '2.0.4'
 
   post_install do |installer|
     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
