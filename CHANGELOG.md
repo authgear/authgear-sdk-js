@@ -1,6 +1,7 @@
 # Changelog
 
-## [Unreleased]
+<a name="v6.0.0"></a>
+## [v6.0.0](https://github.com/authgear/authgear-sdk-js/compare/v5.1.0...v6.0.0) (2026-07-23)
 
 ### Breaking Changes
 
