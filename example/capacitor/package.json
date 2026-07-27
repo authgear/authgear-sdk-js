@@ -13,11 +13,6 @@
     "run-ios": "cap run ios",
     "run-android": "cap run android"
   },
-  "overrides": {
-    "@typescript-eslint/typescript-estree": {
-      "minimatch": "^9.0.9"
-    }
-  },
   "dependencies": {
     "@authgear/capacitor": "../../packages/authgear-capacitor",
     "@authgear/web": "../../packages/authgear-web",
@@ -42,11 +37,11 @@
     "@capacitor/cli": "^7.5.0",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
-    "@typescript-eslint/parser": "^6.17.0",
+    "@typescript-eslint/parser": "^8.65.0",
     "@vitejs/plugin-legacy": "^8.0.2",
     "@vitejs/plugin-react": "^6.0.2",
-    "eslint": "^8.35.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint": "^10.8.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "native-run": "^2.0.0",
     "typescript": "^5.1.6",
     "vite": "^8.0.0",
