@@ -1,5 +1,5 @@
 ---
-name: audit-js-dependencies
+name: update-deps
 description: Audit JavaScript and TypeScript dependencies across every directory in this repository that contains a package.json, using the correct install root for each project, apply non-breaking security upgrades, and stop to summarize any fixes that require a major-version change. Use when asked to run dependency audits, update vulnerable npm or yarn packages, reduce JavaScript dependency CVEs, or review whether vulnerable dependency fixes can be applied safely without breaking changes.
 ---
 
