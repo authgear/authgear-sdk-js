@@ -3,7 +3,7 @@
 
 
 "@authgear/react-native@../../packages/authgear-react-native":
-  version "5.1.0"
+  version "6.0.0"
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.28.6", "@babel/code-frame@^7.29.0":
   version "7.29.0"
