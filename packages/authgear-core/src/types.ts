@@ -641,6 +641,10 @@ export enum Page {
   Settings = "/settings",
   /**
    * The path of the indenties page in Authgear.
+   *
+   * @deprecated Use {@link Page.Settings} if you want a list of identities.
+   * Use methods like `changeEmail` or `changePhone` instead if you want to
+   * change these identities.
    */
   Identities = "/settings/identities",
 }
