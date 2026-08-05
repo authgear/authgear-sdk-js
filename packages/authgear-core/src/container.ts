@@ -258,8 +258,15 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     // When the error is `invalid_grant`, the refresh token is no longer valid.
     // Clear the session in this case.
     // https://tools.ietf.org/html/rfc6749#section-5.2
+    //
+    // `invalid_dpop_proof` on refresh means the DPoP key no longer matches the
+    // key the refresh token is bound to (e.g. restored from a device backup),
+    // so the refresh token is unusable and should be treated the same way.
     if (error != null) {
-      if (error.error === "invalid_grant") {
+      if (
+        error.error === "invalid_grant" ||
+        error.error === "invalid_dpop_proof"
+      ) {
         await this._clearSession(SessionStateChangeReason.Invalid);
       } else if (error.reason === "InvalidGrant") {
         await this._clearSession(SessionStateChangeReason.Invalid);
@@ -355,7 +362,11 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       tokenResponse = await this.apiClient._oidcTokenRequest(request);
     } catch (error: unknown) {
       await this._handleInvalidGrantError(error);
-      if (error != null && (error as any).error === "invalid_grant") {
+      if (
+        error != null &&
+        ((error as any).error === "invalid_grant" ||
+          (error as any).error === "invalid_dpop_proof")
+      ) {
         return;
       }
 
