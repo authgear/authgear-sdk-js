@@ -8,41 +8,24 @@
     "start": "react-native start",
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "typecheck": "tsc --noEmit",
-    "yarnauditfix": "rm yarn.lock && npm install && npm audit fix && git checkout -- yarn.lock && npm install && yarn install && rm package-lock.json"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@authgear/react-native": "../../packages/authgear-react-native",
     "react": "19.2.3",
     "react-native": "0.86.0"
   },
-  "resolutions": {
-    "@react-native-community/cli/**/yaml": "2.8.3",
+  "overrides": {
     "shell-quote": "1.9.0",
-    "@react-native/eslint-config/**/lodash": "4.18.1",
-    "@react-native/eslint-config/**/brace-expansion": "2.1.4",
-    "anymatch/picomatch": "2.3.2",
-    "jest-util/picomatch": "2.3.2",
-    "minimatch/brace-expansion": "1.1.16",
-    "micromatch/picomatch": "2.3.2",
-    "@react-native-community/cli/**/body-parser": "2.3.0",
-    "@babel/preset-env/**/@babel/plugin-transform-modules-systemjs": "7.29.4",
-    "@react-native-community/cli/**/joi": "^17.13.4",
-    "react-native/ws": "6.2.4",
-    "@react-native-community/cli-server-api/ws": "6.2.4",
-    "@react-native/dev-middleware/ws": "6.2.4",
-    "@react-native/metro-config/**/ws": "7.5.11",
-    "react-native/**/react-devtools-core/ws": "7.5.11",
-    "react-native/**/metro/ws": "7.5.11",
-    "@react-native-community/cli/**/launch-editor": "2.14.1",
-    "@react-native-community/cli-platform-android/**/launch-editor": "2.14.1",
-    "@react-native-community/cli-platform-ios/**/launch-editor": "2.14.1",
-    "eslint/**/js-yaml": "4.3.0",
-    "@babel/core": "7.29.7"
+    "minimatch@3.1.5": {
+      "brace-expansion": "1.1.18"
+    },
+    "minimatch@10.2.5": {
+      "brace-expansion": "^5.0.5"
+    }
   },
   "devDependencies": {
-    "//": "For unknown reason, we need to install eslint-plugin-jest oursevles so that it is found by eslint",
-    "@babel/core": "^7.25.2",
+    "@babel/core": "7.29.7",
     "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.0",
     "@react-native-community/cli": "20.2.0",
@@ -65,6 +48,7 @@
     "typescript": "^5.8.3"
   },
   "engines": {
-    "node": ">= 22.11.0"
+    "node": ">= 22.11.0",
+    "npm": ">=11.10.0"
   }
 }

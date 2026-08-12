@@ -91,7 +91,7 @@ sdk-build:
 react-native-npm-ci:
 	cd ./example/reactnative; \
 		rm -rf node_modules; \
-		yarn install --frozen-lockfile
+		npm ci
 
 .PHONY:	react-native-build-unsigned-aab
 react-native-build-unsigned-aab:

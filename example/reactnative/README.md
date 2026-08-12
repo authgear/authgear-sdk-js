@@ -2,23 +2,17 @@
 
 This app is for demonstrating the usage of functions supportted by @authgear/react-native SDK.
 
-# How to resolve vulnerabilities in packages
+# Package manager
 
-Yarn Classic is our package manager. It does not support `audit fix`.
-I tried to switch to npm, but then `npm start` will result in error `cannot find package @authgear/react-native`.
-So a React Native project cannot really use npm as package manager.
+This app uses npm (see `package-lock.json`). It previously used Yarn Classic; the switch
+required two things beyond the usual `resolutions` -> `overrides` conversion:
 
-To automate the fixing of vulnerabilities in packages. We can use the following workaround:
-
-> You can just `npm run yarnauditfix`. It does the following for you.
-
-- `rm yarn.lock`
-- `npm i` to generate `package-lock.json`.
-- `npm audit fix` to fix vulnerabilities.
-- `git checkout -- yarn.lock` to bring back `yarn.lock`.
-- `npm i` to ask npm to update `yarn.lock` based on `package-lock.json`.
-- `yarn install` to ask Yarn to update `yarn.lock` according to its own flavor.
-- `rm package-lock.json` to remove residue.
+- `metro.config.js` sets `resolver.unstable_enableSymlinks` and `watchFolders`/
+  `resolver.nodeModulesPaths` so Metro can resolve the `@authgear/react-native` symlink
+  (a local `../../packages/authgear-react-native` dependency) and the hoisted
+  workspace `node_modules` it depends on. Without this, `npm start`/bundling fails with
+  `Unable to resolve module @authgear/react-native`.
+- `npm audit fix` works natively here now, so no workaround script is needed.
 
 # Initial setup
 
@@ -36,14 +30,14 @@ in project root in **authgear-sdk-js** repo
 
 ```bash
 # In root of React Native demo app
-yarn
+npm ci
 ```
 
 ## Start Metro server
 
 ```bash
 # In root of React Native demo app
-yarn start
+npm start
 ```
 
 NOTE: the server is started on port 8082 instead of the default 8081 as it is taken by Authgear server
