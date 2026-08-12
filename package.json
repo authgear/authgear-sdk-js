@@ -60,5 +60,8 @@
     "@microsoft/api-extractor": {
       "minimatch": "^10.2.4"
     }
+  },
+  "engines": {
+    "npm": ">=11.10.0"
   }
 }
