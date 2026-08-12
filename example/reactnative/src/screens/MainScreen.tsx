@@ -19,6 +19,7 @@ import authgear, {
   SessionStateChangeReason,
   UserInfo,
   CancelError,
+  OAuthError,
   BiometricPrivateKeyNotFoundError,
   BiometricNotSupportedOrPermissionDeniedError,
   BiometricNoEnrollmentError,
@@ -344,6 +345,13 @@ const HomeScreen: React.FC = () => {
           'error=',
           error,
         );
+        if (error instanceof OAuthError) {
+          if (error.error === 'invalid_grant') {
+            console.log('onSessionStateChange: error is invalid_grant');
+          } else if (error.error === 'invalid_dpop_proof') {
+            console.log('onSessionStateChange: error is invalid_dpop_proof');
+          }
+        }
         setSessionState(container.sessionState);
         if (container.sessionState !== 'AUTHENTICATED') {
           setUserInfo(null);

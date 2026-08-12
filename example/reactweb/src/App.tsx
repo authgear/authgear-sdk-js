@@ -9,6 +9,7 @@ import authgear, {
   LinkOAuthOptions,
   UnlinkOAuthOptions,
   IdentityType,
+  OAuthError,
 } from "@authgear/web";
 import "./App.css";
 
@@ -189,6 +190,11 @@ function Root() {
           "error=",
           error
         );
+        // Web does not implement DPoP, so invalid_dpop_proof cannot occur
+        // here -- only invalid_grant is relevant.
+        if (error instanceof OAuthError && error.error === "invalid_grant") {
+          console.log("onSessionStateChange: error is invalid_grant");
+        }
         setSessionState(container.sessionState);
       },
     };

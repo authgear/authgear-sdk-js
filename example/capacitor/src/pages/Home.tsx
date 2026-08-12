@@ -39,6 +39,7 @@ import authgearCapacitor, {
   TransientTokenStorage,
   PersistentTokenStorage,
   CancelError as CapacitorCancelError,
+  OAuthError,
   ColorScheme,
   Page as CapacitorPage,
   BiometricOptions,
@@ -174,6 +175,13 @@ function AuthgearDemo() {
           "error=",
           error
         );
+        if (error instanceof OAuthError) {
+          if (error.error === "invalid_grant") {
+            console.log("onSessionStateChange: error is invalid_grant");
+          } else if (error.error === "invalid_dpop_proof") {
+            console.log("onSessionStateChange: error is invalid_dpop_proof");
+          }
+        }
         setSessionState(container.sessionState);
       },
     };
