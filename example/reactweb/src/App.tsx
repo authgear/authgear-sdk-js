@@ -181,7 +181,14 @@ function Root() {
 
   const delegate: WebContainerDelegate = useMemo(() => {
     return {
-      onSessionStateChange(container, _) {
+      onSessionStateChange(container, reason, error) {
+        console.log(
+          "onSessionStateChange",
+          "sessionState=" + container.sessionState,
+          "reason=" + reason,
+          "error=",
+          error
+        );
         setSessionState(container.sessionState);
       },
     };

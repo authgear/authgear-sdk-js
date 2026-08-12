@@ -164,8 +164,16 @@ function AuthgearDemo() {
     const d = {
       onSessionStateChange: (
         container: WebContainer | CapacitorContainer,
-        _reason: SessionStateChangeReason
+        reason: SessionStateChangeReason,
+        error?: unknown
       ) => {
+        console.log(
+          "onSessionStateChange",
+          "sessionState=" + container.sessionState,
+          "reason=" + reason,
+          "error=",
+          error
+        );
         setSessionState(container.sessionState);
       },
     };

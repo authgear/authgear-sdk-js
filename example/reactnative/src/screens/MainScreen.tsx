@@ -334,8 +334,16 @@ const HomeScreen: React.FC = () => {
     const d: ReactNativeContainerDelegate = {
       onSessionStateChange: (
         container: ReactNativeContainer,
-        _reason: SessionStateChangeReason,
+        reason: SessionStateChangeReason,
+        error?: unknown,
       ) => {
+        console.log(
+          'onSessionStateChange',
+          'sessionState=' + container.sessionState,
+          'reason=' + reason,
+          'error=',
+          error,
+        );
         setSessionState(container.sessionState);
         if (container.sessionState !== 'AUTHENTICATED') {
           setUserInfo(null);
