@@ -31,9 +31,6 @@ jobs:
     - uses: actions/setup-node@v6
       with:
         node-version-file: "./.tool-versions"
-    # engine-strict requires npm to be new enough to understand min-release-age;
-    # the npm bundled with our pinned Node is too old, so upgrade it explicitly.
-    - run: npm install -g npm@^11.10.0
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
@@ -75,9 +72,6 @@ jobs:
     - uses: actions/setup-node@v6
       with:
         node-version-file: "./.tool-versions"
-    # engine-strict requires npm to be new enough to understand min-release-age;
-    # the npm bundled with our pinned Node is too old, so upgrade it explicitly.
-    - run: npm install -g npm@^11.10.0
     - run: node --version
     - run: npm --version
     - run: npm ci
@@ -122,9 +116,6 @@ jobs:
     - uses: actions/setup-node@v6
       with:
         node-version-file: "./.tool-versions"
-    # engine-strict requires npm to be new enough to understand min-release-age;
-    # the npm bundled with our pinned Node is too old, so upgrade it explicitly.
-    - run: npm install -g npm@^11.10.0
     - run: make sdk-build
     - run: make react-native-npm-ci
     - run: make react-native-build-unsigned-aab
@@ -136,9 +127,6 @@ jobs:
     - uses: actions/setup-node@v6
       with:
         node-version-file: "./.tool-versions"
-    # engine-strict requires npm to be new enough to understand min-release-age;
-    # the npm bundled with our pinned Node is too old, so upgrade it explicitly.
-    - run: npm install -g npm@^11.10.0
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
@@ -155,9 +143,6 @@ jobs:
     - uses: actions/setup-node@v6
       with:
         node-version-file: "./.tool-versions"
-    # engine-strict requires npm to be new enough to understand min-release-age;
-    # the npm bundled with our pinned Node is too old, so upgrade it explicitly.
-    - run: npm install -g npm@^11.10.0
     - run: make sdk-build
     - run: make capacitor-npm-ci
     - run: make capacitor-build-js
@@ -175,9 +160,6 @@ jobs:
     - uses: actions/setup-node@v6
       with:
         node-version-file: "./.tool-versions"
-    # engine-strict requires npm to be new enough to understand min-release-age;
-    # the npm bundled with our pinned Node is too old, so upgrade it explicitly.
-    - run: npm install -g npm@^11.10.0
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
@@ -213,9 +195,6 @@ jobs:
     - uses: actions/setup-node@v6
       with:
         node-version-file: "./.tool-versions"
-    # engine-strict requires npm to be new enough to understand min-release-age;
-    # the npm bundled with our pinned Node is too old, so upgrade it explicitly.
-    - run: npm install -g npm@^11.10.0
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
@@ -249,9 +228,6 @@ jobs:
     - uses: actions/setup-node@v6
       with:
         node-version-file: "./.tool-versions"
-    # engine-strict requires npm to be new enough to understand min-release-age;
-    # the npm bundled with our pinned Node is too old, so upgrade it explicitly.
-    - run: npm install -g npm@^11.10.0
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
@@ -285,9 +261,6 @@ jobs:
     - uses: actions/setup-node@v6
       with:
         node-version-file: "./.tool-versions"
-    # engine-strict requires npm to be new enough to understand min-release-age;
-    # the npm bundled with our pinned Node is too old, so upgrade it explicitly.
-    - run: npm install -g npm@^11.10.0
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
