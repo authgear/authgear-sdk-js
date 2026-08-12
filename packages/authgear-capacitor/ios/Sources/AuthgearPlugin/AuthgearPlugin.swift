@@ -3,7 +3,29 @@ import LocalAuthentication
 import Capacitor
 
 @objc(AuthgearPlugin)
-public class AuthgearPlugin: CAPPlugin {
+public class AuthgearPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "AuthgearPlugin"
+    public let jsName = "Authgear"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "storageGetItem", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "storageSetItem", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "storageDeleteItem", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "randomBytes", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "sha256String", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getDeviceInfo", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "generateUUID", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "openAuthorizeURL", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "openAuthorizeURLWithWebView", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "checkBiometricSupported", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "createBiometricPrivateKey", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "signWithBiometricPrivateKey", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "removeBiometricPrivateKey", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "checkDPoPSupported", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "createDPoPPrivateKey", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "signWithDPoPPrivateKey", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "checkDPoPPrivateKey", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "computeDPoPJKT", returnType: CAPPluginReturnPromise)
+    ]
     private let impl = AuthgearPluginImpl()
 
     @objc func storageGetItem(_ call: CAPPluginCall) {

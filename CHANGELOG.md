@@ -1,5 +1,22 @@
 # Changelog
 
+## [Unreleased]
+
+### Breaking Changes
+
+- **capacitor:** Capacitor 5 is no longer supported; `@capacitor/core`
+  `peerDependencies` is now `^6.0.0 || ^7.0.0`. iOS plugin registration
+  moved from the Objective-C `CAP_PLUGIN` macro to Swift
+  (`CAPBridgedPlugin`), which requires Capacitor 6+. Upgrade your app to
+  Capacitor 6 or 7 before upgrading.
+
+### Added
+
+- **capacitor:** The iOS plugin can now be consumed via Swift Package
+  Manager. Apps using Capacitor's SPM integration pick it up
+  automatically via `npx cap sync`; CocoaPods continues to work
+  unchanged.
+
 <a name="v6.0.0"></a>
 ## [v6.0.0](https://github.com/authgear/authgear-sdk-js/compare/v5.1.0...v6.0.0) (2026-07-23)
 

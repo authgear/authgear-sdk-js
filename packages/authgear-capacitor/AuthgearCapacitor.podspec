@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.homepage = 'https://github.com/authgear/authgear-sdk-js'
   s.author = { 'Louis Chan' => 'louischan@oursky.com' }
   s.source = { :git => 'https://github.com/authgear/authgear-sdk-js.git' }
-  s.source_files = 'ios/Plugin/**/*.{swift,h,m,c,cc,mm,cpp}'
+  s.source_files = 'ios/Sources/AuthgearPlugin/**/*.{swift,h,m,c,cc,mm,cpp}'
   s.ios.deployment_target  = '14.0'
   s.dependency 'Capacitor'
   s.swift_version = '5.1'
