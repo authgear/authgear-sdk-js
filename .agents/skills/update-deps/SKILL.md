@@ -23,9 +23,11 @@ Use these package managers:
 
 - `.`: `npm`
 - `example/reactweb`: `npm`
-- `example/reactnative`: `yarn`
+- `example/reactnative`: `npm`
 - `example/capacitor`: `npm`
 - `website`: `npm`
+
+`example/reactnative` migrated from Yarn to npm (it now has a `package-lock.json`, no `yarn.lock`, and no `yarnauditfix` script). Confirm the lockfile in use before auditing in case this changes again.
 
 ## Workflow
 
@@ -44,10 +46,7 @@ npm audit --json
 npm outdated --json
 ```
 
-```bash
-yarn audit --json
-yarn outdated --json
-```
+If a root's package manager has changed since this skill was last updated, use that manager's audit/outdated equivalent instead (e.g. `yarn audit --json` / `yarn outdated --json`).
 
 If dependencies are missing, install them with the package manager already used by that directory before auditing. Keep lockfiles aligned with the existing manager.
 
@@ -72,7 +71,7 @@ Before adding any `overrides` or `resolutions`, check whether the existing decla
 When an override or resolution is genuinely required, keep its scope as narrow as possible:
 
 - For npm, use `npm explain <package>` to identify the exact parent chain and scope the override to the nested dependency path instead of the package globally.
-- For Yarn, use `yarn why <package>` and prefer the most specific resolution pattern that matches the vulnerable path.
+- If a root still uses Yarn, use `yarn why <package>` and prefer the most specific resolution pattern that matches the vulnerable path.
 - If the vulnerable package can be updated through the existing semver range after a lockfile refresh, remove the temporary override or resolution instead of leaving it behind.
 - As part of the final pass, review any existing or newly added `overrides` and `resolutions` touched by the audit and remove entries that are now outdated, redundant, or no longer needed.
 - If an override or resolution crosses a major version line for a transitive dependency, only do it when you have primary-source evidence that the major change is compatible in this context, and note that evidence alongside the manifest change before verification.
@@ -81,7 +80,6 @@ For this repo, also account for these specifics:
 
 - Keep local file references such as `../../packages/authgear-web` and `../../packages/authgear-react-native` untouched
 - Preserve root `overrides` or per-project `resolutions` unless the fix requires adjusting them
-- In `example/reactnative`, use the existing `yarnauditfix` script only when it cleanly resolves lockfile-level vulnerabilities without introducing a major bump
 
 ## Apply Safe Fixes
 
@@ -100,15 +98,15 @@ When explicit targeted updates are needed, use commands in this shape:
 npm install <package>@<fixed-version>
 ```
 
-```bash
-yarn add <package>@<fixed-version>
-```
+If a root still uses Yarn, use `yarn add <package>@<fixed-version>` instead.
 
 Avoid opportunistic upgrades. The goal is to remove vulnerable dependencies with the narrowest safe diff.
 
 ## Tool Path Setup
 
-`npm` and `yarn` are not in the default shell PATH in this environment. Locate them in the Nix store before running any commands:
+Check `which npm yarn` first. In some sandboxed/cloud environments `npm` and `yarn` are not on the default shell PATH and must be located manually; on a local machine using a version manager (e.g. asdf) they are typically already resolvable and no extra setup is needed.
+
+If they are missing, locate them in the Nix store before running any commands:
 
 ```bash
 NPM=$(find /nix/store -maxdepth 3 -name "npm" -path "*/nodejs-24*/bin/npm" 2>/dev/null | head -1)
@@ -117,6 +115,8 @@ export PATH="$(dirname $NPM):$(dirname $YARN):$PATH"
 ```
 
 Use this PATH prefix for every `npm` and `yarn` command in this skill.
+
+No install root in this repo currently uses Yarn (see Audit Scope), so `YARN`/`yarn` lookups are usually unnecessary — only resolve `yarn` if a root's package manager has changed back.
 
 ## Verify After Changes
 
