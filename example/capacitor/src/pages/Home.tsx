@@ -39,6 +39,7 @@ import authgearCapacitor, {
   TransientTokenStorage,
   PersistentTokenStorage,
   CancelError as CapacitorCancelError,
+  OAuthError,
   ColorScheme,
   Page as CapacitorPage,
   BiometricOptions,
@@ -164,8 +165,23 @@ function AuthgearDemo() {
     const d = {
       onSessionStateChange: (
         container: WebContainer | CapacitorContainer,
-        _reason: SessionStateChangeReason
+        reason: SessionStateChangeReason,
+        error?: unknown
       ) => {
+        console.log(
+          "onSessionStateChange",
+          "sessionState=" + container.sessionState,
+          "reason=" + reason,
+          "error=",
+          error
+        );
+        if (error instanceof OAuthError) {
+          if (error.error === "invalid_grant") {
+            console.log("onSessionStateChange: error is invalid_grant");
+          } else if (error.error === "invalid_dpop_proof") {
+            console.log("onSessionStateChange: error is invalid_dpop_proof");
+          }
+        }
         setSessionState(container.sessionState);
       },
     };
@@ -645,6 +661,35 @@ function AuthgearDemo() {
     }
   }, [showError, showUserInfo]);
 
+  // Unlike fetchUserInfo(), this does NOT chain any follow-up request
+  // after refresh, so the refresh result (e.g. invalid_grant vs
+  // invalid_dpop_proof) is not masked by a subsequent request made with a
+  // stale/missing access token.
+  const refreshAccessToken = useCallback(async () => {
+    setLoading(true);
+    try {
+      if (isPlatformWeb()) {
+        await authgearWeb.refreshAccessTokenIfNeeded();
+        setIsAlertOpen(true);
+        setAlertHeader("Refresh Access Token If Needed");
+        setAlertMessage(
+          `Refreshed access token successfully.\nsessionState: ${authgearWeb.sessionState}`
+        );
+      } else {
+        await authgearCapacitor.refreshAccessTokenIfNeeded();
+        setIsAlertOpen(true);
+        setAlertHeader("Refresh Access Token If Needed");
+        setAlertMessage(
+          `Refreshed access token successfully.\nsessionState: ${authgearCapacitor.sessionState}`
+        );
+      }
+    } catch (e) {
+      showError(e);
+    } finally {
+      setLoading(false);
+    }
+  }, [showError]);
+
   const logout = useCallback(async () => {
     setLoading(true);
     try {
@@ -947,6 +992,16 @@ function AuthgearDemo() {
     [fetchUserInfo]
   );
 
+  const onClickRefreshAccessToken = useCallback(
+    (e: MouseEvent<HTMLIonButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      refreshAccessToken();
+    },
+    [refreshAccessToken]
+  );
+
   const onClickShowAuthTime = useCallback(
     (e: MouseEvent<HTMLIonButtonElement>) => {
       e.preventDefault();
@@ -1224,6 +1279,13 @@ function AuthgearDemo() {
           onClick={onClickFetchUserInfo}
         >
           Fetch User Info
+        </IonButton>
+        <IonButton
+          className="button"
+          disabled={!initialized || loading || !loggedIn}
+          onClick={onClickRefreshAccessToken}
+        >
+          Refresh Access Token If Needed
         </IonButton>
         <IonButton
           className="button"

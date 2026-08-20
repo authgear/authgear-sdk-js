@@ -56,7 +56,13 @@ export interface _BaseContainerDelegate {
     challenge: string;
   }>;
   refreshAccessToken(): Promise<void>;
-  onSessionStateChange: (reason: SessionStateChangeReason) => void;
+  // error is non-null when reason is Invalid, i.e. the session was cleared
+  // because a request failed with an error such as invalid_grant or
+  // invalid_dpop_proof. It is undefined for all other reasons.
+  onSessionStateChange: (
+    reason: SessionStateChangeReason,
+    error?: unknown
+  ) => void;
 }
 
 /**
@@ -244,25 +250,35 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     }
   }
 
-  async _clearSession(reason: SessionStateChangeReason): Promise<void> {
+  async _clearSession(
+    reason: SessionStateChangeReason,
+    error?: unknown
+  ): Promise<void> {
     await this._delegate.tokenStorage.delRefreshToken(this.name);
     await this._delegate.sharedStorage.onLogout(this.name);
     this.idToken = undefined;
     this.accessToken = undefined;
     this.refreshToken = undefined;
     this.expireAt = undefined;
-    this._updateSessionState(SessionState.NoSession, reason);
+    this._updateSessionState(SessionState.NoSession, reason, error);
   }
 
   async _handleInvalidGrantError(error: any): Promise<void> {
     // When the error is `invalid_grant`, the refresh token is no longer valid.
     // Clear the session in this case.
     // https://tools.ietf.org/html/rfc6749#section-5.2
+    //
+    // `invalid_dpop_proof` on refresh means the DPoP key no longer matches the
+    // key the refresh token is bound to (e.g. restored from a device backup),
+    // so the refresh token is unusable and should be treated the same way.
     if (error != null) {
-      if (error.error === "invalid_grant") {
-        await this._clearSession(SessionStateChangeReason.Invalid);
+      if (
+        error.error === "invalid_grant" ||
+        error.error === "invalid_dpop_proof"
+      ) {
+        await this._clearSession(SessionStateChangeReason.Invalid, error);
       } else if (error.reason === "InvalidGrant") {
-        await this._clearSession(SessionStateChangeReason.Invalid);
+        await this._clearSession(SessionStateChangeReason.Invalid, error);
       }
     }
   }
@@ -355,7 +371,11 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       tokenResponse = await this.apiClient._oidcTokenRequest(request);
     } catch (error: unknown) {
       await this._handleInvalidGrantError(error);
-      if (error != null && (error as any).error === "invalid_grant") {
+      if (
+        error != null &&
+        ((error as any).error === "invalid_grant" ||
+          (error as any).error === "invalid_dpop_proof")
+      ) {
         return;
       }
 
@@ -695,10 +715,11 @@ export class _BaseContainer<T extends _BaseAPIClient> {
    */
   _updateSessionState(
     state: SessionState,
-    reason: SessionStateChangeReason
+    reason: SessionStateChangeReason,
+    error?: unknown
   ): void {
     this.sessionState = state;
-    this._delegate.onSessionStateChange(reason);
+    this._delegate.onSessionStateChange(reason, error);
   }
 
   async _fetchUserInfo(accessToken?: string): Promise<UserInfo> {

@@ -19,6 +19,7 @@ import authgear, {
   SessionStateChangeReason,
   UserInfo,
   CancelError,
+  OAuthError,
   BiometricPrivateKeyNotFoundError,
   BiometricNotSupportedOrPermissionDeniedError,
   BiometricNoEnrollmentError,
@@ -334,8 +335,23 @@ const HomeScreen: React.FC = () => {
     const d: ReactNativeContainerDelegate = {
       onSessionStateChange: (
         container: ReactNativeContainer,
-        _reason: SessionStateChangeReason,
+        reason: SessionStateChangeReason,
+        error?: unknown,
       ) => {
+        console.log(
+          'onSessionStateChange',
+          'sessionState=' + container.sessionState,
+          'reason=' + reason,
+          'error=',
+          error,
+        );
+        if (error instanceof OAuthError) {
+          if (error.error === 'invalid_grant') {
+            console.log('onSessionStateChange: error is invalid_grant');
+          } else if (error.error === 'invalid_dpop_proof') {
+            console.log('onSessionStateChange: error is invalid_dpop_proof');
+          }
+        }
         setSessionState(container.sessionState);
         if (container.sessionState !== 'AUTHENTICATED') {
           setUserInfo(null);
@@ -767,6 +783,26 @@ const HomeScreen: React.FC = () => {
       });
   }, [showError, showUser]);
 
+  // Unlike fetchUserInfo(), this does NOT chain any follow-up request
+  // after refresh, so the refresh result (e.g. invalid_grant vs
+  // invalid_dpop_proof) is not masked by a subsequent request made with a
+  // stale/missing access token.
+  const refreshAccessToken = useCallback(() => {
+    setLoading(true);
+    authgear
+      .refreshAccessTokenIfNeeded()
+      .then(() => {
+        Alert.alert(
+          'Refresh Access Token If Needed',
+          `Refreshed access token successfully.\nsessionState: ${authgear.sessionState}`,
+        );
+      })
+      .catch(e => showError(e))
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [showError]);
+
   const showAuthTime = useCallback(() => {
     Alert.alert('auth_time', `${authgear.getAuthTime()}`);
   }, []);
@@ -1075,6 +1111,13 @@ const HomeScreen: React.FC = () => {
           <Button
             title="Fetch User Info"
             onPress={fetchUserInfo}
+            disabled={!initialized || loading || !loggedIn}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Refresh Access Token If Needed"
+            onPress={refreshAccessToken}
             disabled={!initialized || loading || !loggedIn}
           />
         </View>

@@ -321,8 +321,11 @@ export class ReactNativeContainer {
    *
    * @internal
    */
-  onSessionStateChange(reason: SessionStateChangeReason): void {
-    this.delegate?.onSessionStateChange(this, reason);
+  onSessionStateChange(
+    reason: SessionStateChangeReason,
+    error?: unknown
+  ): void {
+    this.delegate?.onSessionStateChange(this, reason, error);
   }
 
   /**
