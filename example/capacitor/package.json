@@ -47,5 +47,8 @@
     "vite": "^8.0.0",
     "vitest": "^4.1.8"
   },
-  "description": "An Ionic project"
+  "description": "An Ionic project",
+  "engines": {
+    "npm": ">=11.10.0"
+  }
 }

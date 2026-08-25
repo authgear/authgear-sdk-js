@@ -22,5 +22,8 @@
     "eslint-plugin-react-hooks": "4.4.0",
     "typescript": "5.4.2",
     "vite": "^8.0.0"
+  },
+  "engines": {
+    "npm": ">=11.10.0"
   }
 }
