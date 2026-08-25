@@ -169,8 +169,8 @@ jobs:
     - run: make react-native-pod-install
     - uses: authgear/gh-actions-install-apple-certificate-and-provisioning-profile@v1
       with:
-        certificate_base64: ${{ secrets.REACT_NATIVE_IOS_CERTIFICATE_BASE64 }}
-        certificate_password: ${{ secrets.REACT_NATIVE_IOS_CERTIFICATE_PASSWORD }}
+        certificate_base64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+        certificate_password: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
         provisioning_profile_base64: ${{ secrets.REACT_NATIVE_IOS_PROVISIONING_PROFILE_BASE64 }}
     - uses: authgear/gh-actions-create-fastlane-api-key-json-file@v1
       with:
@@ -238,8 +238,8 @@ jobs:
     - run: make capacitor-build-js
     - uses: authgear/gh-actions-install-apple-certificate-and-provisioning-profile@v1
       with:
-        certificate_base64: ${{ secrets.CAPACITOR_IOS_CERTIFICATE_BASE64 }}
-        certificate_password: ${{ secrets.CAPACITOR_IOS_CERTIFICATE_PASSWORD }}
+        certificate_base64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+        certificate_password: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
         provisioning_profile_base64: ${{ secrets.CAPACITOR_IOS_PROVISIONING_PROFILE_BASE64 }}
     - uses: authgear/gh-actions-create-fastlane-api-key-json-file@v1
       with:
