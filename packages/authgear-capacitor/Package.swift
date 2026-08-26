@@ -10,7 +10,7 @@ let package = Package(
             targets: ["AuthgearPlugin"])
     ],
     dependencies: [
-        .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", from: "7.0.0")
+        .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", "6.0.0" ..< "8.0.0")
     ],
     targets: [
         .target(
