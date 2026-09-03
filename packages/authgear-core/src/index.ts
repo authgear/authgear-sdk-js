@@ -10,4 +10,4 @@ export * from "./dpop";
 /**
  * @public
  */
-export const VERSION = "6.0.0";
+export const VERSION = "7.0.0";
