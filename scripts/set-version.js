@@ -3,7 +3,7 @@
 // 2. Update all packages/*/package.json and the lock files with this version.
 // 3. Update ./packages/authgear-core/src/index.ts VERSION variable.
 // 4. Build the project once.
-// 5. Run `npm install` or `yarn install` in the ./example/* to update the lock files.
+// 5. Run `npm install` in the ./example/* to update the lock files.
 // 6. Run `bundle exec pod install` to update the lock files.
 //
 // The goal of this script is to ensure all files are consistent with the given version.
@@ -125,7 +125,7 @@ assert.equal(
   0
 );
 assert.equal(
-  child_process.spawnSync("yarn", ["install"], {
+  child_process.spawnSync("npm", ["install"], {
     cwd: path.join(cwd, "./example/reactnative/"),
     stdio: "inherit",
   }).status,
