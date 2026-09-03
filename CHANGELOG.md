@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+<a name="v7.0.0"></a>
+## [v7.0.0](https://github.com/authgear/authgear-sdk-js/compare/v6.0.0...v7.0.0) (2026-09-03)
+
 ### Breaking Changes
 
 - **capacitor:** Capacitor 5 is no longer supported; `@capacitor/core`
