@@ -22,7 +22,10 @@
     },
     "minimatch@10.2.5": {
       "brace-expansion": "^5.0.5"
-    }
+    },
+    "metro": "0.84.5",
+    "metro-config": "0.84.5",
+    "metro-transform-worker": "0.84.5"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
