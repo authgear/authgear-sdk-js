@@ -38,7 +38,9 @@
     },
     "terser-webpack-plugin": {
       "serialize-javascript": "^7.0.4"
-    }
+    },
+    "image-size": "git+https://github.com/tung2744/image-size-next.git#d424afcc6fceb0720f55b881e1389b6b89ea2f02",
+    "qs": "^6.16.0"
   },
   "browserslist": {
     "production": [
