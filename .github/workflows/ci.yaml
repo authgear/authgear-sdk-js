@@ -180,7 +180,7 @@ jobs:
         output_path: ./build/fastlane-api-key.json
     - run: make react-native-build-ios-app
     - name: Upload to TestFlight
-      if: ${{ github.ref == 'refs/heads/main' }}
+      if: ${{ github.ref == 'refs/heads/master' }}
       run: make react-native-upload-ios-app
 
   react_native_android:
@@ -211,7 +211,7 @@ jobs:
         echo -n "$STORE_BASE64" | base64 --decode -o "$STORE_FILE"
         make react-native-build-aab
     - name: Upload aab
-      if: ${{ github.ref == 'refs/heads/main' }}
+      if: ${{ github.ref == 'refs/heads/master' }}
       env:
         GOOGLE_SERVICE_ACCOUNT_KEY_JSON_BASE64: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY_JSON_BASE64 }}
       run: |
@@ -249,7 +249,7 @@ jobs:
         output_path: ./build/fastlane-api-key.json
     - run: make capacitor-build-ios-app
     - name: Upload to TestFlight
-      if: ${{ github.ref == 'refs/heads/main' }}
+      if: ${{ github.ref == 'refs/heads/master' }}
       run: make capacitor-upload-ios-app
 
   capacitor_android:
@@ -279,7 +279,7 @@ jobs:
         echo -n "$STORE_BASE64" | base64 --decode -o "$STORE_FILE"
         make capacitor-build-aab
     - name: Upload aab
-      if: ${{ github.ref == 'refs/heads/main' }}
+      if: ${{ github.ref == 'refs/heads/master' }}
       env:
         GOOGLE_SERVICE_ACCOUNT_KEY_JSON_BASE64: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY_JSON_BASE64 }}
       run: |
