@@ -529,6 +529,9 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     if (options.dpopJKT != null) {
       query.append("dpop_jkt", options.dpopJKT);
     }
+    if (options.resource != null) {
+      query.append("resource", options.resource);
+    }
 
     if (!this.isSSOEnabled) {
       // For backward compatibility
