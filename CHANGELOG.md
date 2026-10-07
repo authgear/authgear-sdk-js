@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- `authenticate()` accepts an optional `resource` (RFC 8707 resource
+  indicator). Access tokens of the resulting session, including
+  refreshed ones, have `aud` set to that resource URI. Resource-specific
+  scopes cannot be requested yet. On web it has no effect with
+  `sessionType: "cookie"`.
+
 <a name="v7.0.0"></a>
 ## [v7.0.0](https://github.com/authgear/authgear-sdk-js/compare/v6.0.0...v7.0.0) (2026-09-03)
 
