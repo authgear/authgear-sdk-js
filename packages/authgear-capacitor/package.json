@@ -19,7 +19,7 @@
     "@authgear/core": "7.0.0",
     "@capacitor/android": "^7.0.0",
     "@capacitor/core": "^7.0.0",
-    "@capacitor/ios": "^7.0.0"
+    "@capacitor/ios": "^7.6.9"
   },
   "peerDependencies": {
     "@capacitor/core": "^6.0.0 || ^7.0.0"
