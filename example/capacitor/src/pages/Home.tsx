@@ -124,6 +124,7 @@ function AuthgearDemo() {
     return readEndpoint();
   });
   const [authenticationFlowGroup, setAuthenticationFlowGroup] = useState("");
+  const [resource, setResource] = useState("");
   const [page, setPage] = useState("");
   const [colorScheme, setColorScheme] = useState("");
   const [useTransientTokenStorage, setUseTransientTokenStorage] =
@@ -324,6 +325,7 @@ function AuthgearDemo() {
             colorScheme === "" ? undefined : (colorScheme as ColorScheme),
           page: page === "" ? undefined : page,
           authenticationFlowGroup,
+          resource: resource === "" ? undefined : resource,
         });
         setUserInfo(result.userInfo);
         showUserInfo(result.userInfo);
@@ -336,6 +338,7 @@ function AuthgearDemo() {
     }
   }, [
     authenticationFlowGroup,
+    resource,
     colorScheme,
     page,
     showError,
@@ -1056,6 +1059,12 @@ function AuthgearDemo() {
           label="Authentication Flow Group"
           placeholder="Enter Authentication Flow Group"
           onIonInput={(e) => setAuthenticationFlowGroup(e.detail.value!)}
+        />
+        <IonInput
+          type="text"
+          label="Resource"
+          placeholder="Enter Resource URI"
+          onIonInput={(e) => setResource(e.detail.value!)}
         />
         <IonSelect label="Page" value={page} onIonChange={onChangePage}>
           <IonSelectOption value="">Unset</IonSelectOption>

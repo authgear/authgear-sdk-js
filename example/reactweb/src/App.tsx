@@ -134,6 +134,7 @@ function Root() {
   const [authenticationFlowGroup, setAuthenticationflowGroup] =
     useState<string>("");
   const [oauthProviderAlias, setOauthProviderAlias] = useState<string>("");
+  const [resource, setResource] = useState<string>("");
 
   const [error, setError] = useState<unknown>(null);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -423,13 +424,14 @@ function Root() {
           state: "authenticate",
           page,
           authenticationFlowGroup,
+          resource: resource === "" ? undefined : resource,
         })
         .then(
           () => {},
           (err) => setError(err)
         );
     },
-    [page, authenticationFlowGroup]
+    [page, authenticationFlowGroup, resource]
   );
 
   const onClickSignInAnonymously = useCallback(
@@ -603,6 +605,16 @@ function Root() {
           placeholder="Enter Flow Group"
           value={authenticationFlowGroup}
           onChange={(e) => setAuthenticationflowGroup(e.currentTarget.value)}
+        />
+      </label>
+      <label className="label">
+        Resource
+        <input
+          className="input"
+          type="text"
+          placeholder="Enter Resource URI"
+          value={resource}
+          onChange={(e) => setResource(e.currentTarget.value)}
         />
       </label>
       <label className="label">

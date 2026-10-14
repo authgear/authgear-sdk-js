@@ -169,6 +169,7 @@ const HomeScreen: React.FC = () => {
   const [clientID, setClientID] = useState('');
   const [endpoint, setEndpoint] = useState('');
   const [authenticationFlowGroup, setAuthenticationflowGroup] = useState('');
+  const [resource, setResource] = useState('');
   const [page, setPage] = useState('');
   const [explicitColorScheme, setExplicitColorScheme] =
     useState<ColorScheme | null>(null);
@@ -451,6 +452,7 @@ const HomeScreen: React.FC = () => {
         colorScheme: colorScheme as ColorScheme,
         page,
         authenticationFlowGroup,
+        resource: resource === '' ? undefined : resource,
       })
       .then(({userInfo}) => {
         setUserInfo(userInfo);
@@ -466,6 +468,7 @@ const HomeScreen: React.FC = () => {
   }, [
     page,
     authenticationFlowGroup,
+    resource,
     updateBiometricState,
     showError,
     showUser,
@@ -862,6 +865,17 @@ const HomeScreen: React.FC = () => {
             autoCapitalize="none"
             autoCorrect={false}
             placeholder="Enter flow group"
+          />
+        </View>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>Resource</Text>
+          <TextInput
+            style={styles.inputField}
+            value={resource}
+            onChangeText={setResource}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder="Enter resource URI"
           />
         </View>
         <View style={styles.input}>
