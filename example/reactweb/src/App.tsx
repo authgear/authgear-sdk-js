@@ -27,6 +27,11 @@ function readSessionType(): SessionType {
   return "refresh_token";
 }
 
+function parseScopes(scopes: string): string[] | undefined {
+  const list = scopes.split(/\s+/).filter((s) => s !== "");
+  return list.length > 0 ? list : undefined;
+}
+
 function readClientID(): string {
   return window.localStorage.getItem("authgear.demo.clientID") ?? "";
 }
@@ -135,6 +140,7 @@ function Root() {
     useState<string>("");
   const [oauthProviderAlias, setOauthProviderAlias] = useState<string>("");
   const [resource, setResource] = useState<string>("");
+  const [scopes, setScopes] = useState<string>("");
 
   const [error, setError] = useState<unknown>(null);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -425,13 +431,14 @@ function Root() {
           page,
           authenticationFlowGroup,
           resource: resource === "" ? undefined : resource,
+          scopes: parseScopes(scopes),
         })
         .then(
           () => {},
           (err) => setError(err)
         );
     },
-    [page, authenticationFlowGroup, resource]
+    [page, authenticationFlowGroup, resource, scopes]
   );
 
   const onClickSignInAnonymously = useCallback(
@@ -615,6 +622,16 @@ function Root() {
           placeholder="Enter Resource URI"
           value={resource}
           onChange={(e) => setResource(e.currentTarget.value)}
+        />
+      </label>
+      <label className="label">
+        Scopes
+        <input
+          className="input"
+          type="text"
+          placeholder="Enter resource scopes separated by space"
+          value={scopes}
+          onChange={(e) => setScopes(e.currentTarget.value)}
         />
       </label>
       <label className="label">

@@ -124,6 +124,11 @@ const styles = StyleSheet.create({
   },
 });
 
+function parseScopes(scopes: string): string[] | undefined {
+  const list = scopes.split(/\s+/).filter(s => s !== '');
+  return list.length > 0 ? list : undefined;
+}
+
 const redirectURI = 'com.authgear.example.rn://host/path';
 const wechatRedirectURI = Platform.select<string>({
   android: 'com.authgear.example.rn://host/open_wechat_app',
@@ -170,6 +175,7 @@ const HomeScreen: React.FC = () => {
   const [endpoint, setEndpoint] = useState('');
   const [authenticationFlowGroup, setAuthenticationflowGroup] = useState('');
   const [resource, setResource] = useState('');
+  const [scopes, setScopes] = useState('');
   const [page, setPage] = useState('');
   const [explicitColorScheme, setExplicitColorScheme] =
     useState<ColorScheme | null>(null);
@@ -453,6 +459,7 @@ const HomeScreen: React.FC = () => {
         page,
         authenticationFlowGroup,
         resource: resource === '' ? undefined : resource,
+        scopes: parseScopes(scopes),
       })
       .then(({userInfo}) => {
         setUserInfo(userInfo);
@@ -469,6 +476,7 @@ const HomeScreen: React.FC = () => {
     page,
     authenticationFlowGroup,
     resource,
+    scopes,
     updateBiometricState,
     showError,
     showUser,
@@ -876,6 +884,17 @@ const HomeScreen: React.FC = () => {
             autoCapitalize="none"
             autoCorrect={false}
             placeholder="Enter resource URI"
+          />
+        </View>
+        <View style={styles.input}>
+          <Text style={styles.inputLabel}>Scopes</Text>
+          <TextInput
+            style={styles.inputField}
+            value={scopes}
+            onChangeText={setScopes}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder="Enter resource scopes separated by space"
           />
         </View>
         <View style={styles.input}>

@@ -72,6 +72,11 @@ const TITLE = "Authgear SDK";
 
 const REDIRECT_URI_WEB_AUTHENTICATE = "http://localhost:8100/oauth-redirect";
 const REDIRECT_URI_WEB_REAUTH = "http://localhost:8100/reauth-redirect";
+function parseScopes(scopes: string): string[] | undefined {
+  const list = scopes.split(/\s+/).filter((s) => s !== "");
+  return list.length > 0 ? list : undefined;
+}
+
 const REDIRECT_URI_CAPACITOR = "com.authgear.exampleapp.capacitor://host/path";
 
 const biometricOptions: BiometricOptions = {
@@ -125,6 +130,7 @@ function AuthgearDemo() {
   });
   const [authenticationFlowGroup, setAuthenticationFlowGroup] = useState("");
   const [resource, setResource] = useState("");
+  const [scopes, setScopes] = useState("");
   const [page, setPage] = useState("");
   const [colorScheme, setColorScheme] = useState("");
   const [useTransientTokenStorage, setUseTransientTokenStorage] =
@@ -326,6 +332,7 @@ function AuthgearDemo() {
           page: page === "" ? undefined : page,
           authenticationFlowGroup,
           resource: resource === "" ? undefined : resource,
+          scopes: parseScopes(scopes),
         });
         setUserInfo(result.userInfo);
         showUserInfo(result.userInfo);
@@ -339,6 +346,7 @@ function AuthgearDemo() {
   }, [
     authenticationFlowGroup,
     resource,
+    scopes,
     colorScheme,
     page,
     showError,
@@ -1065,6 +1073,12 @@ function AuthgearDemo() {
           label="Resource"
           placeholder="Enter Resource URI"
           onIonInput={(e) => setResource(e.detail.value!)}
+        />
+        <IonInput
+          type="text"
+          label="Scopes"
+          placeholder="Enter resource scopes"
+          onIonInput={(e) => setScopes(e.detail.value!)}
         />
         <IonSelect label="Page" value={page} onIonChange={onChangePage}>
           <IonSelectOption value="">Unset</IonSelectOption>
