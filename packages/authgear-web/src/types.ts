@@ -145,6 +145,12 @@ export interface AuthenticateOptions {
    * It has effect only when sessionType is "refresh_token", because no access token is issued for cookie-based sessions.
    */
   resource?: string;
+  /**
+   * Scopes of the API Resource given in `resource` to request.
+   *
+   * They are merged with the scopes required by the SDK. The scopes required by the SDK are always requested.
+   */
+  scopes?: string[];
 }
 
 /**

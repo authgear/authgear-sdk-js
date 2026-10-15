@@ -115,6 +115,12 @@ export interface AuthenticateOptions {
    * The binding lasts for the whole session, including tokens obtained by refreshing.
    */
   resource?: string;
+  /**
+   * Scopes of the API Resource given in `resource` to request.
+   *
+   * They are merged with the scopes required by the SDK. The scopes required by the SDK are always requested.
+   */
+  scopes?: string[];
 }
 
 /**

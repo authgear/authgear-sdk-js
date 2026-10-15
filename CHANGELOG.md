@@ -6,9 +6,11 @@
 
 - `authenticate()` accepts an optional `resource` (RFC 8707 resource
   indicator). Access tokens of the resulting session, including
-  refreshed ones, have `aud` set to that resource URI. Resource-specific
-  scopes cannot be requested yet. On web it has no effect with
-  `sessionType: "cookie"`.
+  refreshed ones, have `aud` set to that resource URI. On web it has no
+  effect with `sessionType: "cookie"`.
+- `authenticate()` accepts optional `scopes` to request the scopes of the API
+  resource given in `resource`. They are merged with the scopes required by
+  the SDK, so the scopes required by the SDK are always requested.
 
 <a name="v7.0.0"></a>
 ## [v7.0.0](https://github.com/authgear/authgear-sdk-js/compare/v6.0.0...v7.0.0) (2026-09-03)

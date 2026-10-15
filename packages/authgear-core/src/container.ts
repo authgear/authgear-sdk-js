@@ -178,8 +178,13 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     return _getAuthTime(payload);
   }
 
-  getAuthenticateScopes(options: { requestOfflineAccess: boolean }): string[] {
-    const { requestOfflineAccess } = options;
+  getAuthenticateScopes(options: {
+    requestOfflineAccess: boolean;
+    // Additional scopes requested by the app. They are merged with the scopes
+    // required by the SDK, so the scopes required by the SDK are always requested.
+    additionalScopes?: string[];
+  }): string[] {
+    const { requestOfflineAccess, additionalScopes } = options;
     const scopes = ["openid", "https://authgear.com/scopes/full-access"];
     if (requestOfflineAccess) {
       scopes.push("offline_access");
@@ -189,6 +194,11 @@ export class _BaseContainer<T extends _BaseAPIClient> {
         "device_sso",
         "https://authgear.com/scopes/pre-authenticated-url"
       );
+    }
+    for (const scope of additionalScopes ?? []) {
+      if (!scopes.includes(scope)) {
+        scopes.push(scope);
+      }
     }
     return scopes;
   }
