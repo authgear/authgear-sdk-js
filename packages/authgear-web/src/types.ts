@@ -136,6 +136,21 @@ export interface AuthenticateOptions {
    * Authentication flow group
    */
   authenticationFlowGroup?: string;
+  /**
+   * Resource indicator (RFC 8707). The URI of an API Resource registered in Authgear Portal.
+   *
+   * When it is set, the access tokens of the resulting session have `aud` set to this URI instead of the Authgear endpoint.
+   * The binding lasts for the whole session, including tokens obtained by refreshing.
+   *
+   * It has effect only when sessionType is "refresh_token", because no access token is issued for cookie-based sessions.
+   */
+  resource?: string;
+  /**
+   * Scopes of the API Resource given in `resource` to request.
+   *
+   * They are merged with the scopes required by the SDK. The scopes required by the SDK are always requested.
+   */
+  scopes?: string[];
 }
 
 /**

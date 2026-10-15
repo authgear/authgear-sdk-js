@@ -213,6 +213,7 @@ export interface _OIDCAuthenticationRequest {
   clientID?: string;
   xPreAuthenticatedURLToken?: string;
   dpopJKT?: string;
+  resource?: string;
 }
 
 /**

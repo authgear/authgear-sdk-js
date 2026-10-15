@@ -924,14 +924,16 @@ export class WebContainer {
     // Use shared session cookie by default for first-party web apps.
     const responseType =
       options.responseType ?? this.sessionType === "cookie" ? "none" : "code";
+    const { scopes, ...rest } = options;
     const scope = this.baseContainer.getAuthenticateScopes({
       requestOfflineAccess: this.sessionType === "refresh_token",
+      additionalScopes: scopes,
     });
 
     const suppressIDPSessionCookie = this.sessionType === "refresh_token";
 
     return this.baseContainer.authorizeEndpoint({
-      ...options,
+      ...rest,
       responseType,
       scope,
       suppressIDPSessionCookie,
