@@ -42,6 +42,8 @@ import androidx.core.util.TypedValueCompat;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.webkit.WebSettingsCompat;
+import androidx.webkit.WebViewFeature;
 
 public class WebKitWebViewActivity extends AppCompatActivity {
 
@@ -374,6 +376,13 @@ public class WebKitWebViewActivity extends AppCompatActivity {
         this.mWebView.setWebChromeClient(new MyWebChromeClient(this));
         WebSettings webSettings = this.mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
+        // Let pages use passkeys for domains whose assetlinks.json lists this app.
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_AUTHENTICATION)) {
+            WebSettingsCompat.setWebAuthenticationSupport(
+                webSettings,
+                WebSettingsCompat.WEB_AUTHENTICATION_SUPPORT_FOR_APP
+            );
+        }
 
         this.mRootFrameLayout.addView(this.mWebView);
         this.mRootFrameLayout.addView(this.mToolbarFrameLayout);
