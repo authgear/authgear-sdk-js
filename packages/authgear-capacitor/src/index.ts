@@ -800,11 +800,13 @@ export class CapacitorContainer {
    * @internal
    */
   async authorizeEndpoint(options: AuthenticateOptions): Promise<string> {
+    const { scopes, ...rest } = options;
     const oidcRequest: _OIDCAuthenticationRequest = {
-      ...options,
+      ...rest,
       responseType: "code",
       scope: this.baseContainer.getAuthenticateScopes({
         requestOfflineAccess: true,
+        additionalScopes: scopes,
       }),
     };
     const dpopJKT = await this.dpopProvider.computeJKT();
