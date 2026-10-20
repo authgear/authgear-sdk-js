@@ -40,6 +40,14 @@ function readEndpoint(): string {
   return window.localStorage.getItem("authgear.demo.endpoint") ?? "";
 }
 
+function readResource(): string {
+  return window.localStorage.getItem("authgear.demo.resource") ?? "";
+}
+
+function readScopes(): string {
+  return window.localStorage.getItem("authgear.demo.scopes") ?? "";
+}
+
 function readIsSSOEnabled(): boolean {
   return window.localStorage.getItem("authgear.demo.isSSOEnabled") === "true";
 }
@@ -130,6 +138,8 @@ function Root() {
   const initialEndpoint = readEndpoint();
   const initialSessionType = readSessionType();
   const initialIsSSOEnabled = readIsSSOEnabled();
+  const initialResource = readResource();
+  const initialScopes = readScopes();
 
   const [sessionType, setSessionType] = useState(initialSessionType);
   const [clientID, setClientID] = useState(initialClientID);
@@ -139,8 +149,8 @@ function Root() {
   const [authenticationFlowGroup, setAuthenticationflowGroup] =
     useState<string>("");
   const [oauthProviderAlias, setOauthProviderAlias] = useState<string>("");
-  const [resource, setResource] = useState<string>("");
-  const [scopes, setScopes] = useState<string>("");
+  const [resource, setResource] = useState<string>(initialResource);
+  const [scopes, setScopes] = useState<string>(initialScopes);
 
   const [error, setError] = useState<unknown>(null);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -164,6 +174,8 @@ function Root() {
         "authgear.demo.isSSOEnabled",
         isSSOEnabled ? "true" : "false"
       );
+      window.localStorage.setItem("authgear.demo.resource", resource ?? "");
+      window.localStorage.setItem("authgear.demo.scopes", scopes ?? "");
       authgear
         .configure({
           endpoint,
@@ -172,7 +184,8 @@ function Root() {
           isSSOEnabled,
           fetch: myfetch,
           resource: resource === "" ? undefined : resource,
-          scopes: scopes == null ? undefined : parseScopes(scopes),
+          scopes:
+            scopes == null || scopes === "" ? undefined : parseScopes(scopes),
         })
         .then(
           () => {
@@ -217,7 +230,9 @@ function Root() {
         initialSessionType,
         initialClientID,
         initialEndpoint,
-        initialIsSSOEnabled
+        initialIsSSOEnabled,
+        initialResource,
+        initialScopes
       );
     }
   }, [
@@ -225,6 +240,8 @@ function Root() {
     initialClientID,
     initialEndpoint,
     initialIsSSOEnabled,
+    initialResource,
+    initialScopes,
     configure,
   ]);
 
