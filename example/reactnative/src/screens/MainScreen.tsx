@@ -426,6 +426,8 @@ const HomeScreen: React.FC = () => {
         isSSOEnabled,
         preAuthenticatedURLEnabled,
         fetch: myfetch,
+        resource: resource === '' ? undefined : resource,
+        scopes: parseScopes(scopes),
       })
       .then(() => {
         postConfigure();
@@ -444,6 +446,8 @@ const HomeScreen: React.FC = () => {
     isSSOEnabled,
     preAuthenticatedURLEnabled,
     useWebKitWebView,
+    resource,
+    scopes,
     postConfigure,
     showError,
     sendWechatAuthRequest,
@@ -458,8 +462,6 @@ const HomeScreen: React.FC = () => {
         colorScheme: colorScheme as ColorScheme,
         page,
         authenticationFlowGroup,
-        resource: resource === '' ? undefined : resource,
-        scopes: parseScopes(scopes),
       })
       .then(({userInfo}) => {
         setUserInfo(userInfo);
@@ -475,8 +477,6 @@ const HomeScreen: React.FC = () => {
   }, [
     page,
     authenticationFlowGroup,
-    resource,
-    scopes,
     updateBiometricState,
     showError,
     showUser,

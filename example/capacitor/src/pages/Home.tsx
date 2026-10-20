@@ -271,6 +271,8 @@ function AuthgearDemo() {
           sessionType: "refresh_token",
           isSSOEnabled,
           fetch: myfetch,
+          resource: resource === "" ? undefined : resource,
+          scopes: parseScopes(scopes),
         });
       } else {
         await authgearCapacitor.configure({
@@ -294,6 +296,8 @@ function AuthgearDemo() {
           isSSOEnabled,
           preAuthenticatedURLEnabled,
           fetch: myfetch,
+          resource: resource === "" ? undefined : resource,
+          scopes: parseScopes(scopes),
         });
       }
       await postConfigure();
@@ -312,6 +316,8 @@ function AuthgearDemo() {
     preAuthenticatedURLRedirectURI,
     postConfigure,
     useTransientTokenStorage,
+    resource,
+    scopes,
     showError,
   ]);
 
@@ -331,8 +337,6 @@ function AuthgearDemo() {
             colorScheme === "" ? undefined : (colorScheme as ColorScheme),
           page: page === "" ? undefined : page,
           authenticationFlowGroup,
-          resource: resource === "" ? undefined : resource,
-          scopes: parseScopes(scopes),
         });
         setUserInfo(result.userInfo);
         showUserInfo(result.userInfo);
@@ -345,8 +349,6 @@ function AuthgearDemo() {
     }
   }, [
     authenticationFlowGroup,
-    resource,
-    scopes,
     colorScheme,
     page,
     showError,

@@ -153,7 +153,9 @@ function Root() {
       sessionType: SessionType,
       clientID: string,
       endpoint: string,
-      isSSOEnabled: boolean
+      isSSOEnabled: boolean,
+      resource?: string,
+      scopes?: string
     ) => {
       window.localStorage.setItem("authgear.demo.sessionType", sessionType);
       window.localStorage.setItem("authgear.demo.clientID", clientID);
@@ -169,6 +171,8 @@ function Root() {
           sessionType,
           isSSOEnabled,
           fetch: myfetch,
+          resource: resource === "" ? undefined : resource,
+          scopes: scopes == null ? undefined : parseScopes(scopes),
         })
         .then(
           () => {
@@ -489,9 +493,16 @@ function Root() {
     (e: React.MouseEvent<HTMLElement>) => {
       e.preventDefault();
       e.stopPropagation();
-      configure(sessionType, clientID, endpoint, isSSOEnabled);
+      configure(
+        sessionType,
+        clientID,
+        endpoint,
+        isSSOEnabled,
+        resource,
+        scopes
+      );
     },
-    [sessionType, clientID, endpoint, isSSOEnabled, configure]
+    [sessionType, clientID, endpoint, isSSOEnabled, resource, scopes, configure]
   );
 
   const onClickReauthenticate = useCallback(
