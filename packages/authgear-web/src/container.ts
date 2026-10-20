@@ -24,6 +24,7 @@ import { generateCodeVerifier, computeCodeChallenge } from "./pkce";
 import {
   WebContainerDelegate,
   AuthenticateOptions,
+  AuthenticateAnonymouslyOptions,
   ReauthenticateOptions,
   PromoteOptions,
   SettingOptions,
@@ -83,6 +84,22 @@ export interface ConfigureOptions {
    * in all requests that are sent to your self-hosted deployment.
    */
   fetch?: typeof window.fetch;
+
+  /**
+   * Default resource indicator (RFC 8707) for startAuthentication(), startPromoteAnonymousUser() and authenticateAnonymously().
+   * It is used only when the call does not specify its own `resource`, which replaces this default.
+   *
+   * It is ignored when sessionType is "cookie", because no access token is issued for cookie-based sessions.
+   */
+  resource?: string;
+
+  /**
+   * Default scopes of the API Resource given in `resource`, used by startAuthentication(), startPromoteAnonymousUser() and authenticateAnonymously().
+   * They are used only when the call does not specify its own `scopes`, which replaces this default.
+   *
+   * They are always merged with the scopes required by the SDK.
+   */
+  scopes?: string[];
 }
 
 /**
@@ -317,6 +334,8 @@ export class WebContainer {
     } else {
       this.isSSOEnabled = options.isSSOEnabled ?? false;
     }
+    this.baseContainer.defaultResource = options.resource;
+    this.baseContainer.defaultScopes = options.scopes;
 
     switch (this.sessionType) {
       case "cookie":
@@ -367,7 +386,9 @@ export class WebContainer {
    * Start authentication by redirecting to the authorization endpoint.
    */
   async startAuthentication(options: AuthenticateOptions): Promise<void> {
-    const authorizeEndpoint = await this.authorizeEndpoint(options);
+    const authorizeEndpoint = await this.authorizeEndpoint(
+      this.withDefaultResourceAndScopes(options)
+    );
     window.location.href = authorizeEndpoint;
   }
 
@@ -544,7 +565,7 @@ export class WebContainer {
     )}`;
 
     const authorizeEndpoint = await this.authorizeEndpoint({
-      ...options,
+      ...this.withDefaultResourceAndScopes(options),
       prompt: PromptOption.Login,
       loginHint,
     });
@@ -824,7 +845,9 @@ export class WebContainer {
   /**
    * Authenticate as an anonymous user.
    */
-  async authenticateAnonymously(): Promise<AuthenticateResult> {
+  async authenticateAnonymously(
+    options?: AuthenticateAnonymouslyOptions
+  ): Promise<AuthenticateResult> {
     const clientID = this.clientID;
     if (clientID == null) {
       throw new AuthgearError("missing client ID");
@@ -834,10 +857,16 @@ export class WebContainer {
     switch (this.sessionType) {
       case "cookie": {
         // cookie
+        // The server rejects resource and scope here, so the configured
+        // defaults are not used.
         await this.baseContainer.apiClient.signupAnonymousUserWithoutKey(
           clientID,
           sessionType,
-          undefined
+          undefined,
+          {
+            resource: options?.resource,
+            scope: this.signupScope(options?.scopes),
+          }
         );
 
         const userInfo =
@@ -853,7 +882,13 @@ export class WebContainer {
           await this.baseContainer.apiClient.signupAnonymousUserWithoutKey(
             clientID,
             sessionType,
-            refreshToken ?? undefined
+            refreshToken ?? undefined,
+            {
+              resource: this.baseContainer.resolveResource(options?.resource),
+              scope: this.signupScope(
+                this.baseContainer.resolveScopes(options?.scopes)
+              ),
+            }
           );
 
         if (!tokenResponse) {
@@ -875,6 +910,33 @@ export class WebContainer {
       default:
         throw new AuthgearError("unknown session type");
     }
+  }
+
+  // The configured defaults are not used for cookie sessions, which issue no
+  // access token.
+  private withDefaultResourceAndScopes<
+    T extends { resource?: string; scopes?: string[] }
+  >(options: T): T {
+    if (this.sessionType === "cookie") {
+      return options;
+    }
+    return {
+      ...options,
+      resource: this.baseContainer.resolveResource(options.resource),
+      scopes: this.baseContainer.resolveScopes(options.scopes),
+    };
+  }
+
+  // The server requires scope, when given, to include the scopes required
+  // by the SDK.
+  private signupScope(scopes: string[] | undefined): string[] | undefined {
+    if (scopes == null) {
+      return undefined;
+    }
+    return this.baseContainer.getAuthenticateScopes({
+      requestOfflineAccess: true,
+      additionalScopes: scopes,
+    });
   }
 
   private async _logoutRefreshToken(options: {
