@@ -94,3 +94,34 @@ describe("getAuthenticateScopes", () => {
     ).toEqual(["openid", "https://authgear.com/scopes/full-access", "email"]);
   });
 });
+
+describe("resolveResource and resolveScopes", () => {
+  const container = new _BaseContainer({ name: "test" }, {} as any, {} as any);
+
+  it("returns the call value when no default is configured", () => {
+    expect(container.resolveResource("https://a.example.com")).toEqual(
+      "https://a.example.com"
+    );
+    expect(container.resolveResource(undefined)).toBeUndefined();
+    expect(container.resolveScopes(["email"])).toEqual(["email"]);
+    expect(container.resolveScopes(undefined)).toBeUndefined();
+  });
+
+  it("falls back to the configured defaults only when the call has no value", () => {
+    container.defaultResource = "https://default.example.com";
+    container.defaultScopes = ["default"];
+    expect(container.resolveResource(undefined)).toEqual(
+      "https://default.example.com"
+    );
+    expect(container.resolveScopes(undefined)).toEqual(["default"]);
+  });
+
+  it("replaces the defaults with the call value", () => {
+    container.defaultResource = "https://default.example.com";
+    container.defaultScopes = ["default"];
+    expect(container.resolveResource("https://a.example.com")).toEqual(
+      "https://a.example.com"
+    );
+    expect(container.resolveScopes(["email"])).toEqual(["email"]);
+  });
+});

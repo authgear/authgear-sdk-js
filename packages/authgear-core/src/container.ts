@@ -131,6 +131,12 @@ export class _BaseContainer<T extends _BaseAPIClient> {
 
   preAuthenticatedURLEnabled: boolean;
 
+  // Defaults set by configure(). They are used only when a call does not
+  // specify its own value, which replaces the default.
+  defaultResource?: string;
+
+  defaultScopes?: string[];
+
   sessionState: SessionState;
 
   idToken?: string;
@@ -176,6 +182,14 @@ export class _BaseContainer<T extends _BaseAPIClient> {
       return undefined;
     }
     return _getAuthTime(payload);
+  }
+
+  resolveResource(resource: string | undefined): string | undefined {
+    return resource ?? this.defaultResource;
+  }
+
+  resolveScopes(scopes: string[] | undefined): string[] | undefined {
+    return scopes ?? this.defaultScopes;
   }
 
   getAuthenticateScopes(options: {
@@ -760,8 +774,9 @@ export class _BaseContainer<T extends _BaseAPIClient> {
     clientID: string;
     idToken: string;
     deviceSecret: string;
+    resource?: string;
   }): Promise<_OIDCTokenResponse> {
-    const { clientID, idToken, deviceSecret } = options;
+    const { clientID, idToken, deviceSecret, resource } = options;
     try {
       const audience = await this.apiClient.getEndpointOrigin();
       const tokenExchangeResult = await this.apiClient._oidcTokenRequest({
@@ -774,6 +789,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
         subject_token: idToken,
         actor_token_type: "urn:x-oath:params:oauth:token-type:device-secret",
         actor_token: deviceSecret,
+        resource,
       });
       return tokenExchangeResult;
     } catch (e: unknown) {
@@ -813,6 +829,7 @@ export class _BaseContainer<T extends _BaseAPIClient> {
         deviceSecret,
         idToken,
         clientID,
+        resource: this.resolveResource(options.resource),
       }
     );
     // Here access_token is pre-authenticated-url-token
