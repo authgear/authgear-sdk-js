@@ -105,10 +105,13 @@ export interface AuthenticateOptions {
    *
    * When it is set, the access tokens of the resulting session have `aud` set to this URI instead of the Authgear endpoint.
    * The binding lasts for the whole session, including tokens obtained by refreshing.
+   *
+   * If it is not set, `ConfigureOptions.resource` is used.
    */
   resource?: string;
   /**
    * Scopes of the API Resource given in `resource` to request.
+   * If it is not set, `ConfigureOptions.scopes` is used.
    *
    * They are merged with the scopes required by the SDK. The scopes required by the SDK are always requested.
    */
@@ -407,6 +410,26 @@ export interface BiometricOptions {
 }
 
 /**
+ * Options of authenticateBiometric().
+ *
+ * @public
+ */
+export interface AuthenticateBiometricOptions extends BiometricOptions {
+  /**
+   * Resource indicator (RFC 8707). The URI of an API Resource registered in Authgear Portal.
+   * If it is not set, `ConfigureOptions.resource` is used.
+   */
+  resource?: string;
+  /**
+   * Scopes of the API Resource given in `resource` to request.
+   * If it is not set, `ConfigureOptions.scopes` is used.
+   *
+   * They are merged with the scopes required by the SDK. The scopes required by the SDK are always requested.
+   */
+  scopes?: string[];
+}
+
+/**
  * @internal
  */
 export interface BiometricPrivateKeyOptions extends BiometricOptions {
@@ -438,4 +461,10 @@ export interface PreAuthenticatedURLOptions {
    * Any string that will be passed to webApplicationURI by the `state` query parameter.
    */
   state?: string;
+
+  /**
+   * Resource indicator (RFC 8707). The URI of an API Resource registered in Authgear Portal.
+   * If it is not set, `ConfigureOptions.resource` is used.
+   */
+  resource?: string;
 }

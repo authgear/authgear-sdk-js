@@ -53,6 +53,7 @@ import {
   type ReauthenticateResult,
   type SettingOptions,
   type BiometricOptions,
+  type AuthenticateBiometricOptions,
   type SettingsActionOptions,
   type PreAuthenticatedURLOptions,
   _InternalSettingsActionOptions,
@@ -130,6 +131,20 @@ export interface ConfigureOptions {
    * in all requests that are sent to your self-hosted deployment.
    */
   fetch?: typeof window.fetch;
+
+  /**
+   * Default resource indicator (RFC 8707) for authenticate(), promoteAnonymousUser(), authenticateAnonymously(), authenticateBiometric() and makePreAuthenticatedURL().
+   * It is used only when the call does not specify its own `resource`, which replaces this default.
+   */
+  resource?: string;
+
+  /**
+   * Default scopes of the API Resource given in `resource`, used by authenticate(), promoteAnonymousUser(), authenticateAnonymously() and authenticateBiometric().
+   * They are used only when the call does not specify its own `scopes`, which replaces this default.
+   *
+   * They are always merged with the scopes required by the SDK.
+   */
+  scopes?: string[];
 }
 
 async function getXDeviceInfo(): Promise<string> {
@@ -363,6 +378,8 @@ export class CapacitorContainer {
    */
   async configure(options: ConfigureOptions): Promise<void> {
     this.isSSOEnabled = options.isSSOEnabled ?? false;
+    this.baseContainer.defaultResource = options.resource;
+    this.baseContainer.defaultScopes = options.scopes;
     this.preAuthenticatedURLEnabled =
       options.preAuthenticatedURLEnabled ?? false;
     if (options.tokenStorage != null) {
@@ -479,6 +496,8 @@ export class CapacitorContainer {
     const platform = getPlatform();
     const authorizeURL = await this.authorizeEndpoint({
       ...options,
+      resource: this.baseContainer.resolveResource(options.resource),
+      scopes: this.baseContainer.resolveScopes(options.scopes),
       platform,
     });
     const redirectURL = await this.uiImplementation.openAuthorizationURL({
@@ -877,9 +896,17 @@ export class CapacitorContainer {
     await this.storage.setBiometricKeyID(this.name, kid);
   }
 
+  /**
+   * Authenticate with biometric authentication.
+   *
+   * You can refer to {@link AuthenticateBiometricOptions} for more customization.
+   *
+   * @public
+   */
   async authenticateBiometric(
-    options: BiometricOptions
+    options: AuthenticateBiometricOptions
   ): Promise<AuthenticateResult> {
+    const { resource, scopes, ...biometricOptions } = options;
     const kid = await this.storage.getBiometricKeyID(this.name);
     if (kid == null) {
       throw new AuthgearError("biometric key ID not found");
@@ -903,7 +930,7 @@ export class CapacitorContainer {
 
     try {
       const jwt = await signWithBiometricPrivateKey({
-        ...options,
+        ...biometricOptions,
         kid,
         payload,
       });
@@ -914,7 +941,9 @@ export class CapacitorContainer {
           jwt,
           scope: this.baseContainer.getAuthenticateScopes({
             requestOfflineAccess: true,
+            additionalScopes: this.baseContainer.resolveScopes(scopes),
           }),
+          resource: this.baseContainer.resolveResource(resource),
         });
 
       const userInfo = await this.baseContainer.apiClient._oidcUserInfoRequest(
