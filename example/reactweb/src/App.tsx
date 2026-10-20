@@ -451,15 +451,13 @@ function Root() {
           state: "authenticate",
           page,
           authenticationFlowGroup,
-          resource: resource === "" ? undefined : resource,
-          scopes: parseScopes(scopes),
         })
         .then(
           () => {},
           (err) => setError(err)
         );
     },
-    [page, authenticationFlowGroup, resource, scopes]
+    [page, authenticationFlowGroup]
   );
 
   const onClickSignInAnonymously = useCallback(
