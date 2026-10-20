@@ -43,6 +43,8 @@ import {
   checkDPoPSupported,
 } from "./nativemodule";
 import {
+  AuthenticateAnonymouslyOptions,
+  AuthenticateBiometricOptions,
   BiometricOptions,
   ReactNativeContainerDelegate,
   AuthenticateOptions,
@@ -122,6 +124,20 @@ export interface ConfigureOptions {
    * in all requests that are sent to your self-hosted deployment.
    */
   fetch?: typeof fetch;
+
+  /**
+   * Default resource indicator (RFC 8707) for authenticate(), promoteAnonymousUser(), authenticateAnonymously(), authenticateBiometric() and makePreAuthenticatedURL().
+   * It is used only when the call does not specify its own `resource`, which replaces this default.
+   */
+  resource?: string;
+
+  /**
+   * Default scopes of the API Resource given in `resource`, used by authenticate(), promoteAnonymousUser(), authenticateAnonymously() and authenticateBiometric().
+   * They are used only when the call does not specify its own `scopes`, which replaces this default.
+   *
+   * They are always merged with the scopes required by the SDK.
+   */
+  scopes?: string[];
 }
 
 async function getXDeviceInfo(): Promise<string> {
@@ -383,6 +399,8 @@ export class ReactNativeContainer {
    */
   async configure(options: ConfigureOptions): Promise<void> {
     this.isSSOEnabled = options.isSSOEnabled ?? false;
+    this.baseContainer.defaultResource = options.resource;
+    this.baseContainer.defaultScopes = options.scopes;
     this.preAuthenticatedURLEnabled =
       options.preAuthenticatedURLEnabled ?? false;
     if (options.tokenStorage != null) {
@@ -451,6 +469,8 @@ export class ReactNativeContainer {
     const platform = Platform.OS;
     const authorizeURL = await this.authorizeEndpoint({
       ...options,
+      resource: this.baseContainer.resolveResource(options.resource),
+      scopes: this.baseContainer.resolveScopes(options.scopes),
       platform,
     });
     const redirectURL = await this.uiImplementation.openAuthorizationURL({
@@ -814,7 +834,9 @@ export class ReactNativeContainer {
    *
    * @public
    */
-  async authenticateAnonymously(): Promise<AuthenticateResult> {
+  async authenticateAnonymously(
+    options?: AuthenticateAnonymouslyOptions
+  ): Promise<AuthenticateResult> {
     const clientID = this.clientID;
     if (clientID == null) {
       throw new AuthgearError("missing client ID");
@@ -841,6 +863,8 @@ export class ReactNativeContainer {
       grant_type: "urn:authgear:params:oauth:grant-type:anonymous-request",
       client_id: clientID,
       jwt,
+      scope: this.getAnonymousScopes(options?.scopes),
+      resource: this.baseContainer.resolveResource(options?.resource),
     });
 
     const userInfo = await this.baseContainer.apiClient._oidcUserInfoRequest(
@@ -854,6 +878,20 @@ export class ReactNativeContainer {
     await this.storage.setAnonymousKeyID(this.name, key.kid);
     await this.disableBiometric();
     return { userInfo };
+  }
+
+  // The server requires scope, when given, to include the scopes required by the SDK.
+  private getAnonymousScopes(
+    scopes: string[] | undefined
+  ): string[] | undefined {
+    const resolved = this.baseContainer.resolveScopes(scopes);
+    if (resolved == null) {
+      return undefined;
+    }
+    return this.baseContainer.getAuthenticateScopes({
+      requestOfflineAccess: true,
+      additionalScopes: resolved,
+    });
   }
 
   /**
@@ -895,6 +933,8 @@ export class ReactNativeContainer {
     const platform = Platform.OS;
     const authorizeURL = await this.authorizeEndpoint({
       ...options,
+      resource: this.baseContainer.resolveResource(options.resource),
+      scopes: this.baseContainer.resolveScopes(options.scopes),
       prompt: PromptOption.Login,
       loginHint,
       platform,
@@ -1089,13 +1129,14 @@ export class ReactNativeContainer {
    * Platform specific biometric authentication UI will be shown.
    * You may first enable biometric authentication in Authgear Portal (Your Project \> Authentication \> Biometric \> Enable biometric authentication).
    *
-   * You can refer to {@link BiometricOptions} for more customization.
+   * You can refer to {@link AuthenticateBiometricOptions} for more customization.
    *
    * @public
    */
   async authenticateBiometric(
-    options: BiometricOptions
+    options: AuthenticateBiometricOptions
   ): Promise<AuthenticateResult> {
+    const { resource, scopes, ...biometricOptions } = options;
     const kid = await this.storage.getBiometricKeyID(this.name);
     if (kid == null) {
       throw new AuthgearError("biometric key ID not found");
@@ -1119,7 +1160,7 @@ export class ReactNativeContainer {
 
     try {
       const jwt = await signWithBiometricPrivateKey({
-        ...options,
+        ...biometricOptions,
         kid,
         payload,
       });
@@ -1130,7 +1171,9 @@ export class ReactNativeContainer {
           jwt,
           scope: this.baseContainer.getAuthenticateScopes({
             requestOfflineAccess: true,
+            additionalScopes: this.baseContainer.resolveScopes(scopes),
           }),
+          resource: this.baseContainer.resolveResource(resource),
         });
 
       const userInfo = await this.baseContainer.apiClient._oidcUserInfoRequest(
