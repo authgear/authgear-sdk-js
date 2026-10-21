@@ -297,6 +297,7 @@ export class _BaseAPIClient {
       "actor_token",
       "actor_token_type",
       "audience",
+      "resource",
     ] as (keyof _OIDCTokenRequest)[]) {
       appendKeyAsString(k);
     }
@@ -416,7 +417,8 @@ export class _BaseAPIClient {
   async signupAnonymousUserWithoutKey(
     clientID: string,
     sessionType: string,
-    refreshToken?: string
+    refreshToken?: string,
+    options?: { resource?: string; scope?: string[] }
   ): Promise<_OIDCTokenResponse | undefined> {
     const payload: Record<string, string> = {
       client_id: clientID,
@@ -424,6 +426,12 @@ export class _BaseAPIClient {
     };
     if (refreshToken) {
       payload["refresh_token"] = refreshToken;
+    }
+    if (options?.resource != null) {
+      payload["resource"] = options.resource;
+    }
+    if (options?.scope != null) {
+      payload["scope"] = options.scope.join(" ");
     }
     const result = await this._post("/api/anonymous_user/signup", {
       json: payload,

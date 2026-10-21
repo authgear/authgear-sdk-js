@@ -40,6 +40,14 @@ function readEndpoint(): string {
   return window.localStorage.getItem("authgear.demo.endpoint") ?? "";
 }
 
+function readResource(): string {
+  return window.localStorage.getItem("authgear.demo.resource") ?? "";
+}
+
+function readScopes(): string {
+  return window.localStorage.getItem("authgear.demo.scopes") ?? "";
+}
+
 function readIsSSOEnabled(): boolean {
   return window.localStorage.getItem("authgear.demo.isSSOEnabled") === "true";
 }
@@ -130,6 +138,8 @@ function Root() {
   const initialEndpoint = readEndpoint();
   const initialSessionType = readSessionType();
   const initialIsSSOEnabled = readIsSSOEnabled();
+  const initialResource = readResource();
+  const initialScopes = readScopes();
 
   const [sessionType, setSessionType] = useState(initialSessionType);
   const [clientID, setClientID] = useState(initialClientID);
@@ -139,8 +149,8 @@ function Root() {
   const [authenticationFlowGroup, setAuthenticationflowGroup] =
     useState<string>("");
   const [oauthProviderAlias, setOauthProviderAlias] = useState<string>("");
-  const [resource, setResource] = useState<string>("");
-  const [scopes, setScopes] = useState<string>("");
+  const [resource, setResource] = useState<string>(initialResource);
+  const [scopes, setScopes] = useState<string>(initialScopes);
 
   const [error, setError] = useState<unknown>(null);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -153,7 +163,9 @@ function Root() {
       sessionType: SessionType,
       clientID: string,
       endpoint: string,
-      isSSOEnabled: boolean
+      isSSOEnabled: boolean,
+      resource?: string,
+      scopes?: string
     ) => {
       window.localStorage.setItem("authgear.demo.sessionType", sessionType);
       window.localStorage.setItem("authgear.demo.clientID", clientID);
@@ -162,6 +174,8 @@ function Root() {
         "authgear.demo.isSSOEnabled",
         isSSOEnabled ? "true" : "false"
       );
+      window.localStorage.setItem("authgear.demo.resource", resource ?? "");
+      window.localStorage.setItem("authgear.demo.scopes", scopes ?? "");
       authgear
         .configure({
           endpoint,
@@ -169,6 +183,9 @@ function Root() {
           sessionType,
           isSSOEnabled,
           fetch: myfetch,
+          resource: resource === "" ? undefined : resource,
+          scopes:
+            scopes == null || scopes === "" ? undefined : parseScopes(scopes),
         })
         .then(
           () => {
@@ -213,7 +230,9 @@ function Root() {
         initialSessionType,
         initialClientID,
         initialEndpoint,
-        initialIsSSOEnabled
+        initialIsSSOEnabled,
+        initialResource,
+        initialScopes
       );
     }
   }, [
@@ -221,6 +240,8 @@ function Root() {
     initialClientID,
     initialEndpoint,
     initialIsSSOEnabled,
+    initialResource,
+    initialScopes,
     configure,
   ]);
 
@@ -430,15 +451,13 @@ function Root() {
           state: "authenticate",
           page,
           authenticationFlowGroup,
-          resource: resource === "" ? undefined : resource,
-          scopes: parseScopes(scopes),
         })
         .then(
           () => {},
           (err) => setError(err)
         );
     },
-    [page, authenticationFlowGroup, resource, scopes]
+    [page, authenticationFlowGroup]
   );
 
   const onClickSignInAnonymously = useCallback(
@@ -489,9 +508,16 @@ function Root() {
     (e: React.MouseEvent<HTMLElement>) => {
       e.preventDefault();
       e.stopPropagation();
-      configure(sessionType, clientID, endpoint, isSSOEnabled);
+      configure(
+        sessionType,
+        clientID,
+        endpoint,
+        isSSOEnabled,
+        resource,
+        scopes
+      );
     },
-    [sessionType, clientID, endpoint, isSSOEnabled, configure]
+    [sessionType, clientID, endpoint, isSSOEnabled, resource, scopes, configure]
   );
 
   const onClickReauthenticate = useCallback(
