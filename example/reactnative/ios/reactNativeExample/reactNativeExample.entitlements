@@ -4,6 +4,7 @@
 <dict>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
+		<string>webcredentials:demo-app2app.authgear-staging.com</string>
 		<string>applinks:authgear-demo-rn.pandawork.com</string>
 	</array>
 </dict>
