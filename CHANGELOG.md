@@ -11,6 +11,20 @@
 - `authenticate()` accepts optional `scopes` to request the scopes of the API
   resource given in `resource`. They are merged with the scopes required by
   the SDK, so the scopes required by the SDK are always requested.
+- `configure()` accepts optional `resource` and `scopes` as defaults for the
+  calls below. A value given to a call replaces the default; the scopes
+  required by the SDK are still always merged in. On web, the defaults are
+  ignored with `sessionType: "cookie"`.
+- **web:** `startPromoteAnonymousUser()` accepts optional `resource` and
+  `scopes`. `authenticateAnonymously()` accepts an optional options object with
+  `resource` and `scopes`.
+- **react-native:** `promoteAnonymousUser()` accepts optional `resource` and
+  `scopes`. `authenticateAnonymously()` accepts an optional options object with
+  `resource` and `scopes`.
+- **react-native, capacitor:** `authenticateBiometric()` accepts optional
+  `resource` and `scopes`.
+- **react-native, capacitor:** `makePreAuthenticatedURL()` accepts an optional
+  `resource`, which defaults to `configure()`'s `resource`.
 
 <a name="v7.0.0"></a>
 ## [v7.0.0](https://github.com/authgear/authgear-sdk-js/compare/v6.0.0...v7.0.0) (2026-09-03)

@@ -564,6 +564,7 @@ export interface _OIDCTokenRequest {
   actor_token?: string;
   audience?: string;
   device_secret?: string;
+  resource?: string;
 }
 
 /**
@@ -705,4 +706,5 @@ export interface _PreAuthenticatedURLOptions {
   webApplicationClientID: string;
   webApplicationURI: string;
   state?: string;
+  resource?: string;
 }
