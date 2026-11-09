@@ -7,7 +7,7 @@
 
 // config
 NSString* const WechatAppID = @"wxe64ed6a7605b5021";
-NSString* const WechatUniversalLink = @"https://authgear-demo-rn.pandawork.com/wechat/";
+NSString* const WechatUniversalLink = @"https://authgear-demo-rn.oursky.codes/wechat/";
 
 // Error domain
 NSString* const WechatAuthErrorDomain = @"com.authgear.example.reactnative.wechatauth_error";
