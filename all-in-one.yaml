@@ -1,69 +1,15 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: authgear-qa-app-cookie-app1
-  annotations:
-    kubernetes.io/tls-acme: "true"
-spec:
-  ingressClassName: nginx
-  tls:
-  - secretName: authgear-qa-app-cookie-app1-tls
-    hosts:
-    - cookie-app1.authgear-qa-app.pandawork.com
-  rules:
-  - host: cookie-app1.authgear-qa-app.pandawork.com
-    http:
-      paths:
-      - path: /
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: authgear-demo-webapp
-            port:
-              name: http
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: authgear-qa-app-cookie-app2
-  annotations:
-    kubernetes.io/tls-acme: "true"
-spec:
-  ingressClassName: nginx
-  tls:
-  - secretName: authgear-qa-app-cookie-app2-tls
-    hosts:
-    - cookie-app2.authgear-qa-app.pandawork.com
-  rules:
-  - host: cookie-app2.authgear-qa-app.pandawork.com
-    http:
-      paths:
-      - path: /
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: authgear-demo-webapp
-            port:
-              name: http
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
   name: authgear-token-app1
-  annotations:
-    kubernetes.io/tls-acme: "true"
 spec:
-  ingressClassName: nginx
-  tls:
-  - secretName: authgear-token-app1-tls
-    hosts:
-    - token-app1.authgear.pandawork.com
+  ingressClassName: cloudflare-tunnel
   rules:
-  - host: token-app1.authgear.pandawork.com
+  - host: authgear-token-app1.oursky.codes
     http:
       paths:
       - path: /
-        pathType: ImplementationSpecific
+        pathType: Prefix
         backend:
           service:
             name: authgear-demo-webapp
@@ -74,20 +20,14 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: authgear-token-app2
-  annotations:
-    kubernetes.io/tls-acme: "true"
 spec:
-  ingressClassName: nginx
-  tls:
-  - secretName: authgear-token-app2-tls
-    hosts:
-    - token-app2.authgear.pandawork.com
+  ingressClassName: cloudflare-tunnel
   rules:
-  - host: token-app2.authgear.pandawork.com
+  - host: authgear-token-app2.oursky.codes
     http:
       paths:
       - path: /
-        pathType: ImplementationSpecific
+        pathType: Prefix
         backend:
           service:
             name: authgear-demo-webapp
@@ -98,20 +38,14 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: authgear-demo-webapp
-  annotations:
-    kubernetes.io/tls-acme: "true"
 spec:
-  ingressClassName: nginx
-  tls:
-  - secretName: web-tls
-    hosts:
-    - authgear-demo-webapp.pandawork.com
+  ingressClassName: cloudflare-tunnel
   rules:
-  - host: authgear-demo-webapp.pandawork.com
+  - host: authgear-demo-webapp.oursky.codes
     http:
       paths:
       - path: /
-        pathType: ImplementationSpecific
+        pathType: Prefix
         backend:
           service:
             name: authgear-demo-webapp
