@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+<a name="v7.1.0"></a>
+## [v7.1.0](https://github.com/authgear/authgear-sdk-js/compare/v7.0.0...v7.1.0) (2026-11-11)
+
 ### Added
 
 - `authenticate()` accepts an optional `resource` (RFC 8707 resource
