@@ -7,6 +7,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -400,6 +401,19 @@ public class WebKitWebViewActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    // The activity handles rotation and resizing itself (see AndroidManifest.xml), so that the
+    // page and a pending bridge request survive them. The toolbar height depends on the
+    // configuration, so it is updated here.
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        float actionBarSizeInDp = this.getActionBarSizeInDp();
+        ViewGroup.LayoutParams toolbarParams = this.mToolbar.getLayoutParams();
+        toolbarParams.height = (int) TypedValueCompat.dpToPx(actionBarSizeInDp, this.getResources().getDisplayMetrics());
+        this.mToolbar.setLayoutParams(toolbarParams);
+        this.applyInsetsToWebView(this.mLastSeenInsets == null ? Insets.NONE : this.mLastSeenInsets);
     }
 
     @Override
