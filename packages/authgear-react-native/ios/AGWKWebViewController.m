@@ -1,4 +1,5 @@
 #import "AGWKWebViewController.h"
+#import "AGWKWebViewBridge.h"
 
 NSErrorDomain const AGWKWebViewControllerErrorDomain = @"AGWKWebViewController";
 NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
@@ -11,6 +12,8 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
 @property (nonatomic) WKWebView *webView;
 @property (nonatomic, copy) NSURL* result;
 @property (nonatomic) BOOL isInspectable;
+// AGWKWebViewBridge on iOS 16+. id so that this class still builds for older iOS versions.
+@property (nonatomic, strong) id bridge;
 
 @end
 
@@ -32,6 +35,22 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
         "document.documentElement.style.userSelect = 'none';";
     WKUserScript *userScript = [[WKUserScript alloc] initWithSource:disableUserSelectScript injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:NO];
     [configuration.userContentController addUserScript:userScript];
+
+    // Provide the AuthUI bridge to pages of the endpoint's origin.
+    // The page world is required because AuthUI's scripts run in it.
+    if (@available(iOS 16.0, *)) {
+        // url is nil if the string from JavaScript is not a valid URL. Then no page is allowed.
+        AGWKWebViewBridge *bridge = [[AGWKWebViewBridge alloc] initWithAllowedOrigins:url == nil ? @[] : @[url]];
+        // Weak, so that the bridge, which the user content controller holds, does not hold this view controller.
+        __weak typeof(self) weakSelf = self;
+        bridge.presentationAnchorProvider = ^ASPresentationAnchor _Nullable {
+            return weakSelf.view.window;
+        };
+        [configuration.userContentController addScriptMessageHandlerWithReply:bridge
+                                                                 contentWorld:[WKContentWorld pageWorld]
+                                                                         name:AGWKWebViewBridgeName];
+        self.bridge = bridge;
+    }
 
     self.webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:configuration];
     self.webView.translatesAutoresizingMaskIntoConstraints = false;
@@ -120,6 +139,9 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
 {
     [super viewDidDisappear:animated];
 
+    // A passkey request must not stay pending after the web view is gone.
+    [self invalidateBridge];
+
     // We only call completion handler here because
     // The view controller could be swiped to dismiss.
     // viewDidDisappear is the most rebust way to detect whether the view controller is dismissed.
@@ -145,6 +167,20 @@ NSInteger const AGWKWebViewControllerErrorCodeCanceledLogin = 1;
 - (void)onTapCloseButton
 {
     [self cancel];
+}
+
+- (void)invalidateBridge
+{
+    if (@available(iOS 16.0, *)) {
+        [(AGWKWebViewBridge *)self.bridge invalidate];
+    }
+}
+
+- (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(WKNavigation *)navigation
+{
+    // The top-level page starts loading another page.
+    // Pending bridge requests are cancelled, and their replies never reach the new page.
+    [self invalidateBridge];
 }
 
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler

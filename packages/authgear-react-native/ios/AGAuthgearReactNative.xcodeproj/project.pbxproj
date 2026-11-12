@@ -10,6 +10,8 @@
 		77E2D5A02B6B530700BAC8D5 /* AGWKWebViewController.h in Sources */ = {isa = PBXBuildFile; fileRef = 77E2D59F2B6B530700BAC8D5 /* AGWKWebViewController.h */; };
 		77E2D5A22B6B546C00BAC8D5 /* AGWKWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 77E2D5A12B6B546C00BAC8D5 /* AGWKWebViewController.m */; };
 		B3E7B58A1CC2AC0600A0062D /* AGAuthgearReactNative.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* AGAuthgearReactNative.m */; };
+		E0B1D6A32EC4A00000A1B2C3 /* AGWKWebViewBridge.h in Sources */ = {isa = PBXBuildFile; fileRef = E0B1D6A12EC4A00000A1B2C3 /* AGWKWebViewBridge.h */; };
+		E0B1D6A42EC4A00000A1B2C3 /* AGWKWebViewBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = E0B1D6A22EC4A00000A1B2C3 /* AGWKWebViewBridge.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -30,6 +32,8 @@
 		77E2D5A12B6B546C00BAC8D5 /* AGWKWebViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AGWKWebViewController.m; sourceTree = "<group>"; };
 		B3E7B5881CC2AC0600A0062D /* AGAuthgearReactNative.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGAuthgearReactNative.h; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* AGAuthgearReactNative.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGAuthgearReactNative.m; sourceTree = "<group>"; };
+		E0B1D6A12EC4A00000A1B2C3 /* AGWKWebViewBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AGWKWebViewBridge.h; sourceTree = "<group>"; };
+		E0B1D6A22EC4A00000A1B2C3 /* AGWKWebViewBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AGWKWebViewBridge.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +58,8 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				E0B1D6A12EC4A00000A1B2C3 /* AGWKWebViewBridge.h */,
+				E0B1D6A22EC4A00000A1B2C3 /* AGWKWebViewBridge.m */,
 				77E2D59F2B6B530700BAC8D5 /* AGWKWebViewController.h */,
 				77E2D5A12B6B546C00BAC8D5 /* AGWKWebViewController.m */,
 				B3E7B5881CC2AC0600A0062D /* AGAuthgearReactNative.h */,
@@ -123,6 +129,8 @@
 				77E2D5A02B6B530700BAC8D5 /* AGWKWebViewController.h in Sources */,
 				B3E7B58A1CC2AC0600A0062D /* AGAuthgearReactNative.m in Sources */,
 				77E2D5A22B6B546C00BAC8D5 /* AGWKWebViewController.m in Sources */,
+				E0B1D6A32EC4A00000A1B2C3 /* AGWKWebViewBridge.h in Sources */,
+				E0B1D6A42EC4A00000A1B2C3 /* AGWKWebViewBridge.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
