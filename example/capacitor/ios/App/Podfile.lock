@@ -1,11 +1,11 @@
 PODS:
-  - AuthgearCapacitor (7.0.0):
+  - AuthgearCapacitor (7.1.0):
     - Capacitor
-  - Capacitor (7.6.6):
+  - Capacitor (7.6.9):
     - CapacitorCordova
   - CapacitorApp (7.1.2):
     - Capacitor
-  - CapacitorCordova (7.6.6)
+  - CapacitorCordova (7.6.9)
   - CapacitorHaptics (7.0.5):
     - Capacitor
   - CapacitorKeyboard (7.0.6):
@@ -39,14 +39,14 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/status-bar"
 
 SPEC CHECKSUMS:
-  AuthgearCapacitor: 50d00265cbe09df1e19867992c0714a177d173bb
-  Capacitor: 961efd309ab0e390a8081b63c561186f61a6714d
+  AuthgearCapacitor: 82938ec4704985fec619c1d55e53af9614ac7f19
+  Capacitor: 46067d1c8df89760dbed78780d436327d588c726
   CapacitorApp: f01a913211780e0718dae9750442c3e23f96e106
-  CapacitorCordova: 3a4e0027a89a59421c918d19aee9d6ba1c7a3556
+  CapacitorCordova: 2080fc0d6bfbc9dcc0e6d88e77fa624190d343ca
   CapacitorHaptics: 1b145fa83c622e5383a3bac04ea81e2514f0b0f5
   CapacitorKeyboard: a2e0869edd229490ce36aed2549c0d6b95e27ee8
   CapacitorStatusBar: 416e9e53fd6397e668d4a181cd2131617d949bd6
 
 PODFILE CHECKSUM: ade9ca3b7d62eb897d0fb2ceb6127a694b70c8f3
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.17.0

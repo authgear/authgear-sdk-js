@@ -1,5 +1,5 @@
 PODS:
-  - authgear-react-native (7.0.0):
+  - authgear-react-native (7.1.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2088,7 +2088,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  authgear-react-native: 1f9c9e5206a32b8d241f98ea41254029f1eb9b24
+  authgear-react-native: f7a6a201b457ee0f27c46630593337df3cdebcd2
   FBLazyVector: b3e7ad108f0d882e30445c5527d774e3fd432f3d
   hermes-engine: a2e65de4c65bcc5f778e5b51c1d5a1bfb7a3666f
   RCTDeprecation: 2a74a2c57675e64419bd89078efde81f7c1de90b
@@ -2168,4 +2168,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 4fc0c74958ce9c9535c259a891e1b822c4a8d96e
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.17.0
