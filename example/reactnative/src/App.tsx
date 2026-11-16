@@ -1,22 +1,24 @@
 import React from 'react';
-import {View, StatusBar} from 'react-native';
+import {StatusBar, StyleSheet} from 'react-native';
+import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 
 import MainScreen from './screens/MainScreen';
 
-const safeAreaStyle = {
-  paddingHorizontal: '5%',
-  paddingVertical: '5%',
-};
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
+});
 
 const App: React.FC = () => {
   return (
-    <>
-      <StatusBar barStyle="light-content" />
-      {/* @ts-expect-error */}
-      <View style={safeAreaStyle}>
+    <SafeAreaProvider>
+      <StatusBar barStyle="dark-content" backgroundColor="white" />
+      <SafeAreaView style={styles.safeArea}>
         <MainScreen />
-      </View>
-    </>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 
