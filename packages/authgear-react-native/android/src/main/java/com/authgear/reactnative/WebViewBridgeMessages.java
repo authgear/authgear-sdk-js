@@ -105,6 +105,17 @@ final class WebViewBridgeMessages {
         }
     }
 
+    // True when rpId is host or a parent domain of host, compared without case,
+    // as a browser checks the rpId of a WebAuthn request against the page's origin.
+    static boolean isRpIdAllowed(@NonNull String rpId, @NonNull String host) {
+        if (rpId.isEmpty()) {
+            return false;
+        }
+        String r = rpId.toLowerCase(Locale.ROOT);
+        String h = host.toLowerCase(Locale.ROOT);
+        return h.equals(r) || h.endsWith("." + r);
+    }
+
     // Returns null when text is not a JSON object with a string id.
     @Nullable
     static Request parseRequest(@NonNull String text) {

@@ -164,6 +164,13 @@ final class WebViewBridge {
             replyProxy.postMessage(WebViewBridgeMessages.reply(id, WebViewBridgeMessages.STATUS_ERROR, "publicKey must be an object"));
             return;
         }
+        // As in a browser, rpId must be the page's host or a parent domain of it.
+        Object rpId = ((JSONObject) publicKey).opt("rpId");
+        String host = sourceOrigin.getHost();
+        if (!(rpId instanceof String) || host == null || !WebViewBridgeMessages.isRpIdAllowed((String) rpId, host)) {
+            replyProxy.postMessage(WebViewBridgeMessages.reply(id, WebViewBridgeMessages.STATUS_ERROR, "rpId is not allowed for this page"));
+            return;
+        }
 
         final PendingGet pendingGet = new PendingGet();
         this.pendingGet = pendingGet;
