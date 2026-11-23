@@ -185,6 +185,16 @@ NSString *const AGWKWebViewBridgeName = @"authgearBridge";
     return -1;
 }
 
++ (BOOL)isRpIDAllowed:(NSString *)rpID host:(NSString *)host
+{
+    if (rpID.length == 0) {
+        return NO;
+    }
+    NSString *r = rpID.lowercaseString;
+    NSString *h = host.lowercaseString;
+    return [h isEqualToString:r] || [h hasSuffix:[@"." stringByAppendingString:r]];
+}
+
 + (NSData *)dataFromBase64URLString:(NSString *)text
 {
     NSMutableString *base64 = [[[text stringByReplacingOccurrencesOfString:@"-" withString:@"+"]
@@ -294,11 +304,12 @@ NSString *const AGWKWebViewBridgeName = @"authgearBridge";
         replyHandler([AGWKWebViewBridgeMessages encodeReply:reply], nil);
         return;
     }
-    [self getPublicKeyCredentialWithRequestID:requestID request:request replyHandler:replyHandler];
+    [self getPublicKeyCredentialWithRequestID:requestID request:request host:origin.host replyHandler:replyHandler];
 }
 
 - (void)getPublicKeyCredentialWithRequestID:(NSString *)requestID
                                     request:(AGWKWebViewBridgePublicKeyRequest *)request
+                                       host:(NSString *)host
                                replyHandler:(AGWKWebViewBridgeReplyHandler)replyHandler
 {
     void (^reply)(NSDictionary *) = ^(NSDictionary *reply) {
@@ -306,6 +317,12 @@ NSString *const AGWKWebViewBridgeName = @"authgearBridge";
         replyWithID[@"id"] = requestID;
         replyHandler([AGWKWebViewBridgeMessages encodeReply:replyWithID], nil);
     };
+
+    // As in a browser, rpId must be the page's host or a parent domain of it.
+    if (![AGWKWebViewBridgeMessages isRpIDAllowed:request.rpId host:host]) {
+        reply(@{@"status": @"error", @"message": @"rpId is not allowed for this page"});
+        return;
+    }
 
     if (self.pendingRequest != nil) {
         reply(@{@"status": @"error", @"message": @"a passkey request is in progress"});

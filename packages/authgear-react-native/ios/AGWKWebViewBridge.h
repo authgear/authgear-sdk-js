@@ -54,6 +54,11 @@ extern NSString *const AGWKWebViewBridgeName;
                              port:(NSInteger)port
                    allowedOrigins:(NSArray<NSURL *> *)allowedOrigins;
 
+/// Whether rpId is host or a parent domain of host, compared without case,
+/// as a browser checks the rpId of a WebAuthn request against the page's origin.
+/// An empty rpId is not allowed.
++ (BOOL)isRpIDAllowed:(NSString *)rpID host:(NSString *)host;
+
 + (nullable NSData *)dataFromBase64URLString:(NSString *)text;
 + (NSString *)base64URLStringFromData:(NSData *)data;
 
