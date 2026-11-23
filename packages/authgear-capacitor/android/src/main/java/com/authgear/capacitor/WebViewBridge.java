@@ -177,6 +177,13 @@ class WebViewBridge {
             replyProxy.postMessage(reply(id, STATUS_ERROR, "publicKey must be an object"));
             return;
         }
+        // As in a browser, rpId must be the page's host or a parent domain of it.
+        Object rpId = ((JSONObject) publicKey).opt("rpId");
+        String host = sourceOrigin.getHost();
+        if (!(rpId instanceof String) || host == null || !isRpIdAllowed((String) rpId, host)) {
+            replyProxy.postMessage(reply(id, STATUS_ERROR, "rpId is not allowed for this page"));
+            return;
+        }
 
         CancellationSignal signal = new CancellationSignal();
         this.pendingGet = signal;
@@ -331,6 +338,17 @@ class WebViewBridge {
             default:
                 return -1;
         }
+    }
+
+    // True when rpId is host or a parent domain of host, compared without case,
+    // as a browser checks the rpId of a WebAuthn request against the page's origin.
+    static boolean isRpIdAllowed(@NonNull String rpId, @NonNull String host) {
+        if (rpId.isEmpty()) {
+            return false;
+        }
+        String r = rpId.toLowerCase(Locale.ROOT);
+        String h = host.toLowerCase(Locale.ROOT);
+        return h.equals(r) || h.endsWith("." + r);
     }
 
     // Returns null when text is not a JSON object with a string id.

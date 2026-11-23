@@ -234,4 +234,39 @@ public class WebViewBridgeTest {
         );
         assertJsonEquals("{\"id\":\"2\",\"status\":\"ok\",\"credential\":" + credentialText + "}", reply);
     }
+
+    @Test
+    public void isRpIdAllowedWhenEqualToHost() {
+        assertTrue(WebViewBridge.isRpIdAllowed("auth.example.com", "auth.example.com"));
+    }
+
+    @Test
+    public void isRpIdAllowedForParentDomain() {
+        assertTrue(WebViewBridge.isRpIdAllowed("example.com", "auth.example.com"));
+    }
+
+    @Test
+    public void isRpIdAllowedIgnoresCase() {
+        assertTrue(WebViewBridge.isRpIdAllowed("Example.COM", "AUTH.example.com"));
+    }
+
+    @Test
+    public void isRpIdAllowedRejectsSiblingDomain() {
+        assertFalse(WebViewBridge.isRpIdAllowed("other.example.com", "auth.example.com"));
+    }
+
+    @Test
+    public void isRpIdAllowedRejectsSuffixNotAtLabelBoundary() {
+        assertFalse(WebViewBridge.isRpIdAllowed("example.com", "evilexample.com"));
+    }
+
+    @Test
+    public void isRpIdAllowedRejectsRpIdLongerThanHost() {
+        assertFalse(WebViewBridge.isRpIdAllowed("auth.example.com", "example.com"));
+    }
+
+    @Test
+    public void isRpIdAllowedRejectsEmptyRpId() {
+        assertFalse(WebViewBridge.isRpIdAllowed("", "example.com"));
+    }
 }
