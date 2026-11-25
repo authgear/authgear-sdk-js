@@ -39,7 +39,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 // The bridge between AuthUI and the app, as window.authgearBridge in the WebView.
@@ -54,12 +53,6 @@ class WebViewBridge {
 
     static final String TYPE_CAPABILITIES = "bridge.capabilities";
     static final String TYPE_CREDENTIALS_GET = "credentials.get";
-
-    static final String STATUS_OK = "ok";
-    static final String STATUS_UNSUPPORTED = "unsupported";
-    static final String STATUS_ERROR = "error";
-    static final String STATUS_NO_CREDENTIAL = "no_credential";
-    static final String STATUS_CANCELLED = "cancelled";
 
     // The capabilities listed in the reply to bridge.capabilities.
     static final List<String> CAPABILITIES = Collections.unmodifiableList(Arrays.asList(
@@ -148,11 +141,11 @@ class WebViewBridge {
             @NonNull JavaScriptReplyProxy replyProxy
     ) {
         if (TYPE_CAPABILITIES.equals(request.type)) {
-            replyProxy.postMessage(capabilitiesReply(request.id));
+            replyProxy.postMessage(capabilitiesReply(request.id).encode());
         } else if (TYPE_CREDENTIALS_GET.equals(request.type)) {
             credentialsGet(webView, request, sourceOrigin, replyProxy);
         } else {
-            replyProxy.postMessage(reply(request.id, STATUS_UNSUPPORTED));
+            replyProxy.postMessage(new BridgeReply(request.id, BridgeStatus.UNSUPPORTED).encode());
         }
     }
 
@@ -166,22 +159,22 @@ class WebViewBridge {
         Object publicKey = request.json.opt("publicKey");
         // publicKey is the only member supported. Other members, such as password, are ignored.
         if (!"immediate".equals(request.json.opt("mediation")) || publicKey == null || publicKey == JSONObject.NULL) {
-            replyProxy.postMessage(reply(id, STATUS_UNSUPPORTED));
+            replyProxy.postMessage(new BridgeReply(id, BridgeStatus.UNSUPPORTED).encode());
             return;
         }
         if (this.pendingGet != null) {
-            replyProxy.postMessage(reply(id, STATUS_ERROR, "a passkey request is in progress"));
+            replyProxy.postMessage(new BridgeReply(id, BridgeStatus.ERROR).setMessage("a passkey request is in progress").encode());
             return;
         }
         if (!(publicKey instanceof JSONObject)) {
-            replyProxy.postMessage(reply(id, STATUS_ERROR, "publicKey must be an object"));
+            replyProxy.postMessage(new BridgeReply(id, BridgeStatus.ERROR).setMessage("publicKey must be an object").encode());
             return;
         }
         // As in a browser, rpId must be the page's host or a parent domain of it.
         Object rpId = ((JSONObject) publicKey).opt("rpId");
         String host = sourceOrigin.getHost();
         if (!(rpId instanceof String) || host == null || !isRpIdAllowed((String) rpId, host)) {
-            replyProxy.postMessage(reply(id, STATUS_ERROR, "rpId is not allowed for this page"));
+            replyProxy.postMessage(new BridgeReply(id, BridgeStatus.ERROR).setMessage("rpId is not allowed for this page").encode());
             return;
         }
 
@@ -214,7 +207,7 @@ class WebViewBridge {
                     callback
             );
         } catch (Exception e) {
-            finish(signal, webView, sourceOrigin, replyProxy, reply(id, STATUS_ERROR, e.toString()));
+            finish(signal, webView, sourceOrigin, replyProxy, new BridgeReply(id, BridgeStatus.ERROR).setMessage(e.toString()));
         }
     }
 
@@ -223,7 +216,7 @@ class WebViewBridge {
             @NonNull WebView webView,
             @NonNull Uri sourceOrigin,
             @NonNull JavaScriptReplyProxy replyProxy,
-            @NonNull String text
+            @NonNull BridgeReply reply
     ) {
         // A cancelled request sends no reply: the page that asked is gone.
         if (signal.isCanceled()) {
@@ -237,35 +230,36 @@ class WebViewBridge {
         if (!isSameOrigin(webView.getUrl(), sourceOrigin.toString())) {
             return;
         }
-        replyProxy.postMessage(text);
+        replyProxy.postMessage(reply.encode());
     }
 
     @NonNull
-    private static String credentialReply(@NonNull String id, @NonNull Credential credential) {
+    private static BridgeReply credentialReply(@NonNull String id, @NonNull Credential credential) {
         if (!(credential instanceof PublicKeyCredential)) {
-            return reply(id, STATUS_ERROR, "unexpected credential type: " + credential.getType());
+            return new BridgeReply(id, BridgeStatus.ERROR).setMessage("unexpected credential type: " + credential.getType());
         }
+        // Credential Manager already returns AuthenticationResponseJSON.
         String json = ((PublicKeyCredential) credential).getAuthenticationResponseJson();
         try {
-            return reply(id, STATUS_OK, null, Collections.singletonMap("credential", new JSONObject(json)));
+            return new BridgeReply(id, BridgeStatus.OK).setCredential(BridgePublicKeyCredential.fromAuthenticationResponseJson(json));
         } catch (JSONException e) {
-            return reply(id, STATUS_ERROR, e.toString());
+            return new BridgeReply(id, BridgeStatus.ERROR).setMessage(e.toString());
         }
     }
 
     @NonNull
-    private static String errorReply(@NonNull String id, @NonNull GetCredentialException e) {
+    private static BridgeReply errorReply(@NonNull String id, @NonNull GetCredentialException e) {
         if (e instanceof NoCredentialException) {
-            return reply(id, STATUS_NO_CREDENTIAL);
+            return new BridgeReply(id, BridgeStatus.NO_CREDENTIAL);
         }
         if (e instanceof GetCredentialCancellationException) {
-            return reply(id, STATUS_CANCELLED);
+            return new BridgeReply(id, BridgeStatus.CANCELLED);
         }
         if (e instanceof GetCredentialProviderConfigurationException || e instanceof GetCredentialUnsupportedException) {
-            return reply(id, STATUS_UNSUPPORTED);
+            return new BridgeReply(id, BridgeStatus.UNSUPPORTED);
         }
         // GetCredentialException.getType() is restricted to its library group, so the class name is used.
-        return reply(id, STATUS_ERROR, e.getClass().getSimpleName() + ": " + e.getMessage());
+        return new BridgeReply(id, BridgeStatus.ERROR).setMessage(e.getClass().getSimpleName() + ": " + e.getMessage());
     }
 
     static final class Request {
@@ -391,41 +385,7 @@ class WebViewBridge {
     }
 
     @NonNull
-    static String reply(@NonNull String id, @NonNull String status) {
-        return reply(id, status, null);
-    }
-
-    @NonNull
-    static String reply(@NonNull String id, @NonNull String status, @Nullable String message) {
-        return reply(id, status, message, Collections.<String, Object>emptyMap());
-    }
-
-    @NonNull
-    static String reply(
-            @NonNull String id,
-            @NonNull String status,
-            @Nullable String message,
-            @NonNull Map<String, Object> fields
-    ) {
-        JSONObject obj = new JSONObject();
-        try {
-            obj.put("id", id);
-            obj.put("status", status);
-            if (message != null) {
-                obj.put("message", message);
-            }
-            for (Map.Entry<String, Object> entry : fields.entrySet()) {
-                obj.put(entry.getKey(), entry.getValue());
-            }
-        } catch (JSONException e) {
-            // put throws only for a null key or a non-finite number, which never happen here.
-            throw new IllegalStateException(e);
-        }
-        return obj.toString();
-    }
-
-    @NonNull
-    static String capabilitiesReply(@NonNull String id) {
-        return reply(id, STATUS_OK, null, Collections.<String, Object>singletonMap("capabilities", new JSONArray(CAPABILITIES)));
+    static BridgeReply capabilitiesReply(@NonNull String id) {
+        return new BridgeReply(id, BridgeStatus.OK).setCapabilities(CAPABILITIES);
     }
 }

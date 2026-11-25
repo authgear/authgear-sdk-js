@@ -7,13 +7,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -145,7 +145,7 @@ public class WebViewBridgeTest {
         assertJsonEquals(
                 "{\"id\":\"1\",\"status\":\"ok\",\"capabilities\":" +
                         "[\"credentials.get\",\"credentials.get:publicKey\",\"credentials.get:immediate\"]}",
-                WebViewBridge.capabilitiesReply("1")
+                WebViewBridge.capabilitiesReply("1").encode()
         );
     }
 
@@ -197,17 +197,52 @@ public class WebViewBridgeTest {
     }
 
     @Test
-    public void replyWithEachStatus() throws Exception {
-        for (String status : Arrays.asList("ok", "no_credential", "cancelled", "unsupported", "error")) {
-            assertJsonEquals("{\"id\":\"7\",\"status\":\"" + status + "\"}", WebViewBridge.reply("7", status));
+    public void eachStatusEncodesToItsWireString() {
+        Map<BridgeStatus, String> expected = new EnumMap<>(BridgeStatus.class);
+        expected.put(BridgeStatus.OK, "ok");
+        expected.put(BridgeStatus.UNSUPPORTED, "unsupported");
+        expected.put(BridgeStatus.ERROR, "error");
+        expected.put(BridgeStatus.NO_CREDENTIAL, "no_credential");
+        expected.put(BridgeStatus.CANCELLED, "cancelled");
+        // A new status must be added here too.
+        assertEquals(BridgeStatus.values().length, expected.size());
+        for (Map.Entry<BridgeStatus, String> entry : expected.entrySet()) {
+            assertEquals(entry.getValue(), entry.getKey().value);
         }
+    }
+
+    @Test
+    public void replyWithEachStatus() throws Exception {
+        for (BridgeStatus status : BridgeStatus.values()) {
+            assertJsonEquals(
+                    "{\"id\":\"7\",\"status\":\"" + status.value + "\"}",
+                    new BridgeReply("7", status).encode()
+            );
+        }
+    }
+
+    @Test
+    public void replyLeavesOutNullFields() throws Exception {
+        BridgeReply reply = new BridgeReply("7", BridgeStatus.OK)
+                .setMessage(null)
+                .setCapabilities(null)
+                .setCredential(null);
+        assertJsonEquals("{\"id\":\"7\",\"status\":\"ok\"}", reply.encode());
+    }
+
+    @Test
+    public void replyWithoutId() throws Exception {
+        assertJsonEquals(
+                "{\"status\":\"error\",\"message\":\"invalid message\"}",
+                new BridgeReply(null, BridgeStatus.ERROR).setMessage("invalid message").encode()
+        );
     }
 
     @Test
     public void replyWithMessage() throws Exception {
         assertJsonEquals(
                 "{\"id\":\"7\",\"status\":\"error\",\"message\":\"boom\"}",
-                WebViewBridge.reply("7", "error", "boom")
+                new BridgeReply("7", BridgeStatus.ERROR).setMessage("boom").encode()
         );
     }
 
@@ -226,13 +261,34 @@ public class WebViewBridgeTest {
                 "}," +
                 "\"clientExtensionResults\":{}" +
                 "}";
-        String reply = WebViewBridge.reply(
-                "2",
-                "ok",
-                null,
-                Collections.<String, Object>singletonMap("credential", new JSONObject(credentialText))
-        );
+        String reply = new BridgeReply("2", BridgeStatus.OK)
+                .setCredential(BridgePublicKeyCredential.fromAuthenticationResponseJson(credentialText))
+                .encode();
         assertJsonEquals("{\"id\":\"2\",\"status\":\"ok\",\"credential\":" + credentialText + "}", reply);
+    }
+
+    @Test
+    public void publicKeyCredentialLeavesOutAbsentOptionalMembers() throws Exception {
+        String credentialText = "{" +
+                "\"id\":\"a\"," +
+                "\"rawId\":\"a\"," +
+                "\"type\":\"public-key\"," +
+                "\"response\":{" +
+                "\"clientDataJSON\":\"Yw\"," +
+                "\"authenticatorData\":\"YQ\"," +
+                "\"signature\":\"cw\"" +
+                "}," +
+                "\"clientExtensionResults\":{}" +
+                "}";
+        assertJsonEquals(
+                credentialText,
+                BridgePublicKeyCredential.fromAuthenticationResponseJson(credentialText).toJSON().toString()
+        );
+    }
+
+    @Test(expected = JSONException.class)
+    public void publicKeyCredentialNeedsResponse() throws Exception {
+        BridgePublicKeyCredential.fromAuthenticationResponseJson("{\"id\":\"a\",\"rawId\":\"a\",\"type\":\"public-key\"}");
     }
 
     @Test
