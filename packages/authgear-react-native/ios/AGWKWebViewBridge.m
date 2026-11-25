@@ -2,6 +2,123 @@
 
 NSString *const AGWKWebViewBridgeName = @"authgearBridge";
 
+NSString *AGWKWebViewBridgeStatusString(AGWKWebViewBridgeStatus status)
+{
+    switch (status) {
+    case AGWKWebViewBridgeStatusOK:
+        return @"ok";
+    case AGWKWebViewBridgeStatusUnsupported:
+        return @"unsupported";
+    case AGWKWebViewBridgeStatusError:
+        return @"error";
+    case AGWKWebViewBridgeStatusNoCredential:
+        return @"no_credential";
+    case AGWKWebViewBridgeStatusCancelled:
+        return @"cancelled";
+    }
+    // Not reached: the switch handles every status.
+    return @"error";
+}
+
+@implementation AGWKWebViewBridgePublicKeyCredentialResponse
+
+- (NSDictionary<NSString *, id> *)toJSONObject
+{
+    NSMutableDictionary<NSString *, id> *json = [@{
+        @"clientDataJSON": self.clientDataJSON,
+        @"authenticatorData": self.authenticatorData,
+        @"signature": self.signature,
+    } mutableCopy];
+    if (self.userHandle != nil) {
+        json[@"userHandle"] = self.userHandle;
+    }
+    return json;
+}
+
+@end
+
+@implementation AGWKWebViewBridgePublicKeyCredential
+
+- (instancetype)initWithCredentialID:(NSString *)credentialID
+                               rawID:(NSString *)rawID
+                            response:(AGWKWebViewBridgePublicKeyCredentialResponse *)response
+{
+    self = [super init];
+    if (self) {
+        _credentialID = [credentialID copy];
+        _rawID = [rawID copy];
+        _type = @"public-key";
+        _authenticatorAttachment = @"platform";
+        _response = response;
+        _clientExtensionResults = @{};
+    }
+    return self;
+}
+
+- (NSDictionary<NSString *, id> *)toJSONObject
+{
+    return @{
+        @"id": self.credentialID,
+        @"rawId": self.rawID,
+        @"type": self.type,
+        @"authenticatorAttachment": self.authenticatorAttachment,
+        @"response": [self.response toJSONObject],
+        @"clientExtensionResults": self.clientExtensionResults,
+    };
+}
+
+@end
+
+@implementation AGWKWebViewBridgeReply
+
++ (instancetype)replyWithRequestID:(NSString *)requestID status:(AGWKWebViewBridgeStatus)status
+{
+    return [self replyWithRequestID:requestID status:status message:nil];
+}
+
++ (instancetype)replyWithRequestID:(NSString *)requestID
+                            status:(AGWKWebViewBridgeStatus)status
+                           message:(NSString *)message
+{
+    AGWKWebViewBridgeReply *reply = [self replyWithStatus:status message:message];
+    reply.requestID = requestID;
+    return reply;
+}
+
++ (instancetype)replyWithStatus:(AGWKWebViewBridgeStatus)status
+{
+    return [self replyWithStatus:status message:nil];
+}
+
++ (instancetype)replyWithStatus:(AGWKWebViewBridgeStatus)status message:(NSString *)message
+{
+    AGWKWebViewBridgeReply *reply = [[self alloc] init];
+    reply.status = status;
+    reply.message = message;
+    return reply;
+}
+
+- (NSDictionary<NSString *, id> *)toJSONObject
+{
+    NSMutableDictionary<NSString *, id> *json = [NSMutableDictionary dictionary];
+    if (self.requestID != nil) {
+        json[@"id"] = self.requestID;
+    }
+    json[@"status"] = AGWKWebViewBridgeStatusString(self.status);
+    if (self.message != nil) {
+        json[@"message"] = self.message;
+    }
+    if (self.capabilities != nil) {
+        json[@"capabilities"] = self.capabilities;
+    }
+    if (self.credential != nil) {
+        json[@"credential"] = [self.credential toJSONObject];
+    }
+    return json;
+}
+
+@end
+
 @implementation AGWKWebViewBridgePublicKeyRequest
 @end
 
@@ -16,9 +133,9 @@ NSString *const AGWKWebViewBridgeName = @"authgearBridge";
     ];
 }
 
-+ (NSDictionary *)replyForBody:(id)body
-                     requestID:(NSString **)requestID
-              publicKeyRequest:(AGWKWebViewBridgePublicKeyRequest **)publicKeyRequest
++ (AGWKWebViewBridgeReply *)replyForBody:(id)body
+                               requestID:(NSString **)requestID
+                        publicKeyRequest:(AGWKWebViewBridgePublicKeyRequest **)publicKeyRequest
 {
     *requestID = nil;
     *publicKeyRequest = nil;
@@ -33,17 +150,19 @@ NSString *const AGWKWebViewBridgeName = @"authgearBridge";
     }
     NSString *id_ = json[@"id"];
     if (![id_ isKindOfClass:[NSString class]]) {
-        return @{@"status": @"error", @"message": @"invalid message"};
+        return [AGWKWebViewBridgeReply replyWithStatus:AGWKWebViewBridgeStatusError message:@"invalid message"];
     }
 
     NSString *type = json[@"type"];
     if ([type isKindOfClass:[NSString class]]) {
         if ([type isEqualToString:@"bridge.capabilities"]) {
-            return @{@"id": id_, @"status": @"ok", @"capabilities": [self capabilities]};
+            AGWKWebViewBridgeReply *reply = [AGWKWebViewBridgeReply replyWithRequestID:id_ status:AGWKWebViewBridgeStatusOK];
+            reply.capabilities = [self capabilities];
+            return reply;
         }
         if ([type isEqualToString:@"credentials.get"]) {
             AGWKWebViewBridgePublicKeyRequest *request = nil;
-            NSDictionary *reply = [self credentialsGetReplyForID:id_ json:json publicKeyRequest:&request];
+            AGWKWebViewBridgeReply *reply = [self credentialsGetReplyForID:id_ json:json publicKeyRequest:&request];
             if (reply == nil) {
                 *requestID = id_;
                 *publicKeyRequest = request;
@@ -51,33 +170,33 @@ NSString *const AGWKWebViewBridgeName = @"authgearBridge";
             return reply;
         }
     }
-    return @{@"id": id_, @"status": @"unsupported"};
+    return [AGWKWebViewBridgeReply replyWithRequestID:id_ status:AGWKWebViewBridgeStatusUnsupported];
 }
 
-+ (NSDictionary *)credentialsGetReplyForID:(NSString *)id_
-                                      json:(NSDictionary *)json
-                          publicKeyRequest:(AGWKWebViewBridgePublicKeyRequest **)publicKeyRequest
++ (AGWKWebViewBridgeReply *)credentialsGetReplyForID:(NSString *)id_
+                                                json:(NSDictionary *)json
+                                    publicKeyRequest:(AGWKWebViewBridgePublicKeyRequest **)publicKeyRequest
 {
     // publicKey is the only member this version supports. Other members, such as password, are ignored.
     NSString *mediation = json[@"mediation"];
     NSDictionary *publicKey = json[@"publicKey"];
     if (![mediation isKindOfClass:[NSString class]] || ![mediation isEqualToString:@"immediate"] ||
         ![publicKey isKindOfClass:[NSDictionary class]]) {
-        return @{@"id": id_, @"status": @"unsupported"};
+        return [AGWKWebViewBridgeReply replyWithRequestID:id_ status:AGWKWebViewBridgeStatusUnsupported];
     }
 
     NSString *rpId = publicKey[@"rpId"];
     NSString *challengeText = publicKey[@"challenge"];
     NSData *challenge = [challengeText isKindOfClass:[NSString class]] ? [self dataFromBase64URLString:challengeText] : nil;
     if (![rpId isKindOfClass:[NSString class]] || challenge == nil) {
-        return @{@"id": id_, @"status": @"error", @"message": @"publicKey needs rpId and challenge"};
+        return [AGWKWebViewBridgeReply replyWithRequestID:id_ status:AGWKWebViewBridgeStatusError message:@"publicKey needs rpId and challenge"];
     }
 
     NSString *userVerification = nil;
     id userVerificationValue = publicKey[@"userVerification"];
     if (userVerificationValue != nil) {
         if (![userVerificationValue isKindOfClass:[NSString class]]) {
-            return @{@"id": id_, @"status": @"error", @"message": @"invalid publicKey.userVerification"};
+            return [AGWKWebViewBridgeReply replyWithRequestID:id_ status:AGWKWebViewBridgeStatusError message:@"invalid publicKey.userVerification"];
         }
         // As in WebAuthn, an unknown value is ignored, so iOS uses its default.
         if ([@[@"required", @"preferred", @"discouraged"] containsObject:userVerificationValue]) {
@@ -89,13 +208,13 @@ NSString *const AGWKWebViewBridgeName = @"authgearBridge";
     id allowCredentialsValue = publicKey[@"allowCredentials"];
     if (allowCredentialsValue != nil) {
         if (![allowCredentialsValue isKindOfClass:[NSArray class]]) {
-            return @{@"id": id_, @"status": @"error", @"message": @"invalid publicKey.allowCredentials"};
+            return [AGWKWebViewBridgeReply replyWithRequestID:id_ status:AGWKWebViewBridgeStatusError message:@"invalid publicKey.allowCredentials"];
         }
         for (id descriptor in (NSArray *)allowCredentialsValue) {
             NSString *idText = [descriptor isKindOfClass:[NSDictionary class]] ? descriptor[@"id"] : nil;
             NSData *credentialID = [idText isKindOfClass:[NSString class]] ? [self dataFromBase64URLString:idText] : nil;
             if (credentialID == nil) {
-                return @{@"id": id_, @"status": @"error", @"message": @"invalid publicKey.allowCredentials"};
+                return [AGWKWebViewBridgeReply replyWithRequestID:id_ status:AGWKWebViewBridgeStatusError message:@"invalid publicKey.allowCredentials"];
             }
             [allowCredentialIDs addObject:credentialID];
         }
@@ -110,38 +229,29 @@ NSString *const AGWKWebViewBridgeName = @"authgearBridge";
     return nil;
 }
 
-+ (NSDictionary *)publicKeyCredentialWithCredentialID:(NSData *)credentialID
-                                       clientDataJSON:(NSData *)clientDataJSON
-                                    authenticatorData:(NSData *)authenticatorData
-                                            signature:(NSData *)signature
-                                           userHandle:(NSData *)userHandle
++ (AGWKWebViewBridgePublicKeyCredential *)publicKeyCredentialWithCredentialID:(NSData *)credentialID
+                                                               clientDataJSON:(NSData *)clientDataJSON
+                                                            authenticatorData:(NSData *)authenticatorData
+                                                                    signature:(NSData *)signature
+                                                                   userHandle:(NSData *)userHandle
 {
     NSString *id_ = [self base64URLStringFromData:credentialID];
-    NSMutableDictionary *response = [@{
-        @"clientDataJSON": [self base64URLStringFromData:clientDataJSON],
-        @"authenticatorData": [self base64URLStringFromData:authenticatorData],
-        @"signature": [self base64URLStringFromData:signature],
-    } mutableCopy];
-    if (userHandle != nil) {
-        response[@"userHandle"] = [self base64URLStringFromData:userHandle];
-    }
-    return @{
-        @"id": id_,
-        @"rawId": id_,
-        @"type": @"public-key",
-        @"authenticatorAttachment": @"platform",
-        @"response": response,
-        @"clientExtensionResults": @{},
-    };
+    AGWKWebViewBridgePublicKeyCredentialResponse *response = [[AGWKWebViewBridgePublicKeyCredentialResponse alloc] init];
+    response.clientDataJSON = [self base64URLStringFromData:clientDataJSON];
+    response.authenticatorData = [self base64URLStringFromData:authenticatorData];
+    response.signature = [self base64URLStringFromData:signature];
+    response.userHandle = userHandle == nil ? nil : [self base64URLStringFromData:userHandle];
+    return [[AGWKWebViewBridgePublicKeyCredential alloc] initWithCredentialID:id_ rawID:id_ response:response];
 }
 
-+ (NSString *)encodeReply:(NSDictionary *)reply
++ (NSString *)encodeReply:(AGWKWebViewBridgeReply *)reply
 {
     NSString *fallback = @"{\"message\":\"cannot encode reply\",\"status\":\"error\"}";
-    if (![NSJSONSerialization isValidJSONObject:reply]) {
+    NSDictionary *json = [reply toJSONObject];
+    if (![NSJSONSerialization isValidJSONObject:json]) {
         return fallback;
     }
-    NSData *data = [NSJSONSerialization dataWithJSONObject:reply options:NSJSONWritingSortedKeys error:nil];
+    NSData *data = [NSJSONSerialization dataWithJSONObject:json options:NSJSONWritingSortedKeys error:nil];
     NSString *text = data == nil ? nil : [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     return text ?: fallback;
 }
@@ -233,16 +343,15 @@ NSString *const AGWKWebViewBridgeName = @"authgearBridge";
     return self;
 }
 
-- (void)finishWithReply:(NSDictionary *)reply
+- (void)finishWithReply:(AGWKWebViewBridgeReply *)reply
 {
     AGWKWebViewBridgeReplyHandler replyHandler = _replyHandler;
     if (replyHandler == nil) {
         return;
     }
     _replyHandler = nil;
-    NSMutableDictionary *replyWithID = [reply mutableCopy];
-    replyWithID[@"id"] = self.requestID;
-    replyHandler([AGWKWebViewBridgeMessages encodeReply:replyWithID], nil);
+    reply.requestID = self.requestID;
+    replyHandler([AGWKWebViewBridgeMessages encodeReply:reply], nil);
 }
 
 - (void)cancel
@@ -250,7 +359,7 @@ NSString *const AGWKWebViewBridgeName = @"authgearBridge";
     if (_replyHandler == nil) {
         return;
     }
-    [self finishWithReply:@{@"status": @"error", @"message": @"cancelled"}];
+    [self finishWithReply:[AGWKWebViewBridgeReply replyWithStatus:AGWKWebViewBridgeStatusError message:@"cancelled"]];
     [self.controller cancel];
 }
 
@@ -297,9 +406,9 @@ NSString *const AGWKWebViewBridgeName = @"authgearBridge";
 
     NSString *requestID = nil;
     AGWKWebViewBridgePublicKeyRequest *request = nil;
-    NSDictionary *reply = [AGWKWebViewBridgeMessages replyForBody:message.body
-                                                        requestID:&requestID
-                                                 publicKeyRequest:&request];
+    AGWKWebViewBridgeReply *reply = [AGWKWebViewBridgeMessages replyForBody:message.body
+                                                                  requestID:&requestID
+                                                           publicKeyRequest:&request];
     if (reply != nil) {
         replyHandler([AGWKWebViewBridgeMessages encodeReply:reply], nil);
         return;
@@ -312,20 +421,21 @@ NSString *const AGWKWebViewBridgeName = @"authgearBridge";
                                        host:(NSString *)host
                                replyHandler:(AGWKWebViewBridgeReplyHandler)replyHandler
 {
-    void (^reply)(NSDictionary *) = ^(NSDictionary *reply) {
-        NSMutableDictionary *replyWithID = [reply mutableCopy];
-        replyWithID[@"id"] = requestID;
-        replyHandler([AGWKWebViewBridgeMessages encodeReply:replyWithID], nil);
+    void (^replyError)(NSString *) = ^(NSString *message) {
+        AGWKWebViewBridgeReply *reply = [AGWKWebViewBridgeReply replyWithRequestID:requestID
+                                                                            status:AGWKWebViewBridgeStatusError
+                                                                           message:message];
+        replyHandler([AGWKWebViewBridgeMessages encodeReply:reply], nil);
     };
 
     // As in a browser, rpId must be the page's host or a parent domain of it.
     if (![AGWKWebViewBridgeMessages isRpIDAllowed:request.rpId host:host]) {
-        reply(@{@"status": @"error", @"message": @"rpId is not allowed for this page"});
+        replyError(@"rpId is not allowed for this page");
         return;
     }
 
     if (self.pendingRequest != nil) {
-        reply(@{@"status": @"error", @"message": @"a passkey request is in progress"});
+        replyError(@"a passkey request is in progress");
         return;
     }
 
@@ -345,7 +455,7 @@ NSString *const AGWKWebViewBridgeName = @"authgearBridge";
     }
 
     if (self.presentationAnchorProvider == nil || self.presentationAnchorProvider() == nil) {
-        reply(@{@"status": @"error", @"message": @"no window"});
+        replyError(@"no window");
         return;
     }
 
@@ -359,7 +469,7 @@ NSString *const AGWKWebViewBridgeName = @"authgearBridge";
 }
 
 /// Replies to the pending request of controller. A callback of a cancelled request finds nothing.
-- (void)finishController:(ASAuthorizationController *)controller reply:(NSDictionary *)reply
+- (void)finishController:(ASAuthorizationController *)controller reply:(AGWKWebViewBridgeReply *)reply
 {
     AGWKWebViewBridgePendingRequest *pendingRequest = self.pendingRequest;
     if (pendingRequest == nil || pendingRequest.controller != controller) {
@@ -373,17 +483,20 @@ NSString *const AGWKWebViewBridgeName = @"authgearBridge";
     didCompleteWithAuthorization:(ASAuthorization *)authorization
 {
     if (![authorization.credential isKindOfClass:[ASAuthorizationPlatformPublicKeyCredentialAssertion class]]) {
-        [self finishController:controller reply:@{@"status": @"error", @"message": @"unexpected credential"}];
+        [self finishController:controller
+                         reply:[AGWKWebViewBridgeReply replyWithStatus:AGWKWebViewBridgeStatusError
+                                                               message:@"unexpected credential"]];
         return;
     }
     ASAuthorizationPlatformPublicKeyCredentialAssertion *assertion =
         (ASAuthorizationPlatformPublicKeyCredentialAssertion *)authorization.credential;
-    NSDictionary *credential = [AGWKWebViewBridgeMessages publicKeyCredentialWithCredentialID:assertion.credentialID
-                                                                               clientDataJSON:assertion.rawClientDataJSON
-                                                                            authenticatorData:assertion.rawAuthenticatorData
-                                                                                    signature:assertion.signature
-                                                                                   userHandle:assertion.userID];
-    [self finishController:controller reply:@{@"status": @"ok", @"credential": credential}];
+    AGWKWebViewBridgeReply *reply = [AGWKWebViewBridgeReply replyWithStatus:AGWKWebViewBridgeStatusOK];
+    reply.credential = [AGWKWebViewBridgeMessages publicKeyCredentialWithCredentialID:assertion.credentialID
+                                                                       clientDataJSON:assertion.rawClientDataJSON
+                                                                    authenticatorData:assertion.rawAuthenticatorData
+                                                                            signature:assertion.signature
+                                                                           userHandle:assertion.userID];
+    [self finishController:controller reply:reply];
 }
 
 - (void)authorizationController:(ASAuthorizationController *)controller didCompleteWithError:(NSError *)error
@@ -391,10 +504,12 @@ NSString *const AGWKWebViewBridgeName = @"authgearBridge";
     // With ASAuthorizationControllerRequestOptionPreferImmediatelyAvailableCredentials,
     // "no passkey on this device" and "the user closed the sheet" both end with canceled.
     if ([error.domain isEqualToString:ASAuthorizationErrorDomain] && error.code == ASAuthorizationErrorCanceled) {
-        [self finishController:controller reply:@{@"status": @"no_credential"}];
+        [self finishController:controller
+                         reply:[AGWKWebViewBridgeReply replyWithStatus:AGWKWebViewBridgeStatusNoCredential]];
     } else {
         NSString *message = [NSString stringWithFormat:@"%@ %ld: %@", error.domain, (long)error.code, error.localizedDescription];
-        [self finishController:controller reply:@{@"status": @"error", @"message": message}];
+        [self finishController:controller
+                         reply:[AGWKWebViewBridgeReply replyWithStatus:AGWKWebViewBridgeStatusError message:message]];
     }
 }
 
