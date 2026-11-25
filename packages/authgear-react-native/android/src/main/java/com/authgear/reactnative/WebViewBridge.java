@@ -126,18 +126,18 @@ final class WebViewBridge {
         JavaScriptReplyProxy replyProxy
     ) {
         if (request.type == null) {
-            replyProxy.postMessage(WebViewBridgeMessages.reply(request.id, WebViewBridgeMessages.STATUS_UNSUPPORTED));
+            replyProxy.postMessage(new BridgeReply(request.id, BridgeStatus.UNSUPPORTED).encode());
             return;
         }
         switch (request.type) {
             case WebViewBridgeMessages.TYPE_CAPABILITIES:
-                replyProxy.postMessage(WebViewBridgeMessages.capabilitiesReply(request.id));
+                replyProxy.postMessage(WebViewBridgeMessages.capabilitiesReply(request.id).encode());
                 break;
             case WebViewBridgeMessages.TYPE_CREDENTIALS_GET:
                 credentialsGet(webView, request, sourceOrigin, replyProxy);
                 break;
             default:
-                replyProxy.postMessage(WebViewBridgeMessages.reply(request.id, WebViewBridgeMessages.STATUS_UNSUPPORTED));
+                replyProxy.postMessage(new BridgeReply(request.id, BridgeStatus.UNSUPPORTED).encode());
                 break;
         }
     }
@@ -153,22 +153,22 @@ final class WebViewBridge {
         Object publicKey = request.json.opt("publicKey");
         // publicKey is the only member supported. Other members, such as password, are ignored.
         if (!"immediate".equals(mediation) || publicKey == null || publicKey == JSONObject.NULL) {
-            replyProxy.postMessage(WebViewBridgeMessages.reply(id, WebViewBridgeMessages.STATUS_UNSUPPORTED));
+            replyProxy.postMessage(new BridgeReply(id, BridgeStatus.UNSUPPORTED).encode());
             return;
         }
         if (this.pendingGet != null) {
-            replyProxy.postMessage(WebViewBridgeMessages.reply(id, WebViewBridgeMessages.STATUS_ERROR, "a passkey request is in progress"));
+            replyProxy.postMessage(new BridgeReply(id, BridgeStatus.ERROR).setMessage("a passkey request is in progress").encode());
             return;
         }
         if (!(publicKey instanceof JSONObject)) {
-            replyProxy.postMessage(WebViewBridgeMessages.reply(id, WebViewBridgeMessages.STATUS_ERROR, "publicKey must be an object"));
+            replyProxy.postMessage(new BridgeReply(id, BridgeStatus.ERROR).setMessage("publicKey must be an object").encode());
             return;
         }
         // As in a browser, rpId must be the page's host or a parent domain of it.
         Object rpId = ((JSONObject) publicKey).opt("rpId");
         String host = sourceOrigin.getHost();
         if (!(rpId instanceof String) || host == null || !WebViewBridgeMessages.isRpIdAllowed((String) rpId, host)) {
-            replyProxy.postMessage(WebViewBridgeMessages.reply(id, WebViewBridgeMessages.STATUS_ERROR, "rpId is not allowed for this page"));
+            replyProxy.postMessage(new BridgeReply(id, BridgeStatus.ERROR).setMessage("rpId is not allowed for this page").encode());
             return;
         }
 
@@ -176,7 +176,7 @@ final class WebViewBridge {
         this.pendingGet = pendingGet;
         getPublicKeyCredential(id, (JSONObject) publicKey, pendingGet.cancellationSignal, new ReplyCallback() {
             @Override
-            public void onReply(String text) {
+            public void onReply(BridgeReply reply) {
                 // A cancelled request does not reply: the page that sent it is gone.
                 if (pendingGet.cancelled) {
                     return;
@@ -189,13 +189,13 @@ final class WebViewBridge {
                 if (!WebViewBridgeMessages.isSameOrigin(webView.getUrl(), sourceOrigin.toString())) {
                     return;
                 }
-                replyProxy.postMessage(text);
+                replyProxy.postMessage(reply.encode());
             }
         });
     }
 
     private interface ReplyCallback {
-        void onReply(String text);
+        void onReply(BridgeReply reply);
     }
 
     private void getPublicKeyCredential(
@@ -229,36 +229,36 @@ final class WebViewBridge {
                 }
             );
         } catch (Exception e) {
-            callback.onReply(WebViewBridgeMessages.reply(id, WebViewBridgeMessages.STATUS_ERROR, e.toString()));
+            callback.onReply(new BridgeReply(id, BridgeStatus.ERROR).setMessage(e.toString()));
         }
     }
 
-    private static String replyToResult(String id, GetCredentialResponse result) {
+    private static BridgeReply replyToResult(String id, GetCredentialResponse result) {
         try {
             Credential credential = result.getCredential();
             if (credential instanceof PublicKeyCredential) {
-                JSONObject fields = new JSONObject();
-                // Credential Manager already returns AuthenticationResponseJSON. Pass it through unchanged.
-                fields.put("credential", new JSONObject(((PublicKeyCredential) credential).getAuthenticationResponseJson()));
-                return WebViewBridgeMessages.reply(id, WebViewBridgeMessages.STATUS_OK, null, fields);
+                // Credential Manager already returns AuthenticationResponseJSON.
+                String json = ((PublicKeyCredential) credential).getAuthenticationResponseJson();
+                return new BridgeReply(id, BridgeStatus.OK)
+                    .setCredential(BridgePublicKeyCredential.fromAuthenticationResponseJson(json));
             }
-            return WebViewBridgeMessages.reply(id, WebViewBridgeMessages.STATUS_ERROR, "unexpected credential type: " + credential.getType());
+            return new BridgeReply(id, BridgeStatus.ERROR).setMessage("unexpected credential type: " + credential.getType());
         } catch (Exception e) {
-            return WebViewBridgeMessages.reply(id, WebViewBridgeMessages.STATUS_ERROR, e.toString());
+            return new BridgeReply(id, BridgeStatus.ERROR).setMessage(e.toString());
         }
     }
 
-    private static String replyToError(String id, GetCredentialException e) {
+    private static BridgeReply replyToError(String id, GetCredentialException e) {
         if (e instanceof NoCredentialException) {
-            return WebViewBridgeMessages.reply(id, WebViewBridgeMessages.STATUS_NO_CREDENTIAL);
+            return new BridgeReply(id, BridgeStatus.NO_CREDENTIAL);
         }
         if (e instanceof GetCredentialCancellationException) {
-            return WebViewBridgeMessages.reply(id, WebViewBridgeMessages.STATUS_CANCELLED);
+            return new BridgeReply(id, BridgeStatus.CANCELLED);
         }
         if (e instanceof GetCredentialProviderConfigurationException || e instanceof GetCredentialUnsupportedException) {
-            return WebViewBridgeMessages.reply(id, WebViewBridgeMessages.STATUS_UNSUPPORTED);
+            return new BridgeReply(id, BridgeStatus.UNSUPPORTED);
         }
         // GetCredentialException.getType() is restricted to androidx.credentials, so the class name is used.
-        return WebViewBridgeMessages.reply(id, WebViewBridgeMessages.STATUS_ERROR, e.getClass().getSimpleName() + ": " + e.getMessage());
+        return new BridgeReply(id, BridgeStatus.ERROR).setMessage(e.getClass().getSimpleName() + ": " + e.getMessage());
     }
 }

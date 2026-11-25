@@ -22,12 +22,6 @@ final class WebViewBridgeMessages {
     static final String TYPE_CAPABILITIES = "bridge.capabilities";
     static final String TYPE_CREDENTIALS_GET = "credentials.get";
 
-    static final String STATUS_OK = "ok";
-    static final String STATUS_UNSUPPORTED = "unsupported";
-    static final String STATUS_ERROR = "error";
-    static final String STATUS_NO_CREDENTIAL = "no_credential";
-    static final String STATUS_CANCELLED = "cancelled";
-
     // The capabilities listed in the reply to bridge.capabilities.
     static final List<String> CAPABILITIES = Collections.unmodifiableList(Arrays.asList(
         "credentials.get",
@@ -160,48 +154,7 @@ final class WebViewBridgeMessages {
     }
 
     @NonNull
-    static String reply(@NonNull String id, @NonNull String status) {
-        return reply(id, status, null, null);
-    }
-
-    @NonNull
-    static String reply(@NonNull String id, @NonNull String status, @Nullable String message) {
-        return reply(id, status, message, null);
-    }
-
-    @NonNull
-    static String reply(@NonNull String id, @NonNull String status, @Nullable String message, @Nullable JSONObject fields) {
-        JSONObject obj = new JSONObject();
-        try {
-            obj.put("id", id);
-            obj.put("status", status);
-            if (message != null) {
-                obj.put("message", message);
-            }
-            if (fields != null) {
-                JSONArray names = fields.names();
-                if (names != null) {
-                    for (int i = 0; i < names.length(); i++) {
-                        String name = names.getString(i);
-                        obj.put(name, fields.get(name));
-                    }
-                }
-            }
-        } catch (JSONException e) {
-            // JSONObject.put throws only for a null key or a non-finite number, which are not used here.
-            throw new IllegalStateException(e);
-        }
-        return obj.toString();
-    }
-
-    @NonNull
-    static String capabilitiesReply(@NonNull String id) {
-        JSONObject fields = new JSONObject();
-        try {
-            fields.put("capabilities", new JSONArray(CAPABILITIES));
-        } catch (JSONException e) {
-            throw new IllegalStateException(e);
-        }
-        return reply(id, STATUS_OK, null, fields);
+    static BridgeReply capabilitiesReply(@NonNull String id) {
+        return new BridgeReply(id, BridgeStatus.OK).setCapabilities(CAPABILITIES);
     }
 }
