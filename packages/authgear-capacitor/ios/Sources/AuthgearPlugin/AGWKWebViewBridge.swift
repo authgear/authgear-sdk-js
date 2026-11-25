@@ -27,7 +27,20 @@ struct AGWKWebViewBridgeReply: Encodable, Equatable {
     /// The ok reply to bridge.capabilities.
     var capabilities: [String]?
     /// The ok reply to credentials.get.
-    var credential: AGWKWebViewBridgePublicKeyCredential?
+    var credential: AGWKWebViewBridgeCredential?
+}
+
+/// The credential of an ok reply to credentials.get, one case for each kind of credential.
+/// It is encoded as the credential of its case, whose type field tells the kind.
+enum AGWKWebViewBridgeCredential: Encodable, Equatable {
+    case publicKey(AGWKWebViewBridgePublicKeyCredential)
+
+    func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .publicKey(credential):
+            try credential.encode(to: encoder)
+        }
+    }
 }
 
 /// The AuthenticationResponseJSON of a passkey assertion, with binary values as base64url without padding.
@@ -394,7 +407,7 @@ class AGWKWebViewBridge: NSObject, WKScriptMessageHandlerWithReply, ASAuthorizat
             // userID is imported as Data!, so it is read as an optional to not crash on nil.
             userHandle: assertion.userID as Data?
         )
-        self.finish(controller: controller, reply: AGWKWebViewBridgeReply(status: .ok, credential: credential))
+        self.finish(controller: controller, reply: AGWKWebViewBridgeReply(status: .ok, credential: .publicKey(credential)))
     }
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
