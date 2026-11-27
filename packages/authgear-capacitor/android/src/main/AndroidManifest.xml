@@ -13,6 +13,7 @@
             android:launchMode="singleTask" />
         <activity android:name=".WebKitWebViewActivity"
             android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
             android:launchMode="singleTask"
             android:theme="@style/AuthgearTheme"/>
     </application>

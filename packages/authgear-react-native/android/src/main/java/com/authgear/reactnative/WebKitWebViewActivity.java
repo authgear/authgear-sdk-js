@@ -7,6 +7,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -45,6 +46,8 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.webkit.WebSettingsCompat;
 import androidx.webkit.WebViewFeature;
 
+import java.util.Collections;
+
 public class WebKitWebViewActivity extends AppCompatActivity {
 
     private static final String KEY_OPTIONS = "KEY_OPTIONS";
@@ -59,6 +62,7 @@ public class WebKitWebViewActivity extends AppCompatActivity {
     private Insets mLastSeenInsets;
     private Uri result;
     private StartActivityHandles<ValueCallback<Uri[]>> handles = new StartActivityHandles<>();
+    private WebViewBridge mBridge;
 
     public static class Options {
         public Uri url;
@@ -133,6 +137,11 @@ public class WebKitWebViewActivity extends AppCompatActivity {
             view.evaluateJavascript(USERSCRIPT_USER_SELECT_NONE, null);
             this.activity.handleNonEdgeToEdge();
             this.activity.handleEdgeToEdge();
+            // The top-level page starts loading another page, so the page that sent
+            // the pending bridge request is gone.
+            if (this.activity.mBridge != null) {
+                this.activity.mBridge.cancelPending();
+            }
         }
 
         @Override
@@ -383,6 +392,10 @@ public class WebKitWebViewActivity extends AppCompatActivity {
                 WebSettingsCompat.WEB_AUTHENTICATION_SUPPORT_FOR_APP
             );
         }
+        // Let AuthUI on the endpoint's origin use window.authgearBridge.
+        // It must be installed before loadUrl, so that it exists when the page's scripts run.
+        this.mBridge = new WebViewBridge(this);
+        this.mBridge.install(this.mWebView, Collections.singletonList(options.url));
 
         this.mRootFrameLayout.addView(this.mWebView);
         this.mRootFrameLayout.addView(this.mToolbarFrameLayout);
@@ -429,6 +442,29 @@ public class WebKitWebViewActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    // The activity handles rotation and resizing itself (see AndroidManifest.xml), so that the
+    // page and a pending bridge request survive them. The toolbar height depends on the
+    // configuration, so it is updated here.
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        float actionBarSizeInDp = this.getActionBarSizeInDp();
+        DisplayMetrics displayMetrics = this.getResources().getDisplayMetrics();
+        ViewGroup.LayoutParams toolbarParams = this.mToolbar.getLayoutParams();
+        toolbarParams.height = (int) TypedValueCompat.dpToPx(actionBarSizeInDp, displayMetrics);
+        this.mToolbar.setLayoutParams(toolbarParams);
+        this.applyInsetsToWebView(this.mLastSeenInsets == null ? Insets.NONE : this.mLastSeenInsets);
+    }
+
+    @Override
+    protected void onDestroy() {
+        // A passkey request must not stay pending after the activity is gone.
+        if (this.mBridge != null) {
+            this.mBridge.cancelPending();
+        }
+        super.onDestroy();
     }
 
     @Override

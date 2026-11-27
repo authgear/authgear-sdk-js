@@ -2,6 +2,25 @@
 
 ## [Unreleased]
 
+### Added
+
+- **react-native, capacitor:** `WebKitWebViewUIImplementation` lets AuthUI
+  offer a passkey that is already on this device as soon as the login page
+  loads, on iOS 16+ and where the Android WebView supports web message
+  listeners. As in a browser, the request is refused unless its `rpId` is the
+  page's host or a parent domain of it, compared without case. Adds the Android
+  dependencies `androidx.credentials:credentials` and
+  `androidx.credentials:credentials-play-services-auth` 1.5.0.
+
+### Changed
+
+- **react-native, capacitor:** Android apps must compile with `compileSdk` 35
+  or higher, because `androidx.credentials:credentials` and
+  `androidx.credentials:credentials-play-services-auth` 1.5.0 require it.
+- **react-native, capacitor:** On Android, the activity of
+  `WebKitWebViewUIImplementation` handles rotation and window resizing itself
+  instead of being recreated, so the page is no longer reloaded.
+
 <a name="v7.1.0"></a>
 ## [v7.1.0](https://github.com/authgear/authgear-sdk-js/compare/v7.0.0...v7.1.0) (2026-11-11)
 
